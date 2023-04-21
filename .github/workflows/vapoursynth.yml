@@ -16,14 +16,11 @@ jobs:
     - name: Prepare
       run: git config --global core.autocrlf input
     - uses: actions/checkout@main     
-    - name: Get HASH ENV
-      run: echo "random_hash=$(cat HASH)" >> $GITHUB_ENV
-      shell: bash    
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230106_13.0.0_x64-ucrt-${{ env.random_hash }}
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       shell: msys2 {0}
       run: |
