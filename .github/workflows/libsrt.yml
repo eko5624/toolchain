@@ -12,19 +12,32 @@ jobs:
     - uses: msys2/setup-msys2@v2
       with:
         location: D:\
-        install: base-devel autotools git mingw-w64-x86_64-cmake            
+        install: base-devel autotools git p7zip mingw-w64-x86_64-cmake            
     - name: Prepare
       run: git config --global core.autocrlf input
       shell: bash
     - uses: actions/checkout@v3
-    - name: Get HASH ENV
-      run: echo "random_hash=$(cat HASH)" >> $GITHUB_ENV
-      shell: bash    
-    - uses: actions/cache@v3
+    - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20221205_13.0.0_x64-ucrt-${{ env.random_hash }}
+        path: D:\m64-1301
+        key: mingw-gcc
+        
+    - name: Hack Toolchain
+      shell: msys2 {0}
+      run: |
+        pushd /d/m64-1301/include/c++/13.0.1
+        mv condition_variable orig.condition_variable.h
+        mv future orig.future.h
+        mv mutex orig.mutex.h
+        mv shared_mutex orig.shared_mutex.h
+        mv thread orig.thread.h
+        popd
+        mv mingw-std-threads-hack/* /d/m64-1301/include/c++/13.0.1
+        curl -OL https://github.com/meganz/mingw-std-threads/archive/refs/heads/master.zip
+        7z x master.zip
+        mv mingw-std-threads-master/*.h /d/m64-1301/include/c++/13.0.1
+        
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
@@ -34,9 +47,9 @@ jobs:
         CMAKE: /mingw64/bin/cmake
       shell: msys2 {0}
       run: | 
-        curl -OL https://github.com/${{ github.repository }}/releases/download/dev/mbedtls-dev-3.3.1-1-x86_64.pkg.tar.zst      
+        curl -OL https://github.com/${{ github.repository }}/releases/download/dev/mbedtls-dev-3.4.0-1-x86_64.pkg.tar.zst      
         pacman -U *.zst --noconfirm                   
-        cd libsrt-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg  
+        cd libsrt-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg  
     - name: Delete
       uses: mknejp/delete-release-assets@v1
       with:
