@@ -20,8 +20,8 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       shell: msys2 {0}
       run: |
@@ -48,14 +48,14 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/amf-headers-dev-1.4.29-1-x86_64.pkg.tar.zst
@@ -93,7 +93,7 @@ jobs:
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/vapoursynth-dev-62-1-x86_64.pkg.tar.zst
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/zlib-dev-1.2.13-1-x86_64.pkg.tar.zst
         pacman -U *.zst --noconfirm
-        cd ffmpeg; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd ffmpeg; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -116,17 +116,17 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |                  
-        cd amf-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin makepkg  
+        cd amf-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin makepkg  
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -148,17 +148,17 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |                  
-        cd angle-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin makepkg  
+        cd angle-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin makepkg  
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -180,19 +180,19 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
         CMAKE: /mingw64/bin/cmake
         MAKE: /mingw64/bin/mingw32-make
       shell: msys2 {0}
       run: |                  
-        cd avisynth-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin makepkg  
+        cd avisynth-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin makepkg  
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -214,8 +214,8 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
@@ -228,11 +228,11 @@ jobs:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: | 
         pypath=$(cygpath -u $pythonLocation)
-        PATH=/d/ucrt64/bin:$pypath:$pypath/Scripts:/usr/bin:/opt/bin
+        PATH=/d/m64-1301/bin:$pypath:$pypath/Scripts:/usr/bin:/opt/bin
         cd dav1d-dev; PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
@@ -255,17 +255,17 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |      
-        cd davs2-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd davs2-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -287,17 +287,17 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |
-        cd ffnvcodec-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd ffnvcodec-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -320,8 +320,8 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
@@ -334,11 +334,11 @@ jobs:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |
         pypath=$(cygpath -u $pythonLocation)
-        PATH=/d/ucrt64/bin:$pypath:$pypath/Scripts:/usr/bin:/opt/bin
+        PATH=/d/m64-1301/bin:$pypath:$pypath/Scripts:/usr/bin:/opt/bin
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/libpng-dev-1.6.39-1-x86_64.pkg.tar.zst
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/zlib-dev-1.2.13-1-x86_64.pkg.tar.zst      
         pacman -U *.zst --noconfirm        
@@ -364,8 +364,8 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
@@ -378,11 +378,11 @@ jobs:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |
         pypath=$(cygpath -u $pythonLocation)
-        PATH=/d/ucrt64/bin:$pypath:$pypath/Scripts:/usr/bin:/opt/bin
+        PATH=/d/m64-1301/bin:$pypath:$pypath/Scripts:/usr/bin:/opt/bin
         cd fribidi-dev; PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg -p PKGBUILD-new
     - name: Release
       env:
@@ -405,17 +405,17 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |
-        cd gmp-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd gmp-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -438,8 +438,8 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
@@ -452,11 +452,11 @@ jobs:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |
         pypath=$(cygpath -u $pythonLocation)
-        PATH=/d/ucrt64/bin:$pypath:$pypath/Scripts:/usr/bin:/opt/bin
+        PATH=/d/m64-1301/bin:$pypath:$pypath/Scripts:/usr/bin:/opt/bin
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/freetype2-dev-2_13_0-1-x86_64.pkg.tar.zst 
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/libpng-dev-1.6.39-1-x86_64.pkg.tar.zst     
         pacman -U *.zst --noconfirm         
@@ -482,17 +482,17 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |
-        cd lame-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd lame-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -514,17 +514,17 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |
-        cd lcms2-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd lcms2-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -547,14 +547,14 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |      
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/freetype2-dev-2_13_0-1-x86_64.pkg.tar.zst
@@ -564,7 +564,7 @@ jobs:
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/libunibreak-dev-5_1-1-x86_64.pkg.tar.zst
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/zlib-dev-1.2.13-1-x86_64.pkg.tar.zst       
         pacman -U *.zst --noconfirm 
-        cd libass-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd libass-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -587,20 +587,20 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/libpng-dev-1.6.39-1-x86_64.pkg.tar.zst      
         curl -OL https://github.com/eko5624/mpv-win64/releases/download/dev/zlib-dev-1.2.13-1-x86_64.pkg.tar.zst
         pacman -U *.zst --noconfirm
-        cd libaribb24-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd libaribb24-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -623,14 +623,14 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/freetype2-dev-2_13_0-1-x86_64.pkg.tar.zst
@@ -638,7 +638,7 @@ jobs:
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/libudfread-dev-1.1.2-1-x86_64.pkg.tar.zst
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/zlib-dev-1.2.13-1-x86_64.pkg.tar.zst        
         pacman -U *.zst --noconfirm
-        cd libbluray-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd libbluray-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -660,17 +660,17 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |
-        cd libbs2b-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd libbs2b-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -692,17 +692,17 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: | 
-        cd libcaca-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd libcaca-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -724,8 +724,8 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Install rust
       shell: bash
       run: |
@@ -739,7 +739,7 @@ jobs:
         &'C:\Program Files\7-Zip\7z.exe' x cargo-c-windows-gnu.zip -o'C:\Users\runneradmin\.rustup\toolchains\stable-x86_64-pc-windows-gnu\bin'       
     - name: Build
       env:
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |                  
         cd libdovi-dev; PATH=/usr/bin:/opt/bin:/c/Users/runneradmin/.rustup/toolchains/stable-x86_64-pc-windows-gnu/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg  
@@ -765,17 +765,17 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |
-        cd libdvdcss-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd libdvdcss-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -798,20 +798,20 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/libdvdcss-dev-1.4.3-1-x86_64.pkg.tar.zst
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/libdvdread-dev-6.1.3-1-x86_64.pkg.tar.zst
         pacman -U *.zst --noconfirm
-        cd libdvdnav-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd libdvdnav-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -834,19 +834,19 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/libdvdcss-dev-1.4.3-1-x86_64.pkg.tar.zst
         pacman -U *.zst --noconfirm
-        cd libdvdread-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd libdvdread-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -868,18 +868,18 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
         CMAKE: /mingw64/bin/cmake
       shell: msys2 {0}
       run: |
-        cd libjpeg-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd libjpeg-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -901,19 +901,19 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
         CMAKE: /mingw64/bin/cmake
         MAKE: /mingw64/bin/mingw32-make
       shell: msys2 {0}
       run: |            
-        cd libjxl-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg -p PKGBUILD-new 
+        cd libjxl-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg -p PKGBUILD-new 
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -935,17 +935,17 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |
-        cd libmodplug-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd libmodplug-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -968,20 +968,20 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
         CMAKE: /mingw64/bin/cmake
       shell: msys2 {0}
       run: | 
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/zlib-dev-1.2.13-1-x86_64.pkg.tar.zst      
         pacman -U *.zst --noconfirm                   
-        cd libmysofa-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg  
+        cd libmysofa-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg  
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -1003,17 +1003,17 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |
-        cd libogg-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd libogg-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -1036,14 +1036,14 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/zlib-dev-1.2.13-1-x86_64.pkg.tar.zst
@@ -1051,7 +1051,7 @@ jobs:
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/libsdl2-dev-2.26.5-1-x86_64.pkg.tar.zst 
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/libvorbis_aotuv-dev-1.3.7-1-x86_64.pkg.tar.zst      
         pacman -U *.zst --noconfirm         
-        cd libopenmpt-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd libopenmpt-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -1074,8 +1074,8 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
@@ -1088,11 +1088,11 @@ jobs:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |
         pypath=$(cygpath -u $pythonLocation)
-        PATH=/d/ucrt64/bin:$pypath:$pypath/Scripts:/usr/bin:/opt/bin      
+        PATH=/d/m64-1301/bin:$pypath:$pypath/Scripts:/usr/bin:/opt/bin      
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/lcms2-dev-2.15-1-x86_64.pkg.tar.zst
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/libdovi-dev-3.1.2-1-x86_64.pkg.tar.zst        
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/vulkan-dev-1.3.243.0-1-x86_64.pkg.tar.zst
@@ -1122,19 +1122,19 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/zlib-dev-1.2.13-1-x86_64.pkg.tar.zst     
         pacman -U *.zst --noconfirm         
-        cd libpng-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd libpng-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -1156,19 +1156,19 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
         CMAKE: /mingw64/bin/cmake
         MAKE: /mingw64/bin/mingw32-make
       shell: msys2 {0}
       run: |        
-        cd libsdl2-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd libsdl2-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -1191,8 +1191,8 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
@@ -1205,11 +1205,11 @@ jobs:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: | 
         pypath=$(cygpath -u $pythonLocation)
-        PATH=/d/ucrt64/bin:$pypath:$pypath/Scripts:/usr/bin:/opt/bin
+        PATH=/d/m64-1301/bin:$pypath:$pypath/Scripts:/usr/bin:/opt/bin
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/libjpeg-dev-2.1.91-1-x86_64.pkg.tar.zst
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/libpng-dev-1.6.39-1-x86_64.pkg.tar.zst
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/zlib-dev-1.2.13-1-x86_64.pkg.tar.zst 
@@ -1236,18 +1236,18 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
         CMAKE: /mingw64/bin/cmake
       shell: msys2 {0}
       run: |                  
-        cd libsoxr-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg  
+        cd libsoxr-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg  
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -1269,17 +1269,17 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |        
-        cd libspeex-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd libspeex-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -1302,20 +1302,20 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
         CMAKE: /mingw64/bin/cmake
       shell: msys2 {0}
       run: | 
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/mbedtls-dev-3.4.0-1-x86_64.pkg.tar.zst      
         pacman -U *.zst --noconfirm                   
-        cd libsrt-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg  
+        cd libsrt-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg  
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -1338,14 +1338,14 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
         CMAKE: /mingw64/bin/cmake
         MAKE: /mingw64/bin/mingw32-make
       shell: msys2 {0}
@@ -1353,7 +1353,7 @@ jobs:
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/zlib-dev-1.2.13-1-x86_64.pkg.tar.zst     
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/mbedtls-dev-3.4.0-1-x86_64.pkg.tar.zst
         pacman -U *.zst --noconfirm                   
-        cd libssh-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg  
+        cd libssh-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg  
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -1375,17 +1375,17 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |        
-        cd libudfread-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd libudfread-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -1407,17 +1407,17 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |      
-        cd libunibreak-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd libunibreak-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -1440,19 +1440,19 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/libogg-dev-1.3.5-1-x86_64.pkg.tar.zst
         pacman -U *.zst --noconfirm
-        cd libvorbis_aotuv-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd libvorbis_aotuv-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -1474,18 +1474,18 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
         CMAKE: /mingw64/bin/cmake
       shell: msys2 {0}
       run: |                
-        cd libvpl-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg  
+        cd libvpl-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg  
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -1507,17 +1507,17 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |        
-        cd libvpx-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd libvpx-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -1539,17 +1539,17 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |        
-        cd libwebp-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd libwebp-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -1571,17 +1571,17 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |
-        cd libxml2-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd libxml2-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -1603,17 +1603,17 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |        
-        cd libxvid-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd libxvid-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -1635,17 +1635,17 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |        
-        cd libzimg-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd libzimg-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -1668,20 +1668,20 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/libiconv-dev-1.17-1-x86_64.pkg.tar.zst
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/libpng-dev-1.6.39-1-x86_64.pkg.tar.zst        
         pacman -U *.zst --noconfirm
-        cd libzvbi-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd libzvbi-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -1703,17 +1703,17 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |       
-        cd luajit2; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd luajit2; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -1735,8 +1735,8 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
@@ -1749,13 +1749,13 @@ jobs:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
         CMAKE: /mingw64/bin/cmake
         MAKE: /mingw64/bin/mingw32-make
       shell: msys2 {0}
       run: |                         
         pypath=$(cygpath -u $pythonLocation)
-        PATH=/d/ucrt64/bin:$pypath:$pypath/Scripts:/usr/bin:/opt/bin      
+        PATH=/d/m64-1301/bin:$pypath:$pypath/Scripts:/usr/bin:/opt/bin      
         cd mbedtls-dev; PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg  
     - name: Release
       env:
@@ -1779,8 +1779,8 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
@@ -1790,11 +1790,11 @@ jobs:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |
         pypath=$(cygpath -u $pythonLocation)
-        PATH=/d/ucrt64/bin:$pypath:$pypath/Scripts:/usr/bin:/opt/bin
+        PATH=/d/m64-1301/bin:$pypath:$pypath/Scripts:/usr/bin:/opt/bin
         pip install https://github.com/mesonbuild/meson/archive/refs/heads/master.zip
         pip install ninja      
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/amf-headers-dev-1.4.29-1-x86_64.pkg.tar.zst
@@ -1885,17 +1885,17 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |
-        cd mujs; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd mujs; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -1917,19 +1917,19 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
         CMAKE: /mingw64/bin/cmake
         MAKE: /mingw64/bin/mingw32-make
       shell: msys2 {0}
       run: |            
-        cd openal-soft-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg  
+        cd openal-soft-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg  
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -1951,17 +1951,17 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |
-        cd opus-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd opus-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -1984,8 +1984,8 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Setup Packages      
       shell: msys2 {0}
       run: |        
@@ -2029,8 +2029,8 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
@@ -2043,11 +2043,11 @@ jobs:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: | 
         pypath=$(cygpath -u $pythonLocation)
-        PATH=/d/ucrt64/bin:$pypath:$pypath/Scripts:/usr/bin:/opt/bin
+        PATH=/d/m64-1301/bin:$pypath:$pypath/Scripts:/usr/bin:/opt/bin
         cd rubberband; PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
@@ -2062,7 +2062,7 @@ jobs:
     - uses: msys2/setup-msys2@v2
       with:
         location: D:\
-        install: base-devel autoconf-wrapper automake-wrapper libtool git mingw-w64-x86_64-cmake mingw-w64-x86_64-make     
+        install: base-devel autoconf-wrapper automake-wrapper libtool git p7zip mingw-w64-x86_64-cmake mingw-w64-x86_64-make     
     - name: Prepare
       run: git config --global core.autocrlf input
       shell: bash
@@ -2070,19 +2070,35 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
+
+    - name: Hack Toolchain
+      shell: msys2 {0}
+      run: |
+        pushd /d/m64-1301/include/c++/13.0.1
+        mv condition_variable orig.condition_variable.h
+        mv future orig.future.h
+        mv mutex orig.mutex.h
+        mv shared_mutex orig.shared_mutex.h
+        mv thread orig.thread.h
+        popd
+        mv mingw-std-threads-hack/* /d/m64-1301/include/c++/13.0.1
+        curl -OL https://github.com/meganz/mingw-std-threads/archive/refs/heads/master.zip
+        7z x master.zip
+        mv mingw-std-threads-master/*.h /d/m64-1301/include/c++/13.0.1
+
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
         CMAKE: /mingw64/bin/cmake
         MAKE: /mingw64/bin/mingw32-make
       shell: msys2 {0}
       run: |
-        cd shaderc-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd shaderc-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -2104,18 +2120,18 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
         CMAKE: /mingw64/bin/cmake
       shell: msys2 {0}
       run: |
-        cd spirv-cross-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg -p PKGBUILD-new
+        cd spirv-cross-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg -p PKGBUILD-new
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -2137,19 +2153,19 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
         CMAKE: /mingw64/bin/cmake
         MAKE: /mingw64/bin/mingw32-make
       shell: msys2 {0}
       run: |
-        cd uavs3d-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg 
+        cd uavs3d-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg 
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -2170,12 +2186,12 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       shell: msys2 {0}
       run: |
-        cd vapoursynth; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin makepkg 
+        cd vapoursynth; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin makepkg 
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -2197,18 +2213,18 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
         CMAKE: /mingw64/bin/cmake
       shell: msys2 {0}
       run: |
-        cd vulkan-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd vulkan-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
@@ -2230,17 +2246,17 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |        
-        cd zlib-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd zlib-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}    
