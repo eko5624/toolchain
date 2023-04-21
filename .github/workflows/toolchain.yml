@@ -30,6 +30,9 @@ jobs:
         7z x mingw-gcc*.7z -o/d
         rm -rf /d/m32-1301
         curl -OL https://raw.githubusercontent.com/mingw-w64/mingw-w64/master/mingw-w64-libraries/winpthreads/include/pthread.h
-        mv pthread.h /d/m64-1301/x86_64-w64-mingw32/include
+        curl -OL https://raw.githubusercontent.com/mingw-w64/mingw-w64/master/mingw-w64-libraries/winpthreads/include/pthread_compat.h
+        curl -OL https://raw.githubusercontent.com/mingw-w64/mingw-w64/master/mingw-w64-libraries/winpthreads/include/sched.h
+        curl -OL https://raw.githubusercontent.com/mingw-w64/mingw-w64/master/mingw-w64-libraries/winpthreads/include/semaphore.h
+        mv pthread.h pthread_compat.h sched.h semaphore.h /d/m64-1301/x86_64-w64-mingw32/include
         curl -L -o curl-win64-mingw.zip 'https://curl.se/windows/latest.cgi?p=win64-mingw.zip'
         7z e -r curl*.zip -o/d/m64-1301/bin '*.exe' '*.crt'
