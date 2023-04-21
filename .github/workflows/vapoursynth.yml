@@ -12,7 +12,7 @@ jobs:
     - uses: msys2/setup-msys2@v2
       with:
         location: D:\
-        install: base-devel    
+        install: base-devel autotools git    
     - name: Prepare
       run: git config --global core.autocrlf input
     - uses: actions/checkout@main     
@@ -27,7 +27,7 @@ jobs:
     - name: Build
       shell: msys2 {0}
       run: |
-        cd vapoursynth; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin makepkg 
+        cd vapoursynth; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}
