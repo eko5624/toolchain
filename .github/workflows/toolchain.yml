@@ -19,27 +19,15 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20230419_13.0.1_x64-ucrt
+        path: D:\m64-1301
+        key: mingw-gcc
     
     - name: Setup Toolchain
       if: steps.cache.outputs.cache-hit != 'true'
       shell: msys2 {0}
       run: |
-        curl -OL https://gcc-mcf.lhmouse.com/mingw-w64-gcc-mcf_20230419_13.0.1_x64-ucrt_b483087631dd4cb75e9bc001092b0f549bdcf2dd.7z
-        7z x *.7z -o/d
+        curl -OL http://msystem.waw.pl/x265/mingw-gcc1301-20230322.7z
+        7z x mingw-gcc*.7z -o/d
+        rm -rf /d/m32-1301
         curl -L -o curl-win64-mingw.zip 'https://curl.se/windows/latest.cgi?p=win64-mingw.zip'
-        7z e -r curl*.zip -o/d/ucrt64/bin '*.exe' '*.crt'
-        
-    - name: Make Toolchain
-      shell: msys2 {0}
-      if: steps.cache.outputs.cache-hit != 'true'
-      run: |
-        cd mcfgthread; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin makepkg 
-    - name: Release
-      env:
-        GH_TOKEN: ${{ github.token }}   
-      shell: bash
-      if: steps.cache.outputs.cache-hit != 'true'
-      run: |
-        ./release-latest.sh mcfgthread mcfgthread
+        7z e -r curl*.zip -o/d/m64-1301/bin '*.exe' '*.crt'
