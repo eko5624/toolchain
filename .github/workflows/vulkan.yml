@@ -27,7 +27,7 @@ jobs:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
         CMAKE: /mingw64/bin/cmake
       shell: msys2 {0}
       run: |
