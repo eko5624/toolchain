@@ -32,6 +32,10 @@ jobs:
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/libpng-dev-1.6.39-1-x86_64.pkg.tar.zst        
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/zlib-dev-1.2.13-1-x86_64.pkg.tar.zst
         pacman -U *.zst --noconfirm
+        rm /d/m64-1301/x86_64-w64-mingw32/include/pthread.h
+        rm /d/m64-1301/x86_64-w64-mingw32/include/pthread_compat.h
+        rm /d/m64-1301/x86_64-w64-mingw32/include/sched.h
+        rm /d/m64-1301/x86_64-w64-mingw32/include/semaphore.h
         cd libzvbi-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
