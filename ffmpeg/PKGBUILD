@@ -53,7 +53,7 @@ package_ffmpeg-dev() {
     --prefix=/opt \
     $CARGS \
     --extra-libs="-lz -lstdc++ -lssp" \
-    --extra-ldflags="-static -static-libgcc -static-libstdc++" \
+    --extra-ldflags="-Wl,--allow-multiple-definition -static -static-libgcc -static-libstdc++" \
     --disable-mediafoundation \
     --enable-amf \
     --enable-avisynth \
