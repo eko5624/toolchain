@@ -29,7 +29,7 @@ jobs:
         curl -OL http://msystem.waw.pl/x265/mingw-gcc1301-20230322.7z
         7z x mingw-gcc*.7z -o/d
         rm -rf /d/m32*
-        mv /d/m34* /d/mingw-gcc
+        mv /d/m64* /d/mingw-gcc
         curl -OL https://raw.githubusercontent.com/mingw-w64/mingw-w64/master/mingw-w64-libraries/winpthreads/include/pthread.h
         curl -OL https://raw.githubusercontent.com/mingw-w64/mingw-w64/master/mingw-w64-libraries/winpthreads/include/pthread_compat.h
         curl -OL https://raw.githubusercontent.com/mingw-w64/mingw-w64/master/mingw-w64-libraries/winpthreads/include/pthread_signal.h
