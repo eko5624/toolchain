@@ -7,17 +7,18 @@ url="https://github.com/zapping-vbi/zvbi"
 makedepends=('libiconv-dev' 'libpng-dev')
 license=('BSD' 'GPL2' 'LGPL2.1' 'MIT')
 source=("git+https://github.com/zapping-vbi/zvbi.git"
-        "https://raw.githubusercontent.com/videolan/vlc/master/contrib/src/zvbi/zvbi-fix-static-linking.patch"
-        "https://raw.githubusercontent.com/videolan/vlc/master/contrib/src/zvbi/zvbi-ioctl.patch"
-        "https://raw.githubusercontent.com/videolan/vlc/master/contrib/src/zvbi/zvbi-ssize_max.patch"
-        "https://raw.githubusercontent.com/videolan/vlc/master/contrib/src/zvbi/zvbi-win32-undefined.patch"
-        "https://raw.githubusercontent.com/videolan/vlc/master/contrib/src/zvbi/zvbi-win32.patch"
-        "https://raw.githubusercontent.com/shinchiro/mpv-winbuild-cmake/master/packages/libzvbi-0006-skip-directory.patch")
-md5sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+        "https://raw.githubusercontent.com/shinchiro/mpv-winbuild-cmake/master/packages/libzvbi-0001-ssize_max.patch"
+        "https://raw.githubusercontent.com/shinchiro/mpv-winbuild-cmake/master/packages/libzvbi-0002-ioctl.patch"
+        "https://raw.githubusercontent.com/shinchiro/mpv-winbuild-cmake/master/packages/libzvbi-0003-fix-static-linking.patch"
+        "https://raw.githubusercontent.com/shinchiro/mpv-winbuild-cmake/master/packages/libzvbi-0004-win32.patch"
+        "https://raw.githubusercontent.com/shinchiro/mpv-winbuild-cmake/master/packages/libzvbi-0005-win32-undefined.patch"
+        "https://raw.githubusercontent.com/shinchiro/mpv-winbuild-cmake/master/packages/libzvbi-0006-skip-directory.patch"
+        "https://patch-diff.githubusercontent.com/raw/eko5624/zvbi/pull/1.patch")
+md5sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 build() {
   cd $srcdir/zvbi
-  sed -i 's/configure.in/configure.ac/g' $srcdir/zvbi-fix-static-linking.patch
+  #sed -i 's/configure.in/configure.ac/g' $srcdir/zvbi-fix-static-linking.patch
   for patch in $srcdir/*.patch; do
       echo "Applying $patch"
       patch -p1 < "$patch"
