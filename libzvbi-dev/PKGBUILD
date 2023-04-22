@@ -12,8 +12,9 @@ source=("git+https://github.com/zapping-vbi/zvbi.git"
         "https://raw.githubusercontent.com/shinchiro/mpv-winbuild-cmake/master/packages/libzvbi-0003-fix-static-linking.patch"
         "https://raw.githubusercontent.com/shinchiro/mpv-winbuild-cmake/master/packages/libzvbi-0004-win32.patch"
         "https://raw.githubusercontent.com/shinchiro/mpv-winbuild-cmake/master/packages/libzvbi-0005-win32-undefined.patch"
-        "https://raw.githubusercontent.com/shinchiro/mpv-winbuild-cmake/master/packages/libzvbi-0006-skip-directory.patch")
-md5sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+        "https://raw.githubusercontent.com/shinchiro/mpv-winbuild-cmake/master/packages/libzvbi-0006-skip-directory.patch"
+        "https://patch-diff.githubusercontent.com/raw/eko5624/zvbi/pull/1.patch")
+md5sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 build() {
   cd $srcdir/zvbi
