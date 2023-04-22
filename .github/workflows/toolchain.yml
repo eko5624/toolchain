@@ -29,10 +29,10 @@ jobs:
         curl -OL http://msystem.waw.pl/x265/mingw-gcc1301-20230322.7z
         7z x mingw-gcc*.7z -o/d
         rm -rf /d/m32-1301
-        curl -OL https://raw.githubusercontent.com/mingw-w64/mingw-w64/master/mingw-w64-libraries/winpthreads/include/pthread.h
-        curl -OL https://raw.githubusercontent.com/mingw-w64/mingw-w64/master/mingw-w64-libraries/winpthreads/include/pthread_compat.h
-        curl -OL https://raw.githubusercontent.com/mingw-w64/mingw-w64/master/mingw-w64-libraries/winpthreads/include/sched.h
-        curl -OL https://raw.githubusercontent.com/mingw-w64/mingw-w64/master/mingw-w64-libraries/winpthreads/include/semaphore.h
+        #curl -OL https://raw.githubusercontent.com/mingw-w64/mingw-w64/master/mingw-w64-libraries/winpthreads/include/pthread.h
+        #curl -OL https://raw.githubusercontent.com/mingw-w64/mingw-w64/master/mingw-w64-libraries/winpthreads/include/pthread_compat.h
+        #curl -OL https://raw.githubusercontent.com/mingw-w64/mingw-w64/master/mingw-w64-libraries/winpthreads/include/sched.h
+        #curl -OL https://raw.githubusercontent.com/mingw-w64/mingw-w64/master/mingw-w64-libraries/winpthreads/include/semaphore.h
         echo "/* Dummy header, which gets overridden, if winpthread library gets installed.  */" > pthread.h
         echo "/* Dummy header, which gets overridden, if winpthread library gets installed.  */" > pthread_compat.h
         echo "/* Dummy header, which gets overridden, if winpthread library gets installed.  */" > sched.h
