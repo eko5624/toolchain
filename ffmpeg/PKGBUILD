@@ -49,12 +49,10 @@ build() {
 
 package_ffmpeg-dev() {
   cd $srcdir/FFmpeg
-  CFLAGS+=" -masm=att"
-  CXXFLAGS+=" -masm=att"
   ./configure \
     --prefix=/opt \
     $CARGS \
-    --extra-libs="-lstdc++ -lssp" \
+    --extra-libs="-lz -lstdc++ -lssp" \
     --extra-ldflags="-static -static-libgcc -static-libstdc++" \
     --disable-mediafoundation \
     --enable-amf \
