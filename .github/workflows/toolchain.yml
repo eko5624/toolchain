@@ -19,8 +19,8 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\m64-1301
-        key: mingw-gcc
+        path: D:\mingw-gcc
+        key: mingw-gcc-w32threads
     
     - name: Setup Toolchain
       if: steps.cache.outputs.cache-hit != 'true'
@@ -28,7 +28,8 @@ jobs:
       run: |
         curl -OL http://msystem.waw.pl/x265/mingw-gcc1301-20230322.7z
         7z x mingw-gcc*.7z -o/d
-        rm -rf /d/m32-1301
+        rm -rf /d/m32*
+        mv /d/m34* /d/mingw-gcc
         curl -OL https://raw.githubusercontent.com/mingw-w64/mingw-w64/master/mingw-w64-libraries/winpthreads/include/pthread.h
         curl -OL https://raw.githubusercontent.com/mingw-w64/mingw-w64/master/mingw-w64-libraries/winpthreads/include/pthread_compat.h
         curl -OL https://raw.githubusercontent.com/mingw-w64/mingw-w64/master/mingw-w64-libraries/winpthreads/include/pthread_signal.h
@@ -38,4 +39,4 @@ jobs:
         curl -OL https://raw.githubusercontent.com/mingw-w64/mingw-w64/master/mingw-w64-libraries/winpthreads/include/semaphore.h
         mv -f pthread.h pthread_compat.h pthread_signal.h pthread_time.h pthread_unistd.h sched.h semaphore.h /d/m64-1301/x86_64-w64-mingw32/include
         curl -L -o curl-win64-mingw.zip 'https://curl.se/windows/latest.cgi?p=win64-mingw.zip'
-        7z e -r curl*.zip -o/d/m64-1301/bin '*.exe' '*.crt'
+        7z e -r curl*.zip -o/d/mingw-gcc/bin '*.exe' '*.crt'
