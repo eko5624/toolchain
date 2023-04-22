@@ -31,7 +31,8 @@ build() {
     --disable-dvb \
     --disable-bktr \
     --disable-nls \
-    --disable-proxy
+    --disable-proxy \
+    --disable-pthreads
   make -C src
 }
 
