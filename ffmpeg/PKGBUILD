@@ -52,7 +52,7 @@ package_ffmpeg-dev() {
   ./configure \
     --prefix=/opt \
     $CARGS \
-    --extra-cflags="-DLIBSSH_STATIC"
+    --extra-cflags="-DLIBSSH_STATIC" \
     --extra-libs="-lz -lstdc++ -lssp" \
     --extra-ldflags="-Wl,--allow-multiple-definition -static -static-libgcc -static-libstdc++" \
     --disable-mediafoundation \
