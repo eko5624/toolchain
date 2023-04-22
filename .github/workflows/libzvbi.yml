@@ -32,6 +32,14 @@ jobs:
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/libpng-dev-1.6.39-1-x86_64.pkg.tar.zst        
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/zlib-dev-1.2.13-1-x86_64.pkg.tar.zst
         pacman -U *.zst --noconfirm
+        curl -OL https://raw.githubusercontent.com/mingw-w64/mingw-w64/master/mingw-w64-libraries/winpthreads/include/pthread.h
+        curl -OL https://raw.githubusercontent.com/mingw-w64/mingw-w64/master/mingw-w64-libraries/winpthreads/include/pthread_compat.h
+        curl -OL https://raw.githubusercontent.com/mingw-w64/mingw-w64/master/mingw-w64-libraries/winpthreads/include/pthread_signal.h
+        curl -OL https://raw.githubusercontent.com/mingw-w64/mingw-w64/master/mingw-w64-libraries/winpthreads/include/pthread_time.h
+        curl -OL https://raw.githubusercontent.com/mingw-w64/mingw-w64/master/mingw-w64-libraries/winpthreads/include/pthread_unistd.h
+        curl -OL https://raw.githubusercontent.com/mingw-w64/mingw-w64/master/mingw-w64-libraries/winpthreads/include/sched.h
+        curl -OL https://raw.githubusercontent.com/mingw-w64/mingw-w64/master/mingw-w64-libraries/winpthreads/include/semaphore.h
+        mv -f pthread.h pthread_compat.h pthread_signal.h pthread_time.h pthread_unistd.h sched.h semaphore.h /d/m64-1301/x86_64-w64-mingw32/include
         cd libzvbi-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
