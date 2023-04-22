@@ -6,37 +6,36 @@ on:
 jobs:
   libzvbi:
     runs-on: windows-2022
-    env:
-      GH_TOKEN: ${{ github.token }}
-      CURL_RETRIES: "--connect-timeout 60 --retry 5 --retry-delay 5"      
-      C_INCLUDE_PATH: /opt/include
-      CPLUS_INCLUDE_PATH: /opt/include
-      LIBRARY_PATH: /opt/lib
-      MSYSTEM: UCRT64
-      MSYS2_PATH_TYPE: inherit
-    defaults:
-      run:
-        shell: msys2 {0}
     steps:
     - uses: msys2/setup-msys2@v2
       with:
         location: D:\
-        install: base-devel gettext-devel autotools git    
+        install: base-devel gettext-devel autoconf-wrapper automake-wrapper libtool git     
     - name: Prepare
       run: git config --global core.autocrlf input
       shell: bash
     - uses: actions/checkout@main
-    - name: Get HASH ENV
-      run: echo "random_hash=$(cat HASH)" >> $GITHUB_ENV   
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\ucrt64
-        key: mcf_20221123_13.0.0_x64-ucrt-${{ env.random_hash }}
+        path: D:\m64-1301
+        key: mingw-gcc
     - name: Build
+      env:
+        C_INCLUDE_PATH: /opt/include
+        CPLUS_INCLUDE_PATH: /opt/include
+        LIBRARY_PATH: /opt/lib
+        MSYSTEM: MINGW64
+      shell: msys2 {0}
       run: |
-        ./install-dev.sh libiconv libpng
-        cd libzvbi-dev; PATH=/usr/bin:/opt/bin:/d/ucrt64/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
-    - name: Upload
+        curl -OL https://github.com/${{ github.repository }}/releases/download/dev/libiconv-dev-1.17-1-x86_64.pkg.tar.zst
+        curl -OL https://github.com/${{ github.repository }}/releases/download/dev/libpng-dev-1.6.39-1-x86_64.pkg.tar.zst        
+        curl -OL https://github.com/${{ github.repository }}/releases/download/dev/zlib-dev-1.2.13-1-x86_64.pkg.tar.zst
+        pacman -U *.zst --noconfirm
+        cd libzvbi-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+    - name: Release
+      env:
+        GH_TOKEN: ${{ github.token }}    
+      shell: bash 
       run: |
         ./release-dev.sh libzvbi-dev libzvbi-dev
