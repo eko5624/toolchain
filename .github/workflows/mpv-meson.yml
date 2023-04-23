@@ -29,7 +29,7 @@ jobs:
         C_INCLUDE_PATH: /opt/include
         CPLUS_INCLUDE_PATH: /opt/include
         LIBRARY_PATH: /opt/lib
-        MSYSTEM: UCRT64
+        MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |
         pypath=$(cygpath -u $pythonLocation)
