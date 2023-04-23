@@ -34,6 +34,7 @@ md5sums=('SKIP')
 
 build() {
   cd $srcdir/mpv
+  export PKG_CONFIG_PATH=/d/msys64/opt/lib/pkgconfig
   export LDFLAGS="$LDFLAGS -lstdc++ -lssp"
   curl -OL https://github.com/mpv-player/mpv/raw/master/video/out/placebo/ra_pl.c
   mv ra_pl.c video/out/placebo/ra_pl.c
