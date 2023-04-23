@@ -44,7 +44,7 @@ build() {
     -Dlibbluray=enabled \
     -Ddvdnav=enabled \
     -Degl-angle=enabled \
-    -Diconv=disabled \
+    -Diconv=disabled
   meson compile -C build
   
   # get latest commit sha
