@@ -34,8 +34,7 @@ jobs:
       run: |
         pypath=$(cygpath -u $pythonLocation)
         PATH=/d/mingw-gcc/bin:$pypath:$pypath/Scripts:/usr/bin:/opt/bin
-        pip install https://github.com/mesonbuild/meson/archive/refs/heads/master.zip
-        pip install ninja
+        pip install ninja meson
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/amf-headers-dev-1.4.29-1-x86_64.pkg.tar.zst
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/angle-headers-dev-1.0.772-1-x86_64.pkg.tar.zst
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/avisynth-dev-3.7.2-1-x86_64.pkg.tar.zst
