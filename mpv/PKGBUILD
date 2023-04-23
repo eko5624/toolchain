@@ -34,7 +34,7 @@ md5sums=('SKIP')
 
 build() {
   cd $srcdir/mpv
-  export LDFLAGS="$LDFLAGS -lssp"
+  export LDFLAGS="$LDFLAGS -lstdc++ -lssp"
   meson setup build --buildtype=release -Dprefix=/opt --libdir='/opt/lib' \
     -Dlibmpv=true \
     -Dlua=enabled \
@@ -43,7 +43,8 @@ build() {
     -Dsdl2=enabled \
     -Dlibbluray=enabled \
     -Ddvdnav=enabled \
-    -Degl-angle=enabled
+    -Degl-angle=enabled \
+    -Diconv=disabled \
   meson compile -C build
   
   # get latest commit sha
