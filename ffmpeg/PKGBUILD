@@ -78,7 +78,7 @@ package_ffmpeg-dev() {
     --enable-libxml2 \
     --enable-libxvid \
     --enable-libzimg \
-    --enable-libzvbi \
+    --disable-libzvbi \
     --enable-libopus \
     --disable-mbedtls \
     --disable-decoder=libvorbis \
