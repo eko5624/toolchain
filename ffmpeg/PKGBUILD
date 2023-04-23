@@ -52,6 +52,8 @@ package_ffmpeg-dev() {
     --prefix=/opt \
     $CARGS \
     --extra-libs="-lstdc++ -lssp -lz" \
+    --extra-cflags="-DLIBSSH_STATIC" \
+    --extra-ldflags="-Wl,--allow-multiple-definition" \
     --extra-ldflags="-static -static-libgcc -static-libstdc++" \
     --disable-mediafoundation \
     --enable-amf \
@@ -69,8 +71,8 @@ package_ffmpeg-dev() {
     --enable-libopenmpt \
     --enable-libsoxr \
     --enable-libspeex \
-    --disable-libsrt \
-    --disable-libssh \
+    --enable-libsrt \
+    --enable-libssh \
     --enable-libuavs3d \
     --enable-libvorbis \
     --enable-libvpx \
@@ -78,9 +80,9 @@ package_ffmpeg-dev() {
     --enable-libxml2 \
     --enable-libxvid \
     --enable-libzimg \
-    --disable-libzvbi \
+    --enable-libzvbi \
     --enable-libopus \
-    --disable-mbedtls \
+    --enable-mbedtls \
     --disable-decoder=libvorbis \
     --disable-decoder=libopus \
     --disable-encoder=opus \
