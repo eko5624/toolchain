@@ -21,8 +21,6 @@ makedepends=("nasm"
              "libsdl2-dev"
              "libsoxr-dev"
              "libspeex-dev"
-             "libsrt-dev"
-             "libssh-dev"
              "libvorbis_aotuv-dev"
              "libvpl-dev"
              "libvpx-dev"
@@ -30,8 +28,6 @@ makedepends=("nasm"
              "libxml2-dev"
              "libxvid-dev"
              "libzimg-dev"
-             "libzvbi-dev"
-             "mbedtls-dev"
              "opus-dev"
              "ffnvcodec-dev"
              "uavs3d-dev"
@@ -52,8 +48,6 @@ package_ffmpeg-dev() {
     --prefix=/opt \
     $CARGS \
     --extra-libs="-lstdc++ -lssp -lz" \
-    --extra-cflags="-DLIBSSH_STATIC" \
-    --extra-ldflags="-Wl,--allow-multiple-definition" \
     --extra-ldflags="-static -static-libgcc -static-libstdc++" \
     --disable-mediafoundation \
     --enable-amf \
@@ -71,8 +65,6 @@ package_ffmpeg-dev() {
     --enable-libopenmpt \
     --enable-libsoxr \
     --enable-libspeex \
-    --enable-libsrt \
-    --enable-libssh \
     --enable-libuavs3d \
     --enable-libvorbis \
     --enable-libvpx \
@@ -80,9 +72,7 @@ package_ffmpeg-dev() {
     --enable-libxml2 \
     --enable-libxvid \
     --enable-libzimg \
-    --enable-libzvbi \
     --enable-libopus \
-    --enable-mbedtls \
     --disable-decoder=libvorbis \
     --disable-decoder=libopus \
     --disable-encoder=opus \
