@@ -965,7 +965,7 @@ jobs:
     - uses: msys2/setup-msys2@v2
       with:
         location: D:\
-        install: base-devel autotools git mingw-w64-x86_64-cmake mingw-w64-x86_64-make            
+        install: base-devel autotools git p7zip mingw-w64-x86_64-cmake mingw-w64-x86_64-make            
     - name: Prepare
       run: git config --global core.autocrlf input
       shell: bash
@@ -1426,7 +1426,7 @@ jobs:
     - uses: msys2/setup-msys2@v2
       with:
         location: D:\
-        install: base-devel autotools git mingw-w64-x86_64-cmake            
+        install: base-devel autotools git p7zip mingw-w64-x86_64-cmake            
     - name: Prepare
       run: git config --global core.autocrlf input
       shell: bash
@@ -1476,7 +1476,7 @@ jobs:
     - uses: msys2/setup-msys2@v2
       with:
         location: D:\
-        install: base-devel autotools git mingw-w64-x86_64-cmake mingw-w64-x86_64-make           
+        install: base-devel autotools git p7zip mingw-w64-x86_64-cmake mingw-w64-x86_64-make           
     - name: Prepare
       run: git config --global core.autocrlf input
       shell: bash
@@ -1820,7 +1820,7 @@ jobs:
     - uses: msys2/setup-msys2@v2
       with:
         location: D:\
-        install: base-devel gettext-devel autotools git     
+        install: base-devel gettext-devel autotools git p7zip    
     - name: Prepare
       run: git config --global core.autocrlf input
       shell: bash
@@ -2085,7 +2085,7 @@ jobs:
     - uses: msys2/setup-msys2@v2
       with:
         location: D:\
-        install: base-devel autotools git mingw-w64-x86_64-cmake mingw-w64-x86_64-make            
+        install: base-devel autotools git p7zip mingw-w64-x86_64-cmake mingw-w64-x86_64-make            
     - name: Prepare
       run: git config --global core.autocrlf input
       shell: bash
@@ -2395,7 +2395,7 @@ jobs:
     - uses: msys2/setup-msys2@v2
       with:
         location: D:\
-        install: base-devel autotools mingw-w64-x86_64-cmake git     
+        install: base-devel autotools mingw-w64-x86_64-cmake git p7zip    
     - name: Prepare
       run: git config --global core.autocrlf input
       shell: bash
