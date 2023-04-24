@@ -29,18 +29,22 @@ makedepends=("yasm"
              "vulkan-dev"
              "zlib-dev")
 license=('GPL3')
-source=("git+https://github.com/mpv-player/mpv.git#tag=v0.33.1")
+source=("git+https://github.com/mpv-player/mpv.git")
 md5sums=('SKIP')
 
 build() {
   cd $srcdir/mpv
-  export PKG_CONFIG_PATH=/d/msys64/opt/lib/pkgconfig
-  export LDFLAGS="$LDFLAGS -lstdc++ -lssp"
-  curl -OL https://github.com/mpv-player/mpv/raw/master/video/out/placebo/ra_pl.c
-  mv ra_pl.c video/out/placebo/ra_pl.c
-  python bootstrap.py
-  CC=gcc.exe python waf configure --prefix=/opt --disable-iconv --disable-debug-build --enable-libbluray --enable-dvdnav
-  python waf build
+  export LDFLAGS="$LDFLAGS -static -lstdc++ -lssp"
+  meson setup build --buildtype=release -Dprefix=/opt --libdir='/opt/lib' \
+    -Dlibmpv=true \
+    -Dlua=enabled \
+    -Dopenal=enabled \
+    -Drubberband=enabled \
+    -Dsdl2=enabled \
+    -Dlibbluray=enabled \
+    -Ddvdnav=enabled \
+    -Degl-angle=enabled
+  meson compile -C build
   
   # get latest commit sha
   short_sha=$(git rev-parse --short HEAD)
