@@ -8,8 +8,10 @@ url="https://www.khronos.org/vulkan/"
 license=('APACHE')
 source=("git+https://github.com/KhronosGroup/Vulkan-Headers"
         "git+https://github.com/KhronosGroup/Vulkan-Loader"
-        "https://raw.githubusercontent.com/shinchiro/mpv-winbuild-cmake/master/packages/vulkan-0001-cross-compile-static-linking-hacks.patch")
-md5sums=('SKIP' 'SKIP' 'SKIP')
+        "https://raw.githubusercontent.com/shinchiro/mpv-winbuild-cmake/master/packages/vulkan-0001-cross-compile-static-linking-hacks.patch"
+        "https://raw.githubusercontent.com/shinchiro/mpv-winbuild-cmake/master/toolchain/mingw-headers/d3dkmthk.h"
+        "https://raw.githubusercontent.com/shinchiro/mpv-winbuild-cmake/master/toolchain/mingw-headers/d3dukmdt.h")
+md5sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 build() {
   export CFLAGS="${CFLAGS} -D__STDC_FORMAT_MACROS -Wno-unused-function"
@@ -22,6 +24,8 @@ build() {
   $CMAKE --install . --prefix=$srcdir/opt
 
   cd $srcdir/Vulkan-Loader
+  mv $srcdir/d3dkmthk.h loader
+  mv $srcdir/d3dukmdt.h loader
   patch -p1 -i $srcdir/vulkan-0001-cross-compile-static-linking-hacks.patch
   rm -rf build && mkdir build && cd build
   $CMAKE .. -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX=/opt -DCMAKE_BUILD_TYPE=Release \
