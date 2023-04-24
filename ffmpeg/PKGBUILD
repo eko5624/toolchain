@@ -1,4 +1,4 @@
-pkgname=(ffmpeg-dev ffmpeg-git)
+pkgname=(ffmpeg-dev ffmpeg)
 pkgver=6.0
 pkgrel=1
 pkgdesc='Complete and free Internet live audio and video solution'
@@ -37,9 +37,9 @@ source=("git+https://github.com/FFmpeg/FFmpeg")
 md5sums=('SKIP')
 
 build() {
-  CARGS="--target-os=mingw32 --arch=x86_64 --disable-debug --disable-doc \
-         --enable-gpl --enable-version3 --enable-nonfree --enable-pic --pkg-config-flags=--static \
-         --disable-ffplay --disable-ffprobe --disable-avdevice --enable-static --disable-shared"
+  CARGS="--target-os=mingw32 --arch=x86_64 --disable-debug --disable-stripping --disable-doc \
+         --enable-gpl --enable-version3 --enable-nonfree --enable-zlib --pkg-config-flags=--static \
+         --disable-ffplay --disable-ffprobe --disable-avdevice --enable-shared"
 }
 
 package_ffmpeg-dev() {
@@ -82,18 +82,10 @@ package_ffmpeg-dev() {
   rm -rf $pkgdir/opt/bin $pkgdir/opt/share $pkgdir/opt/lib/*.def
 }
 
-package_ffmpeg-git() {
+package_ffmpeg() {
   export PKGEXT='.pkg.tar.xz'
-  mkdir -p $pkgdir/opt/ffmpeg
   cd $srcdir/FFmpeg
   make DESTDIR=$pkgdir install
   rm -rf $pkgdir/opt/bin/*.lib $pkgdir/opt/share $pkgdir/opt/include $pkgdir/opt/lib
   strip $pkgdir/opt/bin/*
-  mv $pkgdir/opt/bin/ffmpeg.exe $pkgdir/opt/ffmpeg
-  rm -rf $pkgdir/opt/bin
-
-  # get latest commit sha
-  short_sha=$(git rev-parse --short HEAD)
-  echo $short_sha > SHORT_SHA
-  mv SHORT_SHA $pkgdir/opt/ffmpeg
 }
