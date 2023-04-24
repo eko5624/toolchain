@@ -20,8 +20,8 @@ jobs:
     - uses: actions/cache@main
       id: cache
       with:
-        path: D:\m64-1301
-        key: mingw-gcc
+        path: D:\mingw-gcc
+        key: mingw-gcc-w32threads
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
@@ -31,7 +31,7 @@ jobs:
         CMAKE: /mingw64/bin/cmake
       shell: msys2 {0}
       run: |
-        cd vulkan-dev; PATH=/usr/bin:/opt/bin:/d/m64-1301/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        cd vulkan-dev; PATH=/usr/bin:/opt/bin:/d/mingw-gcc/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
     - name: Release
       env:
         GH_TOKEN: ${{ github.token }}  
