@@ -1,21 +1,22 @@
 # Maintainer: nyfair <nyfair2012@gmail.com>
-pkgname=vulkan-shared-dev
+pkgname=vulkan-dev
 pkgver=1.3.243.0
 pkgrel=1
 pkgdesc='Vulkan Header and Loader'
 arch=('x86_64')
 url="https://www.khronos.org/vulkan/"
 license=('APACHE')
-source=("git+https://github.com/KhronosGroup/Vulkan-Headers#tag=sdk-$pkgver"
-        "git+https://github.com/KhronosGroup/Vulkan-Loader#tag=sdk-$pkgver")
-md5sums=('SKIP' 'SKIP')
+source=("git+https://github.com/KhronosGroup/Vulkan-Headers"
+        "git+https://github.com/KhronosGroup/Vulkan-Loader"
+        "https://raw.githubusercontent.com/shinchiro/mpv-winbuild-cmake/master/packages/vulkan-0001-cross-compile-static-linking-hacks.patch")
+md5sums=('SKIP' 'SKIP' 'SKIP')
 
 build() {
   export CFLAGS="${CFLAGS} -D__STDC_FORMAT_MACROS -Wno-unused-function"
   export CPPFLAGS="${CPPFLAGS} -D__STDC_FORMAT_MACROS"
   export CXXFLAGS="${CXXFLAGS} -D__USE_MINGW_ANSI_STDIO -D__STDC_FORMAT_MACROS -fpermissive -Wno-unused-function"
   curl -OL https://www.japheth.de/Download/JWasm/JWasm211bw.zip
-  bsdtar -C /d/mingw-gcc/bin -xvf JWasm211bw.zip '*.EXE'
+  bsdtar -C /d/mingw0gcc/bin -xvf JWasm211bw.zip '*.EXE'
 
   cd $srcdir/Vulkan-Headers
   rm -rf build && mkdir build && cd build
@@ -23,14 +24,10 @@ build() {
   $CMAKE --install . --prefix=$srcdir/opt
 
   cd $srcdir/Vulkan-Loader
-  # skip rc info and use vulkan-1.dll from your graphic driver
-  sed -i '/Git/d' CMakeLists.txt
-  sed -i '/loader.rc/d' loader/CMakeLists.txt
-  sed -i '/RC_FILE_LOCATION/d' loader/CMakeLists.txt
-  sed -i 's/vulkan-1.def/vulkan-1.def)/' loader/CMakeLists.txt
+  patch -p1 -i $srcdir/vulkan-0001-cross-compile-static-linking-hacks.patch
   rm -rf build && mkdir build && cd build
   $CMAKE .. -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX=/opt -DCMAKE_BUILD_TYPE=Release \
-    -DVULKAN_HEADERS_INSTALL_DIR="${srcdir}/opt" -DBUILD_TESTS=OFF -DENABLE_WERROR=OFF
+    -DVULKAN_HEADERS_INSTALL_DIR="${srcdir}/opt" -DBUILD_STATIC_LOADER=ON -DBUILD_TESTS=OFF -DENABLE_WERROR=OFF 
   $CMAKE --build .
 }
 
