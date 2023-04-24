@@ -10,7 +10,7 @@ jobs:
     - uses: msys2/setup-msys2@v2
       with:
         location: D:\
-        install: base-devel autotools yasm git mingw-w64-x86_64-pkg-config      
+        install: base-devel autotools yasm git     
     - name: Prepare
       run: git config --global core.autocrlf input
       shell: bash
@@ -36,7 +36,7 @@ jobs:
       shell: msys2 {0}
       run: |
         pypath=$(cygpath -u $pythonLocation)
-        PATH=/d/mingw-gcc/bin:/usr/bin:/opt/bin:$pypath:$pypath/Scripts
+        PATH=/usr/bin:/opt/bin:/d/mingw-gcc/bin:$pypath:$pypath/Scripts
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/angle-headers-dev-1.0.772-1-x86_64.pkg.tar.zst
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/avisynth-dev-3.7.2-1-x86_64.pkg.tar.zst
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/ffmpeg-dev-6.0-1-x86_64.pkg.tar.zst
