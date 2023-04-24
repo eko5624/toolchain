@@ -975,6 +975,20 @@ jobs:
       with:
         path: D:\mingw-gcc
         key: mingw-gcc-w32threads
+    - name: Hack Toolchain
+      shell: msys2 {0}
+      run: |
+        pushd /d/mingw-gcc/include/c++/12.2.1
+        mv condition_variable orig.condition_variable.h
+        mv future orig.future.h
+        mv mutex orig.mutex.h
+        mv shared_mutex orig.shared_mutex.h
+        mv thread orig.thread.h
+        popd
+        mv mingw-std-threads-hack/* /d/mingw-gcc/include/c++/12.2.1
+        curl -OL https://github.com/meganz/mingw-std-threads/archive/refs/heads/master.zip
+        7z x master.zip
+        mv mingw-std-threads-master/*.h /d/mingw-gcc/include/c++/12.2.1
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
@@ -1422,6 +1436,20 @@ jobs:
       with:
         path: D:\mingw-gcc
         key: mingw-gcc-w32threads
+    - name: Hack Toolchain
+      shell: msys2 {0}
+      run: |
+        pushd /d/mingw-gcc/include/c++/12.2.1
+        mv condition_variable orig.condition_variable.h
+        mv future orig.future.h
+        mv mutex orig.mutex.h
+        mv shared_mutex orig.shared_mutex.h
+        mv thread orig.thread.h
+        popd
+        mv mingw-std-threads-hack/* /d/mingw-gcc/include/c++/12.2.1
+        curl -OL https://github.com/meganz/mingw-std-threads/archive/refs/heads/master.zip
+        7z x master.zip
+        mv mingw-std-threads-master/*.h /d/mingw-gcc/include/c++/12.2.1
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
@@ -1458,6 +1486,20 @@ jobs:
       with:
         path: D:\mingw-gcc
         key: mingw-gcc-w32threads
+    - name: Hack Toolchain
+      shell: msys2 {0}
+      run: |
+        pushd /d/mingw-gcc/include/c++/12.2.1
+        mv condition_variable orig.condition_variable.h
+        mv future orig.future.h
+        mv mutex orig.mutex.h
+        mv shared_mutex orig.shared_mutex.h
+        mv thread orig.thread.h
+        popd
+        mv mingw-std-threads-hack/* /d/mingw-gcc/include/c++/12.2.1
+        curl -OL https://github.com/meganz/mingw-std-threads/archive/refs/heads/master.zip
+        7z x master.zip
+        mv mingw-std-threads-master/*.h /d/mingw-gcc/include/c++/12.2.1        
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
@@ -1788,6 +1830,20 @@ jobs:
       with:
         path: D:\mingw-gcc
         key: mingw-gcc-w32threads
+    - name: Hack Toolchain
+      shell: msys2 {0}
+      run: |
+        pushd /d/mingw-gcc/include/c++/12.2.1
+        mv condition_variable orig.condition_variable.h
+        mv future orig.future.h
+        mv mutex orig.mutex.h
+        mv shared_mutex orig.shared_mutex.h
+        mv thread orig.thread.h
+        popd
+        mv mingw-std-threads-hack/* /d/mingw-gcc/include/c++/12.2.1
+        curl -OL https://github.com/meganz/mingw-std-threads/archive/refs/heads/master.zip
+        7z x master.zip
+        mv mingw-std-threads-master/*.h /d/mingw-gcc/include/c++/12.2.1
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
@@ -2039,6 +2095,20 @@ jobs:
       with:
         path: D:\mingw-gcc
         key: mingw-gcc-w32threads
+    - name: Hack Toolchain
+      shell: msys2 {0}
+      run: |
+        pushd /d/mingw-gcc/include/c++/12.2.1
+        mv condition_variable orig.condition_variable.h
+        mv future orig.future.h
+        mv mutex orig.mutex.h
+        mv shared_mutex orig.shared_mutex.h
+        mv thread orig.thread.h
+        popd
+        mv mingw-std-threads-hack/* /d/mingw-gcc/include/c++/12.2.1
+        curl -OL https://github.com/meganz/mingw-std-threads/archive/refs/heads/master.zip
+        7z x master.zip
+        mv mingw-std-threads-master/*.h /d/mingw-gcc/include/c++/12.2.1
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
@@ -2196,17 +2266,17 @@ jobs:
     - name: Hack Toolchain
       shell: msys2 {0}
       run: |
-        pushd /d/mingw-gcc/include/c++/13.0.1
+        pushd /d/mingw-gcc/include/c++/12.2.1
         mv condition_variable orig.condition_variable.h
         mv future orig.future.h
         mv mutex orig.mutex.h
         mv shared_mutex orig.shared_mutex.h
         mv thread orig.thread.h
         popd
-        mv mingw-std-threads-hack/* /d/mingw-gcc/include/c++/13.0.1
+        mv mingw-std-threads-hack/* /d/mingw-gcc/include/c++/12.2.1
         curl -OL https://github.com/meganz/mingw-std-threads/archive/refs/heads/master.zip
         7z x master.zip
-        mv mingw-std-threads-master/*.h /d/mingw-gcc/include/c++/13.0.1
+        mv mingw-std-threads-master/*.h /d/mingw-gcc/include/c++/12.2.1
 
     - name: Build
       env:
@@ -2335,6 +2405,20 @@ jobs:
       with:
         path: D:\mingw-gcc
         key: mingw-gcc-w32threads
+    - name: Hack Toolchain
+      shell: msys2 {0}
+      run: |
+        pushd /d/mingw-gcc/include/c++/12.2.1
+        mv condition_variable orig.condition_variable.h
+        mv future orig.future.h
+        mv mutex orig.mutex.h
+        mv shared_mutex orig.shared_mutex.h
+        mv thread orig.thread.h
+        popd
+        mv mingw-std-threads-hack/* /d/mingw-gcc/include/c++/12.2.1
+        curl -OL https://github.com/meganz/mingw-std-threads/archive/refs/heads/master.zip
+        7z x master.zip
+        mv mingw-std-threads-master/*.h /d/mingw-gcc/include/c++/12.2.1
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
