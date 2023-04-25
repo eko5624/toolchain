@@ -37,7 +37,7 @@ build() {
   CFLAGS="-I/opt/include"
   LDFLAGS="-L/opt/lib"
   export LDFLAGS="$LDFLAGS -static -lstdc++ -lssp"
-  meson setup build --buildtype=release -Dprefix=/opt --libdir='/opt/lib' \
+  CC=gcc.exe meson setup build --buildtype=release -Dprefix=/opt --libdir='/opt/lib' \
     -Dlibmpv=true \
     -Dlua=enabled \
     -Dopenal=enabled \
