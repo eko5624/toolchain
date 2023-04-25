@@ -70,6 +70,20 @@ jobs:
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/zlib-dev-1.2.13-1-x86_64.pkg.tar.zst
         pacman -U *.zst --noconfirm
         cd mpv; PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg
+        
+      - name: Collecting logs
+        if: ${{ always() }}
+        shell: msys2 {0}
+        run: |
+          mkdir build_logs
+          cp $(find mpv/src/mpv/build/meson-logs -type f -name "meson-log.txt") build_logs || true
+          7z a logs.7z build_logs
+      - name: upload logs
+        uses: actions/upload-artifact@v3
+        if: ${{ always() }}
+        with:
+          name: build_logs
+          path: logs.7z
     
     - name: Delete old libmpv
       env:
