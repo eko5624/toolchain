@@ -15,11 +15,11 @@ jobs:
       run: git config --global core.autocrlf input
       shell: bash
     - uses: actions/checkout@main
-    - uses: actions/cache@main
-      id: cache
-      with:
-        path: D:\mingw-gcc
-        key: mingw-gcc-w32threads
+    #- uses: actions/cache@main
+    #  id: cache
+    #  with:
+    #    path: D:\mingw-gcc
+    #    key: mingw-gcc-w32threads
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
@@ -35,6 +35,9 @@ jobs:
         MSYSTEM: MINGW64
       shell: msys2 {0}
       run: |
+        curl -OL https://github.com/eko5624/toolchain-test/releases/download/20230426/m64-target.7z
+        7z x m64-target.7z -o/d
+        mv /d/target /d/mingw-gcc
         pypath=$(cygpath -u $pythonLocation)
         PATH=/usr/bin:/opt/bin:/d/mingw-gcc/bin:$pypath:$pypath/Scripts
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/angle-headers-dev-1.0.772-1-x86_64.pkg.tar.zst
