@@ -38,6 +38,7 @@ jobs:
         curl -OL https://github.com/eko5624/toolchain-test/releases/download/20230426/m64-target.7z
         7z x m64-target.7z -o/d
         mv /d/target /d/mingw-gcc
+        mv /mingw64 /64
         pypath=$(cygpath -u $pythonLocation)
         PATH=/usr/bin:/opt/bin:/d/mingw-gcc/bin:$pypath:$pypath/Scripts
         curl -OL https://github.com/${{ github.repository }}/releases/download/dev/angle-headers-dev-1.0.772-1-x86_64.pkg.tar.zst
