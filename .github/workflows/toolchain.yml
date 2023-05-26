@@ -26,7 +26,7 @@ jobs:
       if: steps.cache.outputs.cache-hit != 'true'
       shell: msys2 {0}
       run: |
-        curl -OL http://msystem.waw.pl/x265/mingw-gcc1301-20230421.7z
+        curl -OL http://msystem.waw.pl/x265/mingw-gcc131-20230426.7z
         7z x mingw-gcc*.7z -o/d
         rm -rf /d/m32*
         mv /d/m64* /d/mingw-gcc
