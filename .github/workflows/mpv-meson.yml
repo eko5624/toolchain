@@ -38,6 +38,8 @@ jobs:
         #curl -OL https://github.com/eko5624/toolchain-test/releases/download/20230426/m64-target.7z
         #7z x m64-target.7z -o/d
         #mv /d/target /d/mingw-gcc
+        cp /d/mingw-gcc/bin/mingw32-make.exe /d/mingw-gcc/bin/make.exe
+        cp /d/mingw-gcc/bin/gcc.exe /d/mingw-gcc/bin/cc.exe
         mv /mingw64 /64
         pypath=$(cygpath -u $pythonLocation)
         PATH=/usr/bin:/opt/bin:/d/mingw-gcc/bin:$pypath:$pypath/Scripts
