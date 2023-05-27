@@ -39,4 +39,6 @@ package() {
   $CMAKE --install . --prefix=$pkgdir/opt
   cd $srcdir/Vulkan-Loader/build
   $CMAKE --install . --prefix=$pkgdir/opt
+  sed -i '/Libs:/d' $pkgdir/opt/lib/pkgconfig/*.pc
+  sed -i 's/Libs.private:/Libs: -L${libdir} -lvulkan/' $pkgdir/opt/lib/pkgconfig/*.pc
 }
