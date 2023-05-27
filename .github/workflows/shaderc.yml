@@ -23,6 +23,21 @@ jobs:
         path: D:\mingw-gcc
         key: mingw-gcc-w32threads
 
+    - name: Hack Toolchain
+      shell: msys2 {0}
+      run: |
+        pushd /d/mingw-gcc/include/c++/13.1.0
+        mv condition_variable orig.condition_variable.h
+        mv future orig.future.h
+        mv mutex orig.mutex.h
+        mv shared_mutex orig.shared_mutex.h
+        mv thread orig.thread.h
+        popd
+        mv mingw-std-threads-hack/* /d/mingw-gcc/include/c++/13.1.0
+        curl -OL https://github.com/meganz/mingw-std-threads/archive/refs/heads/master.zip
+        7z x master.zip
+        mv mingw-std-threads-master/*.h /d/mingw-gcc/include/c++/13.1.0
+        
     - name: Build
       env:
         C_INCLUDE_PATH: /opt/include
