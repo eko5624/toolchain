@@ -33,6 +33,7 @@ jobs:
         curl -OL https://github.com/eko5624/toolchain-test/releases/download/toolchain/target-gcc-with-posix-ucrt.7z
         7z x target-gcc*.7z -o/d
         mv /d/target /d/mingw-gcc
+        cp /d/mingw-gcc/x86_64-w64-mingw32/bin/libwinpthread-1.dll /d/mingw-gcc/bin
         curl -L -o curl-win64-mingw.zip 'https://curl.se/windows/latest.cgi?p=win64-mingw.zip'
         7z e -r curl*.zip -o/d/mingw-gcc/bin '*.exe' '*.crt'
         
