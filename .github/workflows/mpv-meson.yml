@@ -10,7 +10,7 @@ jobs:
     - uses: msys2/setup-msys2@v2
       with:
         location: D:\
-        install: base-devel autotools p7zip mingw-w64-x86_64-gperf mingw-w64-x86_64-pkgconf mingw-w64-x86_64-windows-default-manifest         
+        install: base-devel autotools git yasm p7zip mingw-w64-x86_64-gperf mingw-w64-x86_64-pkgconf mingw-w64-x86_64-windows-default-manifest         
     - name: Prepare
       run: git config --global core.autocrlf input
       shell: bash
