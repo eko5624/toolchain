@@ -10,7 +10,7 @@ jobs:
     - uses: msys2/setup-msys2@v2
       with:
         location: D:\
-        install: base-devel autotools yasm git p7zip     
+        install: base-devel autotools p7zip mingw-w64-x86_64-gperf mingw-w64-x86_64-pkgconf mingw-w64-x86_64-windows-default-manifest         
     - name: Prepare
       run: git config --global core.autocrlf input
       shell: bash
@@ -40,6 +40,20 @@ jobs:
         #mv /d/target /d/mingw-gcc
         cp /d/mingw-gcc/bin/mingw32-make.exe /d/mingw-gcc/bin/make.exe
         cp /d/mingw-gcc/bin/gcc.exe /d/mingw-gcc/bin/cc.exe
+        
+        #gperf
+        cp /d/msys64/mingw64/bin/gperf.exe /d/mingw-gcc/bin
+        
+        #pkgconf
+        cp /d/msys64/mingw64/bin/libpkgconf-3.dll /d/mingw-gcc/bin
+        cp /d/msys64/mingw64/bin/pkg-config.exe /d/mingw-gcc/bin
+        cp /d/msys64/mingw64/bin/pkgconf.exe /d/mingw-gcc/bin
+        cp /d/msys64/mingw64/bin/x86_64-w64-mingw32-pkg-config.exe /d/mingw-gcc/bin
+        cp /d/msys64/mingw64/bin/x86_64-w64-mingw32-pkgconf.exe /d/mingw-gcc/bin
+        
+        #windows-default-manifest
+        cp /d/msys64/mingw64/lib/default-manifest.o /d/mingw-gcc/x86_64-w64-mingw32/lib
+        
         mv /mingw64 /64
         pypath=$(cygpath -u $pythonLocation)
         PATH=/usr/bin:/opt/bin:/d/mingw-gcc/bin:$pypath:$pypath/Scripts
