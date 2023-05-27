@@ -1,0 +1,43 @@
+name: libmysofa
+
+on:
+  workflow_dispatch:
+  #schedule:
+  #- cron: '30 0 * * MON'
+    
+jobs:  
+  libmysofa:
+    runs-on: windows-2022
+    steps:
+    - uses: msys2/setup-msys2@v2
+      with:
+        location: D:\
+        install: base-devel autotools git mingw-w64-x86_64-cmake            
+    - name: Prepare
+      run: git config --global core.autocrlf input
+      shell: bash
+    - uses: actions/checkout@main
+    - uses: actions/cache@main
+      id: cache
+      with:
+        path: D:\mingw-gcc
+        key: mingw-gcc-w32threads
+    - name: Build
+      env:
+        C_INCLUDE_PATH: /opt/include
+        CPLUS_INCLUDE_PATH: /opt/include
+        LIBRARY_PATH: /opt/lib
+        MSYSTEM: MINGW64
+        CMAKE: /64/bin/cmake
+      shell: msys2 {0}
+      run: | 
+        curl -OL https://github.com/${{ github.repository }}/releases/download/dev/zlib-dev-1.2.13-1-x86_64.pkg.tar.zst      
+        pacman -U *.zst --noconfirm                   
+        mv /mingw64 /64
+        cd libmysofa-dev; PATH=/usr/bin:/opt/bin:/d/mingw-gcc/bin PKG_CONFIG_PATH=/opt/lib/pkgconfig makepkg  
+    - name: Release
+      env:
+        GH_TOKEN: ${{ github.token }}    
+      shell: bash 
+      run: |
+        ./release-dev.sh libmysofa-dev libmysofa-dev 
