@@ -237,7 +237,6 @@ $M_SOURCE/gcc-13.1.0/configure \
   --disable-multilib \
   --disable-dependency-tracking \
   --disable-bootstrap \
-  --disable-libssp \
   --disable-nls \
   --disable-werror \
   --disable-symvers \
@@ -246,12 +245,8 @@ $M_SOURCE/gcc-13.1.0/configure \
   --disable-win32-registry \
   --disable-version-specific-runtime-libs \
   --enable-languages=c,c++ \
-  --enable-libgomp \
-  --enable-fully-dynamic-string \
-  --enable-mingw-wildcard \
-  --enable-__cxa_atexit \
-  --enable-libstdcxx-time=yes \
-  --enable-libstdcxx-filesystem-ts=yes \
+  --enable-twoprocess \
+  --enable-libssp \
   --enable-threads=win32 \
   --enable-libstdcxx-threads=yes \
   --enable-lto \
@@ -268,6 +263,7 @@ VER=$(cat $M_SOURCE/gcc-13.1.0/gcc/BASE-VER)
 #mv $M_TARGET/lib/gcc/x86_64-w64-mingw32/libgcc*.dll $M_TARGET/lib/gcc/x86_64-w64-mingw32/$VER/
 #rm -rf $M_TARGET/lib/gcc/x86_64-w64-mingw32/lib
 #find $M_TARGET/lib/gcc/x86_64-w64-mingw32/$VER -type f -name "*.dll.a" -print0 | xargs -0 -I {} rm {}
+cp $M_TARGET/lib/libgcc_s_seh-1.dll $M_TARGET/bin/
 cp $M_TARGET/bin/gcc.exe $M_TARGET/bin/cc.exe
 cp $M_TARGET/bin/$MINGW_TRIPLE-gcc.exe $M_TARGET/bin/$MINGW_TRIPLE-cc.exe
 for f in $M_TARGET/bin/*.exe; do
