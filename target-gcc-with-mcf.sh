@@ -247,7 +247,6 @@ cd gcc-build
   --disable-multilib \
   --disable-dependency-tracking \
   --disable-bootstrap \
-  --disable-libssp \
   --disable-nls \
   --disable-werror \
   --disable-symvers \
@@ -256,12 +255,8 @@ cd gcc-build
   --disable-win32-registry \
   --disable-version-specific-runtime-libs \
   --enable-languages=c,c++ \
-  --enable-libgomp \
-  --enable-fully-dynamic-string \
-  --enable-mingw-wildcard \
-  --enable-__cxa_atexit \
-  --enable-libstdcxx-time=yes \
-  --enable-libstdcxx-filesystem-ts=yes \
+  --enable-twoprocess \
+  --enable-libssp \
   --enable-threads=mcf \
   --enable-libstdcxx-threads=yes \
   --enable-lto \
