@@ -93,7 +93,7 @@ mkdir mcfgthread-build
 cd mcfgthread-build
 $M_SOURCE/mcfgthread/configure \
   --host=$MINGW_TRIPLE \
-  --prefix=$M_TARGET \
+  --prefix=$M_CROSS/$MINGW_TRIPLE \
   --disable-pch
 make -j$MJOBS
 make install
@@ -165,7 +165,7 @@ make -j$MJOBS
 make install
 cd $M_BUILD
 
-echo "installing gcc-final"
+echo "building gcc-final"
 echo "======================="
 cd gcc-build
 make -j$MJOBS
