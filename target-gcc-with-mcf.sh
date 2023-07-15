@@ -212,19 +212,19 @@ $M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
 make -j$MJOBS
 make install
 
-#echo "building mcfgthread"
-#echo "======================="
-#cd $M_SOURCE/mcfgthread
-#autoreconf -ivf
-#cd $M_BUILD
-#mkdir mcfgthread-build
-#cd mcfgthread-build
-#$M_SOURCE/mcfgthread/configure \
-#  --host=$MINGW_TRIPLE \
-#  --prefix=$M_TARGET \
-#  --disable-pch
-#make -j$MJOBS
-#make install
+echo "building mcfgthread"
+echo "======================="
+cd $M_SOURCE/mcfgthread
+autoreconf -ivf
+cd $M_BUILD
+mkdir mcfgthread-build
+cd mcfgthread-build
+$M_SOURCE/mcfgthread/configure \
+  --host=$MINGW_TRIPLE \
+  --prefix=$M_TARGET \
+  --disable-pch
+make -j$MJOBS
+make install
 
 echo "building gcc"
 echo "======================="
