@@ -91,6 +91,12 @@ autoreconf -ivf
 cd $M_BUILD
 mkdir mcfgthread-build
 cd mcfgthread-build
+# -posix is Ubuntu's variant with pthreads support
+export CC=$MINGW_TRIPLE-gcc-posix
+export CXX=$MINGW_TRIPLE-g++-posix
+export AR=$MINGW_TRIPLE-ar
+export NM=$MINGW_TRIPLE-nm
+export RANLIB=$MINGW_TRIPLE-ranlib
 $M_SOURCE/mcfgthread/configure \
   --host=$MINGW_TRIPLE \
   --prefix=$M_TARGET \
