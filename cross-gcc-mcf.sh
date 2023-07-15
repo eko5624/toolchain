@@ -150,19 +150,19 @@ make -j$MJOBS
 make install
 cd $M_BUILD
 
-echo "building mcfgthread"
-echo "======================="
-cd $M_SOURCE/mcfgthread
-autoreconf -ivf
-cd $M_BUILD
-mkdir mcfgthread-build
-cd mcfgthread-build
-$M_SOURCE/mcfgthread/configure \
-  --host=$MINGW_TRIPLE \
-  --prefix=$M_TARGET \
-  --disable-pch
-make -j$MJOBS
-make install
+#echo "building mcfgthread"
+#echo "======================="
+#cd $M_SOURCE/mcfgthread
+#autoreconf -ivf
+#cd $M_BUILD
+#mkdir mcfgthread-build
+#cd mcfgthread-build
+#$M_SOURCE/mcfgthread/configure \
+#  --host=$MINGW_TRIPLE \
+#  --prefix=$M_TARGET \
+#  --disable-pch
+#make -j$MJOBS
+#make install
 
 echo "installing gcc-final"
 echo "======================="
