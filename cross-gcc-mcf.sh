@@ -97,6 +97,7 @@ $M_SOURCE/mcfgthread/configure \
   --disable-pch
 make -j$MJOBS
 make install
+cd $M_BUILD
 
 echo "building gcc-initial"
 echo "======================="
