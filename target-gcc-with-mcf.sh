@@ -300,6 +300,7 @@ $M_SOURCE/gcc-13.1.0/configure \
   --disable-symvers \
   --disable-libstdcxx-pch \
   --disable-libstdcxx-debug \
+  --disable-libstdcxx-backtrace \
   --disable-win32-registry \
   --disable-version-specific-runtime-libs \
   --enable-languages=c,c++ \
