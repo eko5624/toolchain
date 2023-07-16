@@ -280,6 +280,49 @@ echo "======================="
 cd $M_BUILD
 mkdir gcc-build
 cd gcc-build
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0002-Relocate-libintl.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0003-Windows-Follow-Posix-dir-exists-semantics-more-close.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0005-Windows-Don-t-ignore-native-system-header-dir.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0006-Windows-New-feature-to-allow-overriding.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0007-Build-EXTRA_GNATTOOLS-for-Ada.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0008-Prettify-linking-no-undefined.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0011-Enable-shared-gnat-implib.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0012-Handle-spaces-in-path-for-default-manifest.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0014-gcc-9-branch-clone_function_name_1-Retain-any-stdcall-suffix.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0020-libgomp-Don-t-hard-code-MS-printf-attributes.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0021-PR14940-Allow-a-PCH-to-be-mapped-to-a-different-addr.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0140-gcc-diagnostic-color.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0200-add-m-no-align-vector-insn-option-for-i386.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0300-override-builtin-printf-format.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0400-gcc-Make-stupid-AT-T-syntax-not-default.patch
+curl -OL https://github.com/gcc-mirror/gcc/commit/1c118c9970600117700cc12284587e0238de6bbe.patch
+
+cd $M_SOURCE/gcc-13.1.0
+patch -Nbp1 -i $M_BUILD/gcc-build/0002-Relocate-libintl.patch
+patch -Nbp1 -i $M_BUILD/gcc-build/0003-Windows-Follow-Posix-dir-exists-semantics-more-close.patch
+patch -Nbp1 -i $M_BUILD/gcc-build/0005-Windows-Don-t-ignore-native-system-header-dir.patch
+patch -Nbp1 -i $M_BUILD/gcc-build/0006-Windows-New-feature-to-allow-overriding.patch
+patch -Nbp1 -i $M_BUILD/gcc-build/0007-Build-EXTRA_GNATTOOLS-for-Ada.patch
+patch -Nbp1 -i $M_BUILD/gcc-build/0008-Prettify-linking-no-undefined.patch
+patch -Nbp1 -i $M_BUILD/gcc-build/0011-Enable-shared-gnat-implib.patch
+patch -Nbp1 -i $M_BUILD/gcc-build/0012-Handle-spaces-in-path-for-default-manifest.patch
+patch -Nbp1 -i $M_BUILD/gcc-build/0014-gcc-9-branch-clone_function_name_1-Retain-any-stdcall-suffix.patch
+patch -Nbp1 -i $M_BUILD/gcc-build/0020-libgomp-Don-t-hard-code-MS-printf-attributes.patch
+patch -Nbp1 -i $M_BUILD/gcc-build/0021-PR14940-Allow-a-PCH-to-be-mapped-to-a-different-addr.patch
+patch -Nbp1 -i $M_BUILD/gcc-build/0140-gcc-diagnostic-color.patch
+patch -Nbp1 -i $M_BUILD/gcc-build/0200-add-m-no-align-vector-insn-option-for-i386.patch
+patch -Nbp1 -i $M_BUILD/gcc-build/0300-override-builtin-printf-format.patch
+patch -Nbp1 -i $M_BUILD/gcc-build/0400-gcc-Make-stupid-AT-T-syntax-not-default.patch
+
+# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=109670#c7
+# https://github.com/gcc-mirror/gcc/commit/1c118c9970600117700cc12284587e0238de6bbe
+patch -R -Nbp1 -i $M_BUILD/gcc-build/1c118c9970600117700cc12284587e0238de6bbe.patch
+
+# so libgomp DLL gets built despide static libdl
+export lt_cv_deplibs_check_method='pass_all'
+
+# In addition adaint.c does `#include <accctrl.h>` which pulls in msxml.h, hacky hack:
+CPPFLAGS+=" -DCOM_NO_WINDOWS_H"
 $M_SOURCE/gcc-13.1.0/configure \
   --build=x86_64-pc-linux-gnu \
   --host=$MINGW_TRIPLE \
@@ -315,7 +358,8 @@ $M_SOURCE/gcc-13.1.0/configure \
   --with-arch=nocona \
   --with-tune=generic \
   --without-included-gettext \
-  --with-pkgversion="GCC with MCF thread model"
+  --with-pkgversion="GCC with MCF thread model" \
+  --with-boot-ldflags="$LDFLAGS -Wl,--disable-dynamicbase -static-libstdc++ -static-libgcc"
 make -j$MJOBS
 make install
 cp $M_TARGET/lib/libgcc_s_seh-1.dll $M_TARGET/bin/
