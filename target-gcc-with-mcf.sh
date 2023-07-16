@@ -302,7 +302,6 @@ $M_SOURCE/gcc-13.1.0/configure \
   --disable-libstdcxx-debug \
   --disable-win32-registry \
   --disable-version-specific-runtime-libs \
-  --disable-sjlj-exceptions \
   --enable-languages=c,c++ \
   --enable-twoprocess \
   --enable-libssp \
