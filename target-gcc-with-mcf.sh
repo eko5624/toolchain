@@ -198,6 +198,20 @@ $M_SOURCE/mingw-w64/mingw-w64-tools/gendef/configure \
 make -j$MJOBS
 make install
 
+echo "building winpthreads"
+echo "======================="
+cd $M_BUILD
+mkdir winpthreads-build
+cd winpthreads-build
+cp -u $M_TARGET/lib/{dllcrt2,crtbegin,crtend}.o ./
+$M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
+  --host=$MINGW_TRIPLE \
+  --prefix=$M_TARGET \
+  --disable-shared \
+  --enable-static
+make -j$MJOBS
+make install
+
 echo "building mcfgthread"
 echo "======================="
 cd $M_SOURCE/mcfgthread
@@ -209,19 +223,6 @@ $M_SOURCE/mcfgthread/configure \
   --host=$MINGW_TRIPLE \
   --prefix=$M_TARGET \
   --disable-pch
-make -j$MJOBS
-make install
-
-echo "building winpthreads"
-echo "======================="
-cd $M_BUILD
-mkdir winpthreads-build
-cd winpthreads-build
-$M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
-  --host=$MINGW_TRIPLE \
-  --prefix=$M_TARGET \
-  --enable-shared \
-  --enable-static
 make -j$MJOBS
 make install
 
@@ -251,13 +252,8 @@ cd gcc-build
   --disable-symvers \
   --disable-libstdcxx-pch \
   --disable-libstdcxx-debug \
-  --disable-libstdcxx-backtrace \
-  --disable-libstdcxx-verbose \
-  --disable-hosted-libstdcxx \
   --disable-win32-registry \
   --disable-version-specific-runtime-libs \
-  --disable-sjlj-exceptions \
-  --with-libstdcxx-eh-pool-obj-count=0 \
   --enable-languages=c,c++ \
   --enable-twoprocess \
   --enable-libssp \
@@ -308,4 +304,3 @@ cp $M_TARGET/bin/pkgconf.exe $M_TARGET/bin/pkg-config.exe
 cp $M_TARGET/bin/pkgconf.exe $M_TARGET/bin/x86_64-w64-mingw32-pkg-config.exe
 cd $M_TARGET
 rm -rf $M_TARGET/share
-
