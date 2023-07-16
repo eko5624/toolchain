@@ -92,6 +92,8 @@ $M_SOURCE/binutils-2.40/configure \
   --enable-lto
 make -j$MJOBS
 make install
+cd $M_TARGET
+ln -s $MINGW_TRIPLE mingw
 
 echo "building gmp"
 echo "======================="
@@ -159,7 +161,7 @@ mkdir headers-build
 cd headers-build
 $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
   --host=$MINGW_TRIPLE \
-  --prefix=$M_TARGET \
+  --prefix=$M_TARGET/$MINGW_TRIPLE \
   --enable-sdk=all \
   --with-default-msvcrt=ucrt \
   --enable-idl \
@@ -176,7 +178,7 @@ autoreconf -ivf
 cd $M_BUILD/crt-build
 $M_SOURCE/mingw-w64/mingw-w64-crt/configure \
   --host=$MINGW_TRIPLE \
-  --prefix=$M_TARGET \
+  --prefix=$M_TARGET/$MINGW_TRIPLE \
   --with-sysroot=$M_TARGET \
   --with-default-msvcrt=ucrt \
   --enable-wildcard \
@@ -203,14 +205,14 @@ echo "======================="
 cd $M_BUILD
 mkdir winpthreads-build
 cd winpthreads-build
-cp -u $M_TARGET/lib/{dllcrt2,crtbegin,crtend}.o ./
 $M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
   --host=$MINGW_TRIPLE \
-  --prefix=$M_TARGET \
+  --prefix=$M_TARGET/$MINGW_TRIPLE \
   --disable-shared \
   --enable-static
 make -j$MJOBS
 make install
+cp $M_TARGET/$MINGW_TRIPLE/bin/libwinpthread-1.dll $M_TARGET/bin/
 
 echo "building mcfgthread"
 echo "======================="
@@ -221,24 +223,24 @@ mkdir mcfgthread-build
 cd mcfgthread-build
 $M_SOURCE/mcfgthread/configure \
   --host=$MINGW_TRIPLE \
-  --prefix=$M_TARGET \
+  --prefix=$M_TARGET/$MINGW_TRIPLE \
   --disable-pch
 make -j$MJOBS
 make install
+cp $M_TARGET/$MINGW_TRIPLE/bin/libmcfgthread-1.dll $M_TARGET/bin/
 
 echo "building gcc"
 echo "======================="
-cd $M_SOURCE/gcc-13.1.0
-mkdir -p gcc-build/mingw-w64/mingw/lib
-cp -rf $M_TARGET/include gcc-build/mingw-w64/mingw
-cp -rf $M_TARGET/$MINGW_TRIPLE/lib/* gcc-build/mingw-w64/mingw/lib/ || cp -rf $M_TARGET/lib gcc-build/mingw-w64/mingw/
+cd $M_BUILD
+mkdir gcc-build
 cd gcc-build
-../configure \
+$M_SOURCE/gcc-13.1.0/configure \
   --build=x86_64-pc-linux-gnu \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
   --prefix=$M_TARGET \
   --libexecdir=$M_TARGET/lib \
+  --with-sysroot=$M_TARGET \
   --with-gmp=$M_BUILD/for_target \
   --with-mpfr=$M_BUILD/for_target \
   --with-mpc=$M_BUILD/for_target \
@@ -252,8 +254,10 @@ cd gcc-build
   --disable-symvers \
   --disable-libstdcxx-pch \
   --disable-libstdcxx-debug \
+  --disable-libstdcxx-backtrace \
   --disable-win32-registry \
   --disable-version-specific-runtime-libs \
+  --disable-sjlj-exceptions \
   --enable-languages=c,c++ \
   --enable-twoprocess \
   --enable-libssp \
@@ -266,11 +270,9 @@ cd gcc-build
   --with-arch=nocona \
   --with-tune=generic \
   --without-included-gettext \
-  --with-pkgversion="GCC with MCF thread model" \
-  --with-build-sysroot=$M_SOURCE/gcc-13.1.0/gcc-build/mingw-w64
+  --with-pkgversion="GCC with MCF thread model"
 make -j$MJOBS
 make install
-#touch gcc/cc1.exe.a gcc/cc1plus.exe.a
 #cp $M_TARGET/lib/libgcc_s_seh-1.dll $M_TARGET/bin/
 cp $M_TARGET/bin/gcc.exe $M_TARGET/bin/cc.exe
 cp $M_TARGET/bin/$MINGW_TRIPLE-gcc.exe $M_TARGET/bin/$MINGW_TRIPLE-cc.exe
