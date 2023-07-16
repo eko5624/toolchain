@@ -167,20 +167,6 @@ $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
 make -j$MJOBS
 make install
 
-echo "building mcfgthread"
-echo "======================="
-cd $M_SOURCE/mcfgthread
-autoreconf -ivf
-cd $M_BUILD
-mkdir mcfgthread-build
-cd mcfgthread-build
-$M_SOURCE/mcfgthread/configure \
-  --host=$MINGW_TRIPLE \
-  --prefix=$M_TARGET \
-  --disable-pch
-make -j$MJOBS
-make install
-
 echo "building mingw-w64-crt"
 echo "======================="
 cd $M_BUILD
@@ -265,6 +251,20 @@ make install
 #cp $M_TARGET/lib/libgcc_s_seh-1.dll $M_TARGET/bin/
 cp $M_TARGET/bin/gcc.exe $M_TARGET/bin/cc.exe
 cp $M_TARGET/bin/$MINGW_TRIPLE-gcc.exe $M_TARGET/bin/$MINGW_TRIPLE-cc.exe
+
+echo "building mcfgthread"
+echo "======================="
+cd $M_SOURCE/mcfgthread
+autoreconf -ivf
+cd $M_BUILD
+mkdir mcfgthread-build
+cd mcfgthread-build
+$M_SOURCE/mcfgthread/configure \
+  --host=$MINGW_TRIPLE \
+  --prefix=$M_TARGET \
+  --disable-pch
+make -j$MJOBS
+make install
 
 echo "building winpthreads"
 echo "======================="
