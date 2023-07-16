@@ -92,8 +92,6 @@ $M_SOURCE/binutils-2.40/configure \
   --enable-lto
 make -j$MJOBS
 make install
-cd $M_TARGET
-ln -s $MINGW_TRIPLE mingw
 
 echo "building gmp"
 echo "======================="
@@ -171,7 +169,7 @@ touch include/windows.*.h include/wincrypt.h include/prsht.h
 cd $M_BUILD/headers-build
 $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
   --host=$MINGW_TRIPLE \
-  --prefix=$M_TARGET/$MINGW_TRIPLE \
+  --prefix=$M_TARGET \
   --enable-sdk=all \
   --with-default-win32-winnt=0x601 \
   --with-default-msvcrt=ucrt \
@@ -179,9 +177,9 @@ $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
   --without-widl
 make -j$MJOBS
 make install
-rm $M_TARGET/$MINGW_TRIPLE/include/pthread_signal.h
-rm $M_TARGET/$MINGW_TRIPLE/include/pthread_time.h
-rm $M_TARGET/$MINGW_TRIPLE/include/pthread_unistd.h
+rm $M_TARGET/include/pthread_signal.h
+rm $M_TARGET/include/pthread_time.h
+rm $M_TARGET/include/pthread_unistd.h
 rm -rf $M_SOURCE/mingw-w64
 
 echo "building mingw-w64-crt"
@@ -208,7 +206,7 @@ git apply $M_BUILD/crt-build/0001-Allow-to-use-bessel-and-complex-functions-with
 cd $M_BUILD/crt-build
 $M_SOURCE/mingw-w64/mingw-w64-crt/configure \
   --host=$MINGW_TRIPLE \
-  --prefix=$M_TARGET/$MINGW_TRIPLE \
+  --prefix=$M_TARGET \
   --with-sysroot=$M_TARGET \
   --with-default-msvcrt=ucrt \
   --enable-wildcard \
@@ -253,12 +251,12 @@ autoreconf -vfi
 cd $M_BUILD/winpthreads-build
 $M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
   --host=$MINGW_TRIPLE \
-  --prefix=$M_TARGET/$MINGW_TRIPLE \
+  --prefix=$M_TARGET \
   --enable-static \
   --enable-shared
 make -j$MJOBS
 make install
-cp $M_TARGET/$MINGW_TRIPLE/bin/libwinpthread-1.dll $M_TARGET/bin/
+#cp $M_TARGET/$MINGW_TRIPLE/bin/libwinpthread-1.dll $M_TARGET/bin/
 
 echo "building mcfgthread"
 echo "======================="
@@ -269,7 +267,7 @@ mkdir mcfgthread-build
 cd mcfgthread-build
 $M_SOURCE/mcfgthread/configure \
   --host=$MINGW_TRIPLE \
-  --prefix=$M_TARGET/$MINGW_TRIPLE \
+  --prefix=$M_TARGET \
   --disable-pch
 make -j$MJOBS
 make install
@@ -298,6 +296,10 @@ curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w
 curl -OL https://github.com/gcc-mirror/gcc/commit/1c118c9970600117700cc12284587e0238de6bbe.patch
 
 cd $M_SOURCE/gcc-13.1.0
+mkdir -p gcc-build/mingw-w64/mingw/lib
+cp -rf $M_TARGET/include gcc-build/mingw-w64/mingw
+cp -rf $M_TARGET/$MINGW_TRIPLE/lib/* gcc-build/mingw-w64/mingw/lib/ || cp -rf $M_TARGET/lib gcc-build/mingw-w64/mingw/
+
 patch -Nbp1 -i $M_BUILD/gcc-build/0002-Relocate-libintl.patch
 patch -Nbp1 -i $M_BUILD/gcc-build/0003-Windows-Follow-Posix-dir-exists-semantics-more-close.patch
 patch -Nbp1 -i $M_BUILD/gcc-build/0005-Windows-Don-t-ignore-native-system-header-dir.patch
@@ -323,12 +325,15 @@ export lt_cv_deplibs_check_method='pass_all'
 
 # In addition adaint.c does `#include <accctrl.h>` which pulls in msxml.h, hacky hack:
 CPPFLAGS+=" -DCOM_NO_WINDOWS_H"
-$M_SOURCE/gcc-13.1.0/configure \
+
+cd gcc-build
+../configure \
   --build=x86_64-pc-linux-gnu \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
   --prefix=$M_TARGET \
   --libexecdir=$M_TARGET/lib \
+  --with-build-sysroot=$M_SOURCE/gcc-13.1.0/gcc-build/mingw-w64
   --with-gmp=$M_BUILD/for_target \
   --with-mpfr=$M_BUILD/for_target \
   --with-mpc=$M_BUILD/for_target \
@@ -395,5 +400,4 @@ cp $M_TARGET/bin/pkgconf.exe $M_TARGET/bin/x86_64-w64-mingw32-pkg-config.exe
 cd $M_TARGET
 rm -rf share
 rm -rf lib/pkgconfig
-rm -f mingw
 
