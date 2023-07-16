@@ -271,7 +271,7 @@ $M_SOURCE/mcfgthread/configure \
   --disable-pch
 make -j$MJOBS
 make install
-cp $M_TARGET/$MINGW_TRIPLE/bin/libmcfgthread-1.dll $M_TARGET/bin/
+#cp $M_TARGET/$MINGW_TRIPLE/bin/libmcfgthread-1.dll $M_TARGET/bin/
 
 echo "building gcc"
 echo "======================="
