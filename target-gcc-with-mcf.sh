@@ -333,7 +333,6 @@ cd gcc-build
   --target=$MINGW_TRIPLE \
   --prefix=$M_TARGET \
   --libexecdir=$M_TARGET/lib \
-  --with-build-sysroot=$M_SOURCE/gcc-13.1.0/gcc-build/mingw-w64 \
   --with-gmp=$M_BUILD/for_target \
   --with-mpfr=$M_BUILD/for_target \
   --with-mpc=$M_BUILD/for_target \
@@ -363,6 +362,7 @@ cd gcc-build
   --with-tune=generic \
   --without-included-gettext \
   --with-pkgversion="GCC with MCF thread model" \
+  --with-build-sysroot=$M_SOURCE/gcc-13.1.0/gcc-build/mingw-w64 \
   --with-boot-ldflags="$LDFLAGS -Wl,--disable-dynamicbase -static-libstdc++ -static-libgcc"
 make -j$MJOBS
 make install
