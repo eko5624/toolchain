@@ -277,6 +277,8 @@ rm -rf $M_SOURCE/mingw-w64
 
 echo "building gcc"
 echo "======================="
+cd $M_SOURCE
+git clone https://github.com/gcc-mirror/gcc --branch releases/gcc-13
 cd $M_BUILD
 mkdir gcc-build
 cd gcc-build
@@ -297,12 +299,7 @@ curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0400-gcc-Make-stupid-AT-T-syntax-not-default.patch
 curl -OL https://github.com/gcc-mirror/gcc/commit/1c118c9970600117700cc12284587e0238de6bbe.patch
 
-cd $M_SOURCE/gcc-13.1.0
-#mkdir -p gcc-build/mingw-w64/mingw/lib
-#cp -rf $M_TARGET/include gcc-build/mingw-w64/mingw/
-#cp -rf $M_TARGET/$MINGW_TRIPLE/lib/* gcc-build/mingw-w64/mingw/lib/
-#cp -rf $M_TARGET/lib gcc-build/mingw-w64/mingw/
-
+cd $M_SOURCE/gcc
 patch -Nbp1 -i $M_BUILD/gcc-build/0002-Relocate-libintl.patch
 patch -Nbp1 -i $M_BUILD/gcc-build/0003-Windows-Follow-Posix-dir-exists-semantics-more-close.patch
 patch -Nbp1 -i $M_BUILD/gcc-build/0005-Windows-Don-t-ignore-native-system-header-dir.patch
@@ -329,18 +326,16 @@ export lt_cv_deplibs_check_method='pass_all'
 # In addition adaint.c does `#include <accctrl.h>` which pulls in msxml.h, hacky hack:
 CPPFLAGS+=" -DCOM_NO_WINDOWS_H"
 
+VER=$(cat $M_SOURCE/gcc/gcc/BASE-VER)
 cd $M_BUILD/gcc-build
-$M_SOURCE/gcc-13.1.0/configure \
+$M_SOURCE/gcc/configure \
   --build=x86_64-pc-linux-gnu \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
   --prefix=$M_TARGET \
   --libexecdir=$M_TARGET/lib \
   --with-native-system-header-dir=$M_TARGET/include \
-  --with-gmp=$M_BUILD/for_target \
-  --with-mpfr=$M_BUILD/for_target \
-  --with-mpc=$M_BUILD/for_target \
-  --with-isl=$M_BUILD/for_target \
+  --with-{gmp,mpfr,mpc,isl}=$M_BUILD/for_target \
   --disable-rpath \
   --disable-multilib \
   --disable-dependency-tracking \
@@ -369,6 +364,12 @@ $M_SOURCE/gcc-13.1.0/configure \
   --with-boot-ldflags="$LDFLAGS -Wl,--disable-dynamicbase -static-libstdc++ -static-libgcc"
 make -j$MJOBS
 make install
+for f in $M_TARGET/bin/*.exe; do
+  strip -s $f
+done
+for f in $M_TARGET/lib/gcc/x86_64-w64-mingw32/$VER/*.exe; do
+  strip -s $f
+done
 cp $M_TARGET/lib/libgcc_s_seh-1.dll $M_TARGET/bin/
 cp $M_TARGET/bin/gcc.exe $M_TARGET/bin/cc.exe
 cp $M_TARGET/bin/$MINGW_TRIPLE-gcc.exe $M_TARGET/bin/$MINGW_TRIPLE-cc.exe
