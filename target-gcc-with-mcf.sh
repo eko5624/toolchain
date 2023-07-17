@@ -327,7 +327,7 @@ export lt_cv_deplibs_check_method='pass_all'
 # In addition adaint.c does `#include <accctrl.h>` which pulls in msxml.h, hacky hack:
 CPPFLAGS+=" -DCOM_NO_WINDOWS_H"
 
-VER=$(cat $M_SOURCE/gcc/gcc/BASE-VER)
+VER=$(cat $M_SOURCE/gcc-13.1.0/gcc/BASE-VER)
 cd $M_BUILD/gcc-build
 $M_SOURCE/gcc-13.1.0/configure \
   --build=x86_64-pc-linux-gnu \
