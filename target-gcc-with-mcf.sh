@@ -76,23 +76,6 @@ tar xzf make-4.4.1.tar.gz
 #pkgconf
 git clone https://github.com/pkgconf/pkgconf --branch pkgconf-1.9.5
 
-echo "building binutils"
-echo "======================="
-cd $M_BUILD
-mkdir binutils-build
-cd binutils-build
-$M_SOURCE/binutils-2.40/configure \
-  --host=$MINGW_TRIPLE \
-  --target=$MINGW_TRIPLE \
-  --prefix=$M_TARGET \
-  --with-sysroot=$M_TARGET \
-  --disable-nls \
-  --disable-werror \
-  --disable-shared \
-  --enable-lto
-make -j$MJOBS
-make install
-
 echo "building gmp"
 echo "======================="
 cd $M_BUILD
@@ -149,6 +132,23 @@ $M_SOURCE/isl-0.24/configure \
   --with-gmp-prefix=$M_BUILD/for_target \
   --enable-static \
   --disable-shared
+make -j$MJOBS
+make install
+
+echo "building binutils"
+echo "======================="
+cd $M_BUILD
+mkdir binutils-build
+cd binutils-build
+$M_SOURCE/binutils-2.40/configure \
+  --host=$MINGW_TRIPLE \
+  --target=$MINGW_TRIPLE \
+  --prefix=$M_TARGET \
+  --with-sysroot=$M_TARGET \
+  --disable-nls \
+  --disable-werror \
+  --disable-shared \
+  --enable-lto
 make -j$MJOBS
 make install
 
@@ -403,4 +403,4 @@ cp $M_TARGET/bin/pkgconf.exe $M_TARGET/bin/x86_64-w64-mingw32-pkg-config.exe
 cd $M_TARGET
 rm -rf share
 rm -rf lib/pkgconfig
-
+rm -f mingw
