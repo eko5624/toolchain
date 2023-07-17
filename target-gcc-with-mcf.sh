@@ -177,6 +177,8 @@ $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
   --without-widl
 make -j$MJOBS
 make install
+cd $M_TARGET
+ln -s $MINGW_TRIPLE mingw
 rm $M_TARGET/include/pthread_signal.h
 rm $M_TARGET/include/pthread_time.h
 rm $M_TARGET/include/pthread_unistd.h
@@ -296,10 +298,10 @@ curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w
 curl -OL https://github.com/gcc-mirror/gcc/commit/1c118c9970600117700cc12284587e0238de6bbe.patch
 
 cd $M_SOURCE/gcc-13.1.0
-mkdir -p gcc-build/mingw-w64/mingw/lib
-cp -rf $M_TARGET/include gcc-build/mingw-w64/mingw/
-cp -rf $M_TARGET/$MINGW_TRIPLE/lib/* gcc-build/mingw-w64/mingw/lib/
-cp -rf $M_TARGET/lib gcc-build/mingw-w64/mingw/
+#mkdir -p gcc-build/mingw-w64/mingw/lib
+#cp -rf $M_TARGET/include gcc-build/mingw-w64/mingw/
+#cp -rf $M_TARGET/$MINGW_TRIPLE/lib/* gcc-build/mingw-w64/mingw/lib/
+#cp -rf $M_TARGET/lib gcc-build/mingw-w64/mingw/
 
 patch -Nbp1 -i $M_BUILD/gcc-build/0002-Relocate-libintl.patch
 patch -Nbp1 -i $M_BUILD/gcc-build/0003-Windows-Follow-Posix-dir-exists-semantics-more-close.patch
@@ -327,15 +329,14 @@ export lt_cv_deplibs_check_method='pass_all'
 # In addition adaint.c does `#include <accctrl.h>` which pulls in msxml.h, hacky hack:
 CPPFLAGS+=" -DCOM_NO_WINDOWS_H"
 
-cd gcc-build
-../configure \
+cd $M_BUILD/gcc-build
+$M_SOURCE/gcc-13.1.0/configure \
   --build=x86_64-pc-linux-gnu \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
   --prefix=$M_TARGET \
   --libexecdir=$M_TARGET/lib \
-  --with-build-sysroot=$M_SOURCE/gcc-13.1.0/gcc-build/mingw-w64 \
-  --with-native-system-header-dir=$M_SOURCE/gcc-13.1.0/gcc-build/mingw-w64/mingw/include \
+  --with-native-system-header-dir=$M_TARGET/include
   --with-gmp=$M_BUILD/for_target \
   --with-mpfr=$M_BUILD/for_target \
   --with-mpc=$M_BUILD/for_target \
