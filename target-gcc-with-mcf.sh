@@ -297,8 +297,9 @@ curl -OL https://github.com/gcc-mirror/gcc/commit/1c118c9970600117700cc12284587e
 
 cd $M_SOURCE/gcc-13.1.0
 mkdir -p gcc-build/mingw-w64/mingw/lib
-cp -rf $M_TARGET/include gcc-build/mingw-w64/mingw
-cp -rf $M_TARGET/$MINGW_TRIPLE/lib/* gcc-build/mingw-w64/mingw/lib/ || cp -rf $M_TARGET/lib gcc-build/mingw-w64/mingw/
+cp -rf $M_TARGET/include gcc-build/mingw-w64/mingw/
+cp -rf $M_TARGET/$MINGW_TRIPLE/lib/* gcc-build/mingw-w64/mingw/lib/
+cp -rf $M_TARGET/lib gcc-build/mingw-w64/mingw/
 
 patch -Nbp1 -i $M_BUILD/gcc-build/0002-Relocate-libintl.patch
 patch -Nbp1 -i $M_BUILD/gcc-build/0003-Windows-Follow-Posix-dir-exists-semantics-more-close.patch
