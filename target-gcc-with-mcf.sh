@@ -205,6 +205,7 @@ $M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
 make -j$MJOBS
 make install
 #cp $M_TARGET/$MINGW_TRIPLE/bin/libwinpthread-1.dll $M_TARGET/bin/
+rm -rf $M_SOURCE/mingw-w64
 
 echo "building mcfgthread"
 echo "======================="
