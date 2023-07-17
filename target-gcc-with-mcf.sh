@@ -44,8 +44,8 @@ wget -c -O binutils-2.40.tar.bz2 http://ftp.gnu.org/gnu/binutils/binutils-2.40.t
 tar xjf binutils-2.40.tar.bz2
 
 #gcc
-wget -c -O gcc-13.1.0.tar.xz https://ftp.gnu.org/gnu/gcc/gcc-13.1.0/gcc-13.1.0.tar.xz
-xz -c -d gcc-13.1.0.tar.xz | tar xf -
+#wget -c -O gcc-13.1.0.tar.xz https://ftp.gnu.org/gnu/gcc/gcc-13.1.0/gcc-13.1.0.tar.xz
+#xz -c -d gcc-13.1.0.tar.xz | tar xf -
 
 #gmp
 wget -c -O gmp-6.2.1.tar.bz2 https://ftp.gnu.org/gnu/gmp/gmp-6.2.1.tar.bz2
