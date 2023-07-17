@@ -184,6 +184,43 @@ rm $M_TARGET/include/pthread_time.h
 rm $M_TARGET/include/pthread_unistd.h
 rm -rf $M_SOURCE/mingw-w64
 
+echo "building winpthreads"
+echo "======================="
+cd $M_SOURCE
+git clone https://github.com/mingw-w64/mingw-w64.git
+cd $M_BUILD
+mkdir winpthreads-build
+cd winpthreads-build
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-winpthreads-git/0001-Define-__-de-register_frame_info-in-fake-libgcc_s.patch
+cd $M_SOURCE/mingw-w64
+git apply $M_BUILD/winpthreads-build/0001-Define-__-de-register_frame_info-in-fake-libgcc_s.patch
+cd $M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads
+autoreconf -vfi
+cd $M_BUILD/winpthreads-build
+$M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
+  --host=$MINGW_TRIPLE \
+  --prefix=$M_TARGET \
+  --enable-static \
+  --enable-shared
+make -j$MJOBS
+make install
+#cp $M_TARGET/$MINGW_TRIPLE/bin/libwinpthread-1.dll $M_TARGET/bin/
+
+echo "building mcfgthread"
+echo "======================="
+cd $M_SOURCE/mcfgthread
+autoreconf -ivf
+cd $M_BUILD
+mkdir mcfgthread-build
+cd mcfgthread-build
+$M_SOURCE/mcfgthread/configure \
+  --host=$MINGW_TRIPLE \
+  --prefix=$M_TARGET \
+  --disable-pch
+make -j$MJOBS
+make install
+#cp $M_TARGET/$MINGW_TRIPLE/bin/libmcfgthread-1.dll $M_TARGET/bin/
+
 echo "building mingw-w64-crt"
 echo "======================="
 cd $M_SOURCE
@@ -237,43 +274,6 @@ $M_SOURCE/mingw-w64/mingw-w64-tools/gendef/configure \
 make -j$MJOBS
 make install
 rm -rf $M_SOURCE/mingw-w64
-
-echo "building winpthreads"
-echo "======================="
-cd $M_SOURCE
-git clone https://github.com/mingw-w64/mingw-w64.git
-cd $M_BUILD
-mkdir winpthreads-build
-cd winpthreads-build
-curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-winpthreads-git/0001-Define-__-de-register_frame_info-in-fake-libgcc_s.patch
-cd $M_SOURCE/mingw-w64
-git apply $M_BUILD/winpthreads-build/0001-Define-__-de-register_frame_info-in-fake-libgcc_s.patch
-cd $M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads
-autoreconf -vfi
-cd $M_BUILD/winpthreads-build
-$M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
-  --host=$MINGW_TRIPLE \
-  --prefix=$M_TARGET \
-  --enable-static \
-  --enable-shared
-make -j$MJOBS
-make install
-#cp $M_TARGET/$MINGW_TRIPLE/bin/libwinpthread-1.dll $M_TARGET/bin/
-
-echo "building mcfgthread"
-echo "======================="
-cd $M_SOURCE/mcfgthread
-autoreconf -ivf
-cd $M_BUILD
-mkdir mcfgthread-build
-cd mcfgthread-build
-$M_SOURCE/mcfgthread/configure \
-  --host=$MINGW_TRIPLE \
-  --prefix=$M_TARGET \
-  --disable-pch
-make -j$MJOBS
-make install
-#cp $M_TARGET/$MINGW_TRIPLE/bin/libmcfgthread-1.dll $M_TARGET/bin/
 
 echo "building gcc"
 echo "======================="
