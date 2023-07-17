@@ -44,8 +44,8 @@ wget -c -O binutils-2.40.tar.bz2 http://ftp.gnu.org/gnu/binutils/binutils-2.40.t
 tar xjf binutils-2.40.tar.bz2
 
 #gcc
-#wget -c -O gcc-13.1.0.tar.xz https://ftp.gnu.org/gnu/gcc/gcc-13.1.0/gcc-13.1.0.tar.xz
-#xz -c -d gcc-13.1.0.tar.xz | tar xf -
+wget -c -O gcc-13.1.0.tar.xz https://ftp.gnu.org/gnu/gcc/gcc-13.1.0/gcc-13.1.0.tar.xz
+xz -c -d gcc-13.1.0.tar.xz | tar xf -
 
 #gmp
 wget -c -O gmp-6.2.1.tar.bz2 https://ftp.gnu.org/gnu/gmp/gmp-6.2.1.tar.bz2
@@ -280,8 +280,6 @@ rm -rf $M_SOURCE/mingw-w64
 
 echo "building gcc"
 echo "======================="
-cd $M_SOURCE
-git clone https://github.com/gcc-mirror/gcc --branch releases/gcc-13
 cd $M_BUILD
 mkdir gcc-build
 cd gcc-build
@@ -302,9 +300,7 @@ curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0400-gcc-Make-stupid-AT-T-syntax-not-default.patch
 curl -OL https://github.com/gcc-mirror/gcc/commit/1c118c9970600117700cc12284587e0238de6bbe.patch
 
-cd $M_SOURCE/gcc
-git reset --hard
-git clean -fdx
+cd $M_SOURCE/gcc-13.1.0
 patch -Nbp1 -i $M_BUILD/gcc-build/0002-Relocate-libintl.patch
 patch -Nbp1 -i $M_BUILD/gcc-build/0003-Windows-Follow-Posix-dir-exists-semantics-more-close.patch
 patch -Nbp1 -i $M_BUILD/gcc-build/0005-Windows-Don-t-ignore-native-system-header-dir.patch
@@ -333,7 +329,7 @@ CPPFLAGS+=" -DCOM_NO_WINDOWS_H"
 
 VER=$(cat $M_SOURCE/gcc/gcc/BASE-VER)
 cd $M_BUILD/gcc-build
-$M_SOURCE/gcc/configure \
+$M_SOURCE/gcc-13.1.0/configure \
   --build=x86_64-pc-linux-gnu \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
