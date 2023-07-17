@@ -335,7 +335,7 @@ cd gcc-build
   --prefix=$M_TARGET \
   --libexecdir=$M_TARGET/lib \
   --with-build-sysroot=$M_SOURCE/gcc-13.1.0/gcc-build/mingw-w64 \
-  --with-native-system-header-dir=$M_SOURCE/gcc-13.1.0/gcc-build/mingw-w64/include \
+  --with-native-system-header-dir=$M_SOURCE/gcc-13.1.0/gcc-build/mingw-w64/mingw/include \
   --with-gmp=$M_BUILD/for_target \
   --with-mpfr=$M_BUILD/for_target \
   --with-mpc=$M_BUILD/for_target \
