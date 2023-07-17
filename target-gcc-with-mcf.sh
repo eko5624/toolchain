@@ -210,6 +210,8 @@ rm -rf $M_SOURCE/mingw-w64
 echo "building mcfgthread"
 echo "======================="
 cd $M_SOURCE/mcfgthread
+git reset --hard
+git clean -fdx
 autoreconf -ivf
 cd $M_BUILD
 mkdir mcfgthread-build
@@ -301,6 +303,8 @@ curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w
 curl -OL https://github.com/gcc-mirror/gcc/commit/1c118c9970600117700cc12284587e0238de6bbe.patch
 
 cd $M_SOURCE/gcc
+git reset --hard
+git clean -fdx
 patch -Nbp1 -i $M_BUILD/gcc-build/0002-Relocate-libintl.patch
 patch -Nbp1 -i $M_BUILD/gcc-build/0003-Windows-Follow-Posix-dir-exists-semantics-more-close.patch
 patch -Nbp1 -i $M_BUILD/gcc-build/0005-Windows-Don-t-ignore-native-system-header-dir.patch
