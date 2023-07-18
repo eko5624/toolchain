@@ -29,7 +29,7 @@ jobs:
         run: |
           curl -OL https://github.com/eko5624/toolchain-test/releases/download/toolchain/cross-gcc-mcf.7z
           7z x cross-gcc-mcf.7z
-          rm cross-gcc-mcf
+          rm cross-gcc-mcf.7z
             
       - name: Loading rust toolchain cache
         uses: actions/cache/restore@main
