@@ -84,21 +84,6 @@ make -j$MJOBS
 make install
 cd $M_BUILD
 
-echo "building mcfgthread"
-echo "======================="
-cd $M_SOURCE/mcfgthread
-autoreconf -ivf
-cd $M_BUILD
-mkdir mcfgthread-build
-cd mcfgthread-build
-$M_SOURCE/mcfgthread/configure \
-  --host=$MINGW_TRIPLE \
-  --prefix=$M_CROSS/$MINGW_TRIPLE \
-  --disable-pch
-make -j$MJOBS
-make install
-cd $M_BUILD
-
 echo "building gcc-initial"
 echo "======================="
 mkdir gcc-build
@@ -134,6 +119,34 @@ make -j$MJOBS
 make install
 cd $M_BUILD
 
+echo "building mcfgthread"
+echo "======================="
+cd $M_SOURCE/mcfgthread
+autoreconf -ivf
+cd $M_BUILD
+mkdir mcfgthread-build
+cd mcfgthread-build
+$M_SOURCE/mcfgthread/configure \
+  --host=$MINGW_TRIPLE \
+  --prefix=$M_CROSS/$MINGW_TRIPLE \
+  --disable-pch
+make -j$MJOBS
+make install
+cd $M_BUILD
+
+echo "building winpthreads"
+echo "======================="
+mkdir winpthreads-build
+cd winpthreads-build
+$M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
+  --host=$MINGW_TRIPLE \
+  --prefix=$M_CROSS/$MINGW_TRIPLE \
+  --disable-shared \
+  --enable-static
+make -j$MJOBS
+make install
+cd $M_BUILD
+
 echo "building mingw-w64-crt"
 echo "======================="
 cd $M_SOURCE/mingw-w64/mingw-w64-crt
@@ -148,19 +161,6 @@ $M_SOURCE/mingw-w64/mingw-w64-crt/configure \
   --with-default-msvcrt=ucrt \
   --enable-lib64 \
   --disable-lib32
-make -j$MJOBS
-make install
-cd $M_BUILD
-
-echo "building winpthreads"
-echo "======================="
-mkdir winpthreads-build
-cd winpthreads-build
-$M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
-  --host=$MINGW_TRIPLE \
-  --prefix=$M_CROSS/$MINGW_TRIPLE \
-  --disable-shared \
-  --enable-static
 make -j$MJOBS
 make install
 cd $M_BUILD
