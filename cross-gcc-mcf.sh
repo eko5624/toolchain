@@ -68,10 +68,10 @@ mkdir -p $MINGW_TRIPLE/lib
 ln -s $MINGW_TRIPLE mingw
 cd $MINGW_TRIPLE
 ln -s lib lib64
-cd $M_BUILD
 
 echo "building mingw-w64-headers"
 echo "======================="
+cd $M_BUILD
 mkdir headers-build
 cd headers-build
 $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
@@ -82,10 +82,24 @@ $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
   --with-default-msvcrt=ucrt
 make -j$MJOBS
 make install
+
+echo "building mcfgthread"
+echo "======================="
+cd $M_SOURCE/mcfgthread
+autoreconf -ivf
 cd $M_BUILD
+mkdir mcfgthread-build
+cd mcfgthread-build
+$M_SOURCE/mcfgthread/configure \
+  --host=$MINGW_TRIPLE \
+  --prefix=$M_CROSS/$MINGW_TRIPLE \
+  --disable-pch
+make -j$MJOBS
+make install
 
 echo "building gcc-initial"
 echo "======================="
+cd $M_BUILD
 mkdir gcc-build
 cd gcc-build
 $M_SOURCE/gcc-13.1.0/configure \
@@ -114,21 +128,6 @@ echo "======================="
 mkdir gendef-build
 cd gendef-build
 $M_SOURCE/mingw-w64/mingw-w64-tools/gendef/configure --prefix=$M_CROSS
-make -j$MJOBS
-make install
-cd $M_BUILD
-
-echo "building mcfgthread"
-echo "======================="
-cd $M_SOURCE/mcfgthread
-autoreconf -ivf
-cd $M_BUILD
-mkdir mcfgthread-build
-cd mcfgthread-build
-$M_SOURCE/mcfgthread/configure \
-  --host=$MINGW_TRIPLE \
-  --prefix=$M_CROSS/$MINGW_TRIPLE \
-  --disable-pch
 make -j$MJOBS
 make install
 cd $M_BUILD
