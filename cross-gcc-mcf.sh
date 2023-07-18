@@ -98,7 +98,6 @@ $M_SOURCE/gcc-13.1.0/configure \
   --disable-nls \
   --disable-win32-registry \
   --disable-libstdcxx-pch \
-  --disable-sjlj-exceptions \
   --with-arch=x86-64 \
   --with-tune=generic \
   --enable-threads=mcf \
