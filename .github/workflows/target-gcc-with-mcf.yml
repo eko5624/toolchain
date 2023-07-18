@@ -65,7 +65,7 @@ jobs:
           GH_TOKEN: ${{ github.token }} 
         run: |
           chmod +x ./release-package.sh
-          ./release-package.sh test.7z
+          ./release-package.sh target-gcc-with-mcf.7z
           
       - name: Saving target gcc cache
         uses: actions/cache/save@main
