@@ -130,7 +130,9 @@ cd $M_SOURCE
 git clone https://github.com/libjxl/libjxl.git
 cd libjxl
 rm -rf third_party/brotli
+rm -rf third_party/libjpeg-turbo
 cp -r $M_SOURCE/brotli third_party
+cp -r $M_SOURCE/libjpeg-turbo third_party
 cd $M_BUILD
 mkdir libjxl-build
 cmake -G Ninja -H$M_SOURCE/libjxl -B$M_BUILD/libjxl-build \
