@@ -11,6 +11,7 @@ jobs:
     steps:    
       - name: Install Dependencies
         run: |
+          sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/apt/sources.list
           sudo apt-get -y update
           sudo apt-get -y install \
             build-essential \
