@@ -11,10 +11,12 @@ jobs:
     steps:    
       - name: Install Dependencies
         run: |
+          sudo echo -e "deb http://cz.archive.ubuntu.com/ubuntu kinetic main universe" >> /etc/apt/sources.list
           sudo apt-get -y update
           sudo apt-get -y install \
             build-essential \
-            aptitude \
+            pacman-package-manager \
+            makepkg \
             yasm \
             nasm \
             git \
@@ -45,8 +47,6 @@ jobs:
             curl \
             jq \
             wget
-          sudo aptitude -y update
-          sudo aptitude -y install pacman-package-manager
           pip3 install -U setuptools rst2pdf mako jsonschema meson
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
