@@ -25,7 +25,6 @@ jobs:
             unzip \
             p7zip-full \
             curl \
-            jq \
             wget
           pip3 install -U setuptools rst2pdf mako jsonschema meson
           git config --global user.name "github-actions[bot]"
