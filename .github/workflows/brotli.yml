@@ -11,7 +11,7 @@ jobs:
     steps:    
       - name: Install Dependencies
         run: |
-          sudo echo "deb http://cz.archive.ubuntu.com/ubuntu kinetic main universe" >> /etc/apt/sources.list
+          echo "deb http://cz.archive.ubuntu.com/ubuntu kinetic main universe" >> /etc/apt/sources.list
           sudo apt-get -y update
           sudo apt-get -y install \
             build-essential \
