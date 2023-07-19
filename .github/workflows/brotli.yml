@@ -8,15 +8,43 @@ on:
 jobs:
   brotli:
     runs-on: ubuntu-latest
-    container:
-      image: archlinux/archlinux:base-devel
     steps:    
       - name: Install Dependencies
         run: |
-          sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
-          sudo pacman -Syu --noconfirm docker
-          sudo pacman -S --noconfirm --needed git gyp mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf unzip p7zip xz gcc-multilib clang python-pip python-cairo curl jq lib32-glib2 wget
-          pip3 install -U --break-system-packages setuptools rst2pdf mako jsonschema meson
+          apt-get -y update
+          apt-get -y install \
+            build-essential \
+            yasm \
+            nasm \
+            git \
+            cmake \
+            gyp \
+            checkinstall \
+            bison \
+            flex \
+            gettext \
+            mercurial \
+            subversion \
+            ninja-build \
+            automake \
+            pkgconf \
+            libtool \
+            libtool-bin \
+            gcc-multilib \
+            gperf \
+            ragel \
+            texinfo \
+            autopoint \
+            re2c \
+            asciidoc \
+            python3-pip \
+            docbook2x \
+            unzip \
+            p7zip-full \
+            curl \
+            jq \
+            wget
+          pip3 install -U --break-system-packages setuptools rst2pdf mako jsonschema meson  
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global pull.rebase true
@@ -33,7 +61,4 @@ jobs:
 
       - name: Building
         run: |
-          sudo chown -R $(whoami) brotli-dev
-          sudo chmod 775 brotli-dev
-          sudo find brotli-dev -type f -exec chmod 664 {} +
           cd brotli-dev; makepkg
