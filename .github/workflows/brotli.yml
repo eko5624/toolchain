@@ -24,7 +24,7 @@ jobs:
             ninja-build \
             autoconf \
             automake \
-            pkg-config \
+            pkgconf \
             python3-pip \
             unzip \
             p7zip-full \
