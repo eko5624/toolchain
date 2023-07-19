@@ -37,6 +37,7 @@ jobs:
             libmpfr-dev \
             libmpc-dev \
             libgcrypt-dev \
+            gcc-multilib \
             gperf \
             ragel \
             texinfo \
