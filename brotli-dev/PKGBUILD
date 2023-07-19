@@ -8,6 +8,24 @@ license=('MIT')
 source=("git+https://github.com/google/brotli")
 md5sums=('SKIP')
 
+prepare() {
+  # Speed up the process
+  # Env Var NUMJOBS overrides automatic detection
+  MJOBS=$(grep -c processor /proc/cpuinfo)
+
+  export TOP_DIR=$(pwd)
+  export M_CROSS=$TOP_DIR/cross
+  export RUSTUP_LOCATION=$TOP_DIR/rustup_location
+
+  export MINGW_TRIPLE="x86_64-w64-mingw32"
+
+  export PATH="$M_CROSS/bin:$RUSTUP_LOCATION/.cargo/bin:$PATH"
+  export PKG_CONFIG="pkgconf --static"
+  export PKG_CONFIG_LIBDIR="$M_CROSS/opt/lib/pkgconfig"
+  export RUSTUP_HOME="$RUSTUP_LOCATION/.rustup"
+  export CARGO_HOME="$RUSTUP_LOCATION/.cargo"
+}
+
 build() {
   cd $srcdir/brotli
   rm -rf out && mkdir out && cd out
