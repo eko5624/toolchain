@@ -21,27 +21,11 @@ jobs:
             nasm \
             git \
             cmake \
-            gyp \
-            checkinstall \
-            bison \
-            flex \
-            gettext \
-            mercurial \
-            subversion \
             ninja-build \
+            autoconf \
             automake \
-            pkgconf \
-            libtool \
-            libtool-bin \
-            gcc-multilib \
-            gperf \
-            ragel \
-            texinfo \
-            autopoint \
-            re2c \
-            asciidoc \
+            pkg-config \
             python3-pip \
-            docbook2x \
             unzip \
             p7zip-full \
             curl \
@@ -64,4 +48,9 @@ jobs:
 
       - name: Building
         run: |
+          TOP_DIR=$(pwd)
+          M_CROSS=$TOP_DIR/cross
+          PATH="$M_CROSS/bin:$RUSTUP_LOCATION/.cargo/bin:$PATH"
+          PKG_CONFIG_LIBDIR="$M_CROSS/opt/lib/pkgconfig"
+          PKG_CONFIG="pkgconf --static"
           cd brotli-dev; makepkg
