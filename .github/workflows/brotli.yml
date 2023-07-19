@@ -33,4 +33,7 @@ jobs:
 
       - name: Building
         run: |
-          cd brotli-dev; makepkg -si
+          sudo chown -R $(whoami) brotli-dev
+          sudo chmod 775 brotli-dev
+          sudo find brotli-dev -type f -exec chmod 664 {} +
+          cd brotli-dev; makepkg
