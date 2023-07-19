@@ -47,7 +47,6 @@ jobs:
             curl \
             jq \
             wget
-          brew install pacman makepkg
           pip3 install -U setuptools rst2pdf mako jsonschema meson
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
