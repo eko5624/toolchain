@@ -33,4 +33,4 @@ jobs:
 
       - name: Building
         run: |
-          cd brotli-dev; makepkg
+          cd brotli-dev; makepkg -si
