@@ -31,7 +31,7 @@ build() {
   cd $srcdir/brotli
   rm -rf out && mkdir out && cd out
   cmake .. -G Ninja \
-    -DCMAKE_INSTALL_PREFIX=$M_CROSS/mingw \
+    -DCMAKE_INSTALL_PREFIX=$TOP_DIR/opt \
     -DCMAKE_TOOLCHAIN_FILE=$TOP_DIR/toolchain.cmake \
     -DBUILD_SHARED_LIBS=OFF \
     -DCMAKE_BUILD_TYPE=Release \
