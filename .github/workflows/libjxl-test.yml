@@ -25,11 +25,11 @@ jobs:
           git config --global --add safe.directory $PWD
           
       - uses: actions/checkout@main
-      #- name: Setup Toolchain
-      #  run: |
-      #    curl -OL https://github.com/eko5624/toolchain-test/releases/download/toolchain/cross-gcc-mcf.7z
-      #    7z x cross-gcc-mcf.7z
-      #    rm cross-gcc-mcf.7z
+      - name: Setup Toolchain
+        run: |
+          curl -OL https://github.com/eko5624/toolchain-test/releases/download/toolchain/cross-gcc-mcf.7z
+          7z x cross-gcc-mcf.7z
+          rm cross-gcc-mcf.7z
             
       - name: Loading rust toolchain cache
         uses: actions/cache/restore@main
