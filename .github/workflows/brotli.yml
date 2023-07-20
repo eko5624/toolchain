@@ -43,7 +43,5 @@ jobs:
           export PATH="$M_CROSS/bin:$RUSTUP_LOCATION/.cargo/bin:$PATH"
           export PKG_CONFIG_LIBDIR="$M_CROSS/opt/lib/pkgconfig"
           export PKG_CONFIG="pkgconf --static"
-          echo "check gcc==============="
-          $M_CROSS/bin/x86_64-w64-mingw32-gcc -v
           sudo -H -u builder sudo chmod -R a+rw $TOP_DIR
           cd brotli-dev; sudo -H -u builder makepkg -sC --noconfirm
