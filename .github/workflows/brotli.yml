@@ -14,7 +14,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
-          sudo pacman -Syu --noconfirm docker fakeroot
+          sudo pacman -Syu --noconfirm docker
           sudo pacman -S --noconfirm --needed git gyp mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf unzip p7zip xz clang python-pip python-cairo curl jq lib32-glib2 wget
           pip3 install -U --break-system-packages setuptools rst2pdf mako jsonschema meson
           git config --global user.name "github-actions[bot]"
@@ -27,7 +27,7 @@ jobs:
       - name: add new user
         run: |
           useradd -m -s /bin/bash bot
-          su bot
+          
       - uses: actions/checkout@main
       - name: Setup Toolchain
         run: |
@@ -43,5 +43,7 @@ jobs:
           export PKG_CONFIG_LIBDIR="$M_CROSS/opt/lib/pkgconfig"
           export PKG_CONFIG="pkgconf --static"
           sudo chown -R bot /__w/toolchain-test/toolchain-test
+          echo "======================="
+          echo "$TOP_DIR"
           cd brotli-dev
           sudo -u bot makepkg
