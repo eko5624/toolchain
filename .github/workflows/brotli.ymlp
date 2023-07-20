@@ -23,7 +23,11 @@ jobs:
           git config --global rebase.autoStash true
           git config --global fetch.prune true
           git config --global --add safe.directory $PWD
-          
+
+      - name: add new user
+        run: |
+          useradd -m -s /bin/bash bot
+          su bot
       - uses: actions/checkout@main
       - name: Setup Toolchain
         run: |
@@ -31,10 +35,6 @@ jobs:
           7z x cross-gcc-mcf.7z
           rm cross-gcc-mcf.7z
 
-      - name: add new user
-        run: |
-          useradd -m -s /bin/bash bot
-          
       - name: Building
         run: |
           export TOP_DIR=$(pwd)
