@@ -14,7 +14,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
-          sudo pacman -Syu --noconfirm docker fakechroot
+          sudo pacman -Syu --noconfirm docker fakeroot
           sudo pacman -S --noconfirm --needed git gyp mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf unzip p7zip xz clang python-pip python-cairo curl jq lib32-glib2 wget
           pip3 install -U --break-system-packages setuptools rst2pdf mako jsonschema meson
           git config --global user.name "github-actions[bot]"
