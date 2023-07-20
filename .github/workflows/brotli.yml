@@ -43,8 +43,4 @@ jobs:
           export PKG_CONFIG_LIBDIR="$M_CROSS/opt/lib/pkgconfig"
           export PKG_CONFIG="pkgconf --static"
           sudo chown -R bot /__w/toolchain-test/toolchain-test
-          echo "TOP_DIR======================="
-          echo "$TOP_DIR"
-          echo "PWD======================="
-          pwd
           cd brotli-dev; sudo -u bot makepkg
