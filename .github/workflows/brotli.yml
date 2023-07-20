@@ -45,5 +45,5 @@ jobs:
           export PKG_CONFIG="pkgconf --static"
           echo "check gcc==============="
           $M_CROSS/bin/x86_64-w64-mingw32-gcc -v
-          sudo -H -u builder chmod -R a+rw $TOP_DIR
+          sudo -H -u builder sudo chmod -R a+rw $TOP_DIR
           cd brotli-dev; sudo -H -u builder makepkg -sC --noconfirm
