@@ -37,7 +37,7 @@ jobs:
 
       - name: Building
         run: |
-          export TOP_DIR=$(pwd)
+          export TOP_DIR=/__w/toolchain-test/toolchain-test
           export M_CROSS=$TOP_DIR/cross
           export PATH="$M_CROSS/bin:$RUSTUP_LOCATION/.cargo/bin:$PATH"
           export PKG_CONFIG_LIBDIR="$M_CROSS/opt/lib/pkgconfig"
