@@ -24,9 +24,11 @@ jobs:
           git config --global fetch.prune true
           git config --global --add safe.directory $PWD
 
-      - name: add new user
+      - name: Add builder user
         run: |
-          useradd -m -s /bin/bash bot
+          useradd builder -m
+          echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+          chmod -R a+rw .
           
       - uses: actions/checkout@main
       - name: Setup Toolchain
@@ -37,12 +39,11 @@ jobs:
 
       - name: Building
         run: |
-          export TOP_DIR=/__w/toolchain-test/toolchain-test
+          export TOP_DIR=$(pwd)
           export M_CROSS=$TOP_DIR/cross
           export PATH="$M_CROSS/bin:$RUSTUP_LOCATION/.cargo/bin:$PATH"
           export PKG_CONFIG_LIBDIR="$M_CROSS/opt/lib/pkgconfig"
           export PKG_CONFIG="pkgconf --static"
           echo "check gcc==============="
           $M_CROSS/bin/x86_64-w64-mingw32-gcc -v
-          sudo chown -R bot /__w/toolchain-test/toolchain-test
-          cd brotli-dev; sudo -u bot makepkg
+          cd brotli-dev; sudo -H -u builder makepkg -sC --noconfirm
