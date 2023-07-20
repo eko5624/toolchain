@@ -42,5 +42,7 @@ jobs:
           export PATH="$M_CROSS/bin:$RUSTUP_LOCATION/.cargo/bin:$PATH"
           export PKG_CONFIG_LIBDIR="$M_CROSS/opt/lib/pkgconfig"
           export PKG_CONFIG="pkgconf --static"
+          echo "check gcc==============="
+          $M_CROSS/bin/x86_64-w64-mingw32-gcc -v
           sudo chown -R bot /__w/toolchain-test/toolchain-test
           cd brotli-dev; sudo -u bot makepkg
