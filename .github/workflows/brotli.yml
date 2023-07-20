@@ -43,4 +43,4 @@ jobs:
           export PKG_CONFIG_LIBDIR="$M_CROSS/opt/lib/pkgconfig"
           export PKG_CONFIG="pkgconf --static"
           cd brotli-dev
-          sudo -u bot makepkg
+          makepkg
