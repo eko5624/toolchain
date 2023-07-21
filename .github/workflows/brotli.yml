@@ -42,11 +42,6 @@ jobs:
         run: |
           sudo -u builder sudo chmod -R a+rw $(pwd)
           export TOP_DIR=$(pwd)
-          #export PATH="$(pwd)/cross/bin:$PATH"
-          echo "path==========="
-          echo "$PATH"
-          echo "gcc -v"
-          x86_64-w64-mingw32-gcc -v
           export PKG_CONFIG_LIBDIR="/opt/lib/pkgconfig"
           export PKG_CONFIG="pkgconf --static"
           cd brotli-dev; PATH="$TOP_DIR/cross/bin:$PATH" sudo -u builder makepkg -sC --noconfirm
