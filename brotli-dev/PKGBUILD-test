@@ -9,6 +9,5 @@ source=()
 md5sums=()
   
 package() {
-  cd /__w/toolchain-test/toolchain-test
-  cp -r opt $pkgdir/
+  cp -r /opt $pkgdir/
 }
