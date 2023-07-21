@@ -56,7 +56,7 @@ jobs:
           cd $M_BUILD
           mkdir brotli-build
           cmake -G Ninja -H$M_SOURCE/brotli -B$M_BUILD/brotli-build \
-            -DCMAKE_INSTALL_PREFIX=$TOP_DIR/opt \
+            -DCMAKE_INSTALL_PREFIX=/opt \
             -DCMAKE_TOOLCHAIN_FILE=$TOP_DIR/toolchain.cmake \
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_BUILD_TYPE=Release \
