@@ -41,15 +41,15 @@ jobs:
       - name: Building
         run: |
           sudo -u builder sudo chmod -R a+rw $(pwd)
-          export PATH="$(pwd)/cross/bin:$PATH"
+          export TOP_DIR=$(PWD)
+          #export PATH="$(pwd)/cross/bin:$PATH"
           echo "path==========="
           echo "$PATH"
           echo "gcc -v"
           x86_64-w64-mingw32-gcc -v
           export PKG_CONFIG_LIBDIR="/opt/lib/pkgconfig"
           export PKG_CONFIG="pkgconf --static"
-          cd brotli-dev
-          sudo -u builder makepkg -sC --noconfirm
+          cd brotli-dev; PATH="$TOP_DIR/cross/bin:$PATH" sudo -u builder makepkg -sC --noconfirm
           
       - name: Release
         continue-on-error: true
