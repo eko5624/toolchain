@@ -48,3 +48,13 @@ jobs:
           cd brotli-dev
           sudo -H -u builder sudo chmod -R a+rw .
           sudo -H -u builder makepkg -sC --noconfirm
+          
+      - name: Release
+        continue-on-error: true
+        uses: softprops/action-gh-release@master
+        with:
+          tag_name: dev
+          name: dev
+          files: brotli-dev/*.zst
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
