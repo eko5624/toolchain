@@ -44,6 +44,8 @@ jobs:
           export PATH="$(pwd)/cross/bin:$PATH"
           echo "path==========="
           echo "$PATH"
+          echo "gcc -v"
+          x86_64-w64-mingw32-gcc -v
           export PKG_CONFIG_LIBDIR="/opt/lib/pkgconfig"
           export PKG_CONFIG="pkgconf --static"
           cd brotli-dev
