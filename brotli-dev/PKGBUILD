@@ -9,6 +9,9 @@ source=("git+https://github.com/google/brotli")
 md5sums=('SKIP')
 
 build() {
+  export PATH="/__w/toolchain-test/toolchain-test/cross/bin:$PATH"
+  export PKG_CONFIG_LIBDIR="/opt/lib/pkgconfig"
+  export PKG_CONFIG="pkgconf --static" 
   cd $srcdir/brotli
   rm -rf out && mkdir out && cd out
   cmake .. -G Ninja \
