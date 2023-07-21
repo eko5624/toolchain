@@ -41,7 +41,7 @@ jobs:
       - name: Building
         run: |
           cd brotli-dev
-          sudo -H -u builder sudo chmod -R a+rw .
+          sudo -H -u builder sudo chmod -R a+rw /__w/toolchain-test/toolchain-test
           sudo -H -u builder makepkg -sC --noconfirm
           
       - name: Release
