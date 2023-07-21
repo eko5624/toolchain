@@ -40,11 +40,6 @@ jobs:
 
       - name: Building
         run: |
-          TOP_DIR=$(pwd)
-          export M_CROSS=$TOP_DIR/cross
-          export PATH="/__w/toolchain-test/toolchain-test/cross/bin:$PATH"
-          export PKG_CONFIG_LIBDIR="$M_CROSS/opt/lib/pkgconfig"
-          export PKG_CONFIG="pkgconf --static"
           cd brotli-dev
           sudo -H -u builder sudo chmod -R a+rw .
           sudo -H -u builder makepkg -sC --noconfirm
