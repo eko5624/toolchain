@@ -40,11 +40,13 @@ jobs:
 
       - name: Building
         run: |
-          cd brotli-dev
           sudo -u builder sudo chmod -R a+rw $(pwd)
           export PATH="$(pwd)/cross/bin:$PATH"
+          echo "path==========="
+          echo "$PATH"
           export PKG_CONFIG_LIBDIR="/opt/lib/pkgconfig"
-          export PKG_CONFIG="pkgconf --static" 
+          export PKG_CONFIG="pkgconf --static"
+          cd brotli-dev
           sudo -u builder makepkg -sC --noconfirm
           
       - name: Release
