@@ -40,7 +40,8 @@ jobs:
 
       - name: Building
         run: |
-          sudo -u builder sudo chmod -R a+rw $(pwd)
+          #sudo -u builder sudo chmod -R a+rw $(pwd)
+          sudo chown builder -R $(pwd)
           export TOP_DIR=$(pwd)
           export PKG_CONFIG_LIBDIR="/opt/lib/pkgconfig"
           export PKG_CONFIG="pkgconf --static"
