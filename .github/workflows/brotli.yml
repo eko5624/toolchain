@@ -42,6 +42,9 @@ jobs:
         run: |
           cd brotli-dev
           sudo -H -u builder sudo chmod -R a+rw /__w/toolchain-test/toolchain-test
+          export PATH="/__w/toolchain-test/toolchain-test/cross/bin:$PATH"
+          export PKG_CONFIG_LIBDIR="/opt/lib/pkgconfig"
+          export PKG_CONFIG="pkgconf --static" 
           sudo -H -u builder makepkg -sC --noconfirm
           
       - name: Release
