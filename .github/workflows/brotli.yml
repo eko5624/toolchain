@@ -41,7 +41,7 @@ jobs:
       - name: Building
         run: |
           sudo -u builder sudo chmod -R a+rw $(pwd)
-          export TOP_DIR=$(PWD)
+          export TOP_DIR=$(pwd)
           #export PATH="$(pwd)/cross/bin:$PATH"
           echo "path==========="
           echo "$PATH"
