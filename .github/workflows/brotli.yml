@@ -29,7 +29,9 @@ jobs:
           useradd builder -m
           echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
           
-      - uses: actions/checkout@main
+      - name: Checkout
+        uses: actions/checkout@main
+        
       - name: Setup Toolchain
         run: |
           curl -OL https://github.com/eko5624/toolchain-test/releases/download/toolchain/cross-gcc-mcf.7z
@@ -43,5 +45,6 @@ jobs:
           export PATH="$M_CROSS/bin:$RUSTUP_LOCATION/.cargo/bin:$PATH"
           export PKG_CONFIG_LIBDIR="$M_CROSS/opt/lib/pkgconfig"
           export PKG_CONFIG="pkgconf --static"
-          sudo -H -u builder sudo chmod -R a+rw $TOP_DIR
-          cd brotli-dev; sudo -H -u builder makepkg -sC --noconfirm
+          cd brotli-dev
+          sudo -H -u builder sudo chmod -R a+rw .
+          sudo -H -u builder makepkg -sC --noconfirm
