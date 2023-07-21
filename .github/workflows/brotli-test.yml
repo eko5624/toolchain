@@ -64,7 +64,7 @@ jobs:
           ninja -j$MJOBS -C $M_BUILD/brotli-build
           ninja install -C $M_BUILD/brotli-build
           
-          cd brotli-dev
+          cd $TOP_DIR/brotli-dev
           sudo -H -u builder sudo chmod -R a+rw .
           sudo -H -u builder makepkg -p PKGBUILD-test -sC --noconfirm
           
