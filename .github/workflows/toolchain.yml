@@ -1,4 +1,4 @@
-name: my-gcc
+name: toolchain
 defaults:
   run:
     shell: bash
@@ -15,7 +15,7 @@ jobs:
         run: |
           sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
           sudo pacman -Syu --noconfirm
-          sudo pacman -S --noconfirm --needed git gyp cvs mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf zip unzip p7zip xz gcc-multilib clang python-pip curl jq lib32-glib2 wget
+          sudo pacman -S --noconfirm --needed git gyp cvs mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf zip unzip p7zip xz mingw-w64-gcc gcc-multilib clang python-pip curl jq lib32-glib2 wget
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global pull.rebase true
@@ -28,14 +28,14 @@ jobs:
         uses: actions/cache/restore@main
         with:
           path: ${{ github.workspace }}/cross
-          key: gcc-${{ github.run_id }}
+          key: gcc_toolchain-${{ github.run_id }}
           restore-keys: |
-            gcc-
+            gcc_toolchain-
             
       - name: Loading rust toolchain cache
         uses: actions/cache/restore@main
         with:
-          path: ${{ github.workspace }}/rustup_location
+          path: ${{ github.workspace }}/rust
           key: rust_toolchain-${{ github.run_id }}
           restore-keys: |
             rust_toolchain-
@@ -44,13 +44,14 @@ jobs:
         run: |
           PWD=$(pwd)
           if [[ ! "$(ls -A $PWD/cross/bin)" ]]; then
-            chmod +x ./*.sh
+            chmod +x ./toolchain.sh
             ./toolchain.sh
           fi  
 
       - name: Packaging toolchain
         run: |
-          zip -r -y my-gcc-13.1.0.zip cross/*
+          zip -r -y gcc_toolchain.zip cross/*
+          zip -r -y rust_toolchain.zip rust/*
 
       - name: Release
         continue-on-error: true
@@ -59,20 +60,21 @@ jobs:
           tag_name: toolchain
           name: toolchain
           files: |
-            my-gcc*.zip
+            gcc_toolchain.zip
+            rust_toolchain.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Saving gcc cache
+      - name: Saving gcc toolchain cache
         uses: actions/cache/save@main
         if: always()
         with:
           path: ${{ github.workspace }}/cross
-          key: gcc-${{ github.run_id }}
+          key: gcc_toolchain-${{ github.run_id }}
           
       - name: Saving rust toolchain cache
         uses: actions/cache/save@main
         if: always()
         with:
-          path: ${{ github.workspace }}/rustup_location
+          path: ${{ github.workspace }}/rust
           key: rust_toolchain-${{ github.run_id }}
