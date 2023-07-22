@@ -57,8 +57,8 @@ jobs:
 
       - name: Packaging toolchain
         run: |
-          ver=$(cat version.txt)
-          7z a target-gcc-with-mcf-$ver.7z target/*
+          echo "ver=$(cat version.txt)" >> $GITHUB_ENV
+          7z a target-gcc-with-mcf-${{ env.ver }}.7z target/*
 
       - name: Release
         continue-on-error: true
@@ -66,7 +66,7 @@ jobs:
           GH_TOKEN: ${{ github.token }} 
         run: |
           chmod +x ./release-package.sh
-          ./release-package.sh target-gcc-with-mcf-$ver.7z
+          ./release-package.sh target-gcc-with-mcf-${{ env.ver }}.7z
           
       - name: Saving target gcc cache
         uses: actions/cache/save@main
