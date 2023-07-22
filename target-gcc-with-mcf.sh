@@ -408,4 +408,4 @@ rm -rf share
 rm -rf lib/pkgconfig
 rm -f mingw
 
-echo "$VER" > $M_ROOT/version.txt
+echo "$VER" > $M_TARGET/version.txt
