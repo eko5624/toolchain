@@ -326,7 +326,7 @@ CPPFLAGS+=" -DCOM_NO_WINDOWS_H"
 
 _gcc_version=$(head -n 34 gcc/BASE-VER | sed -e 's/.* //' | tr -d '"\n')
 _gcc_date=$(head -n 34 gcc/DATESTAMP | sed -e 's/.* //' | tr -d '"\n')
-VER=$(printf "%s+%s" "$_gcc_version" "$_gcc_date")
+VER=$(printf "%s-%s" "$_gcc_version" "$_gcc_date")
 cd $M_BUILD/gcc-build
 $M_SOURCE/gcc/configure \
   --build=x86_64-pc-linux-gnu \
@@ -367,7 +367,7 @@ make install
 for f in $M_TARGET/bin/*.exe; do
   strip -s $f
 done
-for f in $M_TARGET/lib/gcc/x86_64-w64-mingw32/${VER%%+*}/*.exe; do
+for f in $M_TARGET/lib/gcc/x86_64-w64-mingw32/${VER%%-*}/*.exe; do
   strip -s $f
 done
 cp $M_TARGET/lib/libgcc_s_seh-1.dll $M_TARGET/bin/
