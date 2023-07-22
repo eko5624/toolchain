@@ -57,7 +57,7 @@ jobs:
 
       - name: Packaging toolchain
         run: |
-          echo "ver=$(cat version.txt)" >> $GITHUB_ENV
+          echo "ver=$(cat target/version.txt)" >> $GITHUB_ENV
           7z a target-gcc-with-mcf-${{ env.ver }}.7z target/*
 
       - name: Release
