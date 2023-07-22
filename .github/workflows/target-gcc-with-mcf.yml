@@ -51,14 +51,17 @@ jobs:
         run: |
           PWD=$(pwd)
           if [[ ! "$(ls -A $PWD/target/bin)" ]]; then
-            chmod +x ./target-gcc-with-mcf.sh
-            ./target-gcc-with-mcf.sh
+            chmod +x ./target-gcc-mcf.sh
+            ./target-gcc-mcf.sh
           fi  
 
+      - name: Get gcc version
+        run: |
+           echo "ver=$(cat target/version.txt)" >> $GITHUB_ENV     
+      
       - name: Packaging toolchain
         run: |
-          echo "ver=$(cat target/version.txt)" >> $GITHUB_ENV
-          7z a target-gcc-with-mcf-${{ env.ver }}.7z target/*
+          7z a target-gcc-mcf-${{ env.ver }}.7z target/*
 
       - name: Release
         continue-on-error: true
@@ -66,7 +69,7 @@ jobs:
           GH_TOKEN: ${{ github.token }} 
         run: |
           chmod +x ./release-package.sh
-          ./release-package.sh target-gcc-with-mcf-${{ env.ver }}.7z
+          ./release-package.sh target-gcc-mcf-${{ env.ver }}.7z
           
       - name: Saving target gcc cache
         uses: actions/cache/save@main
