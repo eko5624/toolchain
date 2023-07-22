@@ -17,7 +17,7 @@ export M_ROOT=$(pwd)
 export M_SOURCE=$M_ROOT/source
 export M_BUILD=$M_ROOT/build
 export M_CROSS=$M_ROOT/cross
-export RUSTUP_LOCATION=$M_ROOT/rustup_location
+export RUSTUP_LOCATION=$M_ROOT/rust
 
 export PATH="$M_CROSS/bin:$RUSTUP_LOCATION/.cargo/bin:$PATH"
 export PKG_CONFIG="pkgconf --static"
@@ -31,24 +31,24 @@ mkdir -p $M_BUILD
 echo "gettiong source"
 echo "======================="
 cd $M_SOURCE
+
+#binutils
 wget -c -O binutils-2.40.tar.bz2 http://ftp.gnu.org/gnu/binutils/binutils-2.40.tar.bz2
 tar xjf binutils-2.40.tar.bz2
+
+#gcc
 wget -c -O gcc-13.1.0.tar.xz https://ftp.gnu.org/gnu/gcc/gcc-13.1.0/gcc-13.1.0.tar.xz
 xz -c -d gcc-13.1.0.tar.xz | tar xf -
+
+#mingw-w64
 git clone https://github.com/mingw-w64/mingw-w64.git --branch master --depth 1
 
-echo "building gendef"
-echo "======================="
-cd $M_BUILD
-mkdir gendef-build
-cd gendef-build
-$M_SOURCE/mingw-w64/mingw-w64-tools/gendef/configure --prefix=$M_CROSS
-make -j$MJOBS
-make install
-cd $M_BUILD
+#mcfgthread
+git clone https://github.com/lhmouse/mcfgthread.git --branch master --depth 1
 
 echo "building binutils"
 echo "======================="
+cd $M_BUILD
 mkdir binutils-build
 cd binutils-build
 $M_SOURCE/binutils-2.40/configure \
@@ -73,10 +73,10 @@ mkdir -p $MINGW_TRIPLE/lib
 ln -s $MINGW_TRIPLE mingw
 cd $MINGW_TRIPLE
 ln -s lib lib64
-cd $M_BUILD
 
 echo "building mingw-w64-headers"
 echo "======================="
+cd $M_BUILD
 mkdir headers-build
 cd headers-build
 $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
@@ -84,16 +84,27 @@ $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
   --prefix=$M_CROSS/$MINGW_TRIPLE \
   --enable-sdk=all \
   --enable-idl \
-  --with-default-msvcrt=msvcrt
+  --with-default-msvcrt=ucrt
 make -j$MJOBS
 make install
-cd $M_BUILD
 
-echo "building gcc"
+echo "building mcfgthread"
 echo "======================="
-# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=54412
-#curl -OL https://salsa.debian.org/mingw-w64-team/gcc-mingw-w64/-/raw/5e7d749d80e47d08e34a17971479d06cd423611e/debian/patches/vmov-alignment.patch
-#patch -d $M_SOURCE/gcc-12-20230421 -p2 < vmov-alignment.patch
+cd $M_SOURCE/mcfgthread
+autoreconf -ivf
+cd $M_BUILD
+mkdir mcfgthread-build
+cd mcfgthread-build
+$M_SOURCE/mcfgthread/configure \
+  --host=$MINGW_TRIPLE \
+  --prefix=$M_CROSS/$MINGW_TRIPLE \
+  --disable-pch
+make -j$MJOBS
+make install
+
+echo "building gcc-initial"
+echo "======================="
+cd $M_BUILD
 mkdir gcc-build
 cd gcc-build
 $M_SOURCE/gcc-13.1.0/configure \
@@ -104,32 +115,24 @@ $M_SOURCE/gcc-13.1.0/configure \
   --disable-multilib \
   --enable-languages=c,c++ \
   --disable-nls \
-  --disable-shared \
   --disable-win32-registry \
+  --disable-libstdcxx-pch \
   --with-arch=x86-64 \
   --with-tune=generic \
-  --enable-threads=posix \
+  --enable-threads=mcf \
+  --enable-libstdcxx-threads=yes \
   --without-included-gettext \
   --enable-lto \
-  --enable-checking=release \
-  --disable-sjlj-exceptions
+  --enable-checking=release
 make -j$MJOBS all-gcc
-make install-gcc
+make install-strip-gcc
 cd $M_BUILD
 
-echo "building mingw-w64-crt"
+echo "building gendef"
 echo "======================="
-cd $M_SOURCE/mingw-w64/mingw-w64-crt
-autoreconf -ivf
-mkdir crt-build
-cd crt-build
-$M_SOURCE/mingw-w64/mingw-w64-crt/configure \
-  --host=$MINGW_TRIPLE \
-  --prefix=$M_CROSS/$MINGW_TRIPLE \
-  --with-sysroot=$M_CROSS \
-  --with-default-msvcrt=msvcrt-os \
-  --enable-lib64 \
-  --disable-lib32
+mkdir gendef-build
+cd gendef-build
+$M_SOURCE/mingw-w64/mingw-w64-tools/gendef/configure --prefix=$M_CROSS
 make -j$MJOBS
 make install
 cd $M_BUILD
@@ -147,7 +150,25 @@ make -j$MJOBS
 make install
 cd $M_BUILD
 
-echo "installing gcc final"
+echo "building mingw-w64-crt"
+echo "======================="
+cd $M_SOURCE/mingw-w64/mingw-w64-crt
+autoreconf -ivf
+cd $M_BUILD 
+mkdir crt-build
+cd crt-build
+$M_SOURCE/mingw-w64/mingw-w64-crt/configure \
+  --host=$MINGW_TRIPLE \
+  --prefix=$M_CROSS/$MINGW_TRIPLE \
+  --with-sysroot=$M_CROSS \
+  --with-default-msvcrt=ucrt \
+  --enable-lib64 \
+  --disable-lib32
+make -j$MJOBS
+make install
+cd $M_BUILD
+
+echo "building gcc-final"
 echo "======================="
 cd gcc-build
 make -j$MJOBS
