@@ -24,34 +24,38 @@ jobs:
           git config --global fetch.prune true
           git config --global --add safe.directory $PWD
           
-      - uses: actions/checkout@main
-      - name: Loading cross gcc cache
-        uses: actions/cache/restore@main
-        with:
-          path: ${{ github.workspace }}/cross
-          key: cross-gcc-posix-${{ github.run_id }}
-          restore-keys: |
-            cross-gcc-posix-
+      - name: Checkout
+        uses: actions/checkout@main
+        
+      - name: Setup Toolchain
+        run: |
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-gcc-posix.7z
+          7z x cross-gcc-posix.7z
+          rm cross-gcc-posix.7z
             
       - name: Loading target gcc cache
         uses: actions/cache/restore@main
         with:
           path: ${{ github.workspace }}/target
-          key: target-gcc-threads-posix-static-${{ github.run_id }}
+          key: target-gcc-posix-static-${{ github.run_id }}
           restore-keys: |
-            target-gcc-threads-posix-static-
+            target-gcc-posix-static-
             
       - name: Building gcc with posix
         run: |
           PWD=$(pwd)
           if [[ ! "$(ls -A $PWD/target/bin)" ]]; then
-            chmod +x ./target-gcc-with-posix-static.sh
-            ./target-gcc-with-posix-static.sh
+            chmod +x ./target-gcc-posix-static.sh
+            ./target-gcc-posix-static.sh
           fi  
 
+      - name: Get gcc version
+        run: |
+           echo "ver=$(cat target/version.txt)" >> $GITHUB_ENV
+           
       - name: Packaging toolchain
         run: |
-          7z a target-gcc-threads-posix-static.7z target/*
+          7z a target-gcc-posix-static-${{ env.ver }}-x64-ucrt.7z target/*
 
       - name: Release
         continue-on-error: true
@@ -59,7 +63,7 @@ jobs:
           GH_TOKEN: ${{ github.token }} 
         run: |
           chmod +x ./release-package.sh
-          ./release-package.sh target-gcc-threads-posix-static.7z
+          ./release-package.sh target-gcc-posix-static-${{ env.ver }}-x64-ucrt.7z
 
       - name: Saving target gcc cache
         uses: actions/cache/save@main
