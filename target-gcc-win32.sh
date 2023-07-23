@@ -44,8 +44,8 @@ wget -c -O binutils-2.40.tar.bz2 http://ftp.gnu.org/gnu/binutils/binutils-2.40.t
 tar xjf binutils-2.40.tar.bz2
 
 #gcc
-wget -c -O gcc-13.1.0.tar.xz https://ftp.gnu.org/gnu/gcc/gcc-13.1.0/gcc-13.1.0.tar.xz
-xz -c -d gcc-13.1.0.tar.xz | tar xf -
+#wget -c -O gcc-13.1.0.tar.xz https://ftp.gnu.org/gnu/gcc/gcc-13.1.0/gcc-13.1.0.tar.xz
+#xz -c -d gcc-13.1.0.tar.xz | tar xf -
 
 #gmp
 wget -c -O gmp-6.2.1.tar.bz2 https://ftp.gnu.org/gnu/gmp/gmp-6.2.1.tar.bz2
@@ -65,14 +65,6 @@ tar xjf isl-0.24.tar.bz2
 
 #mingw-w64
 git clone https://github.com/mingw-w64/mingw-w64.git --branch master --depth 1
-
-#zlib
-wget -c -O zlib-1.2.13.tar.gz https://github.com/madler/zlib/archive/refs/tags/v1.2.13.tar.gz
-tar xzf zlib-1.2.13.tar.gz
-
-#libiconv
-#wget -c -O libiconv-1.17.tar.gz https://ftp.gnu.org/gnu/libiconv/libiconv-1.17.tar.gz
-#tar xzf libiconv-1.17.tar.gz
 
 #make
 wget -c -O make-4.4.1.tar.gz https://ftp.gnu.org/pub/gnu/make/make-4.4.1.tar.gz
@@ -221,10 +213,16 @@ mv $M_TARGET/$MINGW_TRIPLE/bin/libwinpthread-1.dll $M_TARGET/bin/
 
 echo "building gcc"
 echo "======================="
+cd $M_SOURCE
+git clone git://gcc.gnu.org/git/gcc.git --branch releases/gcc-13
+cd gcc
+_gcc_version=$(head -n 34 gcc/BASE-VER | sed -e 's/.* //' | tr -d '"\n')
+_gcc_date=$(head -n 34 gcc/DATESTAMP | sed -e 's/.* //' | tr -d '"\n')
+VER=$(printf "%s-%s" "$_gcc_version" "$_gcc_date")
 cd $M_BUILD
 mkdir gcc-build
 cd gcc-build
-$M_SOURCE/gcc-13.1.0/configure \
+$M_SOURCE/gcc/configure \
   --build=x86_64-pc-linux-gnu \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
@@ -258,10 +256,7 @@ $M_SOURCE/gcc-13.1.0/configure \
   --with-pkgversion="GCC with win32 thread model"
 make -j$MJOBS
 make install
-VER=$(cat $M_SOURCE/gcc-13.1.0/gcc/BASE-VER)
-#mv $M_TARGET/lib/gcc/x86_64-w64-mingw32/lib/libgcc_s.a $M_TARGET/lib/gcc/x86_64-w64-mingw32/$VER/
-#mv $M_TARGET/lib/gcc/x86_64-w64-mingw32/libgcc*.dll $M_TARGET/lib/gcc/x86_64-w64-mingw32/$VER/
-#rm -rf $M_TARGET/lib/gcc/x86_64-w64-mingw32/lib
+
 #find $M_TARGET/lib/gcc/x86_64-w64-mingw32/$VER -type f -name "*.dll.a" -print0 | xargs -0 -I {} rm {}
 cp $M_TARGET/lib/libgcc_s_seh-1.dll $M_TARGET/bin/
 cp $M_TARGET/bin/gcc.exe $M_TARGET/bin/cc.exe
@@ -269,7 +264,7 @@ cp $M_TARGET/bin/$MINGW_TRIPLE-gcc.exe $M_TARGET/bin/$MINGW_TRIPLE-cc.exe
 for f in $M_TARGET/bin/*.exe; do
   strip -s $f
 done
-for f in $M_TARGET/lib/gcc/x86_64-w64-mingw32/$VER/*.exe; do
+for f in $M_TARGET/lib/gcc/x86_64-w64-mingw32/${VER%%-*}/*.exe; do
   strip -s $f
 done
 
@@ -300,8 +295,10 @@ ninja -j$MJOBS -C $M_BUILD/pkgconf-build
 ninja install -C $M_BUILD/pkgconf-build
 cp $M_TARGET/bin/pkgconf.exe $M_TARGET/bin/pkg-config.exe
 cp $M_TARGET/bin/pkgconf.exe $M_TARGET/bin/x86_64-w64-mingw32-pkg-config.exe
+
 cd $M_TARGET
 rm -rf lib/pkgconfig
 rm -rf include/pkgconf
 rm -f mingw
 rm -rf $M_TARGET/share
+echo "$VER" > $M_TARGET/version.txt
