@@ -48,13 +48,12 @@ jobs:
             ./rustup.sh
           fi  
 
-      - name: Get current timestamp      
-        id: timestamp
-        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_OUTPUT 
+      - name: Get current timestamp
+        run: echo "date=$(date +%Y-%m-%d)" >> $GITHUB_ENV   
       
       - name: Packaging Toolchain
         run: |
-          zip -r -y rustup-${date}.zip rust/*
+          7z a rustup-${{ env.date }}.7z rust/*
 
       - name: Release
         continue-on-error: true
@@ -63,7 +62,7 @@ jobs:
           tag_name: toolchain
           name: toolchain
           files: |
-            rustup-${date}.zip
+            rustup-${{ env.date }}.7z
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
