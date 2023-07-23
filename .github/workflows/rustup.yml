@@ -26,13 +26,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@main
         
-      - name: Loading cross gcc cache
-        uses: actions/cache/restore@main
-        with:
-          path: ${{ github.workspace }}/cross
-          key: cross-gcc-mcf-${{ github.run_id }}
-          restore-keys: |
-            cross-gcc-mcf-
+      - name: Setup Toolchain
+        run: |
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-gcc-mcf.7z
+          7z x cross-gcc-mcf.7z
+          rm cross-gcc-mcf.7z
             
       - name: Loading rust toolchain cache
         uses: actions/cache/restore@main
