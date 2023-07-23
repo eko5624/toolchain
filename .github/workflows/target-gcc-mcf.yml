@@ -24,7 +24,9 @@ jobs:
           git config --global fetch.prune true
           git config --global --add safe.directory $PWD
           
-      - uses: actions/checkout@main
+      - name: Checkout
+        uses: actions/checkout@main
+        
       - name: Loading cross gcc cache
         uses: actions/cache/restore@main
         with:
