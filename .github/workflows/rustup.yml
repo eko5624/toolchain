@@ -1,4 +1,4 @@
-name: toolchain
+name: rustup
 defaults:
   run:
     shell: bash
@@ -23,14 +23,16 @@ jobs:
           git config --global fetch.prune true
           git config --global --add safe.directory $PWD
           
-      - uses: actions/checkout@main
-      - name: Loading gcc cache
+      - name: Checkout
+        uses: actions/checkout@main
+        
+      - name: Loading cross gcc cache
         uses: actions/cache/restore@main
         with:
           path: ${{ github.workspace }}/cross
-          key: gcc_toolchain-${{ github.run_id }}
+          key: cross-gcc-mcf-${{ github.run_id }}
           restore-keys: |
-            gcc_toolchain-
+            cross-gcc-mcf-
             
       - name: Loading rust toolchain cache
         uses: actions/cache/restore@main
@@ -43,15 +45,18 @@ jobs:
       - name: Building toolchain
         run: |
           PWD=$(pwd)
-          if [[ ! "$(ls -A $PWD/cross/bin)" ]]; then
-            chmod +x ./toolchain.sh
-            ./toolchain.sh
+          if [[ ! "$(ls -A $PWD/rust/.cargo/bin)" ]]; then
+            chmod +x ./rustup.sh
+            ./rustup.sh
           fi  
 
-      - name: Packaging toolchain
+      - name: Get current timestamp      
+        id: timestamp
+        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_OUTPUT 
+      
+      - name: Packaging Toolchain
         run: |
-          zip -r -y gcc_toolchain.zip cross/*
-          zip -r -y rust_toolchain.zip rust/*
+          zip -r -y rustup-${date}.zip rust/*
 
       - name: Release
         continue-on-error: true
@@ -60,17 +65,9 @@ jobs:
           tag_name: toolchain
           name: toolchain
           files: |
-            gcc_toolchain.zip
-            rust_toolchain.zip
+            rustup-${date}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Saving gcc toolchain cache
-        uses: actions/cache/save@main
-        if: always()
-        with:
-          path: ${{ github.workspace }}/cross
-          key: gcc_toolchain-${{ github.run_id }}
           
       - name: Saving rust toolchain cache
         uses: actions/cache/save@main
