@@ -1,4 +1,4 @@
-name: target-gcc-with-win32
+name: target-gcc-win32
 defaults:
   run:
     shell: bash
@@ -24,14 +24,14 @@ jobs:
           git config --global fetch.prune true
           git config --global --add safe.directory $PWD
           
-      - uses: actions/checkout@main
-      - name: Loading cross gcc cache
-        uses: actions/cache/restore@main
-        with:
-          path: ${{ github.workspace }}/cross
-          key: cross-gcc-ucrt-${{ github.run_id }}
-          restore-keys: |
-            cross-gcc-win32-
+      - name: Checkout
+        uses: actions/checkout@main
+        
+      - name: Setup Toolchain
+        run: |
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-gcc-win32.7z
+          7z x cross-gcc-win32.7z
+          rm cross-gcc-win32.7z
             
       - name: Loading target gcc cache
         uses: actions/cache/restore@main
@@ -45,13 +45,17 @@ jobs:
         run: |
           PWD=$(pwd)
           if [[ ! "$(ls -A $PWD/target/bin)" ]]; then
-            chmod +x ./target-gcc-with-win32.sh
-            ./target-gcc-with-win32.sh
+            chmod +x ./target-gcc-win32.sh
+            ./target-gcc-win32.sh
           fi  
 
+      - name: Get gcc version
+        run: |
+           echo "ver=$(cat target/version.txt)" >> $GITHUB_ENV
+           
       - name: Packaging toolchain
         run: |
-          7z a target-gcc-with-win32.7z target/*
+          7z a target-gcc-win32-${{ env.ver }}-x64-ucrt.7z target/*
 
       - name: Release
         continue-on-error: true
@@ -59,7 +63,7 @@ jobs:
           GH_TOKEN: ${{ github.token }} 
         run: |
           chmod +x ./release-package.sh
-          ./release-package.sh target-gcc-with-win32.7z
+          ./release-package.sh target-gcc-with-win32-${{ env.ver }}-x64-ucrt.7z
 
       - name: Saving target gcc cache
         uses: actions/cache/save@main
