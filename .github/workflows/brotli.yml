@@ -40,6 +40,8 @@ jobs:
           sudo -u builder bash -c 'rm -f /home/builder/cross/bin/x86_64-w64-mingw32-pkg-config /home/builder/cross/bin/x86_64-w64-mingw32-pkgconf'
           sudo -u builder bash -c 'cd /home/builder/cross/bin && ln -s $(which pkg-config) x86_64-w64-mingw32-pkg-config'
           sudo -u builder bash -c 'cd /home/builder/cross/bin && ln -s $(which pkg-config) x86_64-w64-mingw32-pkgconf'
+          sudo -u builder bash -c 'cd /home/builder/cross/bin && ln -s $(which make) x86_64-w64-mingw32-make'
+          sudo -u builder bash -c 'cd /home/builder/cross/bin && ln -s $(which make) make'
           
       - name: Building
         run: |
