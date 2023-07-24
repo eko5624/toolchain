@@ -13,7 +13,7 @@ build() {
   export TOP_DIR="/home/builder"
   export PKG_CONFIG_LIBDIR="/home/builder/opt/lib/pkgconfig"
   export PKG_CONFIG="pkgconf --static"
-  export PATH="/home/builder/cross/bin:$PATH   
+  export PATH="/home/builder/cross/bin:$PATH"
   rm -rf out && mkdir out && cd out
   cmake .. -G Ninja \
     -DCMAKE_INSTALL_PREFIX=/home/builder/opt \
