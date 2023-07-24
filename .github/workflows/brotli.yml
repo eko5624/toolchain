@@ -43,6 +43,8 @@ jobs:
 
       - name: Building
         run: |
+          echo "working directory==============="
+          pwd
           sudo -u builder cd ~; export TOP_DIR=$(pwd)
           sudo -u builder export PKG_CONFIG_LIBDIR="$TOP_DIR/opt/lib/pkgconfig"
           sudo -u builder export PKG_CONFIG="pkgconf --static"
