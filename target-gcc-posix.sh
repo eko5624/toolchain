@@ -299,3 +299,4 @@ rm -rf lib/pkgconfig
 rm -rf include/pkgconf
 rm -f mingw
 rm -rf $M_TARGET/share
+echo "$VER" > $M_TARGET/version.txt
