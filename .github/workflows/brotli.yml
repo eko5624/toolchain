@@ -43,7 +43,7 @@ jobs:
 
       - name: Building
         run: |
-          sudo -u builder sh cd ~; export TOP_DIR=$(pwd)
+          sudo -u builder sh cd ~ ; export TOP_DIR=$(pwd)
           sudo -u builder sh export PKG_CONFIG_LIBDIR="$TOP_DIR/opt/lib/pkgconfig"
           sudo -u builder sh export PKG_CONFIG="pkgconf --static"
           sudo -u builder sh cd $TOP_DIR/toolchain-test/brotli-dev; PATH="$TOP_DIR/cross/bin:$PATH" sudo -u builder makepkg -sC --noconfirm
