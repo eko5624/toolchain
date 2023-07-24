@@ -255,7 +255,8 @@ $M_SOURCE/gcc/configure \
   LDFLAGS='-pthread -Wl,--no-insert-timestamp -Wl,--dynamicbase -Wl,--high-entropy-va -Wl,--nxcompat -Wl,--tsaware'
 make -j$MJOBS
 make install
-#find $M_TARGET/lib/gcc/x86_64-w64-mingw32/$VER -type f -name "*.dll.a" -print0 | xargs -0 -I {} rm {}
+find $M_TARGET/lib -type f \( -name "*.dll.a" \) -print0 | xargs -0 -I {} rm {}
+find $M_TARGET/lib -type f -name "*.la" -print0 | xargs -0 -I {} rm {}
 cp $M_TARGET/bin/gcc.exe $M_TARGET/bin/cc.exe
 cp $M_TARGET/bin/$MINGW_TRIPLE-gcc.exe $M_TARGET/bin/$MINGW_TRIPLE-cc.exe
 for f in $M_TARGET/bin/*.exe; do
