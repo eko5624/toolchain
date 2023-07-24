@@ -41,6 +41,24 @@ git clone https://github.com/mingw-w64/mingw-w64.git --branch master --depth 1
 #mcfgthread
 git clone https://github.com/lhmouse/mcfgthread.git --branch master --depth 1
 
+#pkgconf
+git clone https://github.com/pkgconf/pkgconf --branch pkgconf-1.9.5
+
+echo "building pkg-conf"
+echo "======================="
+cd $M_BUILD
+mkdir pkgconf-build
+cd pkgconf-build
+meson setup . $M_SOURCE/pkgconf \
+  --prefix=$M_CROSS \
+  --buildtype=plain \
+  -Dtests=disabled
+ninja -j$MJOBS -C $M_BUILD/pkgconf-build
+ninja install -C $M_BUILD/pkgconf-build
+cp $M_CROSS/bin/pkgconf $M_CROSS/bin/pkg-config
+cp $M_CROSS/bin/pkgconf $M_CROSS/bin/x86_64-w64-mingw32-pkg-config
+
+
 echo "building binutils"
 echo "======================="
 cd $M_BUILD
@@ -61,8 +79,8 @@ $M_SOURCE/binutils-2.40/configure \
 make -j$MJOBS
 make install
 cd $M_CROSS/bin
-ln -s $(which pkg-config) $MINGW_TRIPLE-pkg-config
-ln -s $(which pkg-config) $MINGW_TRIPLE-pkgconf
+#ln -s $(which pkg-config) $MINGW_TRIPLE-pkg-config
+#ln -s $(which pkg-config) $MINGW_TRIPLE-pkgconf
 cd $M_CROSS
 mkdir -p $MINGW_TRIPLE/lib
 ln -s $MINGW_TRIPLE mingw
