@@ -44,7 +44,7 @@ jobs:
 
       - name: Building
         run: |
-          sudo -u builder cd $TOP_DIR/toolchain-test/brotli-dev; sudo -u builder makepkg -sC --noconfirm
+          sudo -u builder bash -c 'cd $TOP_DIR/toolchain-test/brotli-dev; makepkg -sC --noconfirm'
         
       - name: Release
         continue-on-error: true
