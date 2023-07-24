@@ -15,13 +15,13 @@ build() {
   export PKG_CONFIG="pkgconf --static"
   export PATH="/home/builder/cross/bin:$PATH"
   rm -rf out && mkdir out && cd out
-  cmake .. -G Ninja \
+  cmake ..  \
     -DCMAKE_INSTALL_PREFIX=/home/builder/opt \
     -DCMAKE_TOOLCHAIN_FILE=/home/builder/toolchain-test/toolchain.cmake \
     -DBUILD_SHARED_LIBS=OFF \
     -DCMAKE_BUILD_TYPE=Release \
     -DBROTLI_EMSCRIPTEN=OFF
-  ninja 
+  make
 }  
   
 package() {
