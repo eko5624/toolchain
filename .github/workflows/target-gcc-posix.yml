@@ -70,4 +70,4 @@ jobs:
         if: always()
         with:
           path: ${{ github.workspace }}/target
-          key: target-gcc-threads-posix-shared-${{ github.run_id }}
+          key: target-gcc-posix-${{ github.run_id }}
