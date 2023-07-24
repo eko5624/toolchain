@@ -37,19 +37,16 @@ jobs:
         run: |
           sudo -u builder bash -c 'cd ~ && curl -OL https://github.com/eko5624/toolchain-test/releases/download/toolchain/cross-gcc-mcf.7z'
           sudo -u builder bash -c 'cd ~ && 7z x cross-gcc-mcf.7z && rm cross-gcc-mcf.7z'
-          sudo -u builder bash -c 'cd ~ && ls && pwd'
           
             
 
 
       - name: Building
         run: |
-          sudo -u builder sudo chmod -R 777 $(pwd)
-          #sudo chown builder -R $(pwd)
-          export TOP_DIR=$(pwd)
-          export PKG_CONFIG_LIBDIR="/opt/lib/pkgconfig"
-          export PKG_CONFIG="pkgconf --static"
-          cd brotli-dev; PATH="$TOP_DIR/cross/bin:$PATH" sudo -u builder makepkg -sC --noconfirm
+          sudo -u builder bash -c 'cd ~ && export TOP_DIR=$(pwd)'
+          sudo -u builder export PKG_CONFIG_LIBDIR="$TOP_DIR/opt/lib/pkgconfig"
+          sudo -u builder export PKG_CONFIG="pkgconf --static"
+          sudo -u builder cd brotli-dev; PATH="$TOP_DIR/cross/bin:$PATH" sudo -u builder makepkg -sC --noconfirm
           
       - name: Release
         continue-on-error: true
