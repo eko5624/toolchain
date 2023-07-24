@@ -37,8 +37,8 @@ jobs:
         run: |
           sudo -u builder bash -c 'cd ~ && curl -OL https://github.com/eko5624/toolchain-test/releases/download/toolchain/cross-gcc-mcf.7z'
           sudo -u builder bash -c 'cd ~ && 7z x cross-gcc-mcf.7z && rm cross-gcc-mcf.7z'
-          sudo -u builder bash -c 'cd /home/builder/cross bin && ln -s $(which make) x86_64-w64-mingw32-make'
-          sudo -u builder bash -c 'cd /home/builder/cross bin && ln -s $(which make) make'
+          sudo -u builder bash -c 'cd /home/builder/cross/bin && ln -s $(which pkg-config) x86_64-w64-mingw32-pkg-config'
+          sudo -u builder bash -c 'cd /home/builder/cross/bin && ln -s $(which pkg-config) x86_64-w64-mingw32-pkgconf'
           
       - name: Building
         run: |
