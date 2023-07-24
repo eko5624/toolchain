@@ -30,15 +30,17 @@ jobs:
           echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
           
       - name: Checkout
-        uses: actions/checkout@main
+        run: |
+          sudo -u builder bash -c 'cd ~ && git clone https://github.com/eko5624/toolchain-test'
         
       - name: Setup Toolchain
         run: |
-          curl -OL https://github.com/eko5624/toolchain-test/releases/download/toolchain/cross-gcc-mcf.7z
-          7z x cross-gcc-mcf.7z
-          rm cross-gcc-mcf.7z
-          cd cross/bin
-          ln -s $(which make) x86_64-w64-mingw32-make
+          sudo -u builder bash -c 'cd ~ && curl -OL https://github.com/eko5624/toolchain-test/releases/download/toolchain/cross-gcc-mcf.7z \
+          && 7z x cross-gcc-mcf.7z && rm cross-gcc-mcf.7z'
+          sudo -u builder bash -c 'cd ~ pwd'
+          
+            
+
 
       - name: Building
         run: |
