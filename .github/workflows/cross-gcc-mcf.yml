@@ -44,7 +44,7 @@ jobs:
       - name: Packaging toolchain
         run: |
           rm -f cross/mingw
-          rm -f cross/share
+          rm -rf cross/share
           7z a cross-gcc-mcf.7z cross/*
 
       - name: Release
