@@ -42,7 +42,7 @@ jobs:
         run: |
           sudo -u builder echo 'export PATH="/home/builder/cross/bin:$PATH TOP_DIR=/home/builder PKG_CONFIG_LIBDIR="/home/builder/opt/lib/pkgconfig" PKG_CONFIG="pkgconf --static"' >> ~/.bash_profile
           sudo -u builder bash -c 'source ~/.bash_profile'
-          sudo -u builder bash -c 'cd $TOP_DIR/toolchain-test/brotli-dev; makepkg -sC --noconfirm'
+          sudo -u builder bash -c 'cd /home/builder/toolchain-test/brotli-dev; makepkg -sC --noconfirm'
       
       #- name: Building
       #  run: |
