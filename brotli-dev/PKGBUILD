@@ -21,7 +21,7 @@ build() {
     -DBUILD_SHARED_LIBS=OFF \
     -DCMAKE_BUILD_TYPE=Release \
     -DBROTLI_EMSCRIPTEN=OFF
-  make
+  ninja
 }  
   
 package() {
