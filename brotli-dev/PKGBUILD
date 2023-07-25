@@ -14,6 +14,18 @@ build() {
   export PKG_CONFIG_LIBDIR="/home/builder/opt/lib/pkgconfig"
   export PKG_CONFIG="pkgconf --static"
   export PATH="/home/builder/cross/bin:$PATH"
+  
+  export CC=/home/builder/cross/bin/x86_64-w64-mingw32-gcc
+  export CXX=/home/builder/cross/bin/x86_64-w64-mingw32-g++
+  export AR=/home/builder/cross/bin/x86_64-w64-mingw32-ar
+  export RANLIB=/home/builder/cross/bin/x86_64-w64-mingw32-ranlib
+  export AS=/home/builder/cross/bin/x86_64-w64-mingw32-as
+  export LD=/home/builder/cross/bin/x86_64-w64-mingw32-ld
+  export STRIP=/home/builder/cross/bin/x86_64-w64-mingw32-strip
+  export NM=/home/builder/cross/bin/x86_64-w64-mingw32-nm
+  export DLLTOOL=/home/builder/cross/bin/x86_64-w64-mingw32-dlltool
+  export WINDRES=/home/builder/cross/bin/x86_64-w64-mingw32-windres
+  
   rm -rf out && mkdir out && cd out
   cmake ..  \
     -DCMAKE_INSTALL_PREFIX=/home/builder/opt \
