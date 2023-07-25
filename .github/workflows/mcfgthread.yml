@@ -31,7 +31,7 @@ jobs:
           
       - name: Checkout
         run: |
-          sudo -u builder bash -c 'cd ~ && git clone https://aur.archlinux.org/mingw-w64-mcfgthread-git.git'
+          sudo -u builder bash -c 'cd ~ && git clone https://aur.archlinux.org/brotli-git.git'
         
       - name: Setup Toolchain
         run: |
@@ -41,7 +41,7 @@ jobs:
       - name: Building
         run: |
           export PATH="/home/builder/cross/bin:$PATH"
-          sudo -u builder bash -c 'cd /home/builder/mingw-w64-mcfgthread-git; makepkg -sC --noconfirm'
+          sudo -u builder bash -c 'cd /home/builder/brotli-git; makepkg -sC --noconfirm'
         
       - name: Release
         continue-on-error: true
