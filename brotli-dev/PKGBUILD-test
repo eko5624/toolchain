@@ -1,3 +1,7 @@
+pkgname=brotli-dev
+pkgver=1.0.9
+pkgrel=1
+pkgdesc='Generic-purpose lossless compression algorithm'
 arch=('x86_64')
 url="https://github.com/google/brotli/"
 license=('MIT')
