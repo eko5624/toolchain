@@ -31,7 +31,7 @@ jobs:
 
       - name: Setting TOP_DIR ENV
         run: |
-           echo "TOP_DIR=$(cd ~)" >> $GITHUB_ENV
+           echo "TOP_DIR=$(cd ~ && pwd)" >> $GITHUB_ENV
            
       - name: Checkout
         run: |
