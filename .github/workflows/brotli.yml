@@ -69,7 +69,7 @@ jobs:
             -DBROTLI_EMSCRIPTEN=OFF
           ninja -j$MJOBS -C $M_BUILD/brotli-build
           
-          sudo -H -u builder sudo chmod 775 -R ${{ env.top_dir }}
+          sudo chmod 777 -R ${{ env.top_dir }}
           cd ${{ env.top_dir }}/toolchain-test/brotli-dev
           sudo -H -u builder makepkg -sC --noconfirm
         
