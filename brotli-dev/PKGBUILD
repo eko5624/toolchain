@@ -5,38 +5,9 @@ pkgdesc='Generic-purpose lossless compression algorithm'
 arch=('x86_64')
 url="https://github.com/google/brotli/"
 license=('MIT')
-source=("git+https://github.com/google/brotli")
-md5sums=('SKIP')
-
-build() {
-  cd $srcdir/brotli
-  export TOP_DIR="/home/builder"
-  export PKG_CONFIG_LIBDIR="/home/builder/opt/lib/pkgconfig"
-  export PKG_CONFIG="pkgconf --static"
-  export PATH="/home/builder/cross/bin:$PATH"
-  
-  export CC=/home/builder/cross/bin/x86_64-w64-mingw32-gcc
-  export CXX=/home/builder/cross/bin/x86_64-w64-mingw32-g++
-  export AR=/home/builder/cross/bin/x86_64-w64-mingw32-ar
-  export RANLIB=/home/builder/cross/bin/x86_64-w64-mingw32-ranlib
-  export AS=/home/builder/cross/bin/x86_64-w64-mingw32-as
-  export LD=/home/builder/cross/bin/x86_64-w64-mingw32-ld
-  export STRIP=/home/builder/cross/bin/x86_64-w64-mingw32-strip
-  export NM=/home/builder/cross/bin/x86_64-w64-mingw32-nm
-  export DLLTOOL=/home/builder/cross/bin/x86_64-w64-mingw32-dlltool
-  export WINDRES=/home/builder/cross/bin/x86_64-w64-mingw32-windres
-  
-  rm -rf out && mkdir out && cd out
-  cmake ..  \
-    -DCMAKE_INSTALL_PREFIX=/home/builder/opt \
-    -DCMAKE_TOOLCHAIN_FILE=/home/builder/toolchain-test/toolchain.cmake \
-    -DBUILD_SHARED_LIBS=OFF \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DBROTLI_EMSCRIPTEN=OFF
-  ninja
-}  
+source=()
+md5sums=() 
   
 package() {
-  cd $srcdir/brotli/out
-  DESTDIR=$pkgdir ninja install
+  DESTDIR=$pkgdir ninja install -C $M_BUILD/brotli-build
 }  
