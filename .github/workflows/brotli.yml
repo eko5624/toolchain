@@ -28,13 +28,17 @@ jobs:
         run: |
           useradd builder -m
           echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-          
+
+      - name: Setting TOP_DIR ENV
+        run: |
+           echo "TOP_DIR=$(cd ~)" >> $GITHUB_ENV
+           
       - name: Checkout
         run: |
-          cd ~ && git clone https://github.com/eko5624/toolchain-test
+          cd ${{ env.TOP_DIR }} && git clone https://github.com/eko5624/toolchain-test
       - name: Setup Toolchain
         run: |
-          cd ~
+          cd ${{ env.TOP_DIR }}
           curl -OL https://github.com/eko5624/toolchain-test/releases/download/toolchain/cross-gcc-mcf.7z
           7z x cross-gcc-mcf.7z && rm cross-gcc-mcf.7z
           
@@ -64,10 +68,10 @@ jobs:
             -DBROTLI_EMSCRIPTEN=OFF
           ninja -j$MJOBS -C $M_BUILD/brotli-build
           
-          sudo -H -u builder sudo chmod a+rw -R /github/home
-          cd ~/toolchain-test/brotli-dev
+          sudo -H -u builder sudo chmod 777 -R /github/home
+          cd ${{ env.TOP_DIR }}/toolchain-test/brotli-dev
           sudo -H -u builder makepkg -sC --noconfirm
-          cd $TOP_DIR
+          cd ${{ env.TOP_DIR }}/toolchain-test
 
         
       - name: Release
