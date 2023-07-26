@@ -47,9 +47,9 @@ jobs:
         run: |
           sudo chmod 777 -R /usr
           sudo chmod 777 -R ${{ env.top_dir }}
-          export PKG_CONFIG_LIBDIR="~/opt/lib/pkgconfig"
+          export PKG_CONFIG_LIBDIR="${{ env.top_dir }}/opt/lib/pkgconfig"
           export PKG_CONFIG="pkgconf --static"
-          export PATH="~/cross/bin:$PATH"
+          export PATH="${{ env.top_dir }}/cross/bin:$PATH"
           echo "builder path================"
           sudo -H -u builder echo "$PATH"
           cd ${{ env.top_dir }}/toolchain-test/brotli-dev
