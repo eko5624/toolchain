@@ -40,7 +40,8 @@ jobs:
           
       - name: Building
         run: |
-          sudo -u builder bash -c 'cd /home/builder/toolchain-test/brotli-dev; makepkg -sC --noconfirm'
+          sudo -H -u builder sudo chmod a+rwx -R /home/builder
+          sudo -u builder bash -c 'cd /home/builder/toolchain-test/brotli-dev; makepkg -p PKGBUILD-test -sC --noconfirm'
         
       - name: Release
         continue-on-error: true
