@@ -65,7 +65,7 @@ jobs:
           ninja -j$MJOBS -C $M_BUILD/brotli-build
           
           sudo -H -u builder sudo chmod a+rwx -R /github/home
-          cd $TOP_DIR/toolchain-test/brotli-dev
+          cd ~/toolchain-test/brotli-dev
           sudo -H -u builder makepkg -sC --noconfirm
           cd $TOP_DIR
 
