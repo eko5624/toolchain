@@ -9,5 +9,5 @@ source=()
 md5sums=() 
   
 package() {
-  DESTDIR=$pkgdir ninja install -C $M_BUILD/brotli-build
+  DESTDIR=$pkgdir ninja install -C /home/runner/work/toolchain-test/toolchain-test/build/brotli-build
 }  
