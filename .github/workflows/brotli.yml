@@ -31,18 +31,19 @@ jobs:
           
       - name: Checkout
         run: |
-          sudo -u builder bash -c 'cd ~ && git clone https://github.com/eko5624/toolchain-test'
+          cd ~ && git clone https://github.com/eko5624/toolchain-test
       - name: Setup Toolchain
         run: |
-          sudo -u builder bash -c 'cd ~ && curl -OL https://github.com/eko5624/toolchain-test/releases/download/toolchain/cross-gcc-mcf.7z'
-          sudo -u builder bash -c 'cd ~ && 7z x cross-gcc-mcf.7z && rm cross-gcc-mcf.7z'
+          cd ~
+          curl -OL https://github.com/eko5624/toolchain-test/releases/download/toolchain/cross-gcc-mcf.7z
+          7z x cross-gcc-mcf.7z && rm cross-gcc-mcf.7z
           
       - name: Building
         run: |
-          export TOP_DIR=/home/builder
-          export M_SOURCE=$TOP_DIR/source
-          export M_BUILD=$TOP_DIR/build
-          export M_CROSS=$TOP_DIR/cross
+          export TOP_DIR=$(cd ~)
+          export M_SOURCE=~/source
+          export M_BUILD=~/build
+          export M_CROSS=~/cross
           export PATH="$M_CROSS/bin:$RUSTUP_LOCATION/.cargo/bin:$PATH"
           export PKG_CONFIG_LIBDIR="$M_CROSS/opt/lib/pkgconfig"
           export PKG_CONFIG="pkgconf --static"
@@ -56,8 +57,8 @@ jobs:
           cd $M_BUILD
           mkdir brotli-build
           cmake -G Ninja -H$M_SOURCE/brotli -B$M_BUILD/brotli-build \
-            -DCMAKE_INSTALL_PREFIX=$TOP_DIR/opt \
-            -DCMAKE_TOOLCHAIN_FILE=$TOP_DIR/toolchain-test/toolchain.cmake \
+            -DCMAKE_INSTALL_PREFIX=~/opt \
+            -DCMAKE_TOOLCHAIN_FILE=~/toolchain-test/toolchain.cmake \
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_BUILD_TYPE=Release \
             -DBROTLI_EMSCRIPTEN=OFF
