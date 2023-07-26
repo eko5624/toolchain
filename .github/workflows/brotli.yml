@@ -40,7 +40,7 @@ jobs:
         run: |
           sudo -H -u builder sudo chmod a+rwx -R /__w/toolchain-test/toolchain-test
           cd /__w/toolchain-test/toolchain-test/brotli-dev
-          sudo -H -u builder makepkg -p PKGBUILD-test -sC --noconfirm'
+          sudo -H -u builder makepkg -p PKGBUILD-test -sC --noconfirm
         
       - name: Release
         continue-on-error: true
