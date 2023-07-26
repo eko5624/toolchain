@@ -72,6 +72,7 @@ jobs:
           sudo -H -u builder sudo chmod 777 -R ${{ env.TOP_DIR }}
           cd ${{ env.TOP_DIR }}/toolchain-test/brotli-dev
           sudo -H -u builder makepkg -sC --noconfirm
+          cd ${{ env.TOP_DIR }}/toolchain-test
         
       - name: Release
         continue-on-error: true
