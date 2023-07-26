@@ -28,31 +28,31 @@ jobs:
         run: |
           useradd builder -m
           echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-      - name: Setting TOP_DIR ENV
+      - name: Setting top_dir env
         run: |
-           echo "TOP_DIR=$(cd ~ && pwd)" >> $GITHUB_ENV
+           echo "top_dir=$(cd ~ && pwd)" >> $GITHUB_ENV
            
       - name: Checkout
         run: |
-          cd ${{ env.TOP_DIR }}
+          cd ${{ env.top_dir }}
           git clone https://github.com/eko5624/toolchain-test
           
       - name: Setup Toolchain
         run: |
-          cd ${{ env.TOP_DIR }}
+          cd ${{ env.top_dir }}
           curl -OL https://github.com/eko5624/toolchain-test/releases/download/toolchain/cross-gcc-mcf.7z
           7z x cross-gcc-mcf.7z && rm cross-gcc-mcf.7z
 
       - name: Building
         run: |
-          sudo -H -u builder sudo chmod 755 -R /usr
-          sudo -H -u builder sudo chmod 755 -R ${{ env.TOP_DIR }}
-          export PKG_CONFIG_LIBDIR="/github/home/opt/lib/pkgconfig"
+          sudo chmod 777 -R /usr
+          sudo chmod 777 -R ${{ env.top_dir }}
+          export PKG_CONFIG_LIBDIR="~/opt/lib/pkgconfig"
           export PKG_CONFIG="pkgconf --static"
-          export PATH="/github/home/cross/bin:$PATH"
+          export PATH="~/cross/bin:$PATH"
           echo "builder path================"
           sudo -H -u builder echo "$PATH"
-          cd ${{ env.TOP_DIR }}/toolchain-test/brotli-dev
+          cd ${{ env.top_dir }}/toolchain-test/brotli-dev
           sudo -H -u builder makepkg -p PKGBUILD-test -sC --noconfirm
 
       - name: Release
@@ -61,7 +61,7 @@ jobs:
         with:
           tag_name: dev
           name: dev
-          files: ${{ env.TOP_DIR }}/toolchain-test/brotli-dev/*.zst
+          files: ${{ env.top_dir }}/toolchain-test/brotli-dev/*.zst
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
