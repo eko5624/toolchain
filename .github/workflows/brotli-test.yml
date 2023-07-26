@@ -45,7 +45,8 @@ jobs:
 
       - name: Building
         run: |
-          sudo -H -u builder sudo chmod 777 -R ${{ env.TOP_DIR }}
+          sudo -H -u builder sudo chmod 755 -R /usr
+          sudo -H -u builder sudo chmod 755 -R ${{ env.TOP_DIR }}
           export PKG_CONFIG_LIBDIR="/github/home/opt/lib/pkgconfig"
           export PKG_CONFIG="pkgconf --static"
           export PATH="/github/home/cross/bin:$PATH"
