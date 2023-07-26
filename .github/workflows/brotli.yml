@@ -29,26 +29,26 @@ jobs:
           useradd builder -m
           echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
-      - name: Setting TOP_DIR ENV
+      - name: Adding top_dir env
         run: |
-           echo "TOP_DIR=$(cd ~ && pwd)" >> $GITHUB_ENV
+           echo "top_dir=$(cd ~ && pwd)" >> $GITHUB_ENV
            
       - name: Checkout
         run: |
-          cd ${{ env.TOP_DIR }}
+          cd ${{ env.top_dir }}
           git clone https://github.com/eko5624/toolchain-test
           
       - name: Setup Toolchain
         run: |
-          cd ${{ env.TOP_DIR }}
+          cd ${{ env.top_dir }}
           curl -OL https://github.com/eko5624/toolchain-test/releases/download/toolchain/cross-gcc-mcf.7z
           7z x cross-gcc-mcf.7z && rm cross-gcc-mcf.7z
           
       - name: Building
         run: |
-          export M_SOURCE=${{ env.TOP_DIR }}/source
-          export M_BUILD=${{ env.TOP_DIR }}/build
-          export M_CROSS=${{ env.TOP_DIR }}/cross
+          export M_SOURCE=${{ env.top_dir }}/source
+          export M_BUILD=${{ env.top_dir }}/build
+          export M_CROSS=${{ env.top_dir }}/cross
           export PATH="$M_CROSS/bin:$RUSTUP_LOCATION/.cargo/bin:$PATH"
           export PKG_CONFIG_LIBDIR="$M_CROSS/opt/lib/pkgconfig"
           export PKG_CONFIG="pkgconf --static"
@@ -69,8 +69,8 @@ jobs:
             -DBROTLI_EMSCRIPTEN=OFF
           ninja -j$MJOBS -C $M_BUILD/brotli-build
           
-          sudo -H -u builder sudo chmod 777 -R ${{ env.TOP_DIR }}
-          cd ${{ env.TOP_DIR }}/toolchain-test/brotli-dev
+          sudo -H -u builder sudo chmod 755 -R ${{ env.top_dir }}
+          cd ${{ env.top_dir }}/toolchain-test/brotli-dev
           sudo -H -u builder makepkg -sC --noconfirm
         
       - name: Release
@@ -79,6 +79,6 @@ jobs:
         with:
           tag_name: dev
           name: dev
-          files: ${{ env.TOP_DIR }}/toolchain-test/brotli-dev/*.zst
+          files: ${{ env.top_dir }}/toolchain-test/brotli-dev/*.zst
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
