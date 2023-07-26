@@ -29,19 +29,18 @@ jobs:
           useradd builder -m
           echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
           
-      - name: Checkout
-        run: |
-          sudo -u builder bash -c 'cd ~ && git clone https://github.com/eko5624/toolchain-test'
-        
+      - uses: actions/checkout@main
       - name: Setup Toolchain
         run: |
-          sudo -u builder bash -c 'cd ~ && curl -OL https://github.com/eko5624/toolchain-test/releases/download/toolchain/cross-gcc-mcf.7z'
-          sudo -u builder bash -c 'cd ~ && 7z x cross-gcc-mcf.7z && rm cross-gcc-mcf.7z'
+          curl -OL https://github.com/eko5624/toolchain-test/releases/download/toolchain/cross-gcc-mcf.7z
+          7z x cross-gcc-mcf.7z
+          rm cross-gcc-mcf.7z
           
       - name: Building
         run: |
-          sudo -H -u builder sudo chmod a+rwx -R /home/builder
-          sudo -u builder bash -c 'cd /home/builder/toolchain-test/brotli-dev; makepkg -p PKGBUILD-test -sC --noconfirm'
+          sudo -H -u builder sudo chmod a+rwx -R /__w/toolchain-test/toolchain-test
+          cd /__w/toolchain-test/toolchain-test/brotli-dev
+          sudo -H -u builder makepkg -p PKGBUILD-test -sC --noconfirm'
         
       - name: Release
         continue-on-error: true
