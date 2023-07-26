@@ -10,10 +10,6 @@ md5sums=('SKIP')
 
 build() {
   cd $srcdir/brotli
-  export PKG_CONFIG_LIBDIR="/github/home/opt/lib/pkgconfig"
-  export PKG_CONFIG="pkgconf --static"
-  export PATH="/github/home/cross/bin:$PATH"
-
   rm -rf out && mkdir out && cd out
   cmake ..  \
     -DCMAKE_INSTALL_PREFIX=/github/home/opt \
