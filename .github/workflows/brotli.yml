@@ -44,7 +44,6 @@ jobs:
           
       - name: Building
         run: |
-          export TOP_DIR=$(cd ~)
           export M_SOURCE=~/source
           export M_BUILD=~/build
           export M_CROSS=~/cross
