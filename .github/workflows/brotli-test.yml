@@ -46,6 +46,11 @@ jobs:
       - name: Building
         run: |
           sudo -H -u builder sudo chmod 777 -R ${{ env.TOP_DIR }}
+          export PKG_CONFIG_LIBDIR="/github/home/opt/lib/pkgconfig"
+          export PKG_CONFIG="pkgconf --static"
+          export PATH="/github/home/cross/bin:$PATH"
+          echo "builder path================"
+          sudo -H -u builder echo "$PATH"
           cd ${{ env.TOP_DIR }}/toolchain-test/brotli-dev
           sudo -H -u builder makepkg -p PKGBUILD-test -sC --noconfirm
 
