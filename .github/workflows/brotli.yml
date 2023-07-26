@@ -35,7 +35,9 @@ jobs:
            
       - name: Checkout
         run: |
-          cd ${{ env.TOP_DIR }} && git clone https://github.com/eko5624/toolchain-test
+          cd ${{ env.TOP_DIR }}
+          git clone https://github.com/eko5624/toolchain-test
+          
       - name: Setup Toolchain
         run: |
           cd ${{ env.TOP_DIR }}
@@ -44,9 +46,9 @@ jobs:
           
       - name: Building
         run: |
-          export M_SOURCE=~/source
-          export M_BUILD=~/build
-          export M_CROSS=~/cross
+          export M_SOURCE=${{ env.TOP_DIR }}/source
+          export M_BUILD=${{ env.TOP_DIR }}/build
+          export M_CROSS=${{ env.TOP_DIR }}/cross
           export PATH="$M_CROSS/bin:$RUSTUP_LOCATION/.cargo/bin:$PATH"
           export PKG_CONFIG_LIBDIR="$M_CROSS/opt/lib/pkgconfig"
           export PKG_CONFIG="pkgconf --static"
@@ -67,11 +69,9 @@ jobs:
             -DBROTLI_EMSCRIPTEN=OFF
           ninja -j$MJOBS -C $M_BUILD/brotli-build
           
-          sudo -H -u builder sudo chmod 777 -R /github/home
+          sudo -H -u builder sudo chmod 777 -R ${{ env.TOP_DIR }}
           cd ${{ env.TOP_DIR }}/toolchain-test/brotli-dev
           sudo -H -u builder makepkg -sC --noconfirm
-          cd ${{ env.TOP_DIR }}/toolchain-test
-
         
       - name: Release
         continue-on-error: true
