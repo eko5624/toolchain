@@ -11,6 +11,7 @@ md5sums=('SKIP')
 
 build() {
   cd $srcdir/Little-CMS
+  export LDFLAGS=''
   ./configure \
     --prefix=/github/home/opt \
     --host=x86_64-w64-mingw32 \
