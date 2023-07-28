@@ -53,7 +53,7 @@ jobs:
           echo "builder path================"
           sudo -H -u builder echo "$PATH"
           cd ${{ env.top_dir }}/toolchain-test/brotli-dev
-          sudo -H -u builder makepkg -p PKGBUILD-test -sC --noconfirm
+          sudo -H -u builder makepkg -sC --noconfirm
 
       - name: Release
         continue-on-error: true
