@@ -13,23 +13,23 @@ jobs:
     steps:    
       - name: Install Dependencies
         run: |
-          sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
-          sudo pacman -Syu --noconfirm
-          sudo pacman -S --noconfirm --needed git gyp cvs mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf zip unzip p7zip xz mingw-w64-gcc gcc-multilib clang python-pip curl jq lib32-glib2 wget
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm --needed git yasm nasm ninja cmake python-pip curl python-cairo unzip p7zip curl jq
+          pip3 install -U --break-system-packages setuptools rst2pdf mako jsonschema meson
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global pull.rebase true
           git config --global rebase.autoStash true
           git config --global fetch.prune true
           git config --global --add safe.directory $PWD
-          
-      - name: Checkout
-        uses: actions/checkout@main
-
+      - name: Add builder user
+        run: |
+          useradd builder -m
+          echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
       - name: Loading gcc cache
         uses: actions/cache/restore@main
         with:
-          path: ${{ github.workspace }}/cross
+          path: ~/cross
           key: cross-gcc-mcf-${{ github.run_id }}
           restore-keys: |
             cross-gcc-mcf-
@@ -37,7 +37,7 @@ jobs:
       - name: Setup GCC Toolchain
         run: |
           PWD=$(pwd)
-          if [[ ! "$(ls -A $PWD/cross/bin)" ]]; then
+          if [[ ! "~/cross/bin)" ]]; then
             curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-gcc-mcf.7z
             7z x cross-gcc-mcf.7z
             rm cross-gcc-mcf.7z
@@ -47,5 +47,5 @@ jobs:
         uses: actions/cache/save@main
         if: always()
         with:
-          path: ${{ github.workspace }}/cross
+          path: ~/cross
           key: cross-gcc-mcf-${{ github.run_id }}
