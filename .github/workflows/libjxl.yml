@@ -13,6 +13,7 @@ jobs:
     steps:    
       - name: Install Dependencies
         run: |
+          sudo sed -i '/LDFLAGS/d' /etc/makepkg.conf
           pacman -Syu --noconfirm
           pacman -S --noconfirm --needed git yasm nasm ninja cmake python-pip curl python-cairo unzip p7zip curl jq
           pip3 install -U --break-system-packages setuptools rst2pdf mako jsonschema meson
@@ -33,11 +34,11 @@ jobs:
         run: |
           cd ${{ env.top_dir }}
           git clone https://github.com/eko5624/toolchain-test        
-      - name: Setting makepkg etc
-        run: |
-          sudo cp ${{ env.top_dir }}/toolchain-test/pacman-config/makepkg_cross.conf /etc
-          sudo cp ${{ env.top_dir }}/toolchain-test/pacman-config/makepkg-cross /usr/local/bin
-          sudo chmod +x /usr/local/bin/makepkg-cross
+      #- name: Setting makepkg etc
+      #  run: |
+      #    sudo cp ${{ env.top_dir }}/toolchain-test/pacman-config/makepkg_cross.conf /etc
+      #    sudo cp ${{ env.top_dir }}/toolchain-test/pacman-config/makepkg-cross /usr/local/bin
+      #    sudo chmod +x /usr/local/bin/makepkg-cross
       - name: Loading cross gcc cache
         uses: actions/cache/restore@main
         with:
@@ -57,7 +58,7 @@ jobs:
           export LDFLAGS="-L${{ env.top_dir }}/opt/lib"
           
           cd ${{ env.top_dir }}/toolchain-test/brotli-dev
-          sudo -H -u builder makepkg-cross -sC --noconfirm
+          sudo -H -u builder makepkg -sC --noconfirm
       - name: Release
         continue-on-error: true
         uses: softprops/action-gh-release@master
