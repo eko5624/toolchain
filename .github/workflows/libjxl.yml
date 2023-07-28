@@ -33,6 +33,11 @@ jobs:
         run: |
           cd ${{ env.top_dir }}
           git clone https://github.com/eko5624/toolchain-test
+          
+      - name: Setting makepkg etc
+        run: |
+          sudo cp ${{ env.top_dir }}/toolchain-test/pacman-config/makepkg_cross.conf /etc
+          sudo cp ${{ env.top_dir }}/toolchain-test/pacman-config/makepkg-cross /usr/local/bin
       - name: Loading cross gcc cache
         uses: actions/cache/restore@main
         with:
