@@ -51,10 +51,6 @@ jobs:
           export PKG_CONFIG_LIBDIR="${{ env.top_dir }}/opt/lib/pkgconfig"
           export PKG_CONFIG="pkgconf --static"
 
-          export CFLAGS="-I${{ env.top_dir }}/opt/include"
-          export CPPFLAGS="-I${{ env.top_dir }}/opt/include"
-          export LDFLAGS="-L${{ env.top_dir }}/opt/lib"
-
           sudo chmod 777 -R ${{ env.top_dir }}
           cd ${{ env.top_dir }}/toolchain-test/brotli-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
@@ -110,10 +106,6 @@ jobs:
           export PATH="${{ env.top_dir }}/cross/bin:$PATH"
           export PKG_CONFIG_LIBDIR="${{ env.top_dir }}/opt/lib/pkgconfig"
           export PKG_CONFIG="pkgconf --static"
-
-          export CFLAGS="-I${{ env.top_dir }}/opt/include"
-          export CPPFLAGS="-I${{ env.top_dir }}/opt/include"
-          export LDFLAGS="-L${{ env.top_dir }}/opt/lib"
           
           sudo chmod 777 -R ${{ env.top_dir }}
           cd ${{ env.top_dir }}/toolchain-test/highway-dev
@@ -171,10 +163,6 @@ jobs:
           export PKG_CONFIG_LIBDIR="${{ env.top_dir }}/opt/lib/pkgconfig"
           export PKG_CONFIG="pkgconf --static"
 
-          export CFLAGS="-I${{ env.top_dir }}/opt/include"
-          export CPPFLAGS="-I${{ env.top_dir }}/opt/include"
-          export LDFLAGS="-L${{ env.top_dir }}/opt/lib"
-
           sudo chmod 777 -R ${{ env.top_dir }}
           cd ${{ env.top_dir }}/toolchain-test/lcms2-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
@@ -231,10 +219,6 @@ jobs:
           export PKG_CONFIG_LIBDIR="${{ env.top_dir }}/opt/lib/pkgconfig"
           export PKG_CONFIG="pkgconf --static"
 
-          #export CFLAGS="-I${{ env.top_dir }}/opt/include"
-          #export CPPFLAGS="-I${{ env.top_dir }}/opt/include"
-          #export LDFLAGS="-L${{ env.top_dir }}/opt/lib"
-          
           sudo chmod 777 -R ${{ env.top_dir }}
           cd ${{ env.top_dir }}/toolchain-test/libjpeg-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
@@ -291,10 +275,6 @@ jobs:
           export PATH="${{ env.top_dir }}/cross/bin:$PATH"
           export PKG_CONFIG_LIBDIR="${{ env.top_dir }}/opt/lib/pkgconfig"
           export PKG_CONFIG="pkgconf --static"
-
-          export CFLAGS="-I${{ env.top_dir }}/opt/include"
-          export CPPFLAGS="-I${{ env.top_dir }}/opt/include"
-          export LDFLAGS="-L${{ env.top_dir }}/opt/lib"
 
           cd ${{ env.top_dir }}
           curl -OL https://github.com/${{ github.repository }}/releases/download/dev/brotli-dev-1.0.9-1-x86_64.pkg.tar.zst
@@ -359,10 +339,6 @@ jobs:
           export PKG_CONFIG_LIBDIR="${{ env.top_dir }}/opt/lib/pkgconfig"
           export PKG_CONFIG="pkgconf --static"
 
-          export CFLAGS="-I${{ env.top_dir }}/opt/include"
-          export CPPFLAGS="-I${{ env.top_dir }}/opt/include"
-          export LDFLAGS="-L${{ env.top_dir }}/opt/lib"
-          
           cd ${{ env.top_dir }}
           curl -OL https://github.com/${{ github.repository }}/releases/download/dev/zlib-dev-1.2.13-1-x86_64.pkg.tar.zst
           pacman -U *.zst --noconfirm
@@ -422,19 +398,14 @@ jobs:
           export PKG_CONFIG_LIBDIR="${{ env.top_dir }}/opt/lib/pkgconfig"
           export PKG_CONFIG="pkgconf --static"
 
-          export CFLAGS="-I${{ env.top_dir }}/opt/include"
-          export CPPFLAGS="-I${{ env.top_dir }}/opt/include"
-          export LDFLAGS="-L${{ env.top_dir }}/opt/lib"
-          
           sudo chmod 777 -R ${{ env.top_dir }}
           cd ${{ env.top_dir }}/toolchain-test/zlib-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
       - name: Release
-        continue-on-error: true
-        uses: softprops/action-gh-release@master
-        with:
-          tag_name: dev
-          name: dev
-          files: ${{ env.top_dir }}/toolchain-test/zlib-dev/*.zst
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd ${{ env.top_dir }}/toolchain-test
+          chmod +x ./release-dev.sh
+          ./release-dev.sh zlib-dev zlib-dev
+          
