@@ -13,7 +13,7 @@ jobs:
     steps:    
       - name: Install Dependencies
         run: |
-          #sudo sed -i '/LDFLAGS/d' /etc/makepkg.conf
+          sudo sed -i '/LDFLAGS/d' /etc/makepkg.conf
           sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
           sudo pacman -Syu --noconfirm docker
           sudo pacman -S --noconfirm --needed git gyp mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf unzip p7zip xz clang python-pip python-cairo curl jq lib32-glib2 wget
