@@ -236,7 +236,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
   libjxl:
-    needs: [brotli, highway, lcms2, libjpeg, libpng]
+    needs: [brotli, highway, lcms2, libjpeg]
     runs-on: ubuntu-latest
     container:
       image: archlinux/archlinux:base-devel
@@ -282,11 +282,9 @@ jobs:
 
           cd ${{ env.top_dir }}
           curl -OL https://github.com/${{ github.repository }}/releases/download/dev/brotli-dev-1.0.9-1-x86_64.pkg.tar.zst
-          curl -OL https://github.com/${{ github.repository }}/releases/download/dev/highway-dev-1.0.4-1-x86_64.pkg.tar.zst
+          curl -OL https://github.com/${{ github.repository }}/releases/download/dev/highway-dev-1.0.5-1-x86_64.pkg.tar.zst
           curl -OL https://github.com/${{ github.repository }}/releases/download/dev/lcms2-dev-2.15-1-x86_64.pkg.tar.zst
-          curl -OL https://github.com/${{ github.repository }}/releases/download/dev/libjpeg-dev-2.1.91-1-x86_64.pkg.tar.zst
-          curl -OL https://github.com/${{ github.repository }}/releases/download/dev/libpng-dev-1.6.39-1-x86_64.pkg.tar.zst
-          curl -OL https://github.com/${{ github.repository }}/releases/download/dev/zlib-dev-1.2.13-1-x86_64.pkg.tar.zst
+          curl -OL https://github.com/${{ github.repository }}/releases/download/dev/libjpeg-dev-3.0.0-1-x86_64.pkg.tar.zst
           pacman -U *.zst --noconfirm
           sudo chmod 777 -R ${{ env.top_dir }}
           cd ${{ env.top_dir }}/toolchain-test/libjxl-dev
