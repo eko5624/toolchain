@@ -237,9 +237,9 @@ jobs:
           export PKG_CONFIG_LIBDIR="${{ env.top_dir }}/opt/lib/pkgconfig"
           export PKG_CONFIG="pkgconf --static"
 
-          export CFLAGS="-I${{ env.top_dir }}/opt/include"
-          export CPPFLAGS="-I${{ env.top_dir }}/opt/include"
-          export LDFLAGS="-L${{ env.top_dir }}/opt/lib"
+          #export CFLAGS="-I${{ env.top_dir }}/opt/include"
+          #export CPPFLAGS="-I${{ env.top_dir }}/opt/include"
+          #export LDFLAGS="-L${{ env.top_dir }}/opt/lib"
           
           sudo chmod 777 -R ${{ env.top_dir }}
           cd ${{ env.top_dir }}/toolchain-test/libjpeg-dev
