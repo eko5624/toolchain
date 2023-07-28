@@ -14,8 +14,7 @@ build() {
   ./configure \
     --prefix=/github/home/opt \
     --host=x86_64-w64-mingw32 \
-    --disable-shared \
-    --without-zlib
+    --disable-shared
   make
 }
 
