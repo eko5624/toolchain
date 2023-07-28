@@ -22,21 +22,18 @@ jobs:
           git config --global rebase.autoStash true
           git config --global fetch.prune true
           git config --global --add safe.directory $PWD
-      - name: Setting top_dir env
-        run: |
-           echo "top_dir=$(cd ~ && pwd)" >> $GITHUB_ENV 
       - name: Loading gcc cache
         uses: actions/cache/restore@main
         with:
-          path: ${{ env.top_dir }}/cross
+          path: ~/cross
           key: cross-gcc-mcf-${{ github.run_id }}
           restore-keys: |
             cross-gcc-mcf-
             
       - name: Setup GCC Toolchain
         run: |
-          cd ${{ env.top_dir }}
-          if [[ ! "cross/bin)" ]]; then
+          cd ~
+          if [[ ! -d "cross/bin" ]]; then
             curl -OL https://github.com/eko5624/toolchain-test/releases/download/toolchain/cross-gcc-mcf.7z
             7z x cross-gcc-mcf.7z
             rm cross-gcc-mcf.7z
@@ -46,5 +43,5 @@ jobs:
         uses: actions/cache/save@main
         if: always()
         with:
-          path: ${{ env.top_dir }}/cross
+          path: ~/cross
           key: cross-gcc-mcf-${{ github.run_id }}
