@@ -59,12 +59,14 @@ jobs:
           cd ${{ env.top_dir }}/toolchain-test/brotli-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
       - name: Release
+        continue-on-error: true
+        uses: softprops/action-gh-release@master
+        with:
+          tag_name: dev
+          name: dev
+          files: ${{ env.top_dir }}/toolchain-test/brotli-dev/*.zst
         env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          cd ${{ env.top_dir }}/toolchain-test
-          chmod +x ./release-dev.sh
-          ./release-dev.sh brotli-dev brotli-dev
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
   highway:
     runs-on: ubuntu-latest
