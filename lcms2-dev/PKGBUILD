@@ -13,7 +13,6 @@ build() {
   cd $srcdir/Little-CMS
   ./configure \
     --prefix=/github/home/opt \
-    --host=x86_64-w64-mingw32 \
     --disable-shared
   make
 }
