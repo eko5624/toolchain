@@ -14,43 +14,52 @@ jobs:
       - name: Install Dependencies
         run: |
           pacman -Syu --noconfirm
-          pacman -S --noconfirm --needed git ninja cmake python-pip curl python-cairo
-          pip3 install -U setuptools rst2pdf mako jsonschema meson
+          pacman -S --noconfirm --needed git yasm nasm ninja cmake python-pip curl python-cairo unzip p7zip curl jq
+          pip3 install -U --break-system-packages setuptools rst2pdf mako jsonschema meson
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global pull.rebase true
           git config --global rebase.autoStash true
           git config --global fetch.prune true
           git config --global --add safe.directory $PWD
-           
-      - uses: actions/checkout@main
+      - name: Add builder user
+        run: |
+          useradd builder -m
+          echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+      - name: Setting top_dir env
+        run: |
+           echo "top_dir=$(cd ~ && pwd)" >> $GITHUB_ENV         
+      - name: Checkout
+        run: |
+          cd ${{ env.top_dir }}
+          git clone https://github.com/eko5624/toolchain-test
       - name: Loading cross gcc cache
         uses: actions/cache/restore@main
         with:
-          path: ${{ github.workspace }}/cross
-          key: cross-gcc-${{ github.run_id }}
+          path: ${{ env.top_dir }}/cross
+          key: cross-gcc-mcf-${{ github.run_id }}
           restore-keys: |
-            cross-gcc-
-            
-      - name: Loading rust toolchain cache
-        uses: actions/cache/restore@main
-        with:
-          path: ${{ github.workspace }}/rustup_location
-          key: rust_toolchain-${{ github.run_id }}
-          restore-keys: |
-            rust_toolchain-
-            
-      - name: Building
+            cross-gcc-mcf-
+      - name: Build
         run: |
-          sudo -k && cd brotli-dev; makepkg -sri
+          export PATH="${{ env.top_dir }}/cross/bin:$PATH"
+          export PKG_CONFIG_LIBDIR="${{ env.top_dir }}/opt/lib/pkgconfig"
+          export PKG_CONFIG="pkgconf --static"
 
+          export CFLAGS="-I${{ env.top_dir }}/opt/include"
+          export CPPFLAGS="-I${{ env.top_dir }}/opt/include"
+          export LDFLAGS="-L${{ env.top_dir }}/opt/lib"
+          
+          sudo chmod 777 -R ${{ env.top_dir }}
+          cd ${{ env.top_dir }}/toolchain-test/brotli-dev
+          sudo -H -u builder makepkg -sC --noconfirm
       - name: Release
         continue-on-error: true
         uses: softprops/action-gh-release@master
         with:
           tag_name: dev
           name: dev
-          files: brotli-dev/*.zst
+          files: ${{ env.top_dir }}/toolchain-test/brotli-dev/*.zst
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
@@ -61,45 +70,53 @@ jobs:
     steps:    
       - name: Install Dependencies
         run: |
-          sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
-          sudo pacman -Syu --noconfirm
-          sudo pacman -S --noconfirm --needed git ninja cmake python-pip curl
-          pip3 install -U setuptools rst2pdf mako jsonschema meson
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm --needed git yasm nasm ninja cmake python-pip curl python-cairo unzip p7zip curl jq
+          pip3 install -U --break-system-packages setuptools rst2pdf mako jsonschema meson
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global pull.rebase true
           git config --global rebase.autoStash true
           git config --global fetch.prune true
           git config --global --add safe.directory $PWD
-          
-      - uses: actions/checkout@main
-      - name: Loading gcc cache
-        uses: actions/cache/restore@main
-        with:
-          path: ${{ github.workspace }}/cross
-          key: gcc-${{ github.run_id }}
-          restore-keys: |
-            gcc-
-            
-      - name: Loading rust toolchain cache
-        uses: actions/cache/restore@main
-        with:
-          path: ${{ github.workspace }}/rustup_location
-          key: rust_toolchain-${{ github.run_id }}
-          restore-keys: |
-            rust_toolchain-
-            
-      - name: Building
+      - name: Add builder user
         run: |
-          cd highway-dev; makepkg -si
+          useradd builder -m
+          echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+      - name: Setting top_dir env
+        run: |
+           echo "top_dir=$(cd ~ && pwd)" >> $GITHUB_ENV         
+      - name: Checkout
+        run: |
+          cd ${{ env.top_dir }}
+          git clone https://github.com/eko5624/toolchain-test
+      - name: Loading cross gcc cache
+        uses: actions/cache/restore@main
+        with:
+          path: ${{ env.top_dir }}/cross
+          key: cross-gcc-mcf-${{ github.run_id }}
+          restore-keys: |
+            cross-gcc-mcf-
+      - name: Build
+        run: |
+          export PATH="${{ env.top_dir }}/cross/bin:$PATH"
+          export PKG_CONFIG_LIBDIR="${{ env.top_dir }}/opt/lib/pkgconfig"
+          export PKG_CONFIG="pkgconf --static"
 
+          export CFLAGS="-I${{ env.top_dir }}/opt/include"
+          export CPPFLAGS="-I${{ env.top_dir }}/opt/include"
+          export LDFLAGS="-L${{ env.top_dir }}/opt/lib"
+          
+          sudo chmod 777 -R ${{ env.top_dir }}
+          cd ${{ env.top_dir }}/toolchain-test/highway-dev
+          sudo -H -u builder makepkg -sC --noconfirm
       - name: Release
         continue-on-error: true
         uses: softprops/action-gh-release@master
         with:
           tag_name: dev
           name: dev
-          files: highway-dev/*.zst
+          files: ${{ env.top_dir }}/toolchain-test/highway-dev/*.zst
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
@@ -111,40 +128,50 @@ jobs:
     steps:    
       - name: Install Dependencies
         run: |
-          sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
-          sudo pacman -Syu --noconfirm
-          sudo pacman -S --noconfirm --needed git ninja cmake python-pip curl
-          pip3 install -U setuptools rst2pdf mako jsonschema meson
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm --needed git yasm nasm ninja cmake python-pip curl python-cairo unzip p7zip curl jq
+          pip3 install -U --break-system-packages setuptools rst2pdf mako jsonschema meson
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global pull.rebase true
           git config --global rebase.autoStash true
           git config --global fetch.prune true
           git config --global --add safe.directory $PWD
-          
-      - uses: actions/checkout@main
-      - name: Loading gcc cache
-        uses: actions/cache/restore@main
-        with:
-          path: ${{ github.workspace }}/cross
-          key: gcc-${{ github.run_id }}
-          restore-keys: |
-            gcc-
-            
-      - name: Loading rust toolchain cache
-        uses: actions/cache/restore@main
-        with:
-          path: ${{ github.workspace }}/rustup_location
-          key: rust_toolchain-${{ github.run_id }}
-          restore-keys: |
-            rust_toolchain-
-            
-      - name: Building
+      - name: Add builder user
         run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/dev/libjpeg-dev-2.1.91-1-x86_64.pkg.tar.zst
-          curl -OL https://github.com/${{ github.repository }}/releases/download/dev/zlib-dev-1.2.13-1-x86_64.pkg.tar.zst
+          useradd builder -m
+          echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+      - name: Setting top_dir env
+        run: |
+           echo "top_dir=$(cd ~ && pwd)" >> $GITHUB_ENV         
+      - name: Checkout
+        run: |
+          cd ${{ env.top_dir }}
+          git clone https://github.com/eko5624/toolchain-test
+      - name: Loading cross gcc cache
+        uses: actions/cache/restore@main
+        with:
+          path: ${{ env.top_dir }}/cross
+          key: cross-gcc-mcf-${{ github.run_id }}
+          restore-keys: |
+            cross-gcc-mcf-
+      - name: Build
+        run: |
+          export PATH="${{ env.top_dir }}/cross/bin:$PATH"
+          export PKG_CONFIG_LIBDIR="${{ env.top_dir }}/opt/lib/pkgconfig"
+          export PKG_CONFIG="pkgconf --static"
+
+          export CFLAGS="-I${{ env.top_dir }}/opt/include"
+          export CPPFLAGS="-I${{ env.top_dir }}/opt/include"
+          export LDFLAGS="-L${{ env.top_dir }}/opt/lib"
+
+          cd ${{ env.top_dir }}
+          curl -OL https://github.com/${{ github.repository }}/releases/download/dev/amf-headers-dev-1.4.30-1-x86_64.pkg.tar.zst
+          curl -OL https://github.com/${{ github.repository }}/releases/download/dev/avisynth-dev-3.7.3-1-x86_64.pkg.tar.zst
           pacman -U *.zst --noconfirm
-          cd lcms2-dev;makepkg -si
+          sudo chmod 777 -R ${{ env.top_dir }}
+          cd ${{ env.top_dir }}/toolchain-test/lcms2-dev
+          sudo -H -u builder makepkg -sC --noconfirm
 
       - name: Release
         continue-on-error: true
@@ -152,7 +179,7 @@ jobs:
         with:
           tag_name: dev
           name: dev
-          files: lcms2-dev/*.zst
+          files: ${{ env.top_dir }}/toolchain-test/lcms2-dev/*.zst
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
@@ -163,44 +190,53 @@ jobs:
     steps:    
       - name: Install Dependencies
         run: |
-          sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
-          sudo pacman -Syu --noconfirm
-          sudo pacman -S --noconfirm --needed git ninja cmake python-pip curl
-          pip3 install -U setuptools rst2pdf mako jsonschema meson
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm --needed git yasm nasm ninja cmake python-pip curl python-cairo unzip p7zip curl jq
+          pip3 install -U --break-system-packages setuptools rst2pdf mako jsonschema meson
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global pull.rebase true
           git config --global rebase.autoStash true
           git config --global fetch.prune true
           git config --global --add safe.directory $PWD
-          
-      - uses: actions/checkout@main
-      - name: Loading gcc cache
-        uses: actions/cache/restore@main
-        with:
-          path: ${{ github.workspace }}/cross
-          key: gcc-${{ github.run_id }}
-          restore-keys: |
-            gcc-
-            
-      - name: Loading rust toolchain cache
-        uses: actions/cache/restore@main
-        with:
-          path: ${{ github.workspace }}/rustup_location
-          key: rust_toolchain-${{ github.run_id }}
-          restore-keys: |
-            rust_toolchain-
-      - name: Building
+      - name: Add builder user
         run: |
-          cd libjpeg-dev; makepkg -si
+          useradd builder -m
+          echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+      - name: Setting top_dir env
+        run: |
+           echo "top_dir=$(cd ~ && pwd)" >> $GITHUB_ENV         
+      - name: Checkout
+        run: |
+          cd ${{ env.top_dir }}
+          git clone https://github.com/eko5624/toolchain-test
+      - name: Loading cross gcc cache
+        uses: actions/cache/restore@main
+        with:
+          path: ${{ env.top_dir }}/cross
+          key: cross-gcc-mcf-${{ github.run_id }}
+          restore-keys: |
+            cross-gcc-mcf-
+      - name: Build
+        run: |
+          export PATH="${{ env.top_dir }}/cross/bin:$PATH"
+          export PKG_CONFIG_LIBDIR="${{ env.top_dir }}/opt/lib/pkgconfig"
+          export PKG_CONFIG="pkgconf --static"
 
+          export CFLAGS="-I${{ env.top_dir }}/opt/include"
+          export CPPFLAGS="-I${{ env.top_dir }}/opt/include"
+          export LDFLAGS="-L${{ env.top_dir }}/opt/lib"
+          
+          sudo chmod 777 -R ${{ env.top_dir }}
+          cd ${{ env.top_dir }}/toolchain-test/libjpeg-dev
+          sudo -H -u builder makepkg -sC --noconfirm
       - name: Release
         continue-on-error: true
         uses: softprops/action-gh-release@master
         with:
           tag_name: dev
           name: dev
-          files: libjpeg-dev/*.zst
+          files: ${{ env.top_dir }}/toolchain-test/libjpeg-dev/*.zst
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
@@ -212,52 +248,63 @@ jobs:
     steps:    
       - name: Install Dependencies
         run: |
-          sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
-          sudo pacman -Syu --noconfirm
-          sudo pacman -S --noconfirm --needed git ninja cmake python-pip curl
-          pip3 install -U setuptools rst2pdf mako jsonschema meson
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm --needed git yasm nasm ninja cmake python-pip curl python-cairo unzip p7zip curl jq
+          pip3 install -U --break-system-packages setuptools rst2pdf mako jsonschema meson
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global pull.rebase true
           git config --global rebase.autoStash true
           git config --global fetch.prune true
           git config --global --add safe.directory $PWD
-          
-      - uses: actions/checkout@main
-      - name: Loading gcc cache
-        uses: actions/cache/restore@main
-        with:
-          path: ${{ github.workspace }}/cross
-          key: gcc-${{ github.run_id }}
-          restore-keys: |
-            gcc-
-            
-      - name: Loading rust toolchain cache
-        uses: actions/cache/restore@main
-        with:
-          path: ${{ github.workspace }}/rustup_location
-          key: rust_toolchain-${{ github.run_id }}
-          restore-keys: |
-            rust_toolchain-
-            
-      - name: Building
+      - name: Add builder user
         run: |
+          useradd builder -m
+          echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+      - name: Setting top_dir env
+        run: |
+           echo "top_dir=$(cd ~ && pwd)" >> $GITHUB_ENV         
+      - name: Checkout
+        run: |
+          cd ${{ env.top_dir }}
+          git clone https://github.com/eko5624/toolchain-test
+      - name: Loading cross gcc cache
+        uses: actions/cache/restore@main
+        with:
+          path: ${{ env.top_dir }}/cross
+          key: cross-gcc-mcf-${{ github.run_id }}
+          restore-keys: |
+            cross-gcc-mcf-
+      - name: Build
+        run: |
+          export PATH="${{ env.top_dir }}/cross/bin:$PATH"
+          export PKG_CONFIG_LIBDIR="${{ env.top_dir }}/opt/lib/pkgconfig"
+          export PKG_CONFIG="pkgconf --static"
+
+          export CFLAGS="-I${{ env.top_dir }}/opt/include"
+          export CPPFLAGS="-I${{ env.top_dir }}/opt/include"
+          export LDFLAGS="-L${{ env.top_dir }}/opt/lib"
+
+          cd ${{ env.top_dir }}
           curl -OL https://github.com/${{ github.repository }}/releases/download/dev/brotli-dev-1.0.9-1-x86_64.pkg.tar.zst
           curl -OL https://github.com/${{ github.repository }}/releases/download/dev/highway-dev-1.0.4-1-x86_64.pkg.tar.zst
           curl -OL https://github.com/${{ github.repository }}/releases/download/dev/lcms2-dev-2.15-1-x86_64.pkg.tar.zst
           curl -OL https://github.com/${{ github.repository }}/releases/download/dev/libjpeg-dev-2.1.91-1-x86_64.pkg.tar.zst
           curl -OL https://github.com/${{ github.repository }}/releases/download/dev/libpng-dev-1.6.39-1-x86_64.pkg.tar.zst
           curl -OL https://github.com/${{ github.repository }}/releases/download/dev/zlib-dev-1.2.13-1-x86_64.pkg.tar.zst
+          curl -OL https://github.com/${{ github.repository }}/releases/download/dev/amf-headers-dev-1.4.30-1-x86_64.pkg.tar.zst
+          curl -OL https://github.com/${{ github.repository }}/releases/download/dev/avisynth-dev-3.7.3-1-x86_64.pkg.tar.zst
           pacman -U *.zst --noconfirm
-          cd libjxl-dev; makepkg -si
-
+          sudo chmod 777 -R ${{ env.top_dir }}
+          cd ${{ env.top_dir }}/toolchain-test/libjxl-dev
+          sudo -H -u builder makepkg -sC --noconfirm
       - name: Release
         continue-on-error: true
         uses: softprops/action-gh-release@master
         with:
           tag_name: dev
           name: dev
-          files: libjxl-dev/*.zst
+          files: ${{ env.top_dir }}/libjxl-dev/*.zst
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
@@ -269,33 +316,46 @@ jobs:
     steps:    
       - name: Install Dependencies
         run: |
-          sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
-          sudo pacman -Syu --noconfirm
-          sudo pacman -S --noconfirm --needed git ninja cmake python-pip curl
-          pip3 install -U setuptools rst2pdf mako jsonschema meson
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm --needed git yasm nasm ninja cmake python-pip curl python-cairo unzip p7zip curl jq
+          pip3 install -U --break-system-packages setuptools rst2pdf mako jsonschema meson
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global pull.rebase true
           git config --global rebase.autoStash true
           git config --global fetch.prune true
           git config --global --add safe.directory $PWD
+      - name: Add builder user
+        run: |
+          useradd builder -m
+          echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+      - name: Setting top_dir env
+        run: |
+           echo "top_dir=$(cd ~ && pwd)" >> $GITHUB_ENV         
+      - name: Checkout
+        run: |
+          cd ${{ env.top_dir }}
+          git clone https://github.com/eko5624/toolchain-test
+      - name: Loading cross gcc cache
+        uses: actions/cache/restore@main
+        with:
+          path: ${{ env.top_dir }}/cross
+          key: cross-gcc-mcf-${{ github.run_id }}
+          restore-keys: |
+            cross-gcc-mcf-
+      - name: Build
+        run: |
+          export PATH="${{ env.top_dir }}/cross/bin:$PATH"
+          export PKG_CONFIG_LIBDIR="${{ env.top_dir }}/opt/lib/pkgconfig"
+          export PKG_CONFIG="pkgconf --static"
+
+          export CFLAGS="-I${{ env.top_dir }}/opt/include"
+          export CPPFLAGS="-I${{ env.top_dir }}/opt/include"
+          export LDFLAGS="-L${{ env.top_dir }}/opt/lib"
           
-      - uses: actions/checkout@main
-      - name: Loading gcc cache
-        uses: actions/cache/restore@main
-        with:
-          path: ${{ github.workspace }}/cross
-          key: gcc-${{ github.run_id }}
-          restore-keys: |
-            gcc-
-            
-      - name: Loading rust toolchain cache
-        uses: actions/cache/restore@main
-        with:
-          path: ${{ github.workspace }}/rustup_location
-          key: rust_toolchain-${{ github.run_id }}
-          restore-keys: |
-            rust_toolchain-
+          sudo chmod 777 -R ${{ env.top_dir }}
+          cd ${{ env.top_dir }}/toolchain-test/amf-dev
+          sudo -H -u builder makepkg -sC --noconfirm
             
       - name: Building
         run: |
@@ -320,37 +380,46 @@ jobs:
     steps:    
       - name: Install Dependencies
         run: |
-          sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
-          sudo pacman -Syu --noconfirm
-          sudo pacman -S --noconfirm --needed git ninja cmake python-pip curl
-          pip3 install -U setuptools rst2pdf mako jsonschema meson
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm --needed git yasm nasm ninja cmake python-pip curl python-cairo unzip p7zip curl jq
+          pip3 install -U --break-system-packages setuptools rst2pdf mako jsonschema meson
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global pull.rebase true
           git config --global rebase.autoStash true
           git config --global fetch.prune true
           git config --global --add safe.directory $PWD
-          
-      - uses: actions/checkout@main
-      - name: Loading gcc cache
-        uses: actions/cache/restore@main
-        with:
-          path: ${{ github.workspace }}/cross
-          key: gcc-${{ github.run_id }}
-          restore-keys: |
-            gcc-
-            
-      - name: Loading rust toolchain cache
-        uses: actions/cache/restore@main
-        with:
-          path: ${{ github.workspace }}/rustup_location
-          key: rust_toolchain-${{ github.run_id }}
-          restore-keys: |
-            rust_toolchain-
-            
-      - name: Building
+      - name: Add builder user
         run: |
-          cd zlib-dev; makepkg -si
+          useradd builder -m
+          echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+      - name: Setting top_dir env
+        run: |
+           echo "top_dir=$(cd ~ && pwd)" >> $GITHUB_ENV         
+      - name: Checkout
+        run: |
+          cd ${{ env.top_dir }}
+          git clone https://github.com/eko5624/toolchain-test
+      - name: Loading cross gcc cache
+        uses: actions/cache/restore@main
+        with:
+          path: ${{ env.top_dir }}/cross
+          key: cross-gcc-mcf-${{ github.run_id }}
+          restore-keys: |
+            cross-gcc-mcf-
+      - name: Build
+        run: |
+          export PATH="${{ env.top_dir }}/cross/bin:$PATH"
+          export PKG_CONFIG_LIBDIR="${{ env.top_dir }}/opt/lib/pkgconfig"
+          export PKG_CONFIG="pkgconf --static"
+
+          export CFLAGS="-I${{ env.top_dir }}/opt/include"
+          export CPPFLAGS="-I${{ env.top_dir }}/opt/include"
+          export LDFLAGS="-L${{ env.top_dir }}/opt/lib"
+          
+          sudo chmod 777 -R ${{ env.top_dir }}
+          cd ${{ env.top_dir }}/toolchain-test/amf-dev
+          sudo -H -u builder makepkg -sC --noconfirm
 
       - name: Release
         continue-on-error: true
