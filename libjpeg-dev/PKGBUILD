@@ -11,7 +11,6 @@ md5sums=('SKIP')
 build() {
   cd $srcdir/libjpeg-turbo
   rm -rf build && mkdir build && cd build
-  export LDFLAGS=''
   cmake .. -G Ninja \
     -DCMAKE_INSTALL_PREFIX=/github/home/opt \
     -DCMAKE_TOOLCHAIN_FILE=/github/home/toolchain-test/toolchain.cmake \
