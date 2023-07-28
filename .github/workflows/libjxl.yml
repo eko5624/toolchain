@@ -99,6 +99,7 @@ jobs:
         run: |
           sudo cp ${{ env.top_dir }}/toolchain-test/pacman-config/makepkg_cross.conf /etc
           sudo cp ${{ env.top_dir }}/toolchain-test/pacman-config/makepkg-cross /usr/local/bin
+          sudo chmod +x /usr/local/bin/makepkg-cross
       - name: Loading cross gcc cache
         uses: actions/cache/restore@main
         with:
@@ -160,6 +161,7 @@ jobs:
         run: |
           sudo cp ${{ env.top_dir }}/toolchain-test/pacman-config/makepkg_cross.conf /etc
           sudo cp ${{ env.top_dir }}/toolchain-test/pacman-config/makepkg-cross /usr/local/bin
+          sudo chmod +x /usr/local/bin/makepkg-cross
       - name: Loading cross gcc cache
         uses: actions/cache/restore@main
         with:
@@ -180,7 +182,6 @@ jobs:
           sudo chmod 777 -R ${{ env.top_dir }}
           cd ${{ env.top_dir }}/toolchain-test/lcms2-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
-
       - name: Release
         continue-on-error: true
         uses: softprops/action-gh-release@master
@@ -222,6 +223,7 @@ jobs:
         run: |
           sudo cp ${{ env.top_dir }}/toolchain-test/pacman-config/makepkg_cross.conf /etc
           sudo cp ${{ env.top_dir }}/toolchain-test/pacman-config/makepkg-cross /usr/local/bin
+          sudo chmod +x /usr/local/bin/makepkg-cross
       - name: Loading cross gcc cache
         uses: actions/cache/restore@main
         with:
@@ -284,6 +286,7 @@ jobs:
         run: |
           sudo cp ${{ env.top_dir }}/toolchain-test/pacman-config/makepkg_cross.conf /etc
           sudo cp ${{ env.top_dir }}/toolchain-test/pacman-config/makepkg-cross /usr/local/bin
+          sudo chmod +x /usr/local/bin/makepkg-cross
       - name: Loading cross gcc cache
         uses: actions/cache/restore@main
         with:
@@ -352,6 +355,7 @@ jobs:
         run: |
           sudo cp ${{ env.top_dir }}/toolchain-test/pacman-config/makepkg_cross.conf /etc
           sudo cp ${{ env.top_dir }}/toolchain-test/pacman-config/makepkg-cross /usr/local/bin
+          sudo chmod +x /usr/local/bin/makepkg-cross
       - name: Loading cross gcc cache
         uses: actions/cache/restore@main
         with:
@@ -416,6 +420,7 @@ jobs:
         run: |
           sudo cp ${{ env.top_dir }}/toolchain-test/pacman-config/makepkg_cross.conf /etc
           sudo cp ${{ env.top_dir }}/toolchain-test/pacman-config/makepkg-cross /usr/local/bin
+          sudo chmod +x /usr/local/bin/makepkg-cross
       - name: Loading cross gcc cache
         uses: actions/cache/restore@main
         with:
