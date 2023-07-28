@@ -47,6 +47,7 @@ jobs:
             cross-gcc-mcf-
       - name: Build
         run: |
+          sudo chmod 777 -R ${{ env.top_dir }}
           export PATH="${{ env.top_dir }}/cross/bin:$PATH"
           export PKG_CONFIG_LIBDIR="${{ env.top_dir }}/opt/lib/pkgconfig"
           export PKG_CONFIG="pkgconf --static"
@@ -55,7 +56,6 @@ jobs:
           export CPPFLAGS="-I${{ env.top_dir }}/opt/include"
           export LDFLAGS="-L${{ env.top_dir }}/opt/lib"
           
-          sudo chmod 777 -R ${{ env.top_dir }}
           cd ${{ env.top_dir }}/toolchain-test/brotli-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
       - name: Release
