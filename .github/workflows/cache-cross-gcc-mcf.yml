@@ -36,8 +36,8 @@ jobs:
             
       - name: Setup GCC Toolchain
         run: |
-          PWD=$(pwd)
-          if [[ ! "~/cross/bin)" ]]; then
+          cd ~
+          if [[ ! "cross/bin)" ]]; then
             curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-gcc-mcf.7z
             7z x cross-gcc-mcf.7z
             rm cross-gcc-mcf.7z
