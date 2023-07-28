@@ -11,6 +11,7 @@ md5sums=('SKIP' 'SKIP')
 
 build() {
   cd $srcdir/zlib
+  export LDFLAGS=''
   patch -p1 -i $srcdir/zlib-1-win32-static.patch
   CHOST=x86_64-w64-mingw32 ./configure \
     --prefix=/github/home/opt \
