@@ -12,9 +12,8 @@ md5sums=('SKIP' 'SKIP')
 build() {
   cd $srcdir/zlib
   patch -p1 -i $srcdir/zlib-1-win32-static.patch
-  ./configure \
+  CHOST=x86_64-w64-mingw32 ./configure \
     --prefix=/github/home/opt \
-    --host=x86_64-w64-mingw32 \
     --static
   make
 }
