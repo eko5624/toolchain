@@ -3,4 +3,4 @@
 # /usr/bin/aarch64-makepkg script
 #
 
-/usr/bin/makepkg --config "/etc/cross-makepkg.conf" "$@"
+/usr/bin/makepkg --config "/etc/makepkg_cross.conf" "$@"
