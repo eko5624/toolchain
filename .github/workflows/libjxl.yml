@@ -47,15 +47,7 @@ jobs:
           restore-keys: |
             cross-gcc-mcf-
       - name: Build
-        env:
-          C_INCLUDE_PATH: ${{ env.top_dir }}/opt/include
-          CPLUS_INCLUDE_PATH: ${{ env.top_dir }}/opt/include
-          LIBRARY_PATH: ${{ env.top_dir }}/opt/lib
         run: |
-          export PATH="${{ env.top_dir }}/cross/bin:$PATH"
-          export PKG_CONFIG_LIBDIR="${{ env.top_dir }}/opt/lib/pkgconfig"
-          export PKG_CONFIG="pkgconf --static"
-
           sudo chmod 777 -R ${{ env.top_dir }}
           cd ${{ env.top_dir }}/toolchain-test/brotli-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
@@ -108,15 +100,7 @@ jobs:
           restore-keys: |
             cross-gcc-mcf-
       - name: Build
-        env:
-          C_INCLUDE_PATH: ${{ env.top_dir }}/opt/include
-          CPLUS_INCLUDE_PATH: ${{ env.top_dir }}/opt/include
-          LIBRARY_PATH: ${{ env.top_dir }}/opt/lib
         run: |
-          export PATH="${{ env.top_dir }}/cross/bin:$PATH"
-          export PKG_CONFIG_LIBDIR="${{ env.top_dir }}/opt/lib/pkgconfig"
-          export PKG_CONFIG="pkgconf --static"
-          
           sudo chmod 777 -R ${{ env.top_dir }}
           cd ${{ env.top_dir }}/toolchain-test/highway-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
@@ -169,15 +153,7 @@ jobs:
           restore-keys: |
             cross-gcc-mcf-
       - name: Build
-        env:
-          C_INCLUDE_PATH: ${{ env.top_dir }}/opt/include
-          CPLUS_INCLUDE_PATH: ${{ env.top_dir }}/opt/include
-          LIBRARY_PATH: ${{ env.top_dir }}/opt/lib
         run: |
-          export PATH="${{ env.top_dir }}/cross/bin:$PATH"
-          export PKG_CONFIG_LIBDIR="${{ env.top_dir }}/opt/lib/pkgconfig"
-          export PKG_CONFIG="pkgconf --static"
-
           sudo chmod 777 -R ${{ env.top_dir }}
           cd ${{ env.top_dir }}/toolchain-test/lcms2-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
@@ -230,15 +206,7 @@ jobs:
           restore-keys: |
             cross-gcc-mcf-
       - name: Build
-        env:
-          C_INCLUDE_PATH: ${{ env.top_dir }}/opt/include
-          CPLUS_INCLUDE_PATH: ${{ env.top_dir }}/opt/include
-          LIBRARY_PATH: ${{ env.top_dir }}/opt/lib
         run: |
-          export PATH="${{ env.top_dir }}/cross/bin:$PATH"
-          export PKG_CONFIG_LIBDIR="${{ env.top_dir }}/opt/lib/pkgconfig"
-          export PKG_CONFIG="pkgconf --static"
-
           sudo chmod 777 -R ${{ env.top_dir }}
           cd ${{ env.top_dir }}/toolchain-test/libjpeg-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
@@ -292,15 +260,7 @@ jobs:
           restore-keys: |
             cross-gcc-mcf-
       - name: Build
-        env:
-          C_INCLUDE_PATH: ${{ env.top_dir }}/opt/include
-          CPLUS_INCLUDE_PATH: ${{ env.top_dir }}/opt/include
-          LIBRARY_PATH: ${{ env.top_dir }}/opt/lib
         run: |
-          export PATH="${{ env.top_dir }}/cross/bin:$PATH"
-          export PKG_CONFIG_LIBDIR="${{ env.top_dir }}/opt/lib/pkgconfig"
-          export PKG_CONFIG="pkgconf --static"
-
           cd ${{ env.top_dir }}
           curl -OL https://github.com/${{ github.repository }}/releases/download/dev/brotli-dev-1.0.9-1-x86_64.pkg.tar.zst
           curl -OL https://github.com/${{ github.repository }}/releases/download/dev/highway-dev-1.0.5-1-x86_64.pkg.tar.zst
@@ -365,9 +325,6 @@ jobs:
           curl -OL https://github.com/${{ github.repository }}/releases/download/dev/zlib-dev-1.2.13-1-x86_64.pkg.tar.zst
           pacman -U *.zst --noconfirm
           sudo chmod 777 -R ${{ env.top_dir }}
-          export PATH="/github/home/cross/bin:$PATH"
-          export PKG_CONFIG_LIBDIR="/github/home/opt/lib/pkgconfig"
-          export PKG_CONFIG="pkgconf --static"
           cd ${{ env.top_dir }}/toolchain-test/libpng-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
       - name: Release
@@ -421,9 +378,6 @@ jobs:
       - name: Build
         run: |
           sudo chmod 777 -R ${{ env.top_dir }}
-          export PATH="/github/home/cross/bin:$PATH"
-          export PKG_CONFIG_LIBDIR="/github/home/opt/lib/pkgconfig"
-          export PKG_CONFIG="pkgconf --static"
           cd ${{ env.top_dir }}/toolchain-test/zlib-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
       - name: Release
