@@ -11,6 +11,7 @@ md5sums=('SKIP')
 
 build() {
   cd $srcdir/libpng
+  CFLAGS+=' -fno-asynchronous-unwind-tables'
   autoreconf -ivf
   ./configure \
     --host=x86_64-w64-mingw32 \
