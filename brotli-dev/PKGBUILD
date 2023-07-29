@@ -12,7 +12,7 @@ build() {
   export PATH="/github/home/cross/bin:$PATH"
   export PKG_CONFIG_LIBDIR="/github/home/opt/lib/pkgconfig"
   export PKG_CONFIG="pkgconf --static"
-  export CFLAGS="-fno-asynchronous-unwind-tables -I/github/home/opt/include"
+  export CFLAGS="-I/github/home/opt/include"
   export CPPFLAGS="-I/github/home/opt/include"
   export LDFLAGS="-L/github/home/opt/lib"
   cd $srcdir/brotli
