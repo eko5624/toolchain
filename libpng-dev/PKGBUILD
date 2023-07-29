@@ -10,10 +10,15 @@ source=("git+https://github.com/glennrp/libpng.git")
 md5sums=('SKIP')
 
 build() {
+  export PATH="/github/home/cross/bin:$PATH"
+  export PKG_CONFIG_LIBDIR="/github/home/opt/lib/pkgconfig"
+  export PKG_CONFIG="pkgconf --static"
+  export CFLAGS="-fno-asynchronous-unwind-tables -I/github/home/opt/include"
+  export CPPFLAGS="-I/github/home/opt/include"
+  export LDFLAGS="-L/github/home/opt/lib"
   cd $srcdir/libpng
   autoreconf -ivf
   ./configure \
-    CFLAGS='-fno-asynchronous-unwind-tables' \
     --host=x86_64-w64-mingw32 \
     --prefix=/github/home/opt \
     --disable-shared \
