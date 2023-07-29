@@ -365,6 +365,9 @@ jobs:
           curl -OL https://github.com/${{ github.repository }}/releases/download/dev/zlib-dev-1.2.13-1-x86_64.pkg.tar.zst
           pacman -U *.zst --noconfirm
           sudo chmod 777 -R ${{ env.top_dir }}
+          export PATH="/github/home/cross/bin:$PATH"
+          export PKG_CONFIG_LIBDIR="/github/home/opt/lib/pkgconfig"
+          export PKG_CONFIG="pkgconf --static"
           cd ${{ env.top_dir }}/toolchain-test/libpng-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
       - name: Release
@@ -418,6 +421,9 @@ jobs:
       - name: Build
         run: |
           sudo chmod 777 -R ${{ env.top_dir }}
+          export PATH="/github/home/cross/bin:$PATH"
+          export PKG_CONFIG_LIBDIR="/github/home/opt/lib/pkgconfig"
+          export PKG_CONFIG="pkgconf --static"
           cd ${{ env.top_dir }}/toolchain-test/zlib-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
       - name: Release
