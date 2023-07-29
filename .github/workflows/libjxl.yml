@@ -360,10 +360,6 @@ jobs:
           restore-keys: |
             cross-gcc-mcf-
       - name: Build
-        env:
-          C_INCLUDE_PATH: ${{ env.top_dir }}/opt/include
-          CPLUS_INCLUDE_PATH: ${{ env.top_dir }}/opt/include
-          LIBRARY_PATH: ${{ env.top_dir }}/opt/lib
         run: |
           cd ${{ env.top_dir }}
           curl -OL https://github.com/${{ github.repository }}/releases/download/dev/zlib-dev-1.2.13-1-x86_64.pkg.tar.zst
