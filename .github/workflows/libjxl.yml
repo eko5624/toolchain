@@ -46,6 +46,10 @@ jobs:
           restore-keys: |
             cross-gcc-mcf-
       - name: Build
+        env:
+          C_INCLUDE_PATH: ${{ env.top_dir }}/opt/include
+          CPLUS_INCLUDE_PATH: ${{ env.top_dir }}/opt/include
+          LIBRARY_PATH: ${{ env.top_dir }}/opt/lib
         run: |
           export PATH="${{ env.top_dir }}/cross/bin:$PATH"
           export PKG_CONFIG_LIBDIR="${{ env.top_dir }}/opt/lib/pkgconfig"
@@ -102,6 +106,10 @@ jobs:
           restore-keys: |
             cross-gcc-mcf-
       - name: Build
+        env:
+          C_INCLUDE_PATH: ${{ env.top_dir }}/opt/include
+          CPLUS_INCLUDE_PATH: ${{ env.top_dir }}/opt/include
+          LIBRARY_PATH: ${{ env.top_dir }}/opt/lib
         run: |
           export PATH="${{ env.top_dir }}/cross/bin:$PATH"
           export PKG_CONFIG_LIBDIR="${{ env.top_dir }}/opt/lib/pkgconfig"
@@ -158,6 +166,10 @@ jobs:
           restore-keys: |
             cross-gcc-mcf-
       - name: Build
+        env:
+          C_INCLUDE_PATH: ${{ env.top_dir }}/opt/include
+          CPLUS_INCLUDE_PATH: ${{ env.top_dir }}/opt/include
+          LIBRARY_PATH: ${{ env.top_dir }}/opt/lib
         run: |
           export PATH="${{ env.top_dir }}/cross/bin:$PATH"
           export PKG_CONFIG_LIBDIR="${{ env.top_dir }}/opt/lib/pkgconfig"
@@ -214,6 +226,10 @@ jobs:
           restore-keys: |
             cross-gcc-mcf-
       - name: Build
+        env:
+          C_INCLUDE_PATH: ${{ env.top_dir }}/opt/include
+          CPLUS_INCLUDE_PATH: ${{ env.top_dir }}/opt/include
+          LIBRARY_PATH: ${{ env.top_dir }}/opt/lib
         run: |
           export PATH="${{ env.top_dir }}/cross/bin:$PATH"
           export PKG_CONFIG_LIBDIR="${{ env.top_dir }}/opt/lib/pkgconfig"
@@ -271,6 +287,10 @@ jobs:
           restore-keys: |
             cross-gcc-mcf-
       - name: Build
+        env:
+          C_INCLUDE_PATH: ${{ env.top_dir }}/opt/include
+          CPLUS_INCLUDE_PATH: ${{ env.top_dir }}/opt/include
+          LIBRARY_PATH: ${{ env.top_dir }}/opt/lib
         run: |
           export PATH="${{ env.top_dir }}/cross/bin:$PATH"
           export PKG_CONFIG_LIBDIR="${{ env.top_dir }}/opt/lib/pkgconfig"
@@ -334,6 +354,10 @@ jobs:
           restore-keys: |
             cross-gcc-mcf-
       - name: Build
+        env:
+          C_INCLUDE_PATH: ${{ env.top_dir }}/opt/include
+          CPLUS_INCLUDE_PATH: ${{ env.top_dir }}/opt/include
+          LIBRARY_PATH: ${{ env.top_dir }}/opt/lib
         run: |
           export PATH="${{ env.top_dir }}/cross/bin:$PATH"
           export PKG_CONFIG_LIBDIR="${{ env.top_dir }}/opt/lib/pkgconfig"
@@ -393,6 +417,10 @@ jobs:
           restore-keys: |
             cross-gcc-mcf-
       - name: Build
+        env:
+          C_INCLUDE_PATH: ${{ env.top_dir }}/opt/include
+          CPLUS_INCLUDE_PATH: ${{ env.top_dir }}/opt/include
+          LIBRARY_PATH: ${{ env.top_dir }}/opt/lib
         run: |
           export PATH="${{ env.top_dir }}/cross/bin:$PATH"
           export PKG_CONFIG_LIBDIR="${{ env.top_dir }}/opt/lib/pkgconfig"
