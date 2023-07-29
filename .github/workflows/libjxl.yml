@@ -13,8 +13,9 @@ jobs:
     steps:    
       - name: Install Dependencies
         run: |
-          pacman -Syu --noconfirm
-          pacman -S --noconfirm --needed git yasm nasm ninja cmake python-pip curl python-cairo unzip p7zip curl jq
+          sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
+          sudo pacman -Syu --noconfirm docker
+          sudo pacman -S --noconfirm --needed git gyp mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf unzip p7zip xz clang python-pip python-cairo curl jq lib32-glib2 wget
           pip3 install -U --break-system-packages setuptools rst2pdf mako jsonschema meson
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -73,8 +74,9 @@ jobs:
     steps:    
       - name: Install Dependencies
         run: |
-          pacman -Syu --noconfirm
-          pacman -S --noconfirm --needed git yasm nasm ninja cmake python-pip curl python-cairo unzip p7zip curl jq
+          sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
+          sudo pacman -Syu --noconfirm docker
+          sudo pacman -S --noconfirm --needed git gyp mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf unzip p7zip xz clang python-pip python-cairo curl jq lib32-glib2 wget
           pip3 install -U --break-system-packages setuptools rst2pdf mako jsonschema meson
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -133,8 +135,9 @@ jobs:
     steps:    
       - name: Install Dependencies
         run: |
-          pacman -Syu --noconfirm
-          pacman -S --noconfirm --needed git yasm nasm ninja cmake python-pip curl python-cairo unzip p7zip curl jq
+          sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
+          sudo pacman -Syu --noconfirm docker
+          sudo pacman -S --noconfirm --needed git gyp mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf unzip p7zip xz clang python-pip python-cairo curl jq lib32-glib2 wget
           pip3 install -U --break-system-packages setuptools rst2pdf mako jsonschema meson
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -193,8 +196,9 @@ jobs:
     steps:    
       - name: Install Dependencies
         run: |
-          pacman -Syu --noconfirm
-          pacman -S --noconfirm --needed git yasm nasm ninja cmake python-pip curl python-cairo unzip p7zip curl jq
+          sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
+          sudo pacman -Syu --noconfirm docker
+          sudo pacman -S --noconfirm --needed git gyp mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf unzip p7zip xz clang python-pip python-cairo curl jq lib32-glib2 wget
           pip3 install -U --break-system-packages setuptools rst2pdf mako jsonschema meson
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -254,8 +258,9 @@ jobs:
     steps:    
       - name: Install Dependencies
         run: |
-          pacman -Syu --noconfirm
-          pacman -S --noconfirm --needed git yasm nasm ninja cmake python-pip curl python-cairo unzip p7zip curl jq
+          sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
+          sudo pacman -Syu --noconfirm docker
+          sudo pacman -S --noconfirm --needed git gyp mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf unzip p7zip xz clang python-pip python-cairo curl jq lib32-glib2 wget
           pip3 install -U --break-system-packages setuptools rst2pdf mako jsonschema meson
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -321,8 +326,9 @@ jobs:
     steps:    
       - name: Install Dependencies
         run: |
-          pacman -Syu --noconfirm
-          pacman -S --noconfirm --needed git yasm nasm ninja cmake python-pip curl python-cairo unzip p7zip curl jq
+          sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
+          sudo pacman -Syu --noconfirm docker
+          sudo pacman -S --noconfirm --needed git gyp mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf unzip p7zip xz clang python-pip python-cairo curl jq lib32-glib2 wget
           pip3 install -U --break-system-packages setuptools rst2pdf mako jsonschema meson
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -384,8 +390,9 @@ jobs:
     steps:    
       - name: Install Dependencies
         run: |
-          pacman -Syu --noconfirm
-          pacman -S --noconfirm --needed git yasm nasm ninja cmake python-pip curl python-cairo unzip p7zip curl jq
+          sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
+          sudo pacman -Syu --noconfirm docker
+          sudo pacman -S --noconfirm --needed git gyp mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf unzip p7zip xz clang python-pip python-cairo curl jq lib32-glib2 wget
           pip3 install -U --break-system-packages setuptools rst2pdf mako jsonschema meson
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
