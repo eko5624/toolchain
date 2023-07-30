@@ -34,8 +34,8 @@ jobs:
         uses: actions/checkout@main        
       - name: Setting makepkg etc
         run: |
-          sudo cp ${{ github.workspace }}/pacman-config/makepkg_cross.conf /etc
-          sudo cp ${{ github.workspace }}/pacman-config/makepkg-cross /usr/local/bin
+          sudo cp pacman-config/makepkg_cross.conf /etc
+          sudo cp pacman-config/makepkg-cross /usr/local/bin
           sudo chmod +x /usr/local/bin/makepkg-cross
       - name: Loading cross gcc cache
         uses: actions/cache/restore@main
@@ -47,7 +47,7 @@ jobs:
       - name: Build
         run: |
           sudo chmod 777 -R ${{ env.top_dir }}
-          sudo chmod 777 -R ${{ github.workspace }}
+          sudo chmod 776 -R .
           cd brotli-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
       - name: Release
@@ -85,8 +85,8 @@ jobs:
         uses: actions/checkout@main        
       - name: Setting makepkg etc
         run: |
-          sudo cp ${{ github.workspace }}/pacman-config/makepkg_cross.conf /etc
-          sudo cp ${{ github.workspace }}/pacman-config/makepkg-cross /usr/local/bin
+          sudo cp pacman-config/makepkg_cross.conf /etc
+          sudo cp pacman-config/makepkg-cross /usr/local/bin
           sudo chmod +x /usr/local/bin/makepkg-cross
       - name: Loading cross gcc cache
         uses: actions/cache/restore@main
@@ -98,7 +98,7 @@ jobs:
       - name: Build
         run: |
           sudo chmod 777 -R ${{ env.top_dir }}
-          sudo chmod 777 -R ${{ github.workspace }}
+          sudo chmod 776 -R .
           cd highway-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
       - name: Release
@@ -136,8 +136,8 @@ jobs:
         uses: actions/checkout@main        
       - name: Setting makepkg etc
         run: |
-          sudo cp ${{ github.workspace }}/pacman-config/makepkg_cross.conf /etc
-          sudo cp ${{ github.workspace }}/pacman-config/makepkg-cross /usr/local/bin
+          sudo cp pacman-config/makepkg_cross.conf /etc
+          sudo cp pacman-config/makepkg-cross /usr/local/bin
           sudo chmod +x /usr/local/bin/makepkg-cross
       - name: Loading cross gcc cache
         uses: actions/cache/restore@main
@@ -149,7 +149,7 @@ jobs:
       - name: Build
         run: |
           sudo chmod 777 -R ${{ env.top_dir }}
-          sudo chmod 777 -R ${{ github.workspace }}
+          sudo chmod 776 -R .
           cd lcms2-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
       - name: Release
@@ -187,8 +187,8 @@ jobs:
         uses: actions/checkout@main        
       - name: Setting makepkg etc
         run: |
-          sudo cp ${{ github.workspace }}/pacman-config/makepkg_cross.conf /etc
-          sudo cp ${{ github.workspace }}/pacman-config/makepkg-cross /usr/local/bin
+          sudo cp pacman-config/makepkg_cross.conf /etc
+          sudo cp pacman-config/makepkg-cross /usr/local/bin
           sudo chmod +x /usr/local/bin/makepkg-cross
       - name: Loading cross gcc cache
         uses: actions/cache/restore@main
@@ -200,7 +200,7 @@ jobs:
       - name: Build
         run: |
           sudo chmod 777 -R ${{ env.top_dir }}
-          sudo chmod 777 -R ${{ github.workspace }}
+          sudo chmod 776 -R .
           cd libjpeg-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
       - name: Release
@@ -239,8 +239,8 @@ jobs:
         uses: actions/checkout@main        
       - name: Setting makepkg etc
         run: |
-          sudo cp ${{ github.workspace }}/pacman-config/makepkg_cross.conf /etc
-          sudo cp ${{ github.workspace }}/pacman-config/makepkg-cross /usr/local/bin
+          sudo cp pacman-config/makepkg_cross.conf /etc
+          sudo cp pacman-config/makepkg-cross /usr/local/bin
           sudo chmod +x /usr/local/bin/makepkg-cross
       - name: Loading cross gcc cache
         uses: actions/cache/restore@main
@@ -257,7 +257,7 @@ jobs:
           curl -OL https://github.com/${{ github.repository }}/releases/download/dev/libjpeg-dev-3.0.0-1-x86_64.pkg.tar.zst
           pacman -U *.zst --noconfirm
           sudo chmod 777 -R ${{ env.top_dir }}
-          sudo chmod 777 -R ${{ github.workspace }}
+          sudo chmod 776 -R .
           cd libjxl-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
       - name: Release
@@ -296,8 +296,8 @@ jobs:
         uses: actions/checkout@main        
       - name: Setting makepkg etc
         run: |
-          sudo cp ${{ github.workspace }}/pacman-config/makepkg_cross.conf /etc
-          sudo cp ${{ github.workspace }}/pacman-config/makepkg-cross /usr/local/bin
+          sudo cp pacman-config/makepkg_cross.conf /etc
+          sudo cp pacman-config/makepkg-cross /usr/local/bin
           sudo chmod +x /usr/local/bin/makepkg-cross
       - name: Loading cross gcc cache
         uses: actions/cache/restore@main
@@ -311,7 +311,7 @@ jobs:
           curl -OL https://github.com/${{ github.repository }}/releases/download/dev/zlib-dev-1.2.13-1-x86_64.pkg.tar.zst
           pacman -U *.zst --noconfirm
           sudo chmod 777 -R ${{ env.top_dir }}
-          sudo chmod 777 -R ${{ github.workspace }}
+          sudo chmod 776 -R .
           cd libpng-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
       - name: Release
@@ -349,8 +349,8 @@ jobs:
         uses: actions/checkout@main        
       - name: Setting makepkg etc
         run: |
-          sudo cp ${{ github.workspace }}/pacman-config/makepkg_cross.conf /etc
-          sudo cp ${{ github.workspace }}/pacman-config/makepkg-cross /usr/local/bin
+          sudo cp pacman-config/makepkg_cross.conf /etc
+          sudo cp pacman-config/makepkg-cross /usr/local/bin
           sudo chmod +x /usr/local/bin/makepkg-cross
       - name: Loading cross gcc cache
         uses: actions/cache/restore@main
@@ -362,7 +362,7 @@ jobs:
       - name: Build
         run: |
           sudo chmod 777 -R ${{ env.top_dir }}
-          sudo chmod 777 -R ${{ github.workspace }}
+          sudo chmod 776 -R .
           cd zlib-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
       - name: Release
