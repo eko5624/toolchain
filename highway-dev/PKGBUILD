@@ -15,7 +15,7 @@ build() {
   cd $srcdir/highway
   rm -rf build && mkdir build && cd build
   cmake .. -G Ninja \
-    -DCMAKE_INSTALL_PREFIX=${MINGW_PREFIX} \
+    -DCMAKE_INSTALL_PREFIX="${MINGW_PREFIX}" \
     -DCMAKE_TOOLCHAIN_FILE=/github/home/toolchain-test/toolchain.cmake \
     -DBUILD_TESTING=OFF \
     -DCMAKE_GNUtoMS=OFF \
