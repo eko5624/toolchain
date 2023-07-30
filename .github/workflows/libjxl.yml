@@ -47,7 +47,7 @@ jobs:
       - name: Build
         run: |
           sudo chmod 777 -R ${{ env.top_dir }}
-          sudo chmod 776 -R .
+          sudo chmod 777 -R .
           cd brotli-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
       - name: Release
@@ -98,7 +98,7 @@ jobs:
       - name: Build
         run: |
           sudo chmod 777 -R ${{ env.top_dir }}
-          sudo chmod 776 -R .
+          sudo chmod 777 -R .
           cd highway-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
       - name: Release
@@ -149,7 +149,7 @@ jobs:
       - name: Build
         run: |
           sudo chmod 777 -R ${{ env.top_dir }}
-          sudo chmod 776 -R .
+          sudo chmod 777 -R .
           cd lcms2-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
       - name: Release
@@ -200,7 +200,7 @@ jobs:
       - name: Build
         run: |
           sudo chmod 777 -R ${{ env.top_dir }}
-          sudo chmod 776 -R .
+          sudo chmod 777 -R .
           cd libjpeg-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
       - name: Release
@@ -257,7 +257,7 @@ jobs:
           curl -OL https://github.com/${{ github.repository }}/releases/download/dev/libjpeg-dev-3.0.0-1-x86_64.pkg.tar.zst
           pacman -U *.zst --noconfirm
           sudo chmod 777 -R ${{ env.top_dir }}
-          sudo chmod 776 -R .
+          sudo chmod 777 -R .
           cd libjxl-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
       - name: Release
@@ -311,7 +311,7 @@ jobs:
           curl -OL https://github.com/${{ github.repository }}/releases/download/dev/zlib-dev-1.2.13-1-x86_64.pkg.tar.zst
           pacman -U *.zst --noconfirm
           sudo chmod 777 -R ${{ env.top_dir }}
-          sudo chmod 776 -R .
+          sudo chmod 777 -R .
           cd libpng-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
       - name: Release
