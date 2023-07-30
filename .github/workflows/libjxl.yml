@@ -31,13 +31,11 @@ jobs:
         run: |
            echo "top_dir=$(cd ~ && pwd)" >> $GITHUB_ENV         
       - name: Checkout
-        run: |
-          cd ${{ env.top_dir }}
-          git clone https://github.com/eko5624/toolchain-test        
+        uses: actions/checkout@main        
       - name: Setting makepkg etc
         run: |
-          sudo cp ${{ env.top_dir }}/toolchain-test/pacman-config/makepkg_cross.conf /etc
-          sudo cp ${{ env.top_dir }}/toolchain-test/pacman-config/makepkg-cross /usr/local/bin
+          sudo cp ${{ github.workspace }}/pacman-config/makepkg_cross.conf /etc
+          sudo cp ${{ github.workspace }}/pacman-config/makepkg-cross /usr/local/bin
           sudo chmod +x /usr/local/bin/makepkg-cross
       - name: Loading cross gcc cache
         uses: actions/cache/restore@main
@@ -49,13 +47,13 @@ jobs:
       - name: Build
         run: |
           sudo chmod 777 -R ${{ env.top_dir }}
-          cd ${{ env.top_dir }}/toolchain-test/brotli-dev
+          sudo chmod 777 -R ${{ github.workspace }}
+          cd brotli-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
       - name: Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cd ${{ env.top_dir }}/toolchain-test
           chmod +x ./release-dev.sh
           ./release-dev.sh brotli-dev brotli-dev
           
@@ -84,13 +82,11 @@ jobs:
         run: |
            echo "top_dir=$(cd ~ && pwd)" >> $GITHUB_ENV         
       - name: Checkout
-        run: |
-          cd ${{ env.top_dir }}
-          git clone https://github.com/eko5624/toolchain-test
+        uses: actions/checkout@main        
       - name: Setting makepkg etc
         run: |
-          sudo cp ${{ env.top_dir }}/toolchain-test/pacman-config/makepkg_cross.conf /etc
-          sudo cp ${{ env.top_dir }}/toolchain-test/pacman-config/makepkg-cross /usr/local/bin
+          sudo cp ${{ github.workspace }}/pacman-config/makepkg_cross.conf /etc
+          sudo cp ${{ github.workspace }}/pacman-config/makepkg-cross /usr/local/bin
           sudo chmod +x /usr/local/bin/makepkg-cross
       - name: Loading cross gcc cache
         uses: actions/cache/restore@main
@@ -102,13 +98,13 @@ jobs:
       - name: Build
         run: |
           sudo chmod 777 -R ${{ env.top_dir }}
-          cd ${{ env.top_dir }}/toolchain-test/highway-dev
+          sudo chmod 777 -R ${{ github.workspace }}
+          cd highway-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
       - name: Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cd ${{ env.top_dir }}/toolchain-test
           chmod +x ./release-dev.sh
           ./release-dev.sh highway-dev highway-dev
           
@@ -137,13 +133,11 @@ jobs:
         run: |
            echo "top_dir=$(cd ~ && pwd)" >> $GITHUB_ENV         
       - name: Checkout
-        run: |
-          cd ${{ env.top_dir }}
-          git clone https://github.com/eko5624/toolchain-test
+        uses: actions/checkout@main        
       - name: Setting makepkg etc
         run: |
-          sudo cp ${{ env.top_dir }}/toolchain-test/pacman-config/makepkg_cross.conf /etc
-          sudo cp ${{ env.top_dir }}/toolchain-test/pacman-config/makepkg-cross /usr/local/bin
+          sudo cp ${{ github.workspace }}/pacman-config/makepkg_cross.conf /etc
+          sudo cp ${{ github.workspace }}/pacman-config/makepkg-cross /usr/local/bin
           sudo chmod +x /usr/local/bin/makepkg-cross
       - name: Loading cross gcc cache
         uses: actions/cache/restore@main
@@ -155,13 +149,13 @@ jobs:
       - name: Build
         run: |
           sudo chmod 777 -R ${{ env.top_dir }}
-          cd ${{ env.top_dir }}/toolchain-test/lcms2-dev
+          sudo chmod 777 -R ${{ github.workspace }}
+          cd lcms2-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
       - name: Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cd ${{ env.top_dir }}/toolchain-test
           chmod +x ./release-dev.sh
           ./release-dev.sh lcms2-dev lcms2-dev
           
@@ -190,13 +184,11 @@ jobs:
         run: |
            echo "top_dir=$(cd ~ && pwd)" >> $GITHUB_ENV         
       - name: Checkout
-        run: |
-          cd ${{ env.top_dir }}
-          git clone https://github.com/eko5624/toolchain-test
+        uses: actions/checkout@main        
       - name: Setting makepkg etc
         run: |
-          sudo cp ${{ env.top_dir }}/toolchain-test/pacman-config/makepkg_cross.conf /etc
-          sudo cp ${{ env.top_dir }}/toolchain-test/pacman-config/makepkg-cross /usr/local/bin
+          sudo cp ${{ github.workspace }}/pacman-config/makepkg_cross.conf /etc
+          sudo cp ${{ github.workspace }}/pacman-config/makepkg-cross /usr/local/bin
           sudo chmod +x /usr/local/bin/makepkg-cross
       - name: Loading cross gcc cache
         uses: actions/cache/restore@main
@@ -208,13 +200,13 @@ jobs:
       - name: Build
         run: |
           sudo chmod 777 -R ${{ env.top_dir }}
-          cd ${{ env.top_dir }}/toolchain-test/libjpeg-dev
+          sudo chmod 777 -R ${{ github.workspace }}
+          cd libjpeg-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
       - name: Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cd ${{ env.top_dir }}/toolchain-test
           chmod +x ./release-dev.sh
           ./release-dev.sh libjpeg-dev libjpeg-dev
           
@@ -244,13 +236,11 @@ jobs:
         run: |
            echo "top_dir=$(cd ~ && pwd)" >> $GITHUB_ENV         
       - name: Checkout
-        run: |
-          cd ${{ env.top_dir }}
-          git clone https://github.com/eko5624/toolchain-test
+        uses: actions/checkout@main        
       - name: Setting makepkg etc
         run: |
-          sudo cp ${{ env.top_dir }}/toolchain-test/pacman-config/makepkg_cross.conf /etc
-          sudo cp ${{ env.top_dir }}/toolchain-test/pacman-config/makepkg-cross /usr/local/bin
+          sudo cp ${{ github.workspace }}/pacman-config/makepkg_cross.conf /etc
+          sudo cp ${{ github.workspace }}/pacman-config/makepkg-cross /usr/local/bin
           sudo chmod +x /usr/local/bin/makepkg-cross
       - name: Loading cross gcc cache
         uses: actions/cache/restore@main
@@ -261,20 +251,19 @@ jobs:
             cross-gcc-mcf-
       - name: Build
         run: |
-          cd ${{ env.top_dir }}
           curl -OL https://github.com/${{ github.repository }}/releases/download/dev/brotli-dev-1.0.9-1-x86_64.pkg.tar.zst
           curl -OL https://github.com/${{ github.repository }}/releases/download/dev/highway-dev-1.0.5-1-x86_64.pkg.tar.zst
           curl -OL https://github.com/${{ github.repository }}/releases/download/dev/lcms2-dev-2.15-1-x86_64.pkg.tar.zst
           curl -OL https://github.com/${{ github.repository }}/releases/download/dev/libjpeg-dev-3.0.0-1-x86_64.pkg.tar.zst
           pacman -U *.zst --noconfirm
           sudo chmod 777 -R ${{ env.top_dir }}
-          cd ${{ env.top_dir }}/toolchain-test/libjxl-dev
+          sudo chmod 777 -R ${{ github.workspace }}
+          cd libjxl-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
       - name: Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cd ${{ env.top_dir }}/toolchain-test
           chmod +x ./release-dev.sh
           ./release-dev.sh libjxl-dev libjxl-dev
           
@@ -304,13 +293,11 @@ jobs:
         run: |
            echo "top_dir=$(cd ~ && pwd)" >> $GITHUB_ENV         
       - name: Checkout
-        run: |
-          cd ${{ env.top_dir }}
-          git clone https://github.com/eko5624/toolchain-test
+        uses: actions/checkout@main        
       - name: Setting makepkg etc
         run: |
-          sudo cp ${{ env.top_dir }}/toolchain-test/pacman-config/makepkg_cross.conf /etc
-          sudo cp ${{ env.top_dir }}/toolchain-test/pacman-config/makepkg-cross /usr/local/bin
+          sudo cp ${{ github.workspace }}/pacman-config/makepkg_cross.conf /etc
+          sudo cp ${{ github.workspace }}/pacman-config/makepkg-cross /usr/local/bin
           sudo chmod +x /usr/local/bin/makepkg-cross
       - name: Loading cross gcc cache
         uses: actions/cache/restore@main
@@ -321,17 +308,16 @@ jobs:
             cross-gcc-mcf-
       - name: Build
         run: |
-          cd ${{ env.top_dir }}
           curl -OL https://github.com/${{ github.repository }}/releases/download/dev/zlib-dev-1.2.13-1-x86_64.pkg.tar.zst
           pacman -U *.zst --noconfirm
           sudo chmod 777 -R ${{ env.top_dir }}
-          cd ${{ env.top_dir }}/toolchain-test/libpng-dev
+          sudo chmod 777 -R ${{ github.workspace }}
+          cd libpng-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
       - name: Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cd ${{ env.top_dir }}/toolchain-test
           chmod +x ./release-dev.sh
           ./release-dev.sh libpng-dev libpng-dev
           
@@ -360,13 +346,11 @@ jobs:
         run: |
            echo "top_dir=$(cd ~ && pwd)" >> $GITHUB_ENV         
       - name: Checkout
-        run: |
-          cd ${{ env.top_dir }}
-          git clone https://github.com/eko5624/toolchain-test
+        uses: actions/checkout@main        
       - name: Setting makepkg etc
         run: |
-          sudo cp ${{ env.top_dir }}/toolchain-test/pacman-config/makepkg_cross.conf /etc
-          sudo cp ${{ env.top_dir }}/toolchain-test/pacman-config/makepkg-cross /usr/local/bin
+          sudo cp ${{ github.workspace }}/pacman-config/makepkg_cross.conf /etc
+          sudo cp ${{ github.workspace }}/pacman-config/makepkg-cross /usr/local/bin
           sudo chmod +x /usr/local/bin/makepkg-cross
       - name: Loading cross gcc cache
         uses: actions/cache/restore@main
@@ -378,13 +362,13 @@ jobs:
       - name: Build
         run: |
           sudo chmod 777 -R ${{ env.top_dir }}
-          cd ${{ env.top_dir }}/toolchain-test/zlib-dev
+          sudo chmod 777 -R ${{ github.workspace }}
+          cd zlib-dev
           sudo -H -u builder makepkg-cross -sC --noconfirm
       - name: Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cd ${{ env.top_dir }}/toolchain-test
           chmod +x ./release-dev.sh
           ./release-dev.sh zlib-dev zlib-dev
           
