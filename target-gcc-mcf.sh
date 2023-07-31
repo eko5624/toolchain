@@ -390,7 +390,6 @@ $M_SOURCE/windows-default-manifest/configure \
   --prefix=$M_TARGET
 make -j$MJOBS
 make install
-cp $M_TARGET/bin/make.exe $M_TARGET/bin/mingw32-make.exe
 
 echo "building make"
 echo "======================="
