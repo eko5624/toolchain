@@ -1,4 +1,4 @@
-name: build
+name: avisynth
 defaults:
   run:
     shell: bash
