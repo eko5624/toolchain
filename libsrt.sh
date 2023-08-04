@@ -33,6 +33,8 @@ echo "building libsrt"
 echo "======================="
 cd $M_SOURCE
 git clone https://github.com/Haivision/srt.git
+curl -OL https://raw.githubusercontent.com/shinchiro/mpv-winbuild-cmake/master/packages/libsrt-0001-avoid-name-collision.patch
+patch -d $M_SOURCE/srt -p1 < $M_SOURCE/libsrt-0001-avoid-name-collision.patch
 cd $M_BUILD
 mkdir libsrt-build
 cmake -G Ninja -H$M_SOURCE/srt -B$M_BUILD/libsrt-build \
