@@ -29,6 +29,25 @@ export LDFLAGS="-L$TOP_DIR/opt/lib"
 mkdir -p $M_SOURCE
 mkdir -p $M_BUILD
 
+echo "building mbedtls"
+echo "======================="
+cd $M_SOURCE
+git clone https://github.com/Mbed-TLS/mbedtls.git
+cd $M_BUILD
+mkdir mbedtls-build
+cmake -H$M_SOURCE/mbedtls -B$M_BUILD/mbedtls-build \
+  -DCMAKE_INSTALL_PREFIX=$TOP_DIR/opt \
+  -DCMAKE_TOOLCHAIN_FILE=$TOP_DIR/toolchain.cmake \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DENABLE_PROGRAMS=OFF \
+  -DENABLE_TESTING=OFF \
+  -DGEN_FILES=ON \
+  -DUSE_STATIC_MBEDTLS_LIBRARY=ON \
+  -DUSE_SHARED_MBEDTLS_LIBRARY=OFF \
+  -DINSTALL_MBEDTLS_HEADERS=ON
+make -j$MJOBS -C $M_BUILD/mbedtls-build
+make install -C $M_BUILD/mbedtls-build
+
 echo "building libsrt"
 echo "======================="
 cd $M_SOURCE
