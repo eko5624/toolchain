@@ -379,18 +379,17 @@ cp $M_TARGET/bin/$MINGW_TRIPLE-gcc.exe $M_TARGET/bin/$MINGW_TRIPLE-cc.exe
 find $M_TARGET/lib -type f \( -name "*.dll.a" ! -name "libmcfgthread.dll.a" \) -print0 | xargs -0 -I {} rm {}
 find $M_TARGET/lib -type f -name "*.la" -print0 | xargs -0 -I {} rm {}
 
-#echo "building windows-default-manifest"
-#echo "======================="
-#cd $M_BUILD
-#mkdir windows-default-manifest-build
-#cd windows-default-manifest-build
-#$M_SOURCE/windows-default-manifest/configure \
-#  --build=x86_64-pc-linux-gnu \
-#  --host=$MINGW_TRIPLE \
-#  --target=$MINGW_TRIPLE \
-#  --prefix=$M_TARGET
-#make -j$MJOBS
-#make install
+echo "building windows-default-manifest"
+echo "======================="
+cd $M_BUILD
+mkdir windows-default-manifest-build
+cd windows-default-manifest-build
+$M_SOURCE/windows-default-manifest/configure \
+  --host=$MINGW_TRIPLE \
+  --target=$MINGW_TRIPLE \
+  --prefix=$M_TARGET
+make -j$MJOBS
+make install
 
 echo "building make"
 echo "======================="
@@ -403,6 +402,7 @@ $M_SOURCE/make-4.4.1/configure \
   --prefix=$M_TARGET
 make -j$MJOBS
 make install
+cp $M_TARGET/bin/make.exe $M_TARGET/bin/mingw32-make.exe
 
 echo "building pkgconf"
 echo "======================="
