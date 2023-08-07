@@ -385,6 +385,7 @@ cd $M_BUILD
 mkdir windows-default-manifest-build
 cd windows-default-manifest-build
 $M_SOURCE/windows-default-manifest/configure \
+  --build=x86_64-pc-linux-gnu \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
   --prefix=$M_TARGET
