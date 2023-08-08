@@ -22,15 +22,3 @@ echo "======================="
 curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --target x86_64-pc-windows-gnu --no-modify-path --profile minimal
 rustup update
 cargo install cargo-c --profile=release-strip --features=vendored-openssl
-cat <<EOF >$CARGO_HOME/config
-[net]
-git-fetch-with-cli = true
-
-[target.x86_64-pc-windows-gnu]
-linker = "@TOP_DIR@/cross/bin/x86_64-w64-mingw32-gcc"
-ar = "@TOP_DIR@/cross/bin/x86_64-w64-mingw32-ar"
-
-[profile.release]
-panic = "abort"
-strip = true
-EOF
