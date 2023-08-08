@@ -27,8 +27,8 @@ cat <<EOF >$CARGO_HOME/config
 git-fetch-with-cli = true
 
 [target.x86_64-pc-windows-gnu]
-linker = "$M_CROSS/bin/x86_64-w64-mingw32-gcc"
-ar = "$M_CROSS/bin/x86_64-w64-mingw32-ar"
+linker = "@TOP_DIR@/cross/bin/x86_64-w64-mingw32-gcc"
+ar = "@TOP_DIR@/cross/bin/x86_64-w64-mingw32-ar"
 
 [profile.release]
 panic = "abort"
