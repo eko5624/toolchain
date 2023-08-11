@@ -32,8 +32,8 @@ wget -c -O binutils-2.40.tar.bz2 http://ftp.gnu.org/gnu/binutils/binutils-2.40.t
 tar xjf binutils-2.40.tar.bz2
 
 #gcc
-wget -c -O gcc-13.1.0.tar.xz https://ftp.gnu.org/gnu/gcc/gcc-13.1.0/gcc-13.1.0.tar.xz
-xz -c -d gcc-13.1.0.tar.xz | tar xf -
+wget -c -O gcc-13.2.0.tar.xz https://ftp.gnu.org/gnu/gcc/gcc-13.2.0/gcc-13.2.0.tar.xz
+xz -c -d gcc-13.2.0.tar.xz | tar xf -
 
 #mingw-w64
 git clone https://github.com/mingw-w64/mingw-w64.git --branch master --depth 1
@@ -66,11 +66,6 @@ make install
 cd $M_CROSS/bin
 ln -s $(which pkg-config) $MINGW_TRIPLE-pkg-config
 ln -s $(which pkg-config) $MINGW_TRIPLE-pkgconf
-cd $M_CROSS
-mkdir -p $MINGW_TRIPLE/lib
-ln -s $MINGW_TRIPLE mingw
-cd $MINGW_TRIPLE
-ln -s lib lib64
 
 echo "building mingw-w64-headers"
 echo "======================="
@@ -85,6 +80,8 @@ $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
   --with-default-msvcrt=ucrt
 make -j$MJOBS
 make install
+cd $M_CROSS
+ln -s $MINGW_TRIPLE mingw
 
 echo "building mcfgthread"
 echo "======================="
@@ -105,11 +102,12 @@ echo "======================="
 cd $M_BUILD
 mkdir gcc-build
 cd gcc-build
-$M_SOURCE/gcc-13.1.0/configure \
+$M_SOURCE/gcc-13.2.0/configure \
   --target=$MINGW_TRIPLE \
   --prefix=$M_CROSS \
   --libdir=$M_CROSS/lib \
   --with-sysroot=$M_CROSS \
+  --with-pkgversion="GCC with MCF thread model" \
   --disable-multilib \
   --enable-languages=c,c++ \
   --disable-nls \
@@ -124,19 +122,19 @@ $M_SOURCE/gcc-13.1.0/configure \
   --enable-checking=release
 make -j$MJOBS all-gcc
 make install-strip-gcc
-cd $M_BUILD
 
 echo "building gendef"
 echo "======================="
+cd $M_BUILD
 mkdir gendef-build
 cd gendef-build
 $M_SOURCE/mingw-w64/mingw-w64-tools/gendef/configure --prefix=$M_CROSS
 make -j$MJOBS
 make install
-cd $M_BUILD
 
 echo "building winpthreads"
 echo "======================="
+cd $M_BUILD
 mkdir winpthreads-build
 cd winpthreads-build
 $M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
@@ -146,7 +144,6 @@ $M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
   --enable-static
 make -j$MJOBS
 make install
-cd $M_BUILD
 
 echo "building mingw-w64-crt"
 echo "======================="
@@ -164,11 +161,12 @@ $M_SOURCE/mingw-w64/mingw-w64-crt/configure \
   --disable-lib32
 make -j$MJOBS
 make install
-cd $M_BUILD
 
 echo "building gcc-final"
 echo "======================="
-cd gcc-build
+cd $M_BUILD/gcc-build
 make -j$MJOBS
 make install
-cd $M_SOURCE
+cd $M_CROSS
+rm -f mingw
+rm -rf share

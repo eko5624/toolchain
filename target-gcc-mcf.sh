@@ -7,11 +7,9 @@ TOP_DIR=$(pwd)
 # Env Var NUMJOBS overrides automatic detection
 MJOBS=$(grep -c processor /proc/cpuinfo)
 
-CFLAGS="-pipe -O2"
+
 MINGW_TRIPLE="x86_64-w64-mingw32"
 export MINGW_TRIPLE
-export CFLAGS
-export CXXFLAGS=$CFLAGS
 
 export M_ROOT=$(pwd)
 export M_SOURCE=$M_ROOT/source
@@ -39,29 +37,38 @@ echo "gettiong source"
 echo "======================="
 cd $M_SOURCE
 
+VER_BINUTILS=2.40
+VER_GCC=13.2.0
+VER_GMP=6.2.1
+VER_MPFR=4.2.0
+VER_MPC=1.3.1
+VER_ISL=0.24
+VER_MAKE=4.4.1
+VER_PKGCONF=2.0.0
+
 #binutils
-wget -c -O binutils-2.40.tar.bz2 http://ftp.gnu.org/gnu/binutils/binutils-2.40.tar.bz2
-tar xjf binutils-2.40.tar.bz2
+wget -c -O binutils-$VER_BINUTILS.tar.bz2 http://ftp.gnu.org/gnu/binutils/binutils-$VER_BINUTILS.tar.bz2
+tar xjf binutils-$VER_BINUTILS.tar.bz2
 
 #gcc
-#wget -c -O gcc-13.2.0.tar.xz https://ftp.gnu.org/gnu/gcc/gcc-13.2.0/gcc-13.2.0.tar.xz
-#xz -c -d gcc-13.2.0.tar.xz | tar xf -
+#wget -c -O gcc-$VER_GCC.tar.xz https://ftp.gnu.org/gnu/gcc/gcc-$VER_GCC/gcc-$VER_GCC.tar.xz
+#xz -c -d gcc-$VER_GCC.tar.xz | tar xf -
 
 #gmp
-wget -c -O gmp-6.2.1.tar.bz2 https://ftp.gnu.org/gnu/gmp/gmp-6.2.1.tar.bz2
-tar xjf gmp-6.2.1.tar.bz2
+wget -c -O gmp-$VER_GMP.tar.bz2 https://ftp.gnu.org/gnu/gmp/gmp-$VER_GMP.tar.bz2
+tar xjf gmp-$VER_GMP.tar.bz2
 
 #mpfr
-wget -c -O mpfr-4.2.0.tar.bz2 https://ftp.gnu.org/gnu/mpfr/mpfr-4.2.0.tar.bz2
-tar xjf mpfr-4.2.0.tar.bz2
+wget -c -O mpfr-$VER_MPFR.tar.bz2 https://ftp.gnu.org/gnu/mpfr/mpfr-$VER_MPFR.tar.bz2
+tar xjf mpfr-$VER_MPFR.tar.bz2
 
 #MPC
-wget -c -O mpc-1.3.1.tar.gz https://ftp.gnu.org/gnu/mpc/mpc-1.3.1.tar.gz
-tar xzf mpc-1.3.1.tar.gz
+wget -c -O mpc-$VER_MPC.tar.gz https://ftp.gnu.org/gnu/mpc/mpc-$VER_MPC.tar.gz
+tar xzf mpc-$VER_MPC.tar.gz
 
 #isl
-wget -c -O isl-0.24.tar.bz2 https://gcc.gnu.org/pub/gcc/infrastructure/isl-0.24.tar.bz2
-tar xjf isl-0.24.tar.bz2
+wget -c -O isl-$VER_ISL.tar.bz2 https://gcc.gnu.org/pub/gcc/infrastructure/isl-$VER_ISL.tar.bz2
+tar xjf isl-$VER_ISL.tar.bz2
 
 #mingw-w64
 #git clone https://github.com/mingw-w64/mingw-w64.git --branch master --depth 1
@@ -70,11 +77,11 @@ tar xjf isl-0.24.tar.bz2
 git clone https://github.com/lhmouse/mcfgthread.git --branch master --depth 1
 
 #make
-wget -c -O make-4.4.1.tar.gz https://ftp.gnu.org/pub/gnu/make/make-4.4.1.tar.gz
-tar xzf make-4.4.1.tar.gz
+wget -c -O make-$VER_MAKE.tar.gz https://ftp.gnu.org/pub/gnu/make/make-$VER_MAKE.tar.gz
+tar xzf make-$VER_MAKE.tar.gz
 
 #pkgconf
-git clone https://github.com/pkgconf/pkgconf --branch pkgconf-1.9.5
+git clone https://github.com/pkgconf/pkgconf --branch pkgconf-$VER_PKGCONF
 
 #windows-default-manifest
 git clone https://sourceware.org/git/cygwin-apps/windows-default-manifest.git
@@ -84,7 +91,7 @@ echo "======================="
 cd $M_BUILD
 mkdir gmp-build
 cd gmp-build
-$M_SOURCE/gmp-6.2.1/configure \
+$M_SOURCE/gmp-$VER_GMP/configure \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
   --prefix=$M_BUILD/for_target \
@@ -98,7 +105,7 @@ echo "======================="
 cd $M_BUILD
 mkdir mpfr-build
 cd mpfr-build
-$M_SOURCE/mpfr-4.2.0/configure \
+$M_SOURCE/mpfr-$VER_MPFR/configure \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
   --prefix=$M_BUILD/for_target \
@@ -113,7 +120,7 @@ echo "======================="
 cd $M_BUILD
 mkdir mpc-build
 cd mpc-build
-$M_SOURCE/mpc-1.3.1/configure \
+$M_SOURCE/mpc-$VER_MPC/configure \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
   --prefix=$M_BUILD/for_target \
@@ -128,7 +135,7 @@ echo "======================="
 cd $M_BUILD
 mkdir isl-build
 cd isl-build
-$M_SOURCE/isl-0.24/configure \
+$M_SOURCE/isl-$VER_ISL/configure \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
   --prefix=$M_BUILD/for_target \
@@ -143,7 +150,7 @@ echo "======================="
 cd $M_BUILD
 mkdir binutils-build
 cd binutils-build
-$M_SOURCE/binutils-2.40/configure \
+$M_SOURCE/binutils-$VER_BINUTILS/configure \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
   --prefix=$M_TARGET \
@@ -360,11 +367,12 @@ $M_SOURCE/gcc/configure \
   --enable-checking=release \
   --enable-static \
   --enable-shared \
-  --with-arch=nocona \
   --with-tune=generic \
   --without-included-gettext \
   --with-pkgversion="GCC with MCF thread model" \
-  --with-boot-ldflags="$LDFLAGS -Wl,--disable-dynamicbase -static-libstdc++ -static-libgcc"
+  --with-boot-ldflags="$LDFLAGS -Wl,--disable-dynamicbase -static-libstdc++ -static-libgcc" \
+  CFLAGS='-Wno-int-conversion  -march=nocona -msahf -mtune=generic -O2' \
+  CXXFLAGS='-Wno-int-conversion  -march=nocona -msahf -mtune=generic -O2'
 make -j$MJOBS
 make install
 for f in $M_TARGET/bin/*.exe; do
@@ -396,7 +404,7 @@ echo "======================="
 cd $M_BUILD
 mkdir make-build
 cd make-build
-$M_SOURCE/make-4.4.1/configure \
+$M_SOURCE/make-$VER_MAKE/configure \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
   --prefix=$M_TARGET
