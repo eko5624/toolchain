@@ -41,11 +41,13 @@ jobs:
             ./cross-gcc-mcf.sh
           fi  
 
+      - name: Get gcc version
+        run: |
+           echo "ver=$(cat cross/version.txt)" >> $GITHUB_ENV
+
       - name: Packaging toolchain
         run: |
-          rm -f cross/mingw
-          rm -rf cross/share
-          7z a cross-gcc-mcf.7z cross/*
+          7z a cross-gcc-mcf-${{ env.ver }}-x64-ucrt.7z cross/*
 
       - name: Release
         continue-on-error: true
@@ -53,7 +55,7 @@ jobs:
           GH_TOKEN: ${{ github.token }} 
         run: |
           chmod +x ./release-package.sh
-          ./release-package.sh cross-gcc-mcf.7z
+          ./release-package.sh cross-gcc-mcf-${{ env.ver }}-x64-ucrt.7z
 
       - name: Saving gcc cache
         uses: actions/cache/save@main

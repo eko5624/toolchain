@@ -27,13 +27,16 @@ echo "gettiong source"
 echo "======================="
 cd $M_SOURCE
 
+VER_BINUTILS=2.40
+VER_GCC=13.2.0
+
 #binutils
-wget -c -O binutils-2.40.tar.bz2 http://ftp.gnu.org/gnu/binutils/binutils-2.40.tar.bz2
-tar xjf binutils-2.40.tar.bz2
+wget -c -O binutils-$VER_BINUTILS.tar.bz2 http://ftp.gnu.org/gnu/binutils/binutils-$VER_BINUTILS.tar.bz2
+tar xjf binutils-$VER_BINUTILS.tar.bz2
 
 #gcc
-wget -c -O gcc-13.2.0.tar.xz https://ftp.gnu.org/gnu/gcc/gcc-13.2.0/gcc-13.2.0.tar.xz
-xz -c -d gcc-13.2.0.tar.xz | tar xf -
+wget -c -O gcc-$VER_GCC.tar.xz https://ftp.gnu.org/gnu/gcc/gcc-$VER_GCC/gcc-$VER_GCC.tar.xz
+xz -c -d gcc-$VER_GCC.tar.xz | tar xf -
 
 #mingw-w64
 git clone https://github.com/mingw-w64/mingw-w64.git --branch master --depth 1
@@ -43,7 +46,7 @@ echo "======================="
 cd $M_BUILD
 mkdir binutils-build
 cd binutils-build
-$M_SOURCE/binutils-2.40/configure \
+$M_SOURCE/binutils-$VER_BINUTILS/configure \
   --target=$MINGW_TRIPLE \
   --prefix=$M_CROSS \
   --with-sysroot=$M_CROSS \
@@ -82,7 +85,7 @@ echo "======================="
 cd $M_BUILD
 mkdir gcc-build
 cd gcc-build
-$M_SOURCE/gcc-13.2.0/configure \
+$M_SOURCE/gcc-$VER_GCC/configure \
   --target=$MINGW_TRIPLE \
   --prefix=$M_CROSS \
   --libdir=$M_CROSS/lib \
@@ -151,3 +154,4 @@ make install
 cd $M_CROSS
 rm -f mingw
 rm -rf share
+echo "$VER_GCC" > $M_CROSS/version.txt

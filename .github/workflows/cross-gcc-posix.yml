@@ -38,12 +38,15 @@ jobs:
           if [[ ! "$(ls -A $PWD/cross/bin)" ]]; then
             chmod +x ./cross-gcc-posix.sh
             ./cross-gcc-posix.sh
-          fi  
+          fi
+
+      - name: Get gcc version
+        run: |
+           echo "ver=$(cat cross/version.txt)" >> $GITHUB_ENV
 
       - name: Packaging toolchain
         run: |
-          rm -f cross/mingw 
-          7z a cross-gcc-posix.7z cross/*
+          7z a cross-gcc-posix-${{ env.ver }}-x64-ucrt.7z cross/*
 
       - name: Release
         continue-on-error: true
@@ -51,7 +54,7 @@ jobs:
           GH_TOKEN: ${{ github.token }} 
         run: |
           chmod +x ./release-package.sh
-          ./release-package.sh cross-gcc-posix.7z
+          ./release-package.sh cross-gcc-posix-${{ env.ver }}-x64-ucrt.7z
 
       - name: Saving gcc cache
         uses: actions/cache/save@main
