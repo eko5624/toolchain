@@ -71,7 +71,7 @@ wget -c -O isl-$VER_ISL.tar.bz2 https://gcc.gnu.org/pub/gcc/infrastructure/isl-$
 tar xjf isl-$VER_ISL.tar.bz2
 
 #mingw-w64
-#git clone https://github.com/mingw-w64/mingw-w64.git --branch master --depth 1
+git clone https://github.com/mingw-w64/mingw-w64.git --branch master --depth 1
 
 #mcfgthread
 git clone https://github.com/lhmouse/mcfgthread.git --branch master --depth 1
@@ -164,15 +164,11 @@ make install
 
 echo "building mingw-w64-headers"
 echo "======================="
-cd $M_SOURCE
-git clone https://github.com/mingw-w64/mingw-w64.git
 cd $M_BUILD
 mkdir headers-build
 cd headers-build
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-headers-git/0001-Allow-to-use-bessel-and-complex-functions-without-un.patch
 cd $M_SOURCE/mingw-w64
-git reset --hard
-git clean -fdx
 git apply $M_BUILD/headers-build/0001-Allow-to-use-bessel-and-complex-functions-without-un.patch
 cd $M_SOURCE/mingw-w64/mingw-w64-headers
 touch include/windows.*.h include/wincrypt.h include/prsht.h
@@ -192,12 +188,9 @@ ln -s $MINGW_TRIPLE mingw
 rm $M_TARGET/include/pthread_signal.h
 rm $M_TARGET/include/pthread_time.h
 rm $M_TARGET/include/pthread_unistd.h
-rm -rf $M_SOURCE/mingw-w64
 
 echo "building winpthreads"
 echo "======================="
-cd $M_SOURCE
-git clone https://github.com/mingw-w64/mingw-w64.git
 cd $M_BUILD
 mkdir winpthreads-build
 cd winpthreads-build
@@ -215,7 +208,6 @@ $M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
 make -j$MJOBS
 make install
 #cp $M_TARGET/$MINGW_TRIPLE/bin/libwinpthread-1.dll $M_TARGET/bin/
-rm -rf $M_SOURCE/mingw-w64
 
 echo "building mcfgthread"
 echo "======================="
@@ -236,8 +228,6 @@ make install
 
 echo "building mingw-w64-crt"
 echo "======================="
-cd $M_SOURCE
-git clone https://github.com/mingw-w64/mingw-w64.git
 cd $M_BUILD
 mkdir crt-build
 cd crt-build
@@ -271,12 +261,9 @@ make install
 # adds -lssp -lssh_nonshared when linking.
 ar rcs $M_TARGET/lib/libssp.a
 ar rcs $M_TARGET/lib/libssp_nonshared.a
-rm -rf $M_SOURCE/mingw-w64
 
 echo "building gendef"
 echo "======================="
-cd $M_SOURCE
-git clone https://github.com/mingw-w64/mingw-w64.git
 cd $M_BUILD
 mkdir gendef-build
 cd gendef-build
