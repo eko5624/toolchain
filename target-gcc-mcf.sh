@@ -51,8 +51,8 @@ wget -c -O binutils-$VER_BINUTILS.tar.bz2 http://ftp.gnu.org/gnu/binutils/binuti
 tar xjf binutils-$VER_BINUTILS.tar.bz2
 
 #gcc
-#wget -c -O gcc-$VER_GCC.tar.xz https://ftp.gnu.org/gnu/gcc/gcc-$VER_GCC/gcc-$VER_GCC.tar.xz
-#xz -c -d gcc-$VER_GCC.tar.xz | tar xf -
+wget -c -O gcc-$VER_GCC.tar.xz https://ftp.gnu.org/gnu/gcc/gcc-$VER_GCC/gcc-$VER_GCC.tar.xz
+xz -c -d gcc-$VER_GCC.tar.xz | tar xf -
 
 #gmp
 wget -c -O gmp-$VER_GMP.tar.bz2 https://ftp.gnu.org/gnu/gmp/gmp-$VER_GMP.tar.bz2
@@ -277,8 +277,8 @@ rm -rf $M_SOURCE/mingw-w64
 
 echo "building gcc"
 echo "======================="
-cd $M_SOURCE
-git clone git://gcc.gnu.org/git/gcc.git --branch releases/gcc-13
+#cd $M_SOURCE
+#git clone git://gcc.gnu.org/git/gcc.git --branch releases/gcc-13
 cd $M_BUILD
 mkdir gcc-build
 cd gcc-build
@@ -298,7 +298,8 @@ curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0300-override-builtin-printf-format.patch
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0400-gcc-Make-stupid-AT-T-syntax-not-default.patch
 
-cd $M_SOURCE/gcc
+#cd $M_SOURCE/gcc
+cd $M_SOURCE/gcc-$VER_GCC
 patch -Nbp1 -i $M_BUILD/gcc-build/0002-Relocate-libintl.patch
 patch -Nbp1 -i $M_BUILD/gcc-build/0003-Windows-Follow-Posix-dir-exists-semantics-more-close.patch
 patch -Nbp1 -i $M_BUILD/gcc-build/0005-Windows-Don-t-ignore-native-system-header-dir.patch
@@ -325,7 +326,7 @@ _gcc_version=$(head -n 34 gcc/BASE-VER | sed -e 's/.* //' | tr -d '"\n')
 _gcc_date=$(head -n 34 gcc/DATESTAMP | sed -e 's/.* //' | tr -d '"\n')
 VER=$(printf "%s-%s" "$_gcc_version" "$_gcc_date")
 cd $M_BUILD/gcc-build
-$M_SOURCE/gcc/configure \
+$M_SOURCE/gcc-$VER_GCC/configure \
   --build=x86_64-pc-linux-gnu \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
