@@ -150,11 +150,50 @@ echo "======================="
 cd $M_BUILD
 mkdir binutils-build
 cd binutils-build
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0002-check-for-unusual-file-harder.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0010-bfd-Increase-_bfd_coff_max_nscns-to-65279.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0110-binutils-mingw-gnu-print.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0410-windres-handle-spaces.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0500-fix-weak-undef-symbols-after-image-base-change.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/2001-ld-option-to-move-default-bases-under-4GB.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/2003-Restore-old-behaviour-of-windres-so-that-options-con.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/libiberty-unlink-handle-windows-nul.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/reproducible-import-libraries.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/specify-timestamp.patch
+cd $M_SOURCE/binutils-$VER_BINUTILS
+patch -p1 -i $M_BUILD/binutils-build/0002-check-for-unusual-file-harder.patch
+patch -p1 -i $M_BUILD/binutils-build/0010-bfd-Increase-_bfd_coff_max_nscns-to-65279.patch
+patch -p1 -i $M_BUILD/binutils-build/0110-binutils-mingw-gnu-print.patch
+
+# Add an option to change default bases back below 4GB to ease transition
+# https://github.com/msys2/MINGW-packages/issues/7027
+# https://github.com/msys2/MINGW-packages/issues/7023
+patch -p1 -i $M_BUILD/binutils-build/2001-ld-option-to-move-default-bases-under-4GB.patch
+
+# https://github.com/msys2/MINGW-packages/pull/9233#issuecomment-889439433
+patch -R -p1 -i $M_BUILD/binutils-build/2003-Restore-old-behaviour-of-windres-so-that-options-con.patch
+
+# patches for reproducibility from Debian:
+# https://salsa.debian.org/mingw-w64-team/binutils-mingw-w64/-/tree/master/debian/patches
+patch -p2 -i $M_BUILD/binutils-build/reproducible-import-libraries.patch
+patch -p2 -i $M_BUILD/binutils-build/specify-timestamp.patch
+
+# Handle Windows nul device
+# https://github.com/msys2/MINGW-packages/issues/1840
+# https://github.com/msys2/MINGW-packages/issues/10520
+# https://github.com/msys2/MINGW-packages/issues/14725
+
+# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=108276
+# https://gcc.gnu.org/pipermail/gcc-patches/2023-January/609487.html
+patch -p1 -i $M_BUILD/binutils-build/libiberty-unlink-handle-windows-nul.patch
+
+cd $M_BUILD/binutils-build
 $M_SOURCE/binutils-$VER_BINUTILS/configure \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
   --prefix=$M_TARGET \
   --with-sysroot=$M_TARGET \
+  --enable-64-bit-bfd \
   --disable-nls \
   --disable-werror \
   --disable-shared \
