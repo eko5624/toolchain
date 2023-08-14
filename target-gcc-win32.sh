@@ -39,7 +39,7 @@ echo "gettiong source"
 echo "======================="
 cd $M_SOURCE
 
-VER_BINUTILS=2.40
+VER_BINUTILS=2.41
 VER_GCC=13.2.0
 VER_GMP=6.2.1
 VER_MPFR=4.2.0
