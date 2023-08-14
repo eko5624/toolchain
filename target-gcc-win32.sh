@@ -49,7 +49,7 @@ VER_MAKE=4.4.1
 VER_PKGCONF=2.0.0
 
 #binutils
-wget -c -O binutils-$VER_BINUTILS.tar.bz2 http://ftp.gnu.org/gnu/binutils/binutils-$VER_BINUTILS.tar.bz2
+wget -c -O binutils-$VER_BINUTILS.tar.bz2 https://ftp.gnu.org/gnu/binutils/binutils-$VER_BINUTILS.tar.bz2
 tar xjf binutils-$VER_BINUTILS.tar.bz2
 
 #gcc
