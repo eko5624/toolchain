@@ -369,11 +369,11 @@ done
 for f in $M_TARGET/lib/gcc/x86_64-w64-mingw32/${VER%%-*}/*.exe; do
   strip -s $f
 done
-cp $M_TARGET/lib/libgcc_s_seh-1.dll $M_TARGET/bin/
+mv $M_TARGET/lib/libgcc_s_seh-1.dll $M_TARGET/bin/
 cp $M_TARGET/bin/gcc.exe $M_TARGET/bin/cc.exe
 cp $M_TARGET/bin/$MINGW_TRIPLE-gcc.exe $M_TARGET/bin/$MINGW_TRIPLE-cc.exe
-#find $M_TARGET/lib -type f \( -name "*.dll.a" ! -name "libmcfgthread.dll.a" \) -print0 | xargs -0 -I {} rm {}
-#find $M_TARGET/lib -type f -name "*.la" -print0 | xargs -0 -I {} rm {}
+find $M_TARGET/lib -maxdepth 1 -type f \( -name "*.dll.a" ! -name "libmcfgthread.dll.a" \) -print0 | xargs -0 -I {} rm {}
+find $M_TARGET/lib -maxdepth 1 -type f -name "*.la" -print0 | xargs -0 -I {} rm {}
 
 echo "building windows-default-manifest"
 echo "======================="
