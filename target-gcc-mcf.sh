@@ -39,12 +39,12 @@ cd $M_SOURCE
 
 VER_BINUTILS=2.41
 VER_GCC=13.2.0
-VER_GMP=6.2.1
-VER_MPFR=4.2.0
+VER_GMP=6.3.0
+VER_MPFR=4.2.1
 VER_MPC=1.3.1
 VER_ISL=0.24
 VER_MAKE=4.4.1
-VER_PKGCONF=2.0.0
+VER_PKGCONF=2.0.2
 
 #binutils
 wget -c -O binutils-$VER_BINUTILS.tar.bz2 http://ftp.gnu.org/gnu/binutils/binutils-$VER_BINUTILS.tar.bz2
