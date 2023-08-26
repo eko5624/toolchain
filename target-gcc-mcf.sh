@@ -171,7 +171,7 @@ curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-headers-git/0002-heades-add-full-name-winrt.patch
 cd $M_SOURCE/mingw-w64
 git apply $M_BUILD/headers-build/0001-Allow-to-use-bessel-and-complex-functions-without-un.patch
-git apply $M_BUILD/0002-heades-add-full-name-winrt.patch
+git apply $M_BUILD/headers-build/0002-heades-add-full-name-winrt.patch
 cd $M_SOURCE/mingw-w64/mingw-w64-headers
 touch include/windows.*.h include/wincrypt.h include/prsht.h
 cd $M_BUILD/headers-build
