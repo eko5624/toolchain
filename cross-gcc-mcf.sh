@@ -172,7 +172,7 @@ make -j$MJOBS
 make install
 cd $M_CROSS
 find $MINGW_TRIPLE/lib -type f -name "*.la" -print0 | xargs -0 -I {} rm {}
-find $MINGW_TRIPLE/lib -type f \( -name "*.dll.a" ! -name "libmcfgthread.dll.a" \) -print0 | xargs -0 -I {} rm {}
+find $MINGW_TRIPLE/lib -type f -name "*.dll.a" -print0 | xargs -0 -I {} rm {}
 mv $MINGW_TRIPLE/bin/libmcfgthread-1.dll bin
 rm -f mingw
 rm -rf share
