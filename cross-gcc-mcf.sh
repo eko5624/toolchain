@@ -26,9 +26,9 @@ mkdir -p $M_BUILD
 echo "gettiong json ver"
 echo "======================="
 json_ver=$(curl -s "https://raw.githubusercontent.com/eko5624/nginx-nosni/master/old.json")
-declare -A ver
+declare -A ver_array
 while IFS="=" read -r key value; do
-    ver[$key]=$value
+    ver_array[$key]=$value
 done < <(echo "$json_ver" | jq -r 'to_entries | map("\(.key)=\(.value|tostring)") | .[]')
 
 echo "gettiong source"
