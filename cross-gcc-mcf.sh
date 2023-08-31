@@ -23,12 +23,20 @@ export PATH="$M_CROSS/bin:$PATH"
 mkdir -p $M_SOURCE
 mkdir -p $M_BUILD
 
+echo "gettiong json ver"
+echo "======================="
+json_ver=$(curl -s "https://raw.githubusercontent.com/eko5624/nginx-nosni/master/old.json")
+declare -A ver
+while IFS="=" read -r key value; do
+    ver[$key]=$value
+done < <(echo "$json_ver" | jq -r 'to_entries | map("\(.key)=\(.value|tostring)") | .[]')
+
 echo "gettiong source"
 echo "======================="
 cd $M_SOURCE
 
-VER_BINUTILS=2.41
-VER_GCC=13.2.0
+VER_BINUTILS=${ver[binutils]}
+VER_GCC=${ver[GCC]}
 
 #binutils
 wget -c -O binutils-$VER_BINUTILS.tar.bz2 http://ftp.gnu.org/gnu/binutils/binutils-$VER_BINUTILS.tar.bz2
@@ -39,10 +47,10 @@ wget -c -O gcc-$VER_GCC.tar.xz https://ftp.gnu.org/gnu/gcc/gcc-$VER_GCC/gcc-$VER
 xz -c -d gcc-$VER_GCC.tar.xz | tar xf -
 
 #mingw-w64
-git clone https://github.com/mingw-w64/mingw-w64.git --branch master --depth 1
+git clone https://github.com/mingw-w64/mingw-w64.git --branch master
 
 #mcfgthread
-git clone https://github.com/lhmouse/mcfgthread.git --branch master --depth 1
+git clone https://github.com/lhmouse/mcfgthread.git --branch master 
 
 #pkgconf
 #git clone https://github.com/pkgconf/pkgconf --branch pkgconf-1.9.5
