@@ -2,6 +2,7 @@
 set -e
 
 TOP_DIR=$(pwd)
+source $TOP_DIR/ver.sh
 
 # Speed up the process
 # Env Var NUMJOBS overrides automatic detection
@@ -33,26 +34,9 @@ export PATH="$M_CROSS/bin:$PATH"
 mkdir -p $M_SOURCE
 mkdir -p $M_BUILD
 
-echo "gettiong json ver"
-echo "======================="
-json_ver=$(curl -s "https://raw.githubusercontent.com/eko5624/nginx-nosni/master/old.json")
-declare -A ver_array
-while IFS="=" read -r key value; do
-    ver_array[$key]=$value
-done < <(echo "$json_ver" | jq -r 'to_entries | map("\(.key)=\(.value|tostring)") | .[]')
-
 echo "gettiong source"
 echo "======================="
 cd $M_SOURCE
-
-VER_BINUTILS=${ver[binutils]}
-VER_GCC=${ver[GCC]}
-VER_GMP=${ver[gmp]}
-VER_MPFR=${ver[mpfr]}
-VER_MPC=${ver[mpc]}
-VER_ISL=${ver[isl]}
-VER_MAKE=${ver[make]}
-VER_PKGCONF=${ver[pkgconf]}
 
 #binutils
 wget -c -O binutils-$VER_BINUTILS.tar.bz2 http://ftp.gnu.org/gnu/binutils/binutils-$VER_BINUTILS.tar.bz2
