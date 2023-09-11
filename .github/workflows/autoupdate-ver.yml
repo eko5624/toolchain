@@ -28,6 +28,9 @@ jobs:
         declare -A ver_array
         ver_json=$(curl -s "https://raw.githubusercontent.com/eko5624/nginx-nosni/master/old.json")
         ver_array=$(echo "$ver_json" | jq -r 'to_entries|map("\(.key)=\(.value)")|.[]')
+        while read -r k v; do
+          myarray[$k]=$v
+        done < <(echo "$ver_json" | jq -r 'to_entries | .[] | "\(.key) \(.value)"')
         echo "VER_BINUTILS=${ver_array[binutils]}" >> ver.sh
         echo "VER_GCC=${ver_array[GCC]}" >> ver.sh
         echo "VER_GMP=${ver_array[gmp]}" >> ver.sh
