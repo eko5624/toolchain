@@ -33,11 +33,11 @@ jobs:
         echo "VER_BINUTILS=${ver_array[binutils]}" >> ver.sh
         echo "VER_GCC=${ver_array[GCC]}" >> ver.sh
         echo "VER_GMP=${ver_array[gmp]}" >> ver.sh
-        echo "VER_MPFR=${ver[mpfr]}" >> ver.sh
-        echo "VER_MPC=${ver[mpc]}" >> ver.sh
-        echo "VER_ISL=${ver[isl]}" >> ver.sh
-        echo "VER_MAKE=${ver[make]}" >> ver.sh
-        echo "VER_PKGCONF=${ver[pkgconf]}" >> ver.sh
+        echo "VER_MPFR=${ver_array[mpfr]}" >> ver.sh
+        echo "VER_MPC=${ver_array[mpc]}" >> ver.sh
+        echo "VER_ISL=${ver_array[isl]}" >> ver.sh
+        echo "VER_MAKE=${ver_array[make]}" >> ver.sh
+        echo "VER_PKGCONF=${ver_array[pkgconf]}" >> ver.sh
     - name: release
       run: |
         git add -A
