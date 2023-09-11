@@ -1,0 +1,42 @@
+name: autoupdate-ver
+on: 
+  workflow_dispatch:
+  #schedule:
+  #- cron: '30 0 * * MON'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@main
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.BOT }}
+    - name: Install git
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install git
+    - name: Set env
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+    - name: Update
+      shell: bash
+      run: |
+        rm ver.sh || true
+        declare -A ver_array
+        ver_json=$(curl -s "https://raw.githubusercontent.com/eko5624/nginx-nosni/master/old.json")
+        echo "VER_BINUTILS=${ver_array[binutils]}" >> ver.sh
+        echo "VER_GCC=${ver_array[GCC]}" >> ver.sh
+        echo "VER_GMP=${ver_array[gmp]}" >> ver.sh
+        echo "VER_MPFR=${ver[mpfr]}" >> ver.sh
+        echo "VER_MPC=${ver[mpc]}" >> ver.sh
+        echo "VER_ISL=${ver[isl]}" >> ver.sh
+        echo "VER_MAKE=${ver[make]}" >> ver.sh
+        echo "VER_PKGCONF=${ver[pkgconf]}" >> ver.sh
+    - name: release
+      run: |
+        git add -A
+        git commit -am "Automate" || echo "nothing updated"
+        git push -f 
