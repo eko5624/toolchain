@@ -65,8 +65,8 @@ $M_SOURCE/binutils-$VER_BINUTILS/configure \
 make -j$MJOBS
 make install
 cd $M_CROSS/bin
-ln -s $(which pkg-config) $MINGW_TRIPLE-pkg-config
-ln -s $(which pkg-config) $MINGW_TRIPLE-pkgconf
+ln -s $(which pkgconf) $MINGW_TRIPLE-pkg-config
+ln -s $(which pkgconf) $MINGW_TRIPLE-pkgconf
 
 echo "building mingw-w64-headers"
 echo "======================="
