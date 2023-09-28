@@ -8,9 +8,8 @@ source $TOP_DIR/ver.sh
 # Env Var NUMJOBS overrides automatic detection
 MJOBS=$(grep -c processor /proc/cpuinfo)
 
-
-MINGW_TRIPLE="x86_64-w64-mingw32"
-export MINGW_TRIPLE
+export PATH="$M_CROSS/bin:$PATH"
+export MINGW_TRIPLE="x86_64-w64-mingw32"
 
 export M_ROOT=$(pwd)
 export M_SOURCE=$M_ROOT/source
@@ -18,18 +17,16 @@ export M_BUILD=$M_ROOT/build
 export M_CROSS=$M_ROOT/cross
 export M_TARGET=$M_ROOT/target
 
-export CC=$M_CROSS/bin/$MINGW_TRIPLE-gcc
-export CXX=$M_CROSS/bin/$MINGW_TRIPLE-g++
-export AR=$M_CROSS/bin/$MINGW_TRIPLE-ar
-export RANLIB=$M_CROSS/bin/$MINGW_TRIPLE-ranlib
-export AS=$M_CROSS/bin/$MINGW_TRIPLE-as
-export LD=$M_CROSS/bin/$MINGW_TRIPLE-ld
-export STRIP=$M_CROSS/bin/$MINGW_TRIPLE-strip
-export NM=$M_CROSS/bin/$MINGW_TRIPLE-nm
-export DLLTOOL=$M_CROSS/bin/$MINGW_TRIPLE-dlltool
-export WINDRES=$M_CROSS/bin/$MINGW_TRIPLE-windres
-
-export PATH="$M_CROSS/bin:$PATH"
+export CC=$MINGW_TRIPLE-gcc
+export CXX=$MINGW_TRIPLE-g++
+export AR=$MINGW_TRIPLE-ar
+export RANLIB=$MINGW_TRIPLE-ranlib
+export AS=$MINGW_TRIPLE-as
+export LD=$MINGW_TRIPLE-ld
+export STRIP=$MINGW_TRIPLE-strip
+export NM=$MINGW_TRIPLE-nm
+export DLLTOOL=$MINGW_TRIPLE-dlltool
+export WINDRES=$MINGW_TRIPLE-windres
 
 mkdir -p $M_SOURCE
 mkdir -p $M_BUILD
