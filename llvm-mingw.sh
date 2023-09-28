@@ -25,7 +25,8 @@ echo "======================="
 cd $M_SOURCE
 
 #llvm
-git clone https://github.com/llvm/llvm-project.git --branch release/17.x
+#git clone https://github.com/llvm/llvm-project.git --branch release/17.x
+git clone https://github.com/llvm/llvm-project.git --branch llvmorg-17.0.1
 
 #mingw-w64
 git clone https://github.com/mingw-w64/mingw-w64.git --branch master
