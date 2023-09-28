@@ -1,8 +1,7 @@
 #!/bin/sh
 CROSS_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && cd .. && pwd)
 PROG=$CROSS_DIR/bin/clang++
-TARGET=x86_64-w64-mingw32
-FLAGS="$FLAGS -target $TARGET -march=x86-64 -mtune=generic"
+FLAGS="$FLAGS -target x86_64-w64-mingw32 -march=x86-64 -mtune=generic"
 FLAGS="$FLAGS --driver-mode=g++ -pthread --sysroot $CROSS_DIR/x86_64-w64-mingw32"
 FLAGS="$FLAGS -fuse-ld=x86_64-w64-mingw32-lld"
 FLAGS="$FLAGS -mguard=cf -fcf-protection=full -O3 -mllvm --polly -mllvm --polly-position=before-vectorizer -mllvm --polly-scheduling=dynamic -mllvm --polly-ast-use-context -mllvm --polly-vectorizer=stripmine -mllvm --polly-run-dce -mllvm --polly-invariant-load-hoisting -mllvm --polly-run-inliner"
