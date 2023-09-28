@@ -9,7 +9,8 @@ source $TOP_DIR/ver.sh
 MJOBS=$(grep -c processor /proc/cpuinfo)
 
 export PATH="$M_CROSS/bin:$PATH"
-export MINGW_TRIPLE="x86_64-w64-mingw32"
+MINGW_TRIPLE="x86_64-w64-mingw32"
+export MINGW_TRIPLE
 
 export M_ROOT=$(pwd)
 export M_SOURCE=$M_ROOT/source
