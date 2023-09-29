@@ -288,7 +288,6 @@ curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0200-add-m-no-align-vector-insn-option-for-i386.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0300-override-builtin-printf-format.patch
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0400-gcc-Make-stupid-AT-T-syntax-not-default.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/777aa930b106fea2dd6ed9fe22b42a2717f1472d.patch
 curl -L -o 2f7e7bfa3c6327793cdcdcb5c770b93cecd49bd0.patch "https://gcc.gnu.org/git/?p=gcc.git;a=patch;h=2f7e7bfa3c6327793cdcdcb5c770b93cecd49bd0"
 curl -L -o 3eeb4801d6f45f6250fc77a6d3ab4e0115f8cfdd.patch "https://gcc.gnu.org/git/?p=gcc.git;a=patch;h=3eeb4801d6f45f6250fc77a6d3ab4e0115f8cfdd"
 
@@ -323,10 +322,6 @@ apply_patch_with_msg \
 apply_patch_with_msg \
   2f7e7bfa3c6327793cdcdcb5c770b93cecd49bd0.patch \
   3eeb4801d6f45f6250fc77a6d3ab4e0115f8cfdd.patch
-
-# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=110315#c7
-apply_patch_with_msg \
-  777aa930b106fea2dd6ed9fe22b42a2717f1472d.patch
 
 # so libgomp DLL gets built despide static libdl
 export lt_cv_deplibs_check_method='pass_all'
