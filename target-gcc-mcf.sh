@@ -294,7 +294,7 @@ curl -L -o 3eeb4801d6f45f6250fc77a6d3ab4e0115f8cfdd.patch "https://gcc.gnu.org/g
 
 apply_patch_with_msg() {
   for patch in "$@"; do
-    msg2 "Applying $patch"
+    echo "Applying $patch"
     patch -Nbp1 -i "$M_BUILD/gcc-build/$patch"
   done
 }
