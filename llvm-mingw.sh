@@ -25,8 +25,8 @@ echo "======================="
 cd $M_SOURCE
 
 #llvm
-#git clone https://github.com/llvm/llvm-project.git --branch release/17.x
-git clone https://github.com/llvm/llvm-project.git --branch llvmorg-17.0.1
+git clone https://github.com/llvm/llvm-project.git --branch release/17.x
+#git clone https://github.com/llvm/llvm-project.git --branch llvmorg-17.0.1
 
 #mingw-w64
 git clone https://github.com/mingw-w64/mingw-w64.git --branch master
@@ -107,6 +107,7 @@ $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
   --prefix=$M_CROSS/$MINGW_TRIPLE \
   --enable-sdk=all \
   --enable-idl \
+  --with-default-win32-winnt=0x601 \
   --with-default-msvcrt=ucrt
 make -j$MJOBS
 make install
