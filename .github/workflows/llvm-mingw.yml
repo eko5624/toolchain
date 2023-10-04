@@ -47,6 +47,7 @@ jobs:
       - name: Packaging toolchain
         run: |
           7z a llvm-mingw-${{ env.date }}-ucrt-x86_64.7z cross/*
+          7z a rustup-${{ env.date }}.7z rust/*
 
       - name: Release
         continue-on-error: true
@@ -54,7 +55,7 @@ jobs:
           GH_TOKEN: ${{ github.token }} 
         run: |
           chmod +x ./release-package.sh
-          ./release-package.sh llvm-mingw-${{ env.date }}-ucrt-x86_64.7z
+          ./release-package.sh
 
       - name: Saving llvm cache
         uses: actions/cache/save@main
