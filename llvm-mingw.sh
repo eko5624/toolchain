@@ -61,8 +61,8 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
   -DLLVM_ENABLE_LIBXML2=OFF \
   -DLLVM_ENABLE_TERMINFO=OFF \
   -DLLVM_TOOLCHAIN_TOOLS="llvm-as;llvm-ar;llvm-ranlib;llvm-objdump;llvm-rc;llvm-cvtres;llvm-nm;llvm-strings;llvm-readobj;llvm-dlltool;llvm-pdbutil;llvm-objcopy;llvm-strip;llvm-cov;llvm-profdata;llvm-addr2line;llvm-symbolizer;llvm-windres;llvm-ml;llvm-readelf;llvm-size;llvm-config"
-ninja -j$MJOBS -C $M_BUILD/llvm-build
-ninja install -C $M_BUILD/llvm-build
+ninja -j$MJOBS -C llvm-build
+ninja install -C llvm-build
 
 mkdir -p $M_CROSS/$MINGW_TRIPLE/lib
 cd $M_CROSS/bin
@@ -97,6 +97,15 @@ chmod 755 x86_64-w64-mingw32-gcc
 chmod 755 x86_64-w64-mingw32-g++
 chmod 755 x86_64-w64-mingw32-c++
 
+echo "building gendef"
+echo "======================="
+cd $M_BUILD
+mkdir gendef-build
+cd gendef-build
+$M_SOURCE/mingw-w64/mingw-w64-tools/gendef/configure --prefix=$M_CROSS
+make -j$MJOBS
+make install
+
 echo "building mingw-w64-headers"
 echo "======================="
 cd $M_BUILD
@@ -109,15 +118,6 @@ $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
   --enable-idl \
   --with-default-win32-winnt=0x601 \
   --with-default-msvcrt=ucrt
-make -j$MJOBS
-make install
-
-echo "building gendef"
-echo "======================="
-cd $M_BUILD
-mkdir gendef-build
-cd gendef-build
-$M_SOURCE/mingw-w64/mingw-w64-tools/gendef/configure --prefix=$M_CROSS
 make -j$MJOBS
 make install
 
@@ -144,13 +144,26 @@ make install
 llvm-ar rcs $M_CROSS/lib/libssp.a
 llvm-ar rcs $M_CROSS/lib/libssp_nonshared.a
 
+echo "building winpthreads"
+echo "======================="
+cd $M_BUILD
+mkdir winpthreads-build
+cd winpthreads-build
+$M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
+  --host=$MINGW_TRIPLE \
+  --prefix=$M_CROSS/$MINGW_TRIPLE \
+  --disable-shared \
+  --enable-static
+make -j$MJOBS
+make install
+
 echo "building llvm-compiler-rt-builtin"
 echo "======================="
 cd $M_BUILD
 mkdir builtins-build
 cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B$M_BUILD/builtins-build \
   -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_INSTALL_PREFIX=$M_CROSS/lib/clang/17 \
+  -DCMAKE_INSTALL_PREFIX="$($M_CROSS/bin/x86_64-w64-mingw32-clang --print-resource-dir)" \
   -DCMAKE_C_COMPILER=$MINGW_TRIPLE-clang \
   -DCMAKE_CXX_COMPILER=$MINGW_TRIPLE-clang++ \
   -DCMAKE_SYSTEM_NAME=Windows \
@@ -167,21 +180,9 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B$M_BUILD/buil
   -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
   -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
   -DSANITIZER_CXX_ABI=libc++
-ninja -j$MJOBS -C $M_BUILD/builtins-build
-ninja install -C $M_BUILD/builtins-build
-
-echo "building winpthreads"
-echo "======================="
-cd $M_BUILD
-mkdir winpthreads-build
-cd winpthreads-build
-$M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
-  --host=$MINGW_TRIPLE \
-  --prefix=$M_CROSS/$MINGW_TRIPLE \
-  --disable-shared \
-  --enable-static
-make -j$MJOBS
-make install
+ninja -j$MJOBS -C builtins-build
+cp builtins-build/lib/windows/libclang_rt.builtins-x86_64.a $M_CROSS/$MINGW_TRIPLE/lib
+ninja install -C builtins-build
 
 echo "building llvm-libcxx"
 echo "======================="
@@ -215,37 +216,9 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/runtimes -B$M_BUILD/libcxx-build \
   -DLIBCXXABI_USE_LLVM_UNWINDER=ON \
   -DLIBCXXABI_ENABLE_SHARED=OFF \
   -DLIBCXXABI_LIBDIR_SUFFIX=""
-ninja -j$MJOBS -C $M_BUILD/libcxx-build
-ninja install -C $M_BUILD/libcxx-build
+ninja -j$MJOBS -C libcxx-build
+ninja install -C libcxx-build
 cp $M_CROSS/$MINGW_TRIPLE/lib/libc++.a $M_CROSS/$MINGW_TRIPLE/lib/libstdc++.a
-
-echo "building llvm-compiler-rt"
-echo "======================="
-cd $M_BUILD
-mkdir compiler-rt-build
-cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt -B$M_BUILD/compiler-rt-build \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_INSTALL_PREFIX=$M_CROSS/lib/clang/17 \
-  -DCMAKE_C_COMPILER=$MINGW_TRIPLE-clang \
-  -DCMAKE_CXX_COMPILER=$MINGW_TRIPLE-clang++ \
-  -DCMAKE_SYSTEM_NAME=Windows \
-  -DCMAKE_AR=$M_CROSS/bin/llvm-ar \
-  -DCMAKE_RANLIB=$M_CROSS/bin/llvm-ranlib \
-  -DCMAKE_C_COMPILER_WORKS=1 \
-  -DCMAKE_CXX_COMPILER_WORKS=1 \
-  -DCMAKE_C_COMPILER_TARGET=x86_64-w64-windows-gnu \
-  -DCOMPILER_RT_DEFAULT_TARGET_ONLY=TRUE \
-  -DCOMPILER_RT_USE_BUILTINS_LIBRARY=TRUE \
-  -DCOMPILER_RT_BUILD_BUILTINS=FALSE \
-  -DLLVM_CONFIG_PATH="" \
-  -DCMAKE_FIND_ROOT_PATH=$M_CROSS/$MINGW_TRIPLE \
-  -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
-  -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
-  -DSANITIZER_CXX_ABI=libc++ \
-  -DCMAKE_CXX_FLAGS="-std=c++11" \
-  -DCMAKE_EXE_LINKER_FLAGS_INIT="-lc++abi"
-ninja -j$MJOBS -C $M_BUILD/compiler-rt-build
-ninja install -C $M_BUILD/compiler-rt-build
 
 echo "building llvm-openmp"
 echo "======================="
@@ -268,5 +241,9 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/openmp -B$M_BUILD/openmp-build \
   -DCMAKE_RANLIB=$M_CROSS/bin/llvm-ranlib \
   -DLIBOMP_ENABLE_SHARED=FALSE \
   -DLIBOMP_ASMFLAGS=-m64
-ninja -j$MJOBS -C $M_BUILD/openmp-build
-ninja install -C $M_BUILD/openmp-build
+ninja -j$MJOBS -C openmp-build
+ninja install -C openmp-build
+
+#Copy libclang_rt.builtins-x86_64.a to runtime dir
+#mkdir -p $($M_CROSS/bin/x86_64-w64-mingw32-gcc -print-runtime-dir)
+cp $M_CROSS/$MINGW_TRIPLE/lib/libclang_rt.builtins-x86_64.a $($M_CROSS/bin/x86_64-w64-mingw32-gcc -print-runtime-dir)
