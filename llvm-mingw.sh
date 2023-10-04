@@ -14,8 +14,11 @@ export M_ROOT=$(pwd)
 export M_SOURCE=$M_ROOT/source
 export M_BUILD=$M_ROOT/build
 export M_CROSS=$M_ROOT/cross
+export RUSTUP_LOCATION=$M_ROOT/rust
 
-export PATH="$M_CROSS/bin:$PATH"
+export PATH="$M_CROSS/bin:$RUSTUP_LOCATION/.cargo/bin:$PATH"
+export RUSTUP_HOME="$RUSTUP_LOCATION/.rustup"
+export CARGO_HOME="$RUSTUP_LOCATION/.cargo"
 
 mkdir -p $M_SOURCE
 mkdir -p $M_BUILD
@@ -26,7 +29,7 @@ cd $M_SOURCE
 
 #llvm
 git clone https://github.com/llvm/llvm-project.git --branch release/17.x
-#git clone https://github.com/llvm/llvm-project.git --branch llvmorg-17.0.1
+#git clone https://github.com/llvm/llvm-project.git --branch llvmorg-17.0.2
 
 #mingw-w64
 git clone https://github.com/mingw-w64/mingw-w64.git --branch master
@@ -163,7 +166,7 @@ cd $M_BUILD
 mkdir builtins-build
 cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B$M_BUILD/builtins-build \
   -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_INSTALL_PREFIX="$($M_CROSS/bin/x86_64-w64-mingw32-clang --print-resource-dir)" \
+  -DCMAKE_INSTALL_PREFIX="$(x86_64-w64-mingw32-clang --print-resource-dir)" \
   -DCMAKE_C_COMPILER=$MINGW_TRIPLE-clang \
   -DCMAKE_CXX_COMPILER=$MINGW_TRIPLE-clang++ \
   -DCMAKE_SYSTEM_NAME=Windows \
@@ -245,5 +248,23 @@ ninja -j$MJOBS -C openmp-build
 ninja install -C openmp-build
 
 #Copy libclang_rt.builtins-x86_64.a to runtime dir
-#mkdir -p $($M_CROSS/bin/x86_64-w64-mingw32-gcc -print-runtime-dir)
-cp $M_CROSS/$MINGW_TRIPLE/lib/libclang_rt.builtins-x86_64.a $($M_CROSS/bin/x86_64-w64-mingw32-gcc -print-runtime-dir)
+cp $M_CROSS/$MINGW_TRIPLE/lib/libclang_rt.builtins-x86_64.a $(x86_64-w64-mingw32-gcc -print-runtime-dir)
+
+echo "building rustup"
+echo "======================="
+curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --target x86_64-pc-windows-gnu --no-modify-path --profile minimal
+rustup update
+cargo install cargo-c --profile=release-strip --features=vendored-openssl
+cat <<EOF >$CARGO_HOME/config
+[net]
+git-fetch-with-cli = true
+
+[target.x86_64-pc-windows-gnu]
+linker = "x86_64-w64-mingw32-gcc"
+ar = "x86_64-w64-mingw32-ar"
+rustflags = ["-C", "target-cpu=x86-64"]
+
+[profile.release]
+panic = "abort"
+strip = true
+EOF
