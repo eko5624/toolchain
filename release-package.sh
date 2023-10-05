@@ -1,6 +1,6 @@
 #!/bin/bash
 set -ex
-CURL_RETRIES="--connect-timeout 60 --retry 5 --retry-delay"
+CURL_RETRIES="--connect-timeout 60 --retry 5 --retry-delay 5"
 
 # Release assets
 curl -u $GITHUB_ACTOR:$GH_TOKEN $CURL_RETRIES \
