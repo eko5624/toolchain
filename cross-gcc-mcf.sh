@@ -33,8 +33,9 @@ wget -c -O binutils-$VER_BINUTILS.tar.bz2 http://ftp.gnu.org/gnu/binutils/binuti
 tar xjf binutils-$VER_BINUTILS.tar.bz2
 
 #gcc
-wget -c -O gcc-$VER_GCC.tar.xz https://ftp.gnu.org/gnu/gcc/gcc-$VER_GCC/gcc-$VER_GCC.tar.xz
-xz -c -d gcc-$VER_GCC.tar.xz | tar xf -
+#wget -c -O gcc-$VER_GCC.tar.xz https://ftp.gnu.org/gnu/gcc/gcc-$VER_GCC/gcc-$VER_GCC.tar.xz
+#xz -c -d gcc-$VER_GCC.tar.xz | tar xf -
+git clone https://github.com/gcc-mirror/gcc.git --branch master releases/gcc-13.2.0
 
 #mingw-w64
 git clone https://github.com/mingw-w64/mingw-w64.git --branch master
@@ -103,7 +104,7 @@ echo "======================="
 cd $M_BUILD
 mkdir gcc-build
 cd gcc-build
-$M_SOURCE/gcc-$VER_GCC/configure \
+$M_SOURCE/gcc/configure \
   --target=$MINGW_TRIPLE \
   --prefix=$M_CROSS \
   --libdir=$M_CROSS/lib \
