@@ -62,7 +62,7 @@ wget -c -O isl-$VER_ISL.tar.bz2 https://gcc.gnu.org/pub/gcc/infrastructure/isl-$
 tar xjf isl-$VER_ISL.tar.bz2
 
 #mingw-w64
-#git clone https://github.com/mingw-w64/mingw-w64.git --branch master --depth 1
+git clone https://github.com/mingw-w64/mingw-w64.git --branch master --depth 1
 
 #make
 wget -c -O make-$VER_MAKE.tar.gz https://ftp.gnu.org/pub/gnu/make/make-$VER_MAKE.tar.gz
