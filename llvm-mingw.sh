@@ -3,6 +3,9 @@ set -e
 
 TOP_DIR=$(pwd)
 
+# worflows for clang compilation:
+# llvm -> mingw's header+crt -> compiler-rt builtins -> libcxx -> openmp
+
 # Speed up the process
 # Env Var NUMJOBS overrides automatic detection
 MJOBS=$(grep -c processor /proc/cpuinfo)
