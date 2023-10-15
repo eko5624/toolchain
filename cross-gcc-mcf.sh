@@ -18,8 +18,11 @@ export M_ROOT=$(pwd)
 export M_SOURCE=$M_ROOT/source
 export M_BUILD=$M_ROOT/build
 export M_CROSS=$M_ROOT/cross
+export RUSTUP_LOCATION=$M_ROOT/rust
 
-export PATH="$M_CROSS/bin:$PATH"
+export PATH="$M_CROSS/bin:$RUSTUP_LOCATION/.cargo/bin:$PATH"
+export RUSTUP_HOME="$RUSTUP_LOCATION/.rustup"
+export CARGO_HOME="$RUSTUP_LOCATION/.cargo"
 
 mkdir -p $M_SOURCE
 mkdir -p $M_BUILD
@@ -174,3 +177,22 @@ mv $MINGW_TRIPLE/bin/libmcfgthread-1.dll bin
 rm -f mingw
 rm -rf share
 echo "$VER_GCC" > $M_CROSS/version.txt
+
+echo "building rustup"
+echo "======================="
+curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --target x86_64-pc-windows-gnu --no-modify-path --profile minimal
+rustup update
+cargo install cargo-c --profile=release-strip --features=vendored-openssl
+cat <<EOF >$CARGO_HOME/config
+[net]
+git-fetch-with-cli = true
+
+[target.x86_64-pc-windows-gnu]
+linker = "x86_64-w64-mingw32-gcc"
+ar = "x86_64-w64-mingw32-ar"
+rustflags = ["-C", "target-cpu=x86-64"]
+
+[profile.release]
+panic = "abort"
+strip = true
+EOF
