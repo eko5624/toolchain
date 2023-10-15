@@ -48,6 +48,7 @@ jobs:
       - name: Packaging toolchain
         run: |
           7z a cross-gcc-mcf-${{ env.ver }}-x64-ucrt.7z cross/*
+          7z a rustup-${{ env.date }}.7z rust/*
 
       - name: Release
         continue-on-error: true
@@ -55,7 +56,7 @@ jobs:
           GH_TOKEN: ${{ github.token }} 
         run: |
           chmod +x ./release-package.sh
-          ./release-package.sh cross-gcc-mcf-${{ env.ver }}-x64-ucrt.7z
+          ./release-package.sh
 
       - name: Saving gcc cache
         uses: actions/cache/save@main
