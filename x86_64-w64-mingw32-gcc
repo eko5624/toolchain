@@ -6,4 +6,4 @@ FLAGS="$FLAGS  --sysroot $CROSS_DIR/x86_64-w64-mingw32"
 FLAGS="$FLAGS -fuse-ld=x86_64-w64-mingw32-lld"
 FLAGS="$FLAGS -gcodeview"
 
-"$PROG" $FLAGS "$@" -fdata-sections -ffunction-sections
+"$PROG" $FLAGS "$@"
