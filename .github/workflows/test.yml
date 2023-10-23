@@ -1,4 +1,4 @@
-name: llvm-mingw
+name: test
 defaults:
   run:
     shell: bash
