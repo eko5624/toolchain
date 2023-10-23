@@ -15,8 +15,6 @@ jobs:
         run: |
           sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
           sudo pacman -Syu --noconfirm
-          sudo pacman -S --noconfirm --needed git ninja meson cmake yasm nasm zip unzip p7zip clang lld libc++ libc++abi python-pip curl jq wget
-          pip3 install -U --break-system-packages setuptools rst2pdf mako jsonschema
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global pull.rebase true
@@ -38,17 +36,5 @@ jobs:
           PWD=$(pwd)
           echo "$PWD"
           find . -name "x86_64-w64-mingw32-clang++"
-          rm -rf $PWD/cross/x86_64-w64-mingw32
-          rm $PWD/cross/bin/x86_64-w64-mingw32-clang
-          rm $PWD/cross/bin/x86_64-w64-mingw32-clang++
-          rm $PWD/cross/bin/x86_64-w64-mingw32-ld
-          rm $PWD/cross/bin/x86_64-w64-mingw32-gcc
-          rm $PWD/cross/bin/x86_64-w64-mingw32-g++
-          rm $PWD/cross/bin/x86_64-w64-mingw32-c++
-          rm $PWD/cross/bin/ld.x86_64-w64-mingw32-lld
-          cp x86_64-w64-mingw32-clang $PWD/cross/bin
-          cp x86_64-w64-mingw32-clang++ $PWD/cross/bin
-          cp x86_64-w64-mingw32-ld $PWD/cross/bin
-          cp x86_64-w64-mingw32-gcc $PWD/cross/bin
-          cp x86_64-w64-mingw32-g++ $PWD/cross/bin
-          cp x86_64-w64-mingw32-c++ $PWD/cross/bin
+          ls -l ./cross/bin/x86_64-w64-mingw32-clang++
+          ls -l cross/bin/x86_64-w64-mingw32-clang
