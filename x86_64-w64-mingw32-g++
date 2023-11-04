@@ -5,5 +5,6 @@ FLAGS="$FLAGS -target x86_64-w64-mingw32 -march=x86-64 -mtune=generic"
 FLAGS="$FLAGS --driver-mode=g++ -pthread --sysroot $CROSS_DIR/x86_64-w64-mingw32"
 FLAGS="$FLAGS -fuse-ld=x86_64-w64-mingw32-lld"
 FLAGS="$FLAGS -gcodeview"
+CLANG_FLAGS=""
 
 "$PROG" $FLAGS "$@" $CLANG_FLAGS
