@@ -422,7 +422,7 @@ echo "======================="
 cd $M_BUILD
 mkdir cmake-build
 cd cmake-build
-$M_SOURCE/cmake-$VER_CMAKE/configure \
+$M_SOURCE/cmake/configure \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
   --prefix=$M_TARGET
@@ -434,7 +434,7 @@ echo "======================="
 cd $M_BUILD
 mkdir yasm-build
 cd yasm-build
-$M_SOURCE/yasm-$VER_YASM/configure \
+$M_SOURCE/yasm/configure \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
   --prefix=$M_TARGET
@@ -446,7 +446,7 @@ echo "======================="
 cd $M_BUILD
 mkdir nasm-build
 cd nasm-build
-$M_SOURCE/make-$VER_NASM/configure \
+$M_SOURCE/nasm/configure \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
   --prefix=$M_TARGET
