@@ -73,7 +73,7 @@ tar xzf make-$VER_MAKE.tar.gz
 git clone https://github.com/Kitware/CMake.git --branch v$VER_CMAKE
 
 #yasm
-git https://github.com/yasm/yasm.git --branch v$VER_YASM
+git clone https://github.com/yasm/yasm.git --branch v$VER_YASM
 
 #nasm
 git clone https://github.com/netwide-assembler/nasm.git --branch nasm-$VER_NASM
