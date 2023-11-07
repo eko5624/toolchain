@@ -69,6 +69,15 @@ git clone https://github.com/lhmouse/mcfgthread.git --branch master
 wget -c -O make-$VER_MAKE.tar.gz https://ftp.gnu.org/pub/gnu/make/make-$VER_MAKE.tar.gz
 tar xzf make-$VER_MAKE.tar.gz
 
+#cmake
+git clone https://github.com/Kitware/CMake.git --branch v$VER_CMAKE
+
+#yasm
+git https://github.com/yasm/yasm.git --branch v$VER_YASM
+
+#nasm
+git clone https://github.com/netwide-assembler/nasm.git --branch nasm-$VER_NASM
+
 #pkgconf
 git clone https://github.com/pkgconf/pkgconf --branch pkgconf-$VER_PKGCONF
 
@@ -407,6 +416,42 @@ $M_SOURCE/make-$VER_MAKE/configure \
 make -j$MJOBS
 make install
 cp $M_TARGET/bin/make.exe $M_TARGET/bin/mingw32-make.exe
+
+echo "building cmake"
+echo "======================="
+cd $M_BUILD
+mkdir cmake-build
+cd cmake-build
+$M_SOURCE/cmake-$VER_CMAKE/configure \
+  --host=$MINGW_TRIPLE \
+  --target=$MINGW_TRIPLE \
+  --prefix=$M_TARGET
+make -j$MJOBS
+make install
+
+echo "building yasm"
+echo "======================="
+cd $M_BUILD
+mkdir yasm-build
+cd yasm-build
+$M_SOURCE/yasm-$VER_YASM/configure \
+  --host=$MINGW_TRIPLE \
+  --target=$MINGW_TRIPLE \
+  --prefix=$M_TARGET
+make -j$MJOBS
+make install
+
+echo "building nasm"
+echo "======================="
+cd $M_BUILD
+mkdir nasm-build
+cd nasm-build
+$M_SOURCE/make-$VER_NASM/configure \
+  --host=$MINGW_TRIPLE \
+  --target=$MINGW_TRIPLE \
+  --prefix=$M_TARGET
+make -j$MJOBS
+make install
 
 echo "building pkgconf"
 echo "======================="
