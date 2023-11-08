@@ -72,7 +72,7 @@ tar xzf make-$VER_MAKE.tar.gz
 #cmake
 #git clone https://github.com/Kitware/CMake.git --branch v$VER_CMAKE
 curl -OL https://github.com/Kitware/CMake/releases/download/v$VER_CMAKE/cmake-$VER_CMAKE-windows-x86_64.zip
-7z e cmake*.zip
+7z x cmake*.zip
 
 #yasm
 #wget -c -O yasm-$VER_YASM.tar.gz http://www.tortall.net/projects/yasm/releases/yasm-$VER_YASM.tar.gz
@@ -84,7 +84,7 @@ curl -OL https://github.com/yasm/yasm/releases/download/v$VER_YASM/yasm-$VER_YAS
 #wget -c -O nasm-$VER_NASM.tar.gz http://www.nasm.us/pub/nasm/releasebuilds/$VER_NASM/nasm-$VER_NASM.tar.gz
 #tar xzf nasm-$VER_NASM.tar.gz
 curl -OL https://www.nasm.us/pub/nasm/releasebuilds/$VER_NASM/win64/nasm-$VER_NASM-win64.zip
-7z e nasm*.zip
+7z x nasm*.zip
 
 #pkgconf
 git clone https://github.com/pkgconf/pkgconf --branch pkgconf-$VER_PKGCONF
