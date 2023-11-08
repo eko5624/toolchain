@@ -422,7 +422,7 @@ echo "======================="
 cd $M_BUILD
 mkdir cmake-build
 cd cmake-build
-CHOST=$MINGW_TRIPLE $M_SOURCE/cmake/configure \
+CHOST=$MINGW_TRIPLE $M_SOURCE/CMake/configure \
   --prefix=$M_TARGET
 make -j$MJOBS
 make install
