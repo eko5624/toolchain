@@ -70,13 +70,21 @@ wget -c -O make-$VER_MAKE.tar.gz https://ftp.gnu.org/pub/gnu/make/make-$VER_MAKE
 tar xzf make-$VER_MAKE.tar.gz
 
 #cmake
-git clone https://github.com/Kitware/CMake.git --branch v$VER_CMAKE
+#git clone https://github.com/Kitware/CMake.git --branch v$VER_CMAKE
+https://github.com/Kitware/CMake/releases/download/v$VER_CMAKE/cmake-$VER_CMAKE-windows-x86_64.zip
+7z e cmake*.zip
 
 #yasm
-git clone https://github.com/yasm/yasm.git --branch v$VER_YASM
+#wget -c -O yasm-$VER_YASM.tar.gz http://www.tortall.net/projects/yasm/releases/yasm-$VER_YASM.tar.gz
+#tar xzf yasm-$VER_YASM.tar.gz
+https://github.com/yasm/yasm/releases/download/v$VER_YASM/yasm-$VER_YASM-win64.exe
 
 #nasm
-git clone https://github.com/netwide-assembler/nasm.git --branch nasm-$VER_NASM
+# nsam 2.16.01 faild, fatal error: asm/warnings.c: No such file or directory. Stick to 2.15.05.
+#wget -c -O nasm-$VER_NASM.tar.gz http://www.nasm.us/pub/nasm/releasebuilds/$VER_NASM/nasm-$VER_NASM.tar.gz
+#tar xzf nasm-$VER_NASM.tar.gz
+https://www.nasm.us/pub/nasm/releasebuilds/$VER_NASM/win64/nasm-$VER_NASM-win64.zip
+7z e nasm*.zip
 
 #pkgconf
 git clone https://github.com/pkgconf/pkgconf --branch pkgconf-$VER_PKGCONF
@@ -417,39 +425,42 @@ make -j$MJOBS
 make install
 cp $M_TARGET/bin/make.exe $M_TARGET/bin/mingw32-make.exe
 
-echo "building cmake"
-echo "======================="
-cd $M_BUILD
-mkdir cmake-build
-cd cmake-build
-CHOST=$MINGW_TRIPLE $M_SOURCE/CMake/configure \
-  --prefix=$M_TARGET
-make -j$MJOBS
-make install
+#echo "building cmake"
+#echo "======================="
+#cd $M_BUILD
+#mkdir cmake-build
+#cmake -H$M_SOURCE/CMake -B$M_BUILD/cmake-build \
+#  -DCMAKE_INSTALL_PREFIX=$M_TARGET \
+#  -DCMAKE_TOOLCHAIN_FILE=$TOP_DIR/toolchain.cmake \
+#  -DCMAKE_BUILD_TYPE=Release \
+#  -DBUILD_SHARED_LIBS=OFF \
+#  -DCMAKE_USE_SYSTEM_LIBRARIES=OFF
+#make -j$MJOBS -C $M_BUILD/cmake-build
+#make install -C $M_BUILD/cmake-build
 
-echo "building yasm"
-echo "======================="
-cd $M_BUILD
-mkdir yasm-build
-cd yasm-build
-$M_SOURCE/yasm/configure \
-  --host=$MINGW_TRIPLE \
-  --target=$MINGW_TRIPLE \
-  --prefix=$M_TARGET
-make -j$MJOBS
-make install
+#echo "building yasm"
+#echo "======================="
+#cd $M_BUILD
+#mkdir yasm-build
+#cd yasm-build
+#$M_SOURCE/yasm-$VER_YASM/configure \
+#  --host=$MINGW_TRIPLE \
+#  --target=$MINGW_TRIPLE \
+#  --prefix=$M_TARGET
+#make -j$MJOBS
+#make install
 
-echo "building nasm"
-echo "======================="
-cd $M_BUILD
-mkdir nasm-build
-cd nasm-build
-$M_SOURCE/nasm/configure \
-  --host=$MINGW_TRIPLE \
-  --target=$MINGW_TRIPLE \
-  --prefix=$M_TARGET
-make -j$MJOBS
-make install
+#echo "building nasm"
+#echo "======================="
+#cd $M_BUILD
+#mkdir nasm-build
+#cd nasm-build
+#$M_SOURCE/nasm-$VER_NASM/configure \
+#  --host=$MINGW_TRIPLE \
+#  --target=$MINGW_TRIPLE \
+#  --prefix=$M_TARGET
+#make -j$MJOBS
+#make install
 
 echo "building pkgconf"
 echo "======================="
@@ -466,9 +477,14 @@ ninja install -C $M_BUILD/pkgconf-build
 cp $M_TARGET/bin/pkgconf.exe $M_TARGET/bin/pkg-config.exe
 cp $M_TARGET/bin/pkgconf.exe $M_TARGET/bin/x86_64-w64-mingw32-pkg-config.exe
 
+cp $M_SOURCE/nasm-$VER_NASM/*.exe $M_TARGET/bin
+cp $M_SOURCE/yasm-$VER_YASM-win64.exe $M_TARGET/bin/yasm.exe
+cp $M_SOURCE/cmake-$VER_CMAKE-windows-x86_64/bin/cmake.exe $M_TARGET/bin
+
 cd $M_TARGET
+rm -rf doc || true
+rm -rf man || true
 rm -rf share
 rm -rf lib/pkgconfig
 rm -f mingw
-rm -rf $M_TARGET/share
 echo "$VER" > $M_TARGET/version.txt
