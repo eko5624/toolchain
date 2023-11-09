@@ -423,7 +423,7 @@ $M_SOURCE/make-$VER_MAKE/configure \
   --prefix=$M_TARGET
 make -j$MJOBS
 make install
-cp $M_TARGET/bin/make.exe $M_TARGET/bin/mingw32-make.exe
+mv $M_TARGET/bin/make.exe $M_TARGET/bin/mingw32-make.exe
 
 #echo "building cmake"
 #echo "======================="
