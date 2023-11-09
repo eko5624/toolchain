@@ -477,10 +477,6 @@ ninja install -C $M_BUILD/pkgconf-build
 cp $M_TARGET/bin/pkgconf.exe $M_TARGET/bin/pkg-config.exe
 cp $M_TARGET/bin/pkgconf.exe $M_TARGET/bin/x86_64-w64-mingw32-pkg-config.exe
 
-cp $M_SOURCE/nasm-$VER_NASM/*.exe $M_TARGET/bin
-cp $M_SOURCE/yasm-$VER_YASM-win64.exe $M_TARGET/bin/yasm.exe
-cp $M_SOURCE/cmake-$VER_CMAKE-windows-x86_64/bin/cmake.exe $M_TARGET/bin
-
 cd $M_TARGET
 rm -rf doc || true
 rm -rf man || true
@@ -488,3 +484,10 @@ rm -rf share
 rm -rf lib/pkgconfig
 rm -f mingw
 echo "$VER" > $M_TARGET/version.txt
+
+mkdir share
+cp $M_SOURCE/nasm-$VER_NASM/*.exe bin
+cp $M_SOURCE/yasm-$VER_YASM-win64.exe bin/yasm.exe
+cp $M_SOURCE/cmake-$VER_CMAKE-windows-x86_64/bin/cmake.exe bin
+cp -r $M_SOURCE/cmake-$VER_CMAKE-windows-x86_64/share/cmake* share
+
