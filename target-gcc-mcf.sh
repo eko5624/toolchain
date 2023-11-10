@@ -420,6 +420,7 @@ cd make-build
 $M_SOURCE/make-$VER_MAKE/configure \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
+  --disable-nls \
   --prefix=$M_TARGET
 make -j$MJOBS
 make install
