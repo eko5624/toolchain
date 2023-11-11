@@ -16,9 +16,9 @@ jobs:
           
       - name: Setup Toolchain
         run: |
-          curl -OL https://github.com/eko5624/toolchain-test/releases/download/toolchain/cross-gcc-mcf.7z
-          7z x cross-gcc-mcf.7z
-          rm cross-gcc-mcf.7z
+          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/cross-gcc-mcf-13.2.0-x64-ucrt.7z
+          7z x cross-gcc-mcf*.7z
+          rm cross-gcc-mcf*.7z
             
       - name: Building
         run: |
