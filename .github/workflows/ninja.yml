@@ -1,4 +1,4 @@
-name: libjxl-test
+name: ninja
 defaults:
   run:
     shell: bash
