@@ -94,7 +94,6 @@ cp $TOP_DIR/x86_64-w64-mingw32-ld ./
 cp $TOP_DIR/x86_64-w64-mingw32-gcc ./
 cp $TOP_DIR/x86_64-w64-mingw32-g++ ./
 cp $TOP_DIR/x86_64-w64-mingw32-c++ ./
-ln -s x86_64-w64-mingw32-ld ld.x86_64-w64-mingw32-lld
 
 chmod 755 x86_64-w64-mingw32-clang
 chmod 755 x86_64-w64-mingw32-clang++
