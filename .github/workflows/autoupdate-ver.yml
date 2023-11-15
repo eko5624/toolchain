@@ -38,6 +38,7 @@ jobs:
         echo "VER_ISL=${ver_array[isl]}" >> ver.sh
         echo "VER_MAKE=${ver_array[make]}" >> ver.sh
         echo "VER_CMAKE=${ver_array[cmake]}" >> ver.sh
+        echo "VER_NINJA=${ver_array[ninja]}" >> ver.sh
         echo "VER_NASM=${ver_array[nasm]}" >> ver.sh
         echo "VER_YASM=${ver_array[yasm]}" >> ver.sh
         echo "VER_PKGCONF=${ver_array[pkgconf]}" >> ver.sh
