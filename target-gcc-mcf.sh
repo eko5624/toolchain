@@ -74,6 +74,10 @@ tar xzf make-$VER_MAKE.tar.gz
 curl -OL https://github.com/Kitware/CMake/releases/download/v$VER_CMAKE/cmake-$VER_CMAKE-windows-x86_64.zip
 7z x cmake*.zip
 
+#ninja
+curl -OL https://github.com/ninja-build/ninja/releases/download/v$VER_NINJA/ninja-win.zip
+7z x ninja*.zip
+
 #yasm
 #wget -c -O yasm-$VER_YASM.tar.gz http://www.tortall.net/projects/yasm/releases/yasm-$VER_YASM.tar.gz
 #tar xzf yasm-$VER_YASM.tar.gz
@@ -491,4 +495,5 @@ cp $M_SOURCE/nasm-$VER_NASM/*.exe bin
 cp $M_SOURCE/yasm-$VER_YASM-win64.exe bin/yasm.exe
 cp $M_SOURCE/cmake-$VER_CMAKE-windows-x86_64/bin/cmake.exe bin
 cp -r $M_SOURCE/cmake-$VER_CMAKE-windows-x86_64/share/cmake* share
+cp $M_SOURCE/ninja.exe bin
 
