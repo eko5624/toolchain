@@ -257,7 +257,7 @@ sed -i 's/CLANG_FLAGS=""/CLANG_FLAGS="-fdata-sections -ffunction-sections"/' $M_
 sed -i 's/CLANG_FLAGS=""/CLANG_FLAGS="-fdata-sections -ffunction-sections"/' $M_CROSS/bin/x86_64-w64-mingw32-clang++
 sed -i 's/CLANG_FLAGS=""/CLANG_FLAGS="-fdata-sections -ffunction-sections"/' $M_CROSS/bin/x86_64-w64-mingw32-g++
 sed -i 's/CLANG_FLAGS=""/CLANG_FLAGS="-fdata-sections -ffunction-sections"/' $M_CROSS/bin/x86_64-w64-mingw32-gcc
-sed -i 's/LLD_FLAGS=""/LLD_FLAGS="-O3 --gc-sections -Xlink=-opt:safeicf"/' $M_CROSS/bin/x86_64-w64-mingw32-ld
+sed -i 's/LLD_FLAGS=""/LLD_FLAGS="--gc-sections -Xlink=-opt:safeicf"/' $M_CROSS/bin/x86_64-w64-mingw32-ld
 
 echo "building rustup"
 echo "======================="
