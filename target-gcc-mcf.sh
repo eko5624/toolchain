@@ -583,7 +583,6 @@ rm -rf lib/pkgconfig
 rm -f mingw
 echo "$VER" > $M_TARGET/version.txt
 
-mkdir share
 cp $M_SOURCE/nasm-$VER_NASM/*.exe bin
 cp $M_SOURCE/yasm-$VER_YASM-win64.exe bin/yasm.exe
 cp $M_SOURCE/cmake-$VER_CMAKE-windows-x86_64/bin/cmake.exe bin
