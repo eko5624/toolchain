@@ -471,41 +471,22 @@ make install
 
 echo "building make"
 echo "======================="
+cd $M_SOURCE/make-$VER_MAKE
+# also support triplet ending with mingw32ucrt (version >= 4.3)
+sed -i.bak -e "s/\(mingw32\))/\1*)/" configure
+
 cd $M_BUILD
 mkdir make-build && cd make-build
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-make/make-4.2.1-Makefile.am-gcc-only-link-libgnumake-1.dll.a.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-make/make-4.3_undef-HAVE_STRUCT_DIRENT_D_TYPE.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-make/make-4.4-timestamps.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-make/make-check-load-feature.mak
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-make/make-getopt.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-make/make-linebuf-mingw.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-make/mk_temp.c
-
-cd $M_SOURCE/make-$VER_MAKE
-pushd src
-patch -p1 -i $M_BUILD/make-build/make-getopt.patch
-patch -p1 -i $M_BUILD/make-build/make-linebuf-mingw.patch
-patch -p2 -i $M_BUILD/make-build/make-4.3_undef-HAVE_STRUCT_DIRENT_D_TYPE.patch
-popd
-# https://lists.gnu.org/archive/html/bug-make/2022-11/msg00017.html
-patch -p1 -i $M_BUILD/make-build/make-4.4-timestamps.patch
-patch -p1 -i $M_BUILD/make-build/make-4.2.1-Makefile.am-gcc-only-link-libgnumake-1.dll.a.patch
-
-_prog_name=mingw32-make
-_prog_name_am=${_prog_name//[^a-zA-Z0-9@]/_}
-mv Makefile.am Makefile.am.orig
-sed -e "/bin_PROGRAMS/ { s:\bmake\b:${_prog_name}:g };
-        s:\bmake_\(SOURCES\|LDADD\|LDFLAGS\)\b:${_prog_name_am}_\1:g ;
-        s:\bEXTRA_make_\([A-Z]\+\):EXTRA_${_prog_name_am}_\1:g ;" \
-      Makefile.am.orig > Makefile.am
-autoreconf -vfi
-
-cd $M_BUILD/make-build
 $M_SOURCE/make-$VER_MAKE/configure \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
-  --disable-nls \
-  --prefix=$M_TARGET
+  --prefix=$M_TARGET \
+  --program-prefix=mingw32- \
+  --disable-nls
+
+# enable sys/wait.h (version >= 4.4.1)
+echo "#undef HAVE_SYS_WAIT_H" >> $M_SOURCE/make-$VER_MAKE/src/config.h
+echo "#define HAVE_SYS_WAIT_H 1" >> $M_SOURCE/make-$VER_MAKE/src/config.h
 make -j$MJOBS
 make install
 #mv $M_TARGET/bin/make.exe $M_TARGET/bin/mingw32-make.exe
