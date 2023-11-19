@@ -103,8 +103,7 @@ git clone https://sourceware.org/git/cygwin-apps/windows-default-manifest.git
 echo "building gmp"
 echo "======================="
 cd $M_BUILD
-mkdir gmp-build
-cd gmp-build
+mkdir gmp-build && cd gmp-build
 $M_SOURCE/gmp-$VER_GMP/configure \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
@@ -117,8 +116,7 @@ make install
 echo "building mpfr"
 echo "======================="
 cd $M_BUILD
-mkdir mpfr-build
-cd mpfr-build
+mkdir mpfr-build && cd mpfr-build
 $M_SOURCE/mpfr-$VER_MPFR/configure \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
@@ -132,8 +130,7 @@ make install
 echo "building MPC"
 echo "======================="
 cd $M_BUILD
-mkdir mpc-build
-cd mpc-build
+mkdir mpc-build && cd mpc-build
 $M_SOURCE/mpc-$VER_MPC/configure \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
@@ -147,8 +144,7 @@ make install
 echo "building isl"
 echo "======================="
 cd $M_BUILD
-mkdir isl-build
-cd isl-build
+mkdir isl-build && cd isl-build
 $M_SOURCE/isl-$VER_ISL/configure \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
@@ -162,8 +158,66 @@ make install
 echo "building binutils"
 echo "======================="
 cd $M_BUILD
-mkdir binutils-build
-cd binutils-build
+mkdir binutils-build && cd binutils-build
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0002-check-for-unusual-file-harder.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0010-bfd-Increase-_bfd_coff_max_nscns-to-65279.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0110-binutils-mingw-gnu-print.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0410-windres-handle-spaces.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0500-fix-weak-undef-symbols-after-image-base-change.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/2001-ld-option-to-move-default-bases-under-4GB.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/2003-Restore-old-behaviour-of-windres-so-that-options-con.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/libiberty-unlink-handle-windows-nul.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/reproducible-import-libraries.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/specify-timestamp.patch
+curl -L -o 6aadf8a04d162feb2afe3c41f5b36534d661d447.patch "https://sourceware.org/git/?p=binutils-gdb.git;a=commitdiff_plain;h=6aadf8a04d162feb2afe3c41f5b36534d661d447"
+curl -L -o 398f1ddf5e89e066aeee242ea854dcbaa8eb9539.patch "https://sourceware.org/git/?p=binutils-gdb.git;a=commitdiff_plain;h=398f1ddf5e89e066aeee242ea854dcbaa8eb9539"
+curl -L -o 26d0081b52dc482c59abba23ca495304e698ce4b.patch "https://sourceware.org/git/?p=binutils-gdb.git;a=commitdiff_plain;h=26d0081b52dc482c59abba23ca495304e698ce4b"
+curl -L -o 8606b47e94078e77a53f3cd714272c853d2add22.patch "https://sourceware.org/git/?p=binutils-gdb.git;a=commitdiff_plain;h=8606b47e94078e77a53f3cd714272c853d2add22"
+curl -L -o 54d57acf610e5db2e70afa234fd4018207606774.patch "https://sourceware.org/git/?p=binutils-gdb.git;a=commitdiff_plain;h=54d57acf610e5db2e70afa234fd4018207606774"
+
+apply_patch_with_msg() {
+  for patch in "$@"; do
+    echo "Applying $patch"
+    patch -p1 -i "$M_BUILD/binutils-build/$patch"
+  done
+}
+
+cd $M_SOURCE/binutils-$VER_BINUTILS
+apply_patch_with_msg \
+  0002-check-for-unusual-file-harder.patch \
+  0010-bfd-Increase-_bfd_coff_max_nscns-to-65279.patch \
+  0110-binutils-mingw-gnu-print.patch
+
+# Add an option to change default bases back below 4GB to ease transition
+# https://github.com/msys2/MINGW-packages/issues/7027
+# https://github.com/msys2/MINGW-packages/issues/7023
+apply_patch_with_msg 2001-ld-option-to-move-default-bases-under-4GB.patch
+
+# https://github.com/msys2/MINGW-packages/pull/9233#issuecomment-889439433
+patch -R -p1 -i $M_BUILD/binutils-build/2003-Restore-old-behaviour-of-windres-so-that-options-con.patch
+
+# patches for reproducibility from Debian:
+# https://salsa.debian.org/mingw-w64-team/binutils-mingw-w64/-/tree/master/debian/patches
+patch -p2 -i $M_BUILD/binutils-build/reproducible-import-libraries.patch
+patch -p2 -i $M_BUILD/binutils-build/specify-timestamp.patch
+
+# Handle Windows nul device
+# https://github.com/msys2/MINGW-packages/issues/1840
+# https://github.com/msys2/MINGW-packages/issues/10520
+# https://github.com/msys2/MINGW-packages/issues/14725
+
+# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=108276
+# https://gcc.gnu.org/pipermail/gcc-patches/2023-January/609487.html
+patch -p1 -i $M_BUILD/binutils-build/libiberty-unlink-handle-windows-nul.patch
+
+apply_patch_with_msg \
+  6aadf8a04d162feb2afe3c41f5b36534d661d447.patch \
+  398f1ddf5e89e066aeee242ea854dcbaa8eb9539.patch \
+  26d0081b52dc482c59abba23ca495304e698ce4b.patch \
+  8606b47e94078e77a53f3cd714272c853d2add22.patch \
+  54d57acf610e5db2e70afa234fd4018207606774.patch
+
+cd $M_BUILD/binutils-build
 $M_SOURCE/binutils-$VER_BINUTILS/configure \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
@@ -179,15 +233,17 @@ make install
 echo "building mingw-w64-headers"
 echo "======================="
 cd $M_BUILD
-mkdir headers-build
-cd headers-build
+mkdir headers-build && cd headers-build
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-headers-git/0001-Allow-to-use-bessel-and-complex-functions-without-un.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-headers-git/0002-heades-add-full-name-winrt.patch
+
 cd $M_SOURCE/mingw-w64
 git apply $M_BUILD/headers-build/0001-Allow-to-use-bessel-and-complex-functions-without-un.patch
 git apply $M_BUILD/headers-build/0002-heades-add-full-name-winrt.patch
+
 cd $M_SOURCE/mingw-w64/mingw-w64-headers
 touch include/windows.*.h include/wincrypt.h include/prsht.h
+
 cd $M_BUILD/headers-build
 $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
   --host=$MINGW_TRIPLE \
@@ -208,13 +264,15 @@ rm $M_TARGET/include/pthread_unistd.h
 echo "building winpthreads"
 echo "======================="
 cd $M_BUILD
-mkdir winpthreads-build
-cd winpthreads-build
+mkdir winpthreads-build && cd winpthreads-build
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-winpthreads-git/0001-Define-__-de-register_frame_info-in-fake-libgcc_s.patch
+
 cd $M_SOURCE/mingw-w64
 git apply $M_BUILD/winpthreads-build/0001-Define-__-de-register_frame_info-in-fake-libgcc_s.patch
+
 cd $M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads
 autoreconf -vfi
+
 cd $M_BUILD/winpthreads-build
 $M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
   --host=$MINGW_TRIPLE \
@@ -231,9 +289,9 @@ cd $M_SOURCE/mcfgthread
 git reset --hard
 git clean -fdx
 autoreconf -ivf
+
 cd $M_BUILD
-mkdir mcfgthread-build
-cd mcfgthread-build
+mkdir mcfgthread-build && cd mcfgthread-build
 $M_SOURCE/mcfgthread/configure \
   --host=$MINGW_TRIPLE \
   --prefix=$M_TARGET \
@@ -245,22 +303,15 @@ make install
 echo "building mingw-w64-crt"
 echo "======================="
 cd $M_BUILD
-mkdir crt-build
-cd crt-build
+mkdir crt-build && cd crt-build
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-crt-git/0001-Allow-to-use-bessel-and-complex-functions-without-un.patch
-#curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-crt-git/9001-crt-Mark-atexit-as-DATA-because-it-s-always-overridd.patch
-#curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-crt-git/9002-crt-Provide-wrappers-for-exit-in-libmingwex.patch
-#curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-crt-git/9003-crt-Implement-standard-conforming-termination-suppor.patch
-#curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-crt-git/9004-crt-Copy-clock-and-nanosleep-from-winpthreads.patch
+
 cd $M_SOURCE/mingw-w64
 git reset --hard
 git clean -fdx
-#git apply $M_BUILD/crt-build/9001-crt-Mark-atexit-as-DATA-because-it-s-always-overridd.patch
-#git apply $M_BUILD/crt-build/9002-crt-Provide-wrappers-for-exit-in-libmingwex.patch
-#git apply $M_BUILD/crt-build/9003-crt-Implement-standard-conforming-termination-suppor.patch
-#git apply $M_BUILD/crt-build/9004-crt-Copy-clock-and-nanosleep-from-winpthreads.patch
 (cd mingw-w64-crt && automake)
 git apply $M_BUILD/crt-build/0001-Allow-to-use-bessel-and-complex-functions-without-un.patch
+
 cd $M_BUILD/crt-build
 $M_SOURCE/mingw-w64/mingw-w64-crt/configure \
   --host=$MINGW_TRIPLE \
@@ -281,8 +332,7 @@ ar rcs $M_TARGET/lib/libssp_nonshared.a
 echo "building gendef"
 echo "======================="
 cd $M_BUILD
-mkdir gendef-build
-cd gendef-build
+mkdir gendef-build && cd gendef-build
 $M_SOURCE/mingw-w64/mingw-w64-tools/gendef/configure \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
@@ -296,8 +346,7 @@ echo "======================="
 cd $M_SOURCE
 git clone git://gcc.gnu.org/git/gcc.git --branch releases/gcc-13
 cd $M_BUILD
-mkdir gcc-build
-cd gcc-build
+mkdir gcc-build && cd gcc-build
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0002-Relocate-libintl.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0003-Windows-Follow-Posix-dir-exists-semantics-more-close.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0005-Windows-Don-t-ignore-native-system-header-dir.patch
@@ -357,6 +406,7 @@ CPPFLAGS+=" -DCOM_NO_WINDOWS_H"
 _gcc_version=$(head -n 34 gcc/BASE-VER | sed -e 's/.* //' | tr -d '"\n')
 _gcc_date=$(head -n 34 gcc/DATESTAMP | sed -e 's/.* //' | tr -d '"\n')
 VER=$(printf "%s-%s" "$_gcc_version" "$_gcc_date")
+
 cd $M_BUILD/gcc-build
 #$M_SOURCE/gcc-$VER_GCC/configure \
 $M_SOURCE/gcc/configure \
@@ -411,8 +461,7 @@ find $M_TARGET/lib -maxdepth 1 -type f -name "*.la" -print0 | xargs -0 -I {} rm 
 echo "building windows-default-manifest"
 echo "======================="
 cd $M_BUILD
-mkdir windows-default-manifest-build
-cd windows-default-manifest-build
+mkdir windows-default-manifest-build && cd windows-default-manifest-build
 $M_SOURCE/windows-default-manifest/configure \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
@@ -423,8 +472,35 @@ make install
 echo "building make"
 echo "======================="
 cd $M_BUILD
-mkdir make-build
-cd make-build
+mkdir make-build && cd make-build
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-make/make-4.2.1-Makefile.am-gcc-only-link-libgnumake-1.dll.a.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-make/make-4.3_undef-HAVE_STRUCT_DIRENT_D_TYPE.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-make/make-4.4-timestamps.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-make/make-check-load-feature.mak
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-make/make-getopt.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-make/make-linebuf-mingw.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-make/mk_temp.c
+
+cd $M_SOURCE/make-$VER_MAKE
+pushd src
+patch -p1 -i $M_BUILD/make-build/make-getopt.patch
+patch -p1 -i $M_BUILD/make-build/make-linebuf-mingw.patch
+patch -p2 -i $M_BUILD/make-build/make-4.3_undef-HAVE_STRUCT_DIRENT_D_TYPE.patch
+popd
+# https://lists.gnu.org/archive/html/bug-make/2022-11/msg00017.html
+patch -p1 -i $M_BUILD/make-build/make-4.4-timestamps.patch
+patch -p1 -i $M_BUILD/make-build/make-4.2.1-Makefile.am-gcc-only-link-libgnumake-1.dll.a.patch
+
+_prog_name=mingw32-make
+_prog_name_am=${_prog_name//[^a-zA-Z0-9@]/_}
+mv Makefile.am Makefile.am.orig
+sed -e "/bin_PROGRAMS/ { s:\bmake\b:${_prog_name}:g };
+        s:\bmake_\(SOURCES\|LDADD\|LDFLAGS\)\b:${_prog_name_am}_\1:g ;
+        s:\bEXTRA_make_\([A-Z]\+\):EXTRA_${_prog_name_am}_\1:g ;" \
+      Makefile.am.orig > Makefile.am
+autoreconf -vfi
+
+cd $M_BUILD/make-build
 $M_SOURCE/make-$VER_MAKE/configure \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
@@ -432,7 +508,7 @@ $M_SOURCE/make-$VER_MAKE/configure \
   --prefix=$M_TARGET
 make -j$MJOBS
 make install
-mv $M_TARGET/bin/make.exe $M_TARGET/bin/mingw32-make.exe
+#mv $M_TARGET/bin/make.exe $M_TARGET/bin/mingw32-make.exe
 
 #echo "building cmake"
 #echo "======================="
@@ -474,8 +550,22 @@ mv $M_TARGET/bin/make.exe $M_TARGET/bin/mingw32-make.exe
 echo "building pkgconf"
 echo "======================="
 cd $M_BUILD
-mkdir pkgconf-build
-cd pkgconf-build
+mkdir pkgconf-build && cd pkgconf-build
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-pkgconf/0002-size-t-format.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-pkgconf/0003-printf-format.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-pkgconf/0004-default-pure-static.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-pkgconf/384ade5f316367f15da9dbf09853e06fe29bf2bf.patch
+
+cd $M_SOURCE/pkgconf
+# https://github.com/msys2/MINGW-packages/issues/8473
+patch -R -p1 -i $M_BUILD/pkgconf-build/0004-default-pure-static.patch
+patch -p1 -i $M_BUILD/pkgconf-build/0002-size-t-format.patch
+patch -p1 -i $M_BUILD/pkgconf-build/0003-printf-format.patch
+
+# https://github.com/pkgconf/pkgconf/issues/326
+patch -R -p1 -i $M_BUILD/pkgconf-build/384ade5f316367f15da9dbf09853e06fe29bf2bf.patch
+
+cd $M_BUILD/pkgconf-build
 meson setup . $M_SOURCE/pkgconf \
   --prefix=$M_TARGET \
   --cross-file=$TOP_DIR/cross.meson \
