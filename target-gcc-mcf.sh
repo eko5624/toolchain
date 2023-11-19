@@ -175,7 +175,7 @@ curl -L -o 26d0081b52dc482c59abba23ca495304e698ce4b.patch "https://sourceware.or
 curl -L -o 8606b47e94078e77a53f3cd714272c853d2add22.patch "https://sourceware.org/git/?p=binutils-gdb.git;a=commitdiff_plain;h=8606b47e94078e77a53f3cd714272c853d2add22"
 curl -L -o 54d57acf610e5db2e70afa234fd4018207606774.patch "https://sourceware.org/git/?p=binutils-gdb.git;a=commitdiff_plain;h=54d57acf610e5db2e70afa234fd4018207606774"
 
-apply_patch_with_msg() {
+apply_patch_for_binutils() {
   for patch in "$@"; do
     echo "Applying $patch"
     patch -p1 -i "$M_BUILD/binutils-build/$patch"
@@ -183,7 +183,7 @@ apply_patch_with_msg() {
 }
 
 cd $M_SOURCE/binutils-$VER_BINUTILS
-apply_patch_with_msg \
+apply_patch_for_binutils \
   0002-check-for-unusual-file-harder.patch \
   0010-bfd-Increase-_bfd_coff_max_nscns-to-65279.patch \
   0110-binutils-mingw-gnu-print.patch
@@ -191,7 +191,7 @@ apply_patch_with_msg \
 # Add an option to change default bases back below 4GB to ease transition
 # https://github.com/msys2/MINGW-packages/issues/7027
 # https://github.com/msys2/MINGW-packages/issues/7023
-apply_patch_with_msg 2001-ld-option-to-move-default-bases-under-4GB.patch
+apply_patch_for_binutils 2001-ld-option-to-move-default-bases-under-4GB.patch
 
 # https://github.com/msys2/MINGW-packages/pull/9233#issuecomment-889439433
 patch -R -p1 -i $M_BUILD/binutils-build/2003-Restore-old-behaviour-of-windres-so-that-options-con.patch
@@ -210,7 +210,7 @@ patch -p2 -i $M_BUILD/binutils-build/specify-timestamp.patch
 # https://gcc.gnu.org/pipermail/gcc-patches/2023-January/609487.html
 patch -p1 -i $M_BUILD/binutils-build/libiberty-unlink-handle-windows-nul.patch
 
-apply_patch_with_msg \
+apply_patch_for_binutils \
   6aadf8a04d162feb2afe3c41f5b36534d661d447.patch \
   398f1ddf5e89e066aeee242ea854dcbaa8eb9539.patch \
   26d0081b52dc482c59abba23ca495304e698ce4b.patch \
@@ -281,7 +281,6 @@ $M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
   --enable-shared
 make -j$MJOBS
 make install
-#cp $M_TARGET/$MINGW_TRIPLE/bin/libwinpthread-1.dll $M_TARGET/bin/
 
 echo "building mcfgthread"
 echo "======================="
@@ -298,7 +297,6 @@ $M_SOURCE/mcfgthread/configure \
   --disable-pch
 make -j$MJOBS
 make install
-#cp $M_TARGET/$MINGW_TRIPLE/bin/libmcfgthread-1.dll $M_TARGET/bin/
 
 echo "building mingw-w64-crt"
 echo "======================="
@@ -365,7 +363,7 @@ curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w
 curl -L -o 2f7e7bfa3c6327793cdcdcb5c770b93cecd49bd0.patch "https://gcc.gnu.org/git/?p=gcc.git;a=patch;h=2f7e7bfa3c6327793cdcdcb5c770b93cecd49bd0"
 curl -L -o 3eeb4801d6f45f6250fc77a6d3ab4e0115f8cfdd.patch "https://gcc.gnu.org/git/?p=gcc.git;a=patch;h=3eeb4801d6f45f6250fc77a6d3ab4e0115f8cfdd"
 
-apply_patch_with_msg() {
+apply_patch_for_gcc() {
   for patch in "$@"; do
     echo "Applying $patch"
     patch -Nbp1 -i "$M_BUILD/gcc-build/$patch"
@@ -374,7 +372,7 @@ apply_patch_with_msg() {
 
 #cd $M_SOURCE/gcc-$VER_GCC
 cd $M_SOURCE/gcc
-apply_patch_with_msg \
+apply_patch_for_gcc \
   0002-Relocate-libintl.patch \
   0003-Windows-Follow-Posix-dir-exists-semantics-more-close.patch \
   0005-Windows-Don-t-ignore-native-system-header-dir.patch \
@@ -393,7 +391,7 @@ apply_patch_with_msg \
 
 # backport: https://github.com/msys2/MINGW-packages/issues/17599
 # https://inbox.sourceware.org/gcc-patches/a22433f5-b4d2-19b7-86a2-31e2ee45fb61@martin.st/T/
-apply_patch_with_msg \
+apply_patch_for_gcc \
   2f7e7bfa3c6327793cdcdcb5c770b93cecd49bd0.patch \
   3eeb4801d6f45f6250fc77a6d3ab4e0115f8cfdd.patch
 
@@ -489,7 +487,6 @@ echo "#undef HAVE_SYS_WAIT_H" >> $M_SOURCE/make-$VER_MAKE/src/config.h
 echo "#define HAVE_SYS_WAIT_H 1" >> $M_SOURCE/make-$VER_MAKE/src/config.h
 make -j$MJOBS
 make install
-#mv $M_TARGET/bin/make.exe $M_TARGET/bin/mingw32-make.exe
 
 #echo "building cmake"
 #echo "======================="
