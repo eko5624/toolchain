@@ -579,7 +579,6 @@ cp $M_TARGET/bin/pkgconf.exe $M_TARGET/bin/x86_64-w64-mingw32-pkg-config.exe
 cd $M_TARGET
 rm -rf doc || true
 rm -rf man || true
-rm -rf share
 rm -rf lib/pkgconfig
 rm -f mingw
 echo "$VER" > $M_TARGET/version.txt
