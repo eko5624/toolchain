@@ -252,7 +252,6 @@ $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
   --host=$MINGW_TRIPLE \
   --prefix=$M_TARGET \
   --enable-sdk=all \
-  --with-default-win32-winnt=0x601 \
   --with-default-msvcrt=ucrt \
   --enable-idl \
   --without-widl
@@ -399,7 +398,6 @@ $M_SOURCE/gcc/configure \
   --target=$MINGW_TRIPLE \
   --prefix=$M_TARGET \
   --libexecdir=$M_TARGET/lib \
-  --with-sysroot=$M_TARGET \
   --with-{gmp,mpfr,mpc,isl}=$M_BUILD/for_target \
   --disable-rpath \
   --disable-multilib \
@@ -436,11 +434,11 @@ done
 for f in $M_TARGET/lib/gcc/x86_64-w64-mingw32/${VER%%-*}/*.exe; do
   strip -s $f
 done
-
-find $M_TARGET/lib -maxdepth 1 -type f -name "*.dll.a" -print0 | xargs -0 -I {} rm {}
-find $M_TARGET/lib -maxdepth 1 -type f -name "*.la" -print0 | xargs -0 -I {} rm {}
+mv $M_TARGET/lib/libgcc_s_seh-1.dll $M_TARGET/bin/
 cp $M_TARGET/bin/gcc.exe $M_TARGET/bin/cc.exe
 cp $M_TARGET/bin/$MINGW_TRIPLE-gcc.exe $M_TARGET/bin/$MINGW_TRIPLE-cc.exe
+find $M_TARGET/lib -maxdepth 1 -type f -name "*.dll.a" -print0 | xargs -0 -I {} rm {}
+find $M_TARGET/lib -maxdepth 1 -type f -name "*.la" -print0 | xargs -0 -I {} rm {}
 
 echo "building windows-default-manifest"
 echo "======================="
