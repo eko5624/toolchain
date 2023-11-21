@@ -263,7 +263,7 @@ echo "building rustup"
 echo "======================="
 curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --target x86_64-pc-windows-gnu --no-modify-path --profile minimal
 rustup update
-cargo install cargo-c --profile=release-strip --features=vendored-openssl
+cargo install cargo-c --profile=release-strip --features=vendored-openssl --locked
 cat <<EOF >$CARGO_HOME/config
 [net]
 git-fetch-with-cli = true
