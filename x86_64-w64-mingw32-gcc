@@ -5,6 +5,7 @@ FLAGS="$FLAGS -target x86_64-w64-mingw32 -march=x86-64 -mtune=generic"
 FLAGS="$FLAGS  --sysroot $CROSS_DIR/x86_64-w64-mingw32"
 FLAGS="$FLAGS -fuse-ld=lld --ld-path=x86_64-w64-mingw32-ld"
 FLAGS="$FLAGS -gcodeview"
+FLAGS="$FLAGS -Wno-error=unused-command-line-argument -Wno-unused-command-line-argument"
 CLANG_FLAGS=""
 
-"$PROG" $FLAGS "$@" $CLANG_FLAGS
+"$PROG" "$@" $FLAGS $CLANG_FLAGS
