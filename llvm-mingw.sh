@@ -251,14 +251,6 @@ ninja install -C openmp-build
 #Copy libclang_rt.builtins-x86_64.a to runtime dir
 cp $M_CROSS/$MINGW_TRIPLE/lib/libclang_rt.builtins-x86_64.a $(x86_64-w64-mingw32-gcc -print-runtime-dir)
 
-#Add CLANG_FLAGS and LLD_FLAGS
-sed -i 's/CLANG_FLAGS=""/CLANG_FLAGS="-fdata-sections -ffunction-sections"/' $M_CROSS/bin/x86_64-w64-mingw32-c++
-sed -i 's/CLANG_FLAGS=""/CLANG_FLAGS="-fdata-sections -ffunction-sections"/' $M_CROSS/bin/x86_64-w64-mingw32-clang
-sed -i 's/CLANG_FLAGS=""/CLANG_FLAGS="-fdata-sections -ffunction-sections"/' $M_CROSS/bin/x86_64-w64-mingw32-clang++
-sed -i 's/CLANG_FLAGS=""/CLANG_FLAGS="-fdata-sections -ffunction-sections"/' $M_CROSS/bin/x86_64-w64-mingw32-g++
-sed -i 's/CLANG_FLAGS=""/CLANG_FLAGS="-fdata-sections -ffunction-sections"/' $M_CROSS/bin/x86_64-w64-mingw32-gcc
-sed -i 's/LLD_FLAGS=""/LLD_FLAGS="--gc-sections -Xlink=-opt:safeicf"/' $M_CROSS/bin/x86_64-w64-mingw32-ld
-
 echo "building rustup"
 echo "======================="
 curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --target x86_64-pc-windows-gnu --no-modify-path --profile minimal
