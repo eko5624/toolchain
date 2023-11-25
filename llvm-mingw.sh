@@ -70,6 +70,8 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
 ninja -j$MJOBS -C llvm-build
 ninja install -C llvm-build
 
+echo "installing wrappers"
+echo "======================="
 mkdir -p $M_CROSS/$MINGW_TRIPLE/lib
 cd $M_CROSS/bin
 ln -s llvm-as $MINGW_TRIPLE-as
