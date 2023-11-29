@@ -1,0 +1,59 @@
+name: cross-llvm-mingw
+defaults:
+  run:
+    shell: bash
+on:
+  workflow_dispatch:
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: docker://ghcr.io/eko5624/archlinux:latest
+    steps:    
+      - name: Checkout
+        uses: actions/checkout@main
+        
+      - name: Setup Cross Toolchain
+        run: |
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-mingw-2023-11-29-ucrt-x86_64.7z
+          7z x cross*.7z
+          rm cross*.7z
+          
+      - name: Loading target llvm cache
+        uses: actions/cache/restore@main
+        with:
+          path: ${{ github.workspace }}/target
+          key: target-llvm-${{ github.run_id }}
+          restore-keys: |
+            target-llvm-
+            
+      - name: Building toolchain
+        run: |
+          PWD=$(pwd)
+          if [[ ! "$(ls -A $PWD/target/bin)" ]]; then
+            chmod +x ./target-llvm-mingw.sh
+            ./target-llvm-mingw.sh
+          fi
+
+      - name: Get current timestamp
+        run: echo "date=$(date +%Y-%m-%d)" >> $GITHUB_ENV  
+
+      - name: Packaging toolchain
+        run: |
+          7z a target-llvm-mingw-${{ env.date }}-ucrt-x86_64.7z target/*
+
+      - name: Release
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./release-package.sh
+          ./release-package.sh
+
+      - name: Saving llvm cache
+        uses: actions/cache/save@main
+        if: always()
+        with:
+          path: ${{ github.workspace }}/target
+          key: target-llvm-${{ github.run_id }}
