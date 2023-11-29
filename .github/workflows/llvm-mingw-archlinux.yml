@@ -1,4 +1,4 @@
-name: llvm-mingw
+name: llvm-mingw-archlinux
 defaults:
   run:
     shell: bash
