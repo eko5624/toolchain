@@ -29,24 +29,24 @@ jobs:
         uses: actions/cache/restore@main
         with:
           path: ${{ github.workspace }}/cross
-          key: llvm-${{ github.run_id }}
+          key: llvm-archlinux-${{ github.run_id }}
           restore-keys: |
-            llvm-
+            llvm-archlinux-
             
       - name: Building toolchain
         run: |
           PWD=$(pwd)
           if [[ ! "$(ls -A $PWD/cross/bin)" ]]; then
-            chmod +x ./llvm-mingw.sh
-            ./llvm-mingw.sh
-          fi  
+            chmod +x ./llvm-mingw-archlinux.sh
+            ./llvm-mingw-archlinux.sh
+          fi
 
       - name: Get current timestamp
         run: echo "date=$(date +%Y-%m-%d)" >> $GITHUB_ENV  
 
       - name: Packaging toolchain
         run: |
-          7z a llvm-mingw-${{ env.date }}-ucrt-x86_64.7z cross/*
+          7z a llvm-mingw-${{ env.date }}-ucrt-archlinux-x86_64.7z cross/*
           7z a rustup-${{ env.date }}.7z rust/*
 
       - name: Release
@@ -62,4 +62,4 @@ jobs:
         if: always()
         with:
           path: ${{ github.workspace }}/cross
-          key: llvm-${{ github.run_id }}
+          key: llvm-archlinux-${{ github.run_id }}
