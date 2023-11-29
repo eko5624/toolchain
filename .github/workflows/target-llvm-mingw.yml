@@ -1,4 +1,4 @@
-name: cross-llvm-mingw
+name: target-llvm-mingw
 defaults:
   run:
     shell: bash
