@@ -196,6 +196,7 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B$M_BUILD/buil
   -DCMAKE_C_FLAGS_INIT="-mguard=cf" \
   -DCMAKE_CXX_FLAGS_INIT="-mguard=cf"
 cmake --build builtins-build -j$MJOBS
+cp builtins-build/lib/windows/libclang_rt.builtins-x86_64.a $M_TARGET/$MINGW_TRIPLE/lib
 cmake --install builtins-build
 mkdir -p $M_CROSS/$MINGW_TRIPLE/bin
 
