@@ -70,7 +70,6 @@ ln -s $(which pkgconf) $MINGW_TRIPLE-pkgconf
 
 cd $M_SOURCE/llvm-mingw
 export TOOLCHAIN_ARCHS="x86_64"
-export TOOLCHAIN_TARGET_OSES="mingw32"
 ./install-wrappers.sh $M_CROSS
 echo "... Done"
 

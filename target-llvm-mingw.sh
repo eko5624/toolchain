@@ -129,7 +129,6 @@ echo "installing wrappers"
 echo "======================="
 cd $M_SOURCE/llvm-mingw
 export TOOLCHAIN_ARCHS="x86_64"
-export TOOLCHAIN_TARGET_OSES="mingw32"
 ./install-wrappers.sh $M_TARGET --host=x86_64-w64-mingw32
 echo "... Done"
 
