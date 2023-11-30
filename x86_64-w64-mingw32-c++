@@ -5,6 +5,10 @@ FLAGS="$FLAGS -target x86_64-w64-mingw32 -march=x86-64 -mtune=generic"
 FLAGS="$FLAGS --driver-mode=g++ -pthread --sysroot $CROSS_DIR/x86_64-w64-mingw32"
 FLAGS="$FLAGS -fuse-ld=lld --ld-path=x86_64-w64-mingw32-ld"
 FLAGS="$FLAGS -gcodeview"
-FLAGS="$FLAGS -Wno-error=unused-command-line-argument -Wno-unused-command-line-argument"
+FLAGS="$FLAGS -Wno-unused-command-line-argument"
 
-"$PROG" "$@" $FLAGS $CLANG_FLAGS
+if [ "$CONF" == "1" ]; then
+    SKIP_OPT="-O0 -fno-lto"
+fi
+
+"$PROG" "$@" $FLAGS $CLANG_FLAGS $SKIP_OPT
