@@ -43,8 +43,6 @@ mkdir llvm-build
 cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
   -DCMAKE_INSTALL_PREFIX=$M_CROSS \
   -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_C_COMPILER=clang \
-  -DCMAKE_CXX_COMPILER=clang++ \
   -DLLVM_USE_LINKER=lld \
   -DLLVM_ENABLE_ASSERTIONS=OFF \
   -DLLVM_ENABLE_PROJECTS="clang;lld" \
