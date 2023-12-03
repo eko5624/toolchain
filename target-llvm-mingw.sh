@@ -34,6 +34,9 @@ cd $M_SOURCE
 #llvm
 git clone https://github.com/llvm/llvm-project.git --branch release/17.x
 
+#lldb-mi
+git clone https://github.com/lldb-tools/lldb-mi.git
+
 #llvm-mingw
 git clone https://github.com/mstorsjo/llvm-mingw.git --branch master
 
@@ -109,6 +112,25 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
   -DLLVM_TOOLCHAIN_TOOLS="llvm-ar;llvm-ranlib;llvm-objdump;llvm-rc;llvm-cvtres;llvm-nm;llvm-strings;llvm-readobj;llvm-dlltool;llvm-pdbutil;llvm-objcopy;llvm-strip;llvm-cov;llvm-profdata;llvm-addr2line;llvm-symbolizer;llvm-windres;llvm-ml;llvm-readelf;llvm-size;llvm-cxxfilt"
 cmake --build llvm-build -j$MJOBS
 cmake --install llvm-build --strip
+
+echo "building lldb-mi"
+echo "======================="
+cd $M_BUILD
+mkdir lldb-mi-build
+cmake -G Ninja -H$M_SOURCE/lldb-mi -B$M_BUILD/lldb-mi-build \
+  -DCMAKE_INSTALL_PREFIX=$M_TARGET \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_SYSTEM_NAME=Windows \
+  -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc \
+  -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ \
+  -DCMAKE_RC_COMPILER=x86_64-w64-mingw32-windres \
+  -DCMAKE_FIND_ROOT_PATH=$M_TARGET \
+  -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER \
+  -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
+  -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
+  -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY
+cmake --build lldb-mi-build -j$MJOBS
+cmake --install lldb-mi-build --strip
 
 echo "stripping llvm"
 echo "======================="
