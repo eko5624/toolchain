@@ -27,7 +27,7 @@ export PATH="$M_CROSS/bin:$PATH"
 mkdir -p $M_SOURCE
 mkdir -p $M_BUILD
 
-echo "gettiong source"
+echo "getting source"
 echo "======================="
 cd $M_SOURCE
 
@@ -115,6 +115,7 @@ cmake --install llvm-build --strip
 
 echo "building lldb-mi"
 echo "======================="
+export LLVM_DIR=$M_BUILD/llvm-build
 cd $M_BUILD
 mkdir lldb-mi-build
 cmake -G Ninja -H$M_SOURCE/lldb-mi -B$M_BUILD/lldb-mi-build \
@@ -124,7 +125,7 @@ cmake -G Ninja -H$M_SOURCE/lldb-mi -B$M_BUILD/lldb-mi-build \
   -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc \
   -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ \
   -DCMAKE_RC_COMPILER=x86_64-w64-mingw32-windres \
-  -DCMAKE_FIND_ROOT_PATH=$M_TARGET \
+  -DCMAKE_FIND_ROOT_PATH=$LLVM_DIR \
   -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER \
   -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
   -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
