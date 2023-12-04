@@ -352,6 +352,7 @@ echo "#define HAVE_SYS_WAIT_H 1" >> $M_SOURCE/make-$VER_MAKE/src/config.h
 make -j$MJOBS
 make install
 
+cd $M_TARGET
 cp $M_SOURCE/nasm-$VER_NASM/*.exe bin
 cp $M_SOURCE/yasm-$VER_YASM-win64.exe bin/yasm.exe
 cp $M_SOURCE/cmake-$VER_CMAKE-windows-x86_64/bin/cmake.exe bin
