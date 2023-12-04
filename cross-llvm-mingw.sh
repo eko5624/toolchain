@@ -48,7 +48,7 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
   -DCMAKE_BUILD_TYPE=Release \
   -DLLVM_USE_LINKER=lld \
   -DLLVM_ENABLE_ASSERTIONS=OFF \
-  -DLLVM_ENABLE_PROJECTS="clang;lld" \
+  -DLLVM_ENABLE_PROJECTS="clang;lld;lldb" \
   -DLLVM_TARGETS_TO_BUILD="X86" \
   -DLLVM_INSTALL_TOOLCHAIN_ONLY=ON \
   -DLLVM_INCLUDE_TESTS=OFF \
