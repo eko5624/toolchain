@@ -65,6 +65,7 @@ cmake --install llvm-build --strip
 
 echo "building lldb-mi"
 echo "======================="
+export LLVM_DIR=$M_BUILD/llvm-build
 cd $M_BUILD
 mkdir lldb-mi-build
 cmake -G Ninja -H$M_SOURCE/lldb-mi -B$M_BUILD/lldb-mi-build \
