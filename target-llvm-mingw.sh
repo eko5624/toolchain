@@ -352,38 +352,6 @@ echo "#define HAVE_SYS_WAIT_H 1" >> $M_SOURCE/make-$VER_MAKE/src/config.h
 make -j$MJOBS
 make install
 
-echo "building pkgconf"
-echo "======================="
-cd $M_BUILD
-mkdir pkgconf-build && cd pkgconf-build
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-pkgconf/0002-size-t-format.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-pkgconf/0003-printf-format.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-pkgconf/0004-default-pure-static.patch
-
-cd $M_SOURCE/pkgconf
-# https://github.com/msys2/MINGW-packages/issues/8473
-patch -R -p1 -i $M_BUILD/pkgconf-build/0004-default-pure-static.patch
-patch -p1 -i $M_BUILD/pkgconf-build/0002-size-t-format.patch
-patch -p1 -i $M_BUILD/pkgconf-build/0003-printf-format.patch
-
-cd $M_BUILD/pkgconf-build
-meson setup . $M_SOURCE/pkgconf \
-  --prefix=$M_TARGET \
-  --cross-file=$TOP_DIR/cross.meson \
-  --buildtype=plain \
-  -Dtests=disabled
-ninja -j$MJOBS -C $M_BUILD/pkgconf-build
-ninja install -C $M_BUILD/pkgconf-build
-cp $M_TARGET/bin/pkgconf.exe $M_TARGET/bin/pkg-config.exe
-cp $M_TARGET/bin/pkgconf.exe $M_TARGET/bin/x86_64-w64-mingw32-pkg-config.exe
-
-cd $M_TARGET
-rm -rf doc || true
-rm -rf man || true
-rm -rf lib/pkgconfig
-rm -f mingw
-echo "$VER" > $M_TARGET/version.txt
-
 cp $M_SOURCE/nasm-$VER_NASM/*.exe bin
 cp $M_SOURCE/yasm-$VER_YASM-win64.exe bin/yasm.exe
 cp $M_SOURCE/cmake-$VER_CMAKE-windows-x86_64/bin/cmake.exe bin
