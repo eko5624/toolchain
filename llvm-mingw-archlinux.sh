@@ -26,7 +26,7 @@ export CARGO_HOME="$RUSTUP_LOCATION/.cargo"
 mkdir -p $M_SOURCE
 mkdir -p $M_BUILD
 
-echo "gettiong source"
+echo "getting source"
 echo "======================="
 cd $M_SOURCE
 
