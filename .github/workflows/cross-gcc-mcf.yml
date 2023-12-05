@@ -41,13 +41,16 @@ jobs:
             ./cross-gcc-mcf.sh
           fi  
 
+      - name: Get current timestamp
+        run: echo "date=$(date +%Y-%m-%d)" >> $GITHUB_ENV
+        
       - name: Get gcc version
         run: |
            echo "ver=$(cat cross/version.txt)" >> $GITHUB_ENV
 
       - name: Packaging toolchain
         run: |
-          7z a cross-gcc-mcf-${{ env.ver }}-x64-ucrt.7z cross/*
+          7z a cross-gcc-mcf-${{ env.date }}-x64-ucrt.7z cross/*
           7z a rustup-${{ env.date }}.7z rust/*
 
       - name: Release
