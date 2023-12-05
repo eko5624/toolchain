@@ -3,6 +3,7 @@ set -e
 
 TOP_DIR=$(pwd)
 source $TOP_DIR/ver.sh
+export BRANCH_GCC=releases/gcc-13
 
 # Speed up the process
 # Env Var NUMJOBS overrides automatic detection
@@ -327,7 +328,7 @@ make install
 echo "building gcc"
 echo "======================="
 cd $M_SOURCE
-git clone git://gcc.gnu.org/git/gcc.git --branch releases/gcc-13
+git clone git://gcc.gnu.org/git/gcc.git --branch $BRANCH_GCC
 cd $M_BUILD
 mkdir gcc-build && cd gcc-build
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0002-Relocate-libintl.patch
