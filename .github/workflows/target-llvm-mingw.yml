@@ -41,7 +41,7 @@ jobs:
 
       - name: Packaging toolchain
         run: |
-          7z a target-llvm-mingw-${{ env.date }}-ucrt-x86_64.7z target/*
+          7z a -r target-llvm-mingw-${{ env.date }}-ucrt-x86_64.7z target/*
 
       - name: Release
         continue-on-error: true

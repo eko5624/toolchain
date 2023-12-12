@@ -11,18 +11,17 @@ source $TOP_DIR/ver.sh
 # Env Var NUMJOBS overrides automatic detection
 MJOBS=$(grep -c processor /proc/cpuinfo)
 
-MINGW_TRIPLE="x86_64-w64-mingw32"
-export MINGW_TRIPLE
-export CLANG_VER="17"
-
 export M_ROOT=$(pwd)
 export M_SOURCE=$M_ROOT/source
 export M_BUILD=$M_ROOT/build
 export M_CROSS=$M_ROOT/cross
 export M_TARGET=$M_ROOT/target
-export MINGW_TRIPLE="x86_64-w64-mingw32"
 
+export MINGW_TRIPLE="x86_64-w64-mingw32"
+export TOOLCHAIN_ARCHS="x86_64"
+export TOOLCHAIN_TARGET_OSES="mingw32"
 export PATH="$M_CROSS/bin:$PATH"
+export CLANG_VER="17"
 
 mkdir -p $M_SOURCE
 mkdir -p $M_BUILD
@@ -35,7 +34,7 @@ cd $M_SOURCE
 git clone https://github.com/llvm/llvm-project.git --branch release/17.x
 
 #lldb-mi
-git clone https://github.com/lldb-tools/lldb-mi.git
+#git clone https://github.com/lldb-tools/lldb-mi.git
 
 #llvm-mingw
 git clone https://github.com/mstorsjo/llvm-mingw.git --branch master
@@ -93,8 +92,8 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
   -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
   -DLLVM_HOST_TRIPLE=$MINGW_TRIPLE \
   -DLLVM_ENABLE_ASSERTIONS=OFF \
-  -DLLVM_ENABLE_PROJECTS="clang;lld;lldb" \
-  -DLLVM_TARGETS_TO_BUILD="X86" \
+  -DLLVM_ENABLE_PROJECTS="clang;lld" \
+  -DLLVM_TARGETS_TO_BUILD="X86;NVPTX" \
   -DLLVM_INSTALL_TOOLCHAIN_ONLY=ON \
   -DLLVM_INCLUDE_TESTS=OFF \
   -DLLVM_INCLUDE_EXAMPLES=OFF \
@@ -113,25 +112,25 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
 cmake --build llvm-build -j$MJOBS
 cmake --install llvm-build --strip
 
-echo "building lldb-mi"
-echo "======================="
-export LLVM_DIR=$M_BUILD/llvm-build
-cd $M_BUILD
-mkdir lldb-mi-build
-cmake -G Ninja -H$M_SOURCE/lldb-mi -B$M_BUILD/lldb-mi-build \
-  -DCMAKE_INSTALL_PREFIX=$M_TARGET \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_SYSTEM_NAME=Windows \
-  -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc \
-  -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ \
-  -DCMAKE_RC_COMPILER=x86_64-w64-mingw32-windres \
-  -DCMAKE_FIND_ROOT_PATH=$LLVM_DIR \
-  -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER \
-  -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
-  -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
-  -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY
-cmake --build lldb-mi-build -j$MJOBS
-cmake --install lldb-mi-build --strip
+#echo "building lldb-mi"
+#echo "======================="
+#export LLVM_DIR=$M_BUILD/llvm-build
+#cd $M_BUILD
+#mkdir lldb-mi-build
+#cmake -G Ninja -H$M_SOURCE/lldb-mi -B$M_BUILD/lldb-mi-build \
+#  -DCMAKE_INSTALL_PREFIX=$M_TARGET \
+#  -DCMAKE_BUILD_TYPE=Release \
+#  -DCMAKE_SYSTEM_NAME=Windows \
+#  -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc \
+#  -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ \
+#  -DCMAKE_RC_COMPILER=x86_64-w64-mingw32-windres \
+#  -DCMAKE_FIND_ROOT_PATH=$LLVM_DIR \
+#  -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER \
+#  -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
+#  -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
+#  -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY
+#cmake --build lldb-mi-build -j$MJOBS
+#cmake --install lldb-mi-build --strip
 
 echo "stripping llvm"
 echo "======================="
@@ -151,7 +150,6 @@ make install
 echo "installing wrappers"
 echo "======================="
 cd $M_SOURCE/llvm-mingw
-export TOOLCHAIN_ARCHS="x86_64"
 ./install-wrappers.sh $M_TARGET --host=x86_64-w64-mingw32
 echo "... Done"
 
@@ -333,25 +331,19 @@ cp $M_TARGET/$MINGW_TRIPLE/lib/libclang_rt.builtins-x86_64.a $M_TARGET/lib/clang
 
 echo "building make"
 echo "======================="
-cd $M_SOURCE/make-$VER_MAKE
-# also support triplet ending with mingw32ucrt (version >= 4.3)
-sed -i.bak -e "s/\(mingw32\))/\1*)/" configure
-
 cd $M_BUILD
 mkdir make-build && cd make-build
 $M_SOURCE/make-$VER_MAKE/configure \
   --host=$MINGW_TRIPLE \
-  --target=$MINGW_TRIPLE \
   --prefix=$M_TARGET \
   --program-prefix=mingw32- \
-  --disable-nls
-
-# enable sys/wait.h (version >= 4.4.1)
-echo "#undef HAVE_SYS_WAIT_H" >> $M_SOURCE/make-$VER_MAKE/src/config.h
-echo "#define HAVE_SYS_WAIT_H 1" >> $M_SOURCE/make-$VER_MAKE/src/config.h
+  --enable-job-server
 make -j$MJOBS
-make install
+make install-binPROGRAMS
+echo "... Done"
 
+echo "copy yasm nasm cmake ninja curl"
+echo "======================="
 cd $M_TARGET
 cp $M_SOURCE/nasm-$VER_NASM/*.exe bin
 cp $M_SOURCE/yasm-$VER_YASM-win64.exe bin/yasm.exe
@@ -360,3 +352,4 @@ cp -r $M_SOURCE/cmake-$VER_CMAKE-windows-x86_64/share/cmake* share
 cp $M_SOURCE/ninja.exe bin
 cp $M_SOURCE/curl*/bin/curl-ca-bundle.crt bin
 cp $M_SOURCE/curl*/bin/curl.exe bin
+echo "... Done"
