@@ -10,14 +10,14 @@ TOP_DIR=$(pwd)
 # Env Var NUMJOBS overrides automatic detection
 MJOBS=$(grep -c processor /proc/cpuinfo)
 
-MINGW_TRIPLE="x86_64-w64-mingw32"
-export MINGW_TRIPLE
-
 export M_ROOT=$(pwd)
 export M_SOURCE=$M_ROOT/source
 export M_BUILD=$M_ROOT/build
 export M_CROSS=$M_ROOT/cross
 
+export MINGW_TRIPLE="x86_64-w64-mingw32"
+export TOOLCHAIN_ARCHS="x86_64"
+export TOOLCHAIN_TARGET_OSES="mingw32"
 export PATH="$M_CROSS/bin:$PATH"
 
 mkdir -p $M_SOURCE
@@ -48,8 +48,8 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
   -DCMAKE_BUILD_TYPE=Release \
   -DLLVM_USE_LINKER=lld \
   -DLLVM_ENABLE_ASSERTIONS=OFF \
-  -DLLVM_ENABLE_PROJECTS="clang;lld;lldb" \
-  -DLLVM_TARGETS_TO_BUILD="X86" \
+  -DLLVM_ENABLE_PROJECTS="clang;lld" \
+  -DLLVM_TARGETS_TO_BUILD="X86;NVPTX" \
   -DLLVM_INSTALL_TOOLCHAIN_ONLY=ON \
   -DLLVM_INCLUDE_TESTS=OFF \
   -DLLVM_INCLUDE_EXAMPLES=OFF \
@@ -63,16 +63,16 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
 cmake --build llvm-build -j$MJOBS
 cmake --install llvm-build --strip
 
-echo "building lldb-mi"
-echo "======================="
-export LLVM_DIR=$M_BUILD/llvm-build
-cd $M_BUILD
-mkdir lldb-mi-build
-cmake -G Ninja -H$M_SOURCE/lldb-mi -B$M_BUILD/lldb-mi-build \
-  -DCMAKE_INSTALL_PREFIX=$M_CROSS \
-  -DCMAKE_BUILD_TYPE=Release
-cmake --build lldb-mi-build -j$MJOBS
-cmake --install lldb-mi-build --strip
+#echo "building lldb-mi"
+#echo "======================="
+#export LLVM_DIR=$M_BUILD/llvm-build
+#cd $M_BUILD
+#mkdir lldb-mi-build
+#cmake -G Ninja -H$M_SOURCE/lldb-mi -B$M_BUILD/lldb-mi-build \
+#  -DCMAKE_INSTALL_PREFIX=$M_CROSS \
+#  -DCMAKE_BUILD_TYPE=Release
+#cmake --build lldb-mi-build -j$MJOBS
+#cmake --install lldb-mi-build --strip
 
 echo "installing wrappers"
 echo "======================="
@@ -81,7 +81,6 @@ ln -s $(which pkgconf) $MINGW_TRIPLE-pkg-config
 ln -s $(which pkgconf) $MINGW_TRIPLE-pkgconf
 
 cd $M_SOURCE/llvm-mingw
-export TOOLCHAIN_ARCHS="x86_64"
 ./install-wrappers.sh $M_CROSS
 echo "... Done"
 
