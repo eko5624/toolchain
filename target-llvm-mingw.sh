@@ -256,6 +256,7 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/runtimes -B$M_BUILD/libcxx-build \
   -DCMAKE_CXX_FLAGS_INIT="-mguard=cf"
 cmake --build libcxx-build -j$MJOBS
 cmake --install libcxx-build
+cp $M_TARGET/$MINGW_TRIPLE/lib/libc++.a $M_TARGET/$MINGW_TRIPLE/lib/libstdc++.a
 
 echo "building winpthreads"
 echo "======================="
