@@ -533,7 +533,6 @@ mkdir pkgconf-build && cd pkgconf-build
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-pkgconf/0002-size-t-format.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-pkgconf/0003-printf-format.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-pkgconf/0004-default-pure-static.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-pkgconf/384ade5f316367f15da9dbf09853e06fe29bf2bf.patch
 
 cd $M_SOURCE/pkgconf
 # https://github.com/msys2/MINGW-packages/issues/8473
@@ -541,17 +540,13 @@ patch -R -p1 -i $M_BUILD/pkgconf-build/0004-default-pure-static.patch
 patch -p1 -i $M_BUILD/pkgconf-build/0002-size-t-format.patch
 patch -p1 -i $M_BUILD/pkgconf-build/0003-printf-format.patch
 
-# https://github.com/pkgconf/pkgconf/issues/326
-patch -R -p1 -i $M_BUILD/pkgconf-build/384ade5f316367f15da9dbf09853e06fe29bf2bf.patch
-
-cd $M_BUILD/pkgconf-build
-meson setup . $M_SOURCE/pkgconf \
+meson setup $M_BUILD/pkgconf-build \
   --prefix=$M_TARGET \
   --cross-file=$TOP_DIR/cross.meson \
-  --buildtype=plain \
+  --buildtype=release \
   -Dtests=disabled
-ninja -j$MJOBS -C $M_BUILD/pkgconf-build
-ninja install -C $M_BUILD/pkgconf-build
+meson compile -C $M_BUILD/pkgconf-build
+meson install -C $M_BUILD/pkgconf-build
 cp $M_TARGET/bin/pkgconf.exe $M_TARGET/bin/pkg-config.exe
 cp $M_TARGET/bin/pkgconf.exe $M_TARGET/bin/x86_64-w64-mingw32-pkg-config.exe
 
