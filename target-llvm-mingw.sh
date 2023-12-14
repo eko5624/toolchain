@@ -256,7 +256,6 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/runtimes -B$M_BUILD/libcxx-build \
   -DCMAKE_CXX_FLAGS_INIT="-mguard=cf"
 cmake --build libcxx-build -j$MJOBS
 cmake --install libcxx-build
-cp $M_TARGET/$MINGW_TRIPLE/lib/libc++.a $M_TARGET/$MINGW_TRIPLE/lib/libstdc++.a
 
 echo "building winpthreads"
 echo "======================="
@@ -330,6 +329,8 @@ cmake --install openmp-build
 #Copy libclang_rt.builtins-x86_64.a to runtime dir
 cp $M_TARGET/$MINGW_TRIPLE/lib/libclang_rt.builtins-x86_64.a $M_TARGET/lib/clang/$CLANG_VER/lib/windows
 cp $M_TARGET/$MINGW_TRIPLE/bin/*.dll $M_TARGET/bin
+rm -rf $M_TARGET/include
+mv $M_TARGET/$MINGW_TRIPLE/include $M_TARGET
 
 echo "building make"
 echo "======================="

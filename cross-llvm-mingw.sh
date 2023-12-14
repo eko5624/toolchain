@@ -194,7 +194,6 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/runtimes -B$M_BUILD/libcxx-build \
   -DLIBCXXABI_LIBDIR_SUFFIX=""
 cmake --build libcxx-build -j$MJOBS
 cmake --install libcxx-build
-cp $M_CROSS/$MINGW_TRIPLE/lib/libc++.a $M_CROSS/$MINGW_TRIPLE/lib/libstdc++.a
 
 echo "building winpthreads"
 echo "======================="
