@@ -30,8 +30,11 @@ jobs:
             
       - name: Building toolchain
         run: |
-          chmod +x ./target-llvm-mingw.sh
-          ./target-llvm-mingw.sh
+          PWD=$(pwd)
+          if [[ ! "$(ls -A $PWD/target/bin)" ]]; then
+            chmod +x ./target-llvm-mingw.sh
+            ./target-llvm-mingw.sh
+          fi
 
       - name: Get current timestamp
         run: echo "date=$(date +%Y-%m-%d)" >> $GITHUB_ENV  
