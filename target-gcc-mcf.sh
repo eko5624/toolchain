@@ -265,12 +265,30 @@ echo "building winpthreads"
 echo "======================="
 cd $M_BUILD
 mkdir winpthreads-build && cd winpthreads-build
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-winpthreads-git/0001-Define-__-de-register_frame_info-in-fake-libgcc_s.patch
+#curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-winpthreads-git/0001-Define-__-de-register_frame_info-in-fake-libgcc_s.patch
 
-cd $M_SOURCE/mingw-w64
-git apply $M_BUILD/winpthreads-build/0001-Define-__-de-register_frame_info-in-fake-libgcc_s.patch
+#cd $M_SOURCE/mingw-w64
+#git apply $M_BUILD/winpthreads-build/0001-Define-__-de-register_frame_info-in-fake-libgcc_s.patch
 
 cd $M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads
+
+sed -i "s|fakelib_libgcc_s_a_SOURCES =|fakelib_libgcc_s_a_SOURCES = src/libgcc/dll_frame_info.c|" Makefile.am
+cat <<EOF >src/libgcc/dll_frame_info.c
+/* Because of:
+   https://github.com/Alexpux/MINGW-packages/blob/master/mingw-w64-gcc/955-4.9.2-apply-hack-so-gcc_s-isnt-stripped.patch
+   .. we need to define these functions.
+*/
+
+void __register_frame_info (__attribute__((unused)) const void *vp, __attribute__((unused)) void *op)
+{
+}
+
+void *__deregister_frame_info (__attribute__((unused)) const void *vp)
+{
+    return (void *)0;
+}
+EOF
+
 autoreconf -vfi
 
 cd $M_BUILD/winpthreads-build
