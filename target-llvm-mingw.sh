@@ -161,7 +161,6 @@ cd headers-build
 $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
   --host=$MINGW_TRIPLE \
   --prefix=$M_TARGET/$MINGW_TRIPLE \
-  --with-default-win32-winnt=0x601 \
   --enable-idl \
   --with-default-msvcrt=ucrt
 make -j$MJOBS
