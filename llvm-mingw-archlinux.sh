@@ -187,7 +187,7 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B$M_BUILD/buil
   -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
   -DSANITIZER_CXX_ABI=libc++
 ninja -j$MJOBS -C builtins-build
-cp builtins-build/lib/windows/libclang_rt.builtins-x86_64.a $M_CROSS/$MINGW_TRIPLE/lib
+#cp builtins-build/lib/windows/libclang_rt.builtins-x86_64.a $M_CROSS/$MINGW_TRIPLE/lib
 ninja install -C builtins-build
 
 echo "building llvm-libcxx"
@@ -224,7 +224,37 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/runtimes -B$M_BUILD/libcxx-build \
   -DLIBCXXABI_LIBDIR_SUFFIX=""
 ninja -j$MJOBS -C libcxx-build
 ninja install -C libcxx-build
-cp $M_CROSS/$MINGW_TRIPLE/lib/libc++.a $M_CROSS/$MINGW_TRIPLE/lib/libstdc++.a
+#cp $M_CROSS/$MINGW_TRIPLE/lib/libc++.a $M_CROSS/$MINGW_TRIPLE/lib/libstdc++.a
+
+echo "building llvm-compiler-rt"
+echo "======================="
+cd $M_BUILD
+mkdir compiler-rt-build
+cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt -B$M_BUILD/compiler-rt-build \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_INSTALL_PREFIX="$(x86_64-w64-mingw32-clang --print-resource-dir)" \
+  -DCMAKE_C_COMPILER=$MINGW_TRIPLE-clang \
+  -DCMAKE_CXX_COMPILER=$MINGW_TRIPLE-clang++ \
+  -DCMAKE_SYSTEM_NAME=Windows \
+  -DCMAKE_AR=$M_CROSS/bin/llvm-ar \
+  -DCMAKE_RANLIB=$M_CROSS/bin/llvm-ranlib \
+  -DCMAKE_C_COMPILER_WORKS=1 \
+  -DCMAKE_CXX_COMPILER_WORKS=1 \
+  -DCMAKE_C_COMPILER_TARGET=x86_64-w64-windows-gnu \
+  -DCOMPILER_RT_DEFAULT_TARGET_ONLY=TRUE \
+  -DCOMPILER_RT_USE_BUILTINS_LIBRARY=TRUE \
+  -DCOMPILER_RT_BUILD_BUILTINS=FALSE \
+  -DLLVM_CONFIG_PATH="" \
+  -DCMAKE_FIND_ROOT_PATH=$M_CROSS/$MINGW_TRIPLE \
+  -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
+  -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
+  -DSANITIZER_CXX_ABI=libc++ \
+  -DCMAKE_CXX_FLAGS='-std=c++11' \
+  -DCMAKE_EXE_LINKER_FLAGS_INIT='-lc++abi'
+cmake --build compiler-rt-build -j$MJOBS
+cmake --install compiler-rt-build
+mkdir -p $M_CROSS/$MINGW_TRIPLE/bin
+mv $(x86_64-w64-mingw32-clang --print-resource-dir)/lib/windows/*.dll $M_CROSS/$MINGW_TRIPLE/bin
 
 echo "building llvm-openmp"
 echo "======================="
@@ -251,7 +281,7 @@ ninja -j$MJOBS -C openmp-build
 ninja install -C openmp-build
 
 #Copy libclang_rt.builtins-x86_64.a to runtime dir
-cp $M_CROSS/$MINGW_TRIPLE/lib/libclang_rt.builtins-x86_64.a $(x86_64-w64-mingw32-gcc -print-runtime-dir)
+#cp $M_CROSS/$MINGW_TRIPLE/lib/libclang_rt.builtins-x86_64.a $(x86_64-w64-mingw32-gcc -print-runtime-dir)
 
 echo "building rustup"
 echo "======================="
