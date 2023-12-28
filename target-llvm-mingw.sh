@@ -215,9 +215,7 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B$M_BUILD/buil
   -DCMAKE_C_FLAGS_INIT="-mguard=cf" \
   -DCMAKE_CXX_FLAGS_INIT="-mguard=cf"
 cmake --build builtins-build -j$MJOBS
-cp builtins-build/lib/windows/libclang_rt.builtins-x86_64.a $M_TARGET/$MINGW_TRIPLE/lib
 cmake --install builtins-build
-mkdir -p $M_TARGET/$MINGW_TRIPLE/bin
 
 echo "building llvm-libcxx"
 echo "======================="
@@ -296,6 +294,7 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt -B$M_BUILD/compiler-rt-build
   -DCMAKE_CXX_FLAGS_INIT="-mguard=cf"
 cmake --build compiler-rt-build -j$MJOBS
 cmake --install compiler-rt-build
+mkdir -p $M_TARGET/$MINGW_TRIPLE/bin
 mv $M_TARGET/lib/clang/$CLANG_VER/lib/windows/*.dll $M_TARGET/$MINGW_TRIPLE/bin
 
 echo "building llvm-openmp"
@@ -326,7 +325,7 @@ cmake --build openmp-build -j$MJOBS
 cmake --install openmp-build
 
 #Copy libclang_rt.builtins-x86_64.a to runtime dir
-cp $M_TARGET/$MINGW_TRIPLE/lib/libclang_rt.builtins-x86_64.a $M_TARGET/lib/clang/$CLANG_VER/lib/windows
+#cp $M_TARGET/$MINGW_TRIPLE/lib/libclang_rt.builtins-x86_64.a $M_TARGET/lib/clang/$CLANG_VER/lib/windows
 cp $M_TARGET/$MINGW_TRIPLE/bin/*.dll $M_TARGET/bin
 rm -rf $M_TARGET/include
 mv $M_TARGET/$MINGW_TRIPLE/include $M_TARGET
