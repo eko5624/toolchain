@@ -20,8 +20,6 @@ jobs:
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-2023-12-28-ucrt-archlinux-x86_64.7z
           7z x llvm-mingw*.7z
           rm llvm-mingw*.7z
-          rm cross/x86_64-w64-mingw32/lib/libclang_rt.builtins-x86_64.a
-          rm cross/x86_64-w64-mingw32/lib/libstdc++.a
           
       - name: Loading target llvm cache
         uses: actions/cache/restore@main
