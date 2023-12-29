@@ -260,7 +260,7 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/openmp -B$M_BUILD/openmp-build \
 cmake --build openmp-build -j$MJOBS
 cmake --install openmp-build
 
-echo "removing *.dll.a"
-echo "======================="
-find $M_CROSS/$MINGW_TRIPLE/lib -maxdepth 1 -type f -name "*.dll.a" -print0 | xargs -0 -I {} rm {}
-echo "... Done"
+#echo "removing *.dll.a"
+#echo "======================="
+#find $M_CROSS/$MINGW_TRIPLE/lib -maxdepth 1 -type f -name "*.dll.a" -print0 | xargs -0 -I {} rm {}
+#echo "... Done"
