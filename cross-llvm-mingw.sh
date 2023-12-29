@@ -31,7 +31,7 @@ cd $M_SOURCE
 git clone https://github.com/llvm/llvm-project.git --branch release/17.x
 
 #lldb-mi
-git clone https://github.com/lldb-tools/lldb-mi.git
+#git clone https://github.com/lldb-tools/lldb-mi.git
 
 #llvm-mingw
 git clone https://github.com/mstorsjo/llvm-mingw.git --branch master
@@ -74,12 +74,15 @@ cmake --install llvm-build --strip
 #cmake --build lldb-mi-build -j$MJOBS
 #cmake --install lldb-mi-build --strip
 
-echo "installing wrappers"
+echo "symlink pkgconf"
 echo "======================="
 cd $M_CROSS/bin
 ln -s $(which pkgconf) $MINGW_TRIPLE-pkg-config
 ln -s $(which pkgconf) $MINGW_TRIPLE-pkgconf
+echo "... Done"
 
+echo "installing wrappers"
+echo "======================="
 cd $M_SOURCE/llvm-mingw
 ./install-wrappers.sh $M_CROSS
 echo "... Done"
@@ -155,9 +158,7 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B$M_BUILD/buil
   -DCMAKE_C_FLAGS_INIT="-mguard=cf" \
   -DCMAKE_CXX_FLAGS_INIT="-mguard=cf"
 cmake --build builtins-build -j$MJOBS
-cp builtins-build/lib/windows/libclang_rt.builtins-x86_64.a $M_CROSS/$MINGW_TRIPLE/lib
 cmake --install builtins-build
-mkdir -p $M_CROSS/$MINGW_TRIPLE/bin
 
 echo "building llvm-libcxx"
 echo "======================="
@@ -232,6 +233,7 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt -B$M_BUILD/compiler-rt-build
   -DSANITIZER_CXX_ABI=libc++
 cmake --build compiler-rt-build -j$MJOBS
 cmake --install compiler-rt-build
+mkdir -p $M_CROSS/$MINGW_TRIPLE/bin
 mv $(x86_64-w64-mingw32-clang --print-resource-dir)/lib/windows/*.dll $M_CROSS/$MINGW_TRIPLE/bin
 
 echo "building llvm-openmp"
@@ -258,5 +260,7 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/openmp -B$M_BUILD/openmp-build \
 cmake --build openmp-build -j$MJOBS
 cmake --install openmp-build
 
-#Copy libclang_rt.builtins-x86_64.a to runtime dir
-cp $M_CROSS/$MINGW_TRIPLE/lib/libclang_rt.builtins-x86_64.a $(x86_64-w64-mingw32-gcc -print-runtime-dir)
+echo "removing *.dll.a"
+echo "======================="
+find $M_CROSS/$MINGW_TRIPLE/lib -maxdepth 1 -type f -name "*.dll.a" -print0 | xargs -0 -I {} rm {}
+echo "... Done"
