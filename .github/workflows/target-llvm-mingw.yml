@@ -17,8 +17,8 @@ jobs:
       - name: Setup Cross Toolchain
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-mingw-2023-12-29-ucrt-x86_64.7z
-          7z x llvm-mingw*.7z
-          rm llvm-mingw*.7z
+          7z x cross*.7z
+          rm cross*.7z
           
       - name: Loading target llvm cache
         uses: actions/cache/restore@main
