@@ -37,7 +37,7 @@ jobs:
           fi
 
       - name: Get current timestamp
-        run: echo "date=$(date +%Y-%m-%d)" >> $GITHUB_ENV  
+        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV  
 
       - name: Packaging toolchain
         run: |
