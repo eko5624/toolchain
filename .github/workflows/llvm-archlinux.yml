@@ -1,4 +1,4 @@
-name: llvm-mingw-archlinux
+name: llvm-archlinux
 defaults:
   run:
     shell: bash
@@ -37,8 +37,8 @@ jobs:
         run: |
           PWD=$(pwd)
           if [[ ! "$(ls -A $PWD/cross/bin)" ]]; then
-            chmod +x ./llvm-mingw-archlinux.sh
-            ./llvm-mingw-archlinux.sh
+            chmod +x ./llvm-archlinux.sh
+            ./llvm-archlinux.sh
           fi
 
       - name: Get current timestamp
@@ -46,7 +46,7 @@ jobs:
 
       - name: Packaging toolchain
         run: |
-          7z a llvm-mingw-${{ env.date }}-ucrt-archlinux-x86_64.7z cross/*
+          7z a llvm-archlinux-${{ env.date }}-ucrt-x86_64.7z cross/*
           7z a rustup-${{ env.date }}.7z rust/*
 
       - name: Release
