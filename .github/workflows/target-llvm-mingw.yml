@@ -16,7 +16,7 @@ jobs:
         
       - name: Setup Cross Toolchain
         run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-mingw-2023-12-29-ucrt-x86_64.7z
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-mingw-2023-12-30-ucrt-x86_64.7z
           7z x cross*.7z
           rm cross*.7z
           
