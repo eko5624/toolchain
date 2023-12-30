@@ -367,12 +367,14 @@ meson install -C $M_BUILD/pkgconf-build
 cp $M_TARGET/bin/pkgconf.exe $M_TARGET/bin/pkg-config.exe
 cp $M_TARGET/bin/pkgconf.exe $M_TARGET/bin/x86_64-w64-mingw32-pkg-config.exe
 
+
 echo "removing *.dll.a *.la"
 echo "======================="
 find $M_TARGET/lib -maxdepth 1 -type f -name "*.dll.a" -print0 | xargs -0 -I {} rm {}
 find $M_TARGET/$MINGW_TRIPLE/lib -maxdepth 1 -type f -name "*.dll.a" -print0 | xargs -0 -I {} rm {}
 find $M_TARGET/$MINGW_TRIPLE/lib -maxdepth 1 -type f -name "*.la" -print0 | xargs -0 -I {} rm {}
 rm -rf $M_TARGET/lib/pkgconfig
+rm -rf $M_TARGET/include/pkgconf
 echo "... Done"
 
 echo "copy yasm nasm cmake ninja curl"
