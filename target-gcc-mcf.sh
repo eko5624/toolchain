@@ -82,14 +82,14 @@ curl -OL https://github.com/ninja-build/ninja/releases/download/v$VER_NINJA/ninj
 #yasm
 #wget -c -O yasm-$VER_YASM.tar.gz http://www.tortall.net/projects/yasm/releases/yasm-$VER_YASM.tar.gz
 #tar xzf yasm-$VER_YASM.tar.gz
-curl -OL https://github.com/yasm/yasm/releases/download/v$VER_YASM/yasm-$VER_YASM-win64.exe
+#curl -OL https://github.com/yasm/yasm/releases/download/v$VER_YASM/yasm-$VER_YASM-win64.exe
 
 #nasm
 # nasm 2.16.01 faild, fatal error: asm/warnings.c: No such file or directory. Stick to 2.15.05.
 #wget -c -O nasm-$VER_NASM.tar.gz http://www.nasm.us/pub/nasm/releasebuilds/$VER_NASM/nasm-$VER_NASM.tar.gz
 #tar xzf nasm-$VER_NASM.tar.gz
-curl -OL https://www.nasm.us/pub/nasm/releasebuilds/$VER_NASM/win64/nasm-$VER_NASM-win64.zip
-7z x nasm*.zip
+#curl -OL https://www.nasm.us/pub/nasm/releasebuilds/$VER_NASM/win64/nasm-$VER_NASM-win64.zip
+#7z x nasm*.zip
 
 #curl
 curl -L -o curl-win64-mingw.zip 'https://curl.se/windows/latest.cgi?p=win64-mingw.zip'
@@ -574,8 +574,8 @@ rm -rf lib/pkgconfig
 rm -f mingw
 echo "$VER" > $M_TARGET/version.txt
 
-cp $M_SOURCE/nasm-$VER_NASM/*.exe bin
-cp $M_SOURCE/yasm-$VER_YASM-win64.exe bin/yasm.exe
+#cp $M_SOURCE/nasm-$VER_NASM/*.exe bin
+#cp $M_SOURCE/yasm-$VER_YASM-win64.exe bin/yasm.exe
 cp $M_SOURCE/cmake-$VER_CMAKE-windows-x86_64/bin/cmake.exe bin
 cp -r $M_SOURCE/cmake-$VER_CMAKE-windows-x86_64/share/cmake* share
 cp $M_SOURCE/ninja.exe bin
