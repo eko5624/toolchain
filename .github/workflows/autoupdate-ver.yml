@@ -29,14 +29,14 @@ jobs:
         ver_json=$(curl -s "https://raw.githubusercontent.com/eko5624/nginx-nosni/master/old.json")
         
         #第一种方案
-        #while read -r k v; do
+        #while IFS="=" read -r k v; do
         #  ver_array[$k]=$v
-        #done < <(echo "$ver_json" | jq -r 'to_entries | .[] | "\(.key) \(.value)"')
+        #done < <(echo "$ver_json" | jq -r 'to_entries | .[] | "\(.key)=\(.value)"')
 
         #第二种方案
         while IFS= read -r line; do  #从标准输入逐行读取内容，并存储到变量"line"中。"IFS"设置空值防止前导和尾随的空白被修剪掉。"-r"禁用反斜杠转义。
-          k=$(echo "$line" | jq -r 'keys_unsorted[]')  #提取每行对应的key。"keys_unsorted"是jq函数，表示任意次序。
-          v=$(echo "$line" | jq -r ".$k")  #提取每行key对应的值。"-r"表示原始字符串格式输出，而不出json指定格式输出
+          k=$(echo "$line" | jq -r '"\(.key)"')  #提取每行对应的key。"keys_unsorted"是jq函数，表示任意次序。
+          v=$(echo "$line" | jq -r '"\(.value)"')  #提取每行key对应的值。"-r"表示原始字符串格式输出，而不出json指定格式输出
           ver_array[$k]=$v  #把提取到的键值对存储到关联数组"ver_array"中
         done < <(echo "$ver_json" | jq -c 'to_entries | .[]')  #将JSON对象转换为键值对数组，并写入标准输入
         echo "VER_BINUTILS=${ver_array[binutils]}" >> ver.sh
