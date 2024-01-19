@@ -87,8 +87,9 @@ tar xzf yasm-$VER_YASM.tar.gz
 #nasm
 #curl -OL https://www.nasm.us/pub/nasm/releasebuilds/$VER_NASM/win64/nasm-$VER_NASM-win64.zip
 #7z x nasm*.zip
-wget -c -O nasm-$VER_NASM.tar.gz http://www.nasm.us/pub/nasm/releasebuilds/$VER_NASM/nasm-$VER_NASM.tar.gz
-tar xzf nasm-$VER_NASM.tar.gz
+#wget -c -O nasm-$VER_NASM.tar.gz http://www.nasm.us/pub/nasm/releasebuilds/$VER_NASM/nasm-$VER_NASM.tar.gz
+#tar xzf nasm-$VER_NASM.tar.gz
+git clone https://github.com/netwide-assembler/nasm.git --branch nasm-$VER_NASM
 
 
 #curl
@@ -532,9 +533,12 @@ rm -rf $M_TARGET/include/libyasm
 rm $M_TARGET/include/libyasm*
 rm $M_TARGET/lib/libyasm.a
 
-#echo "building nasm"
-#echo "======================="
-cd $M_SOURCE/nasm-$VER_NASM
+echo "building nasm"
+echo "======================="
+cd $M_SOURCE/nasm
+# work around /usr/bin/install: cannot stat './nasm.1': No such file or directory
+sed -i "/man1/d" Makefile.in
+./autogen.sh
 ./configure \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
