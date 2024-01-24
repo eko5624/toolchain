@@ -6,8 +6,12 @@ FLAGS="-m i386pep"
 FLAGS="$FLAGS --pdb="
 FLAGS="$FLAGS -O3 -Xlink=-opt:lldlto=3 -Xlink=-opt:lldltocgo=3"
 
-if [ "$CONF" == "1" ]; then
+if [ "$NO_OPT" == "1" ]; then
     SKIP_OPT="-O0 -Xlink=-opt:lldlto=0 -Xlink=-opt:lldltocgo=0 --no-gc-sections --no-guard-cf"
 fi
 
-"$PROG" "$@" $FLAGS $LLD_FLAGS $SKIP_OPT
+if [ "$GC" == "1" ]; then
+    LLD_GC="--gc-sections -Xlink=-opt:safeicf"
+fi
+
+"$PROG" "$@" $FLAGS $LLD_GC $LLD_FLAGS $SKIP_OPT
