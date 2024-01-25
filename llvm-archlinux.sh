@@ -40,7 +40,7 @@ echo "building llvm"
 echo "======================="
 cd $M_BUILD
 mkdir llvm-build
-CONF=1 cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
+cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
   -DCMAKE_INSTALL_PREFIX=$M_CROSS \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_C_COMPILER=clang \
