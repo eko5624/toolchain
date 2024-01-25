@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 CROSS_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && cd .. && pwd)
 PROG=$CROSS_DIR/bin/clang++
 FLAGS="$FLAGS -target x86_64-w64-mingw32 -march=x86-64 -mtune=generic"
@@ -15,7 +15,7 @@ if [ "$NO_OPT" == "1" ]; then
     SKIP_OPT="-g0 -O0 -fno-lto -fno-data-sections -fno-function-sections"
 fi
 
-if [ "$GC" == "1" ]; then
+if [ "$GC" != "0" ]; then
     CLANG_GC="-fdata-sections -ffunction-sections"
 fi
 

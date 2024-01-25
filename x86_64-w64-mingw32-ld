@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 CROSS_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && cd .. && pwd)
 PROG=$CROSS_DIR/bin/ld.lld
 TARGET=x86_64-w64-mingw32
@@ -10,7 +10,7 @@ if [ "$NO_OPT" == "1" ]; then
     SKIP_OPT="-O0 -Xlink=-opt:lldlto=0 -Xlink=-opt:lldltocgo=0 --no-gc-sections --no-guard-cf"
 fi
 
-if [ "$GC" == "1" ]; then
+if [ "$GC" != "0" ]; then
     LLD_GC="--gc-sections -Xlink=-opt:safeicf"
 fi
 
