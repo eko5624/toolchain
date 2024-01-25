@@ -7,7 +7,7 @@ FLAGS="$FLAGS -fuse-ld=lld --ld-path=x86_64-w64-mingw32-ld"
 FLAGS="$FLAGS -gcodeview"
 FLAGS="$FLAGS -Wno-unused-command-line-argument"
 
-if [ "$CLANG_PACKAGES_LTO" == "1" ]; then
+if [ "$LTO" != "0" ] && [ "$CLANG_PACKAGES_LTO" == "ON" ]; then
     LTO_FLAGS="-flto=thin"
 fi
 
