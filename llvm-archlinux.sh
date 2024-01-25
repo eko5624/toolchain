@@ -89,12 +89,12 @@ ln -s llvm-rc $MINGW_TRIPLE-windres
 ln -s llvm-addr2line $MINGW_TRIPLE-addr2line
 ln -s $(which pkgconf) $MINGW_TRIPLE-pkg-config
 ln -s $(which pkgconf) $MINGW_TRIPLE-pkgconf
-cp $TOP_DIR/x86_64-w64-mingw32-clang ./
-cp $TOP_DIR/x86_64-w64-mingw32-clang++ ./
-cp $TOP_DIR/x86_64-w64-mingw32-ld ./
-cp $TOP_DIR/x86_64-w64-mingw32-gcc ./
-cp $TOP_DIR/x86_64-w64-mingw32-g++ ./
-cp $TOP_DIR/x86_64-w64-mingw32-c++ ./
+cp $TOP_DIR/llvm-wrapper/x86_64-w64-mingw32-clang ./
+cp $TOP_DIR/llvm-wrapper/x86_64-w64-mingw32-clang++ ./
+cp $TOP_DIR/llvm-wrapper/x86_64-w64-mingw32-ld ./
+cp $TOP_DIR/llvm-wrapper/x86_64-w64-mingw32-gcc ./
+cp $TOP_DIR/llvm-wrapper/x86_64-w64-mingw32-g++ ./
+cp $TOP_DIR/llvm-wrapper/x86_64-w64-mingw32-c++ ./
 
 chmod 755 x86_64-w64-mingw32-clang
 chmod 755 x86_64-w64-mingw32-clang++
