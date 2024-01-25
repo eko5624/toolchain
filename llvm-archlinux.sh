@@ -108,7 +108,7 @@ echo "======================="
 cd $M_BUILD
 mkdir gendef-build
 cd gendef-build
-NO_OPT=1 $M_SOURCE/mingw-w64/mingw-w64-tools/gendef/configure --prefix=$M_CROSS
+NO_CONFLTO=1 $M_SOURCE/mingw-w64/mingw-w64-tools/gendef/configure --prefix=$M_CROSS
 make -j$MJOBS
 make install-strip
 
@@ -133,7 +133,7 @@ autoreconf -ivf
 cd $M_BUILD 
 mkdir crt-build
 cd crt-build
-NO_OPT=1 $M_SOURCE/mingw-w64/mingw-w64-crt/configure \
+NO_CONFLTO=1 $M_SOURCE/mingw-w64/mingw-w64-crt/configure \
   --host=$MINGW_TRIPLE \
   --prefix=$M_CROSS/$MINGW_TRIPLE \
   --with-sysroot=$M_CROSS \
@@ -143,7 +143,7 @@ NO_OPT=1 $M_SOURCE/mingw-w64/mingw-w64-crt/configure \
   --enable-cfguard \
   --disable-dependency-tracking
 make -j$MJOBS LTO=0 GC=0
-make install-strip  LTO=0 GC=0
+make install-strip LTO=0 GC=0
 # Create empty dummy archives, to avoid failing when the compiler driver
 # adds -lssp -lssh_nonshared when linking.
 llvm-ar rcs $M_CROSS/lib/libssp.a
@@ -154,19 +154,19 @@ echo "======================="
 cd $M_BUILD
 mkdir winpthreads-build
 cd winpthreads-build
-NO_OPT=1 $M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
+NO_CONFLTO=1 $M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
   --host=$MINGW_TRIPLE \
   --prefix=$M_CROSS/$MINGW_TRIPLE \
   --disable-shared \
   --enable-static
 make -j$MJOBS LTO=0 GC=0
-make install-strip  LTO=0 GC=0
+make install-strip LTO=0 GC=0
 
 echo "building llvm-compiler-rt-builtin"
 echo "======================="
 cd $M_BUILD
 mkdir builtins-build
-NO_OPT=1 cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B$M_BUILD/builtins-build \
+NO_CONFLTO=1 cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B$M_BUILD/builtins-build \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX="$(x86_64-w64-mingw32-clang --print-resource-dir)" \
   -DCMAKE_C_COMPILER=$MINGW_TRIPLE-clang \
@@ -193,7 +193,7 @@ echo "building llvm-libcxx"
 echo "======================="
 cd $M_BUILD
 mkdir libcxx-build
-NO_OPT=1 cmake -G Ninja -H$M_SOURCE/llvm-project/runtimes -B$M_BUILD/libcxx-build \
+NO_CONFLTO=1 cmake -G Ninja -H$M_SOURCE/llvm-project/runtimes -B$M_BUILD/libcxx-build \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX=$M_CROSS/$MINGW_TRIPLE \
   -DCMAKE_C_COMPILER=$MINGW_TRIPLE-clang \
@@ -229,7 +229,7 @@ echo "building llvm-compiler-rt"
 echo "======================="
 cd $M_BUILD
 mkdir compiler-rt-build
-NO_OPT=1 cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt -B$M_BUILD/compiler-rt-build \
+NO_CONFLTO=1 cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt -B$M_BUILD/compiler-rt-build \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX="$(x86_64-w64-mingw32-clang --print-resource-dir)" \
   -DCMAKE_C_COMPILER=$MINGW_TRIPLE-clang \
@@ -255,36 +255,36 @@ LTO=0 cmake --install compiler-rt-build
 mkdir -p $M_CROSS/$MINGW_TRIPLE/bin
 mv $(x86_64-w64-mingw32-clang --print-resource-dir)/lib/windows/*.dll $M_CROSS/$MINGW_TRIPLE/bin
 
-echo "building llvm-openmp"
-echo "======================="
-cd $M_BUILD
-mkdir openmp-build
-cd openmp-build
-curl -OL https://raw.githubusercontent.com/shinchiro/mpv-winbuild-cmake/master/toolchain/llvm/llvm-openmp-0001-support-static-lib.patch
-cd $M_SOURCE/llvm-project
-patch -p1 -i $M_BUILD/openmp-build/llvm-openmp-0001-support-static-lib.patch
-cd $M_BUILD
-NO_OPT=1 cmake -G Ninja -H$M_SOURCE/llvm-project/openmp -B$M_BUILD/openmp-build \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_INSTALL_PREFIX=$M_CROSS/$MINGW_TRIPLE \
-  -DCMAKE_C_COMPILER=$MINGW_TRIPLE-clang \
-  -DCMAKE_CXX_COMPILER=$MINGW_TRIPLE-clang++ \
-  -DCMAKE_RC_COMPILER=$MINGW_TRIPLE-windres \
-  -DCMAKE_ASM_MASM_COMPILER=llvm-ml \
-  -DCMAKE_SYSTEM_NAME=Windows \
-  -DCMAKE_AR=$M_CROSS/bin/llvm-ar \
-  -DCMAKE_RANLIB=$M_CROSS/bin/llvm-ranlib \
-  -DLIBOMP_ENABLE_SHARED=FALSE \
-  -DLIBOMP_ASMFLAGS=-m64
-ninja -j$MJOBS -C openmp-build
-ninja install -C openmp-build
+#echo "building llvm-openmp"
+#echo "======================="
+#cd $M_BUILD
+#mkdir openmp-build
+#cd openmp-build
+#curl -OL https://raw.githubusercontent.com/shinchiro/mpv-winbuild-cmake/master/toolchain/llvm/llvm-openmp-0001-support-static-lib.patch
+#cd $M_SOURCE/llvm-project
+#patch -p1 -i $M_BUILD/openmp-build/llvm-openmp-0001-support-static-lib.patch
+#cd $M_BUILD
+#NO_CONFLTO=1 cmake -G Ninja -H$M_SOURCE/llvm-project/openmp -B$M_BUILD/openmp-build \
+#  -DCMAKE_BUILD_TYPE=Release \
+#  -DCMAKE_INSTALL_PREFIX=$M_CROSS/$MINGW_TRIPLE \
+#  -DCMAKE_C_COMPILER=$MINGW_TRIPLE-clang \
+#  -DCMAKE_CXX_COMPILER=$MINGW_TRIPLE-clang++ \
+#  -DCMAKE_RC_COMPILER=$MINGW_TRIPLE-windres \
+#  -DCMAKE_ASM_MASM_COMPILER=llvm-ml \
+#  -DCMAKE_SYSTEM_NAME=Windows \
+#  -DCMAKE_AR=$M_CROSS/bin/llvm-ar \
+#  -DCMAKE_RANLIB=$M_CROSS/bin/llvm-ranlib \
+#  -DLIBOMP_ENABLE_SHARED=FALSE \
+#  -DLIBOMP_ASMFLAGS=-m64
+#ninja -j$MJOBS -C openmp-build
+#ninja install -C openmp-build
 
 #Copy libclang_rt.builtins-x86_64.a to runtime dir
 #cp $M_CROSS/$MINGW_TRIPLE/lib/libclang_rt.builtins-x86_64.a $(x86_64-w64-mingw32-gcc -print-runtime-dir)
 
 echo "building rustup"
 echo "======================="
-NO_OPT=1 curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --target x86_64-pc-windows-gnu --no-modify-path --profile minimal
+NO_CONFLTO=1 curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --target x86_64-pc-windows-gnu --no-modify-path --profile minimal
 rustup update
 cargo install cargo-c --profile=release-strip --features=vendored-openssl
 cat <<EOF >$CARGO_HOME/config

@@ -11,10 +11,9 @@ if [ "$LTO" != "0" ] && [ "$CLANG_PACKAGES_LTO" == "ON" ]; then
     LTO_FLAGS="-flto=thin"
 fi
 
-if [ "$NO_OPT" == "1" ]; then
+if [ "$NO_CONFLTO" == "1" ]; then
     SKIP_OPT="-g0 -O0 -fno-lto -fno-data-sections -fno-function-sections"
 fi
-
 if [ "$GC" != "0" ]; then
     CLANG_GC="-fdata-sections -ffunction-sections"
 fi
