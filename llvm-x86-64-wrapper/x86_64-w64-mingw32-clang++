@@ -14,6 +14,7 @@ fi
 if [ "$NO_CONFLTO" == "1" ]; then
     SKIP_OPT="-g0 -O0 -fno-lto -fno-data-sections -fno-function-sections"
 fi
+
 if [ "$GC" != "0" ]; then
     CLANG_GC="-fdata-sections -ffunction-sections"
 fi
