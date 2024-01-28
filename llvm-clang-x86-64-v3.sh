@@ -243,22 +243,3 @@ cp $M_CROSS/$MINGW_TRIPLE/lib/libclang_rt.builtins-x86_64.a $(x86_64-w64-mingw32
 #  -DLIBOMP_ASMFLAGS=-m64
 #ninja -j$MJOBS -C openmp-build
 #ninja install -C openmp-build
-
-echo "building rustup"
-echo "======================="
-NO_CONFLTO=1 curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --target x86_64-pc-windows-gnu --no-modify-path --profile minimal
-rustup update
-cargo install cargo-c --profile=release-strip --features=vendored-openssl
-cat <<EOF >$CARGO_HOME/config
-[net]
-git-fetch-with-cli = true
-
-[target.x86_64-pc-windows-gnu]
-linker = "x86_64-w64-mingw32-gcc"
-ar = "x86_64-w64-mingw32-ar"
-rustflags = ["-C", "target-cpu=x86-64"]
-
-[profile.release]
-panic = "abort"
-strip = true
-EOF
