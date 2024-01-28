@@ -10,13 +10,21 @@ FLAGS="$FLAGS -Wno-unused-command-line-argument"
 
 if [ "$LTO" != "0" ] && [ "$CLANG_PACKAGES_LTO" == "ON" ]; then
     LTO_FLAGS="-flto=thin"
+    if [ "$LLD_LTO_ALL_THREADS" == "1" ] && [ "$LTO_JOB" != "1" ]; then
+        LTO_FLAGS="$LTO_FLAGS -flto-jobs=$CPU_COUNT"
+    fi
 fi
 
 if [ "$NO_CONFLTO" == "1" ]; then
     SKIP_OPT="-g0 -O0 -fno-lto -fno-data-sections -fno-function-sections"
+else
+    if [ "$ENABLE_CCACHE" == "ON" ]; then
+        CCACHE="ccache"
+    fi
 fi
+
 if [ "$GC" != "0" ]; then
     CLANG_GC="-fdata-sections -ffunction-sections"
 fi
 
-"$PROG" $LTO_FLAGS "$@" $FLAGS $CLANG_GC $CLANG_FLAGS -lc++abi $SKIP_OPT
+$CCACHE "$PROG" $LTO_FLAGS "$@" $FLAGS $CLANG_GC $CLANG_FLAGS -lc++abi $SKIP_OPT
