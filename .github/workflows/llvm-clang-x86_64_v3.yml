@@ -1,4 +1,4 @@
-name: llvm-clang-x86-64-v3
+name: llvm-clang-x86_64_v3
 defaults:
   run:
     shell: bash
@@ -33,15 +33,15 @@ jobs:
             
       - name: Building toolchain
         run: |
-          chmod +x ./llvm-clang-x86-64-v3.sh
-          ./llvm-clang-x86-64-v3.sh
+          chmod +x ./llvm-clang-x86_64_v3.sh
+          ./llvm-clang-x86_64_v3.sh
 
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV  
 
       - name: Packaging toolchain
         run: |
-          7z a llvm-clang-${{ env.date }}-ucrt-x86-64-v3.7z cross/*
+          7z a llvm-clang-${{ env.date }}-ucrt-x86_64_v3.7z cross/*
 
       - name: Release
         continue-on-error: true

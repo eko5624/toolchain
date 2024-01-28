@@ -16,7 +16,7 @@ export M_ROOT=$(pwd)
 export M_SOURCE=$M_ROOT/source
 export M_BUILD=$M_ROOT/build
 export M_CROSS=$M_ROOT/cross
-export PATH="$M_CROSS/bin:$RUSTUP_LOCATION/.cargo/bin:$PATH"
+export PATH="$M_CROSS/bin:$PATH"
 
 mkdir -p $M_SOURCE
 mkdir -p $M_BUILD
@@ -31,7 +31,7 @@ git clone https://github.com/llvm/llvm-project.git --branch release/17.x
 #mingw-w64
 git clone https://github.com/mingw-w64/mingw-w64.git --branch master
 
-echo "installing wrappers for x86-64-v3"
+echo "installing wrappers for x86_64_v3"
 echo "======================="
 mkdir -p $M_CROSS/$MINGW_TRIPLE/lib
 cd $M_CROSS/bin
@@ -51,12 +51,12 @@ ln -s llvm-rc $MINGW_TRIPLE-windres
 ln -s llvm-addr2line $MINGW_TRIPLE-addr2line
 ln -s $(which pkgconf) $MINGW_TRIPLE-pkg-config
 ln -s $(which pkgconf) $MINGW_TRIPLE-pkgconf
-cp $TOP_DIR/llvm-x86-64-v3-wrapper/x86_64-w64-mingw32-clang ./
-cp $TOP_DIR/llvm-x86-64-v3-wrapper/x86_64-w64-mingw32-clang++ ./
-cp $TOP_DIR/llvm-x86-64-v3-wrapper/x86_64-w64-mingw32-ld ./
-cp $TOP_DIR/llvm-x86-64-v3-wrapper/x86_64-w64-mingw32-gcc ./
-cp $TOP_DIR/llvm-x86-64-v3-wrapper/x86_64-w64-mingw32-g++ ./
-cp $TOP_DIR/llvm-x86-64-v3-wrapper/x86_64-w64-mingw32-c++ ./
+cp $TOP_DIR/llvm-wrapper-x86_64_v3/x86_64-w64-mingw32-clang ./
+cp $TOP_DIR/llvm-wrapper-x86_64_v3/x86_64-w64-mingw32-clang++ ./
+cp $TOP_DIR/llvm-wrapper-x86_64_v3/x86_64-w64-mingw32-ld ./
+cp $TOP_DIR/llvm-wrapper-x86_64_v3/x86_64-w64-mingw32-gcc ./
+cp $TOP_DIR/llvm-wrapper-x86_64_v3/x86_64-w64-mingw32-g++ ./
+cp $TOP_DIR/llvm-wrapper-x86_64_v3/x86_64-w64-mingw32-c++ ./
 
 chmod 755 x86_64-w64-mingw32-clang
 chmod 755 x86_64-w64-mingw32-clang++
