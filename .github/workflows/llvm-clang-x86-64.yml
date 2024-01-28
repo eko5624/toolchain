@@ -1,0 +1,54 @@
+name: llvm-clang-x86-64
+defaults:
+  run:
+    shell: bash
+on:
+  workflow_dispatch:
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux/archlinux:base-devel
+    steps:    
+      - name: Install Dependencies
+        run: |
+          sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
+          sudo pacman -Syu --noconfirm
+          sudo pacman -S --noconfirm --needed git ninja meson cmake yasm nasm zip unzip p7zip clang lld libc++ libc++abi python-pip curl jq wget
+          pip3 install -U --break-system-packages setuptools rst2pdf mako jsonschema
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global pull.rebase true
+          git config --global rebase.autoStash true
+          git config --global fetch.prune true
+          git config --global --add safe.directory $PWD
+
+      - uses: actions/checkout@main          
+      - name: Setup llvm
+        run: |
+          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/llvm-20240128-ucrt.7z
+          7z x llvm*.7z
+          rm llvm*.7z
+            
+      - name: Building toolchain
+        run: |
+          chmod +x ./llvm-clang-x86-64.sh
+          ./llvm-clang-x86-64.sh
+
+      - name: Get current timestamp
+        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV  
+
+      - name: Packaging toolchain
+        run: |
+          7z a llvm-clang-${{ env.date }}-ucrt-x86-64.7z cross/*
+          7z a rustup-${{ env.date }}.7z rust/*
+
+      - name: Release
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          chmod +x ./release-package.sh
+          ./release-package.sh
+

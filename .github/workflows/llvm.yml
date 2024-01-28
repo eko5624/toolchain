@@ -1,4 +1,4 @@
-name: llvm-archlinux
+name: llvm
 defaults:
   run:
     shell: bash
@@ -29,16 +29,16 @@ jobs:
         uses: actions/cache/restore@main
         with:
           path: ${{ github.workspace }}/cross
-          key: llvm-archlinux-${{ github.run_id }}
+          key: llvm-${{ github.run_id }}
           restore-keys: |
-            llvm-archlinux-
+            llvm-
             
       - name: Building toolchain
         run: |
           PWD=$(pwd)
           if [[ ! "$(ls -A $PWD/cross/bin)" ]]; then
-            chmod +x ./llvm-archlinux.sh
-            ./llvm-archlinux.sh
+            chmod +x ./llvm.sh
+            ./llvm.sh
           fi
 
       - name: Get current timestamp
@@ -46,8 +46,7 @@ jobs:
 
       - name: Packaging toolchain
         run: |
-          7z a llvm-archlinux-${{ env.date }}-ucrt-x86_64.7z cross/*
-          7z a rustup-${{ env.date }}.7z rust/*
+          7z a llvm-${{ env.date }}-ucrt.7z cross/*
 
       - name: Release
         continue-on-error: true
@@ -62,4 +61,4 @@ jobs:
         if: always()
         with:
           path: ${{ github.workspace }}/cross
-          key: llvm-archlinux-${{ github.run_id }}
+          key: llvm-${{ github.run_id }}

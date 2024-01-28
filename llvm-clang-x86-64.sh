@@ -10,8 +10,7 @@ TOP_DIR=$(pwd)
 # Env Var NUMJOBS overrides automatic detection
 MJOBS=$(grep -c processor /proc/cpuinfo)
 
-MINGW_TRIPLE="x86_64-w64-mingw32"
-export MINGW_TRIPLE
+export MINGW_TRIPLE="x86_64-w64-mingw32"
 
 export M_ROOT=$(pwd)
 export M_SOURCE=$M_ROOT/source
@@ -19,6 +18,7 @@ export M_BUILD=$M_ROOT/build
 export M_CROSS=$M_ROOT/cross
 export RUSTUP_LOCATION=$M_ROOT/rust
 
+export ORGPATH=$PATH
 export PATH="$M_CROSS/bin:$RUSTUP_LOCATION/.cargo/bin:$PATH"
 export RUSTUP_HOME="$RUSTUP_LOCATION/.rustup"
 export CARGO_HOME="$RUSTUP_LOCATION/.cargo"
@@ -36,40 +36,7 @@ git clone https://github.com/llvm/llvm-project.git --branch release/17.x
 #mingw-w64
 git clone https://github.com/mingw-w64/mingw-w64.git --branch master
 
-echo "building llvm"
-echo "======================="
-cd $M_BUILD
-mkdir llvm-build
-cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
-  -DCMAKE_INSTALL_PREFIX=$M_CROSS \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_C_COMPILER=clang \
-  -DCMAKE_CXX_COMPILER=clang++ \
-  -DLLVM_ENABLE_ASSERTIONS=OFF \
-  -DLLVM_ENABLE_PROJECTS="clang;lld;polly" \
-  -DLLVM_TARGETS_TO_BUILD="X86;NVPTX" \
-  -DLLVM_INSTALL_TOOLCHAIN_ONLY=ON \
-  -DLLVM_POLLY_LINK_INTO_TOOLS=ON \
-  -DLLVM_ENABLE_LIBCXX=ON \
-  -DLLVM_ENABLE_LLD=ON \
-  -DLLVM_INCLUDE_TESTS=OFF \
-  -DLLVM_INCLUDE_EXAMPLES=OFF \
-  -DLLVM_INCLUDE_DOCS=OFF \
-  -DLLVM_ENABLE_LTO=OFF \
-  -DLLVM_INCLUDE_BENCHMARKS=OFF \
-  -DCLANG_DEFAULT_RTLIB=compiler-rt \
-  -DCLANG_DEFAULT_UNWINDLIB=libunwind \
-  -DCLANG_DEFAULT_CXX_STDLIB=libc++ \
-  -DCLANG_DEFAULT_LINKER=lld \
-  -DLLD_DEFAULT_LD_LLD_IS_MINGW=ON \
-  -DLLVM_LINK_LLVM_DYLIB=ON \
-  -DLLVM_ENABLE_LIBXML2=OFF \
-  -DLLVM_ENABLE_TERMINFO=OFF \
-  -DLLVM_TOOLCHAIN_TOOLS="llvm-as;llvm-ar;llvm-ranlib;llvm-objdump;llvm-rc;llvm-cvtres;llvm-nm;llvm-strings;llvm-readobj;llvm-dlltool;llvm-pdbutil;llvm-objcopy;llvm-strip;llvm-cov;llvm-profdata;llvm-addr2line;llvm-symbolizer;llvm-windres;llvm-ml;llvm-readelf;llvm-size;llvm-config"
-ninja -j$MJOBS -C llvm-build
-ninja install -C llvm-build
-
-echo "installing wrappers"
+echo "installing wrappers for x86-64"
 echo "======================="
 mkdir -p $M_CROSS/$MINGW_TRIPLE/lib
 cd $M_CROSS/bin
@@ -89,12 +56,12 @@ ln -s llvm-rc $MINGW_TRIPLE-windres
 ln -s llvm-addr2line $MINGW_TRIPLE-addr2line
 ln -s $(which pkgconf) $MINGW_TRIPLE-pkg-config
 ln -s $(which pkgconf) $MINGW_TRIPLE-pkgconf
-cp $TOP_DIR/llvm-wrapper/x86_64-w64-mingw32-clang ./
-cp $TOP_DIR/llvm-wrapper/x86_64-w64-mingw32-clang++ ./
-cp $TOP_DIR/llvm-wrapper/x86_64-w64-mingw32-ld ./
-cp $TOP_DIR/llvm-wrapper/x86_64-w64-mingw32-gcc ./
-cp $TOP_DIR/llvm-wrapper/x86_64-w64-mingw32-g++ ./
-cp $TOP_DIR/llvm-wrapper/x86_64-w64-mingw32-c++ ./
+cp $TOP_DIR/llvm-x86-64-wrapper/x86_64-w64-mingw32-clang ./
+cp $TOP_DIR/llvm-x86-64-wrapper/x86_64-w64-mingw32-clang++ ./
+cp $TOP_DIR/llvm-x86-64-wrapper/x86_64-w64-mingw32-ld ./
+cp $TOP_DIR/llvm-x86-64-wrapper/x86_64-w64-mingw32-gcc ./
+cp $TOP_DIR/llvm-x86-64-wrapper/x86_64-w64-mingw32-g++ ./
+cp $TOP_DIR/llvm-x86-64-wrapper/x86_64-w64-mingw32-c++ ./
 
 chmod 755 x86_64-w64-mingw32-clang
 chmod 755 x86_64-w64-mingw32-clang++
