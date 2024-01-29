@@ -42,6 +42,7 @@ jobs:
       - name: Packaging toolchain
         run: |
           7z a llvm-clang-${{ env.date }}-ucrt-x86_64_v3.7z cross/*
+          cp llvm-clang-${{ env.date }}-ucrt-x86_64_v3.7z llvm-clang-latest-ucrt-x86_64_v3.7z
 
       - name: Release
         continue-on-error: true
