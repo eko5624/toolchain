@@ -4,7 +4,7 @@ PROG=$CROSS_DIR/bin/ld.lld
 TARGET=x86_64-w64-mingw32
 POLICY="cache_size_bytes=1g:prune_interval=1m"
 FLAGS="-m i386pep"
-FLAGS="$FLAGS --pdb= --thinlto-cache-dir=$CROSS_DIR/x86_64-w64-mingw32/thinlto -Xlink=-lldltocachepolicy:$POLICY"
+FLAGS="$FLAGS --pdb= --thinlto-cache-dir=/github/home/opt/thinlto -Xlink=-lldltocachepolicy:$POLICY"
 FLAGS="$FLAGS -O3 -Xlink=-opt:lldlto=3 -Xlink=-opt:lldltocgo=3"
 
 if [ "$NO_CONFLTO" == "1" ]; then
