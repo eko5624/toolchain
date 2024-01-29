@@ -18,7 +18,6 @@ export M_BUILD=$M_ROOT/build
 export M_CROSS=$M_ROOT/cross
 export RUSTUP_LOCATION=$M_ROOT/rust
 
-export ORGPATH=$PATH
 export PATH="$M_CROSS/bin:$RUSTUP_LOCATION/.cargo/bin:$PATH"
 export RUSTUP_HOME="$RUSTUP_LOCATION/.rustup"
 export CARGO_HOME="$RUSTUP_LOCATION/.cargo"
@@ -56,12 +55,12 @@ ln -s llvm-rc $MINGW_TRIPLE-windres
 ln -s llvm-addr2line $MINGW_TRIPLE-addr2line
 ln -s $(which pkgconf) $MINGW_TRIPLE-pkg-config
 ln -s $(which pkgconf) $MINGW_TRIPLE-pkgconf
-cp $TOP_DIR/llvm-x86_64-wrapper/x86_64-w64-mingw32-clang ./
-cp $TOP_DIR/llvm-x86_64-wrapper/x86_64-w64-mingw32-clang++ ./
-cp $TOP_DIR/llvm-x86_64-wrapper/x86_64-w64-mingw32-ld ./
-cp $TOP_DIR/llvm-x86_64-wrapper/x86_64-w64-mingw32-gcc ./
-cp $TOP_DIR/llvm-x86_64-wrapper/x86_64-w64-mingw32-g++ ./
-cp $TOP_DIR/llvm-x86_64-wrapper/x86_64-w64-mingw32-c++ ./
+cp $TOP_DIR/llvm-wrapper-x86_64/x86_64-w64-mingw32-clang ./
+cp $TOP_DIR/llvm-wrapper-x86_64/x86_64-w64-mingw32-clang++ ./
+cp $TOP_DIR/llvm-wrapper-x86_64/x86_64-w64-mingw32-ld ./
+cp $TOP_DIR/llvm-wrapper-x86_64/x86_64-w64-mingw32-gcc ./
+cp $TOP_DIR/llvm-wrapper-x86_64/x86_64-w64-mingw32-g++ ./
+cp $TOP_DIR/llvm-wrapper-x86_64/x86_64-w64-mingw32-c++ ./
 
 chmod 755 x86_64-w64-mingw32-clang
 chmod 755 x86_64-w64-mingw32-clang++
