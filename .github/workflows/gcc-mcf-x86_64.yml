@@ -1,0 +1,71 @@
+name: gcc-mcf-x86_64
+defaults:
+  run:
+    shell: bash
+on:
+  workflow_dispatch:
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux/archlinux:base-devel
+    steps:    
+      - name: Install Dependencies
+        run: |
+          sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
+          sudo pacman -Syu --noconfirm
+          sudo pacman -S --noconfirm --needed git gyp cvs mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf zip unzip p7zip xz mingw-w64-gcc clang python-pip curl jq wget
+          pip3 install -U --break-system-packages setuptools rst2pdf mako jsonschema meson
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global pull.rebase true
+          git config --global rebase.autoStash true
+          git config --global fetch.prune true
+          git config --global --add safe.directory $PWD
+          
+      - uses: actions/checkout@main
+      - name: Loading gcc cache
+        uses: actions/cache/restore@main
+        with:
+          path: ${{ github.workspace }}/cross
+          key: gcc-mcf-x86_64-ucrt-${{ github.run_id }}
+          restore-keys: |
+            gcc-mcf-x86_64-ucrt-
+            
+      - name: Building toolchain
+        run: |
+          PWD=$(pwd)
+          if [[ ! "$(ls -A $PWD/cross/bin)" ]]; then
+            chmod +x ./gcc-mcf-x86_64.sh
+            ./gcc-mcf-x86_64.sh
+          fi  
+
+      - name: Get current timestamp
+        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
+        
+      - name: Get gcc version
+        run: |
+           echo "ver=$(cat cross/version.txt)" >> $GITHUB_ENV
+
+      - name: Packaging toolchain
+        run: |
+          7z a gcc-mcf-${{ env.date }}-ucrt-x86_64.7z cross/*
+          cp gcc-mcf-${{ env.date }}-ucrt-x86_64.7z gcc-mcf-latest-ucrt-x86_64.7z
+          7z a rustup-${{ env.date }}.7z rust/*
+          cp rustup-${{ env.date }}.7z rustup-latest.7z
+
+      - name: Release
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./release-package.sh
+          ./release-package.sh
+
+      - name: Saving gcc cache
+        uses: actions/cache/save@main
+        if: always()
+        with:
+          path: ${{ github.workspace }}/cross
+          key: gcc-mcf-x86_64-ucrt-${{ github.run_id }}

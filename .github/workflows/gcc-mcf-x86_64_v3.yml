@@ -1,4 +1,4 @@
-name: cross-gcc-mcf
+name: gcc-mcf-x86_64_v3
 defaults:
   run:
     shell: bash
@@ -29,20 +29,20 @@ jobs:
         uses: actions/cache/restore@main
         with:
           path: ${{ github.workspace }}/cross
-          key: cross-gcc-mcf-${{ github.run_id }}
+          key: gcc-mcf-x86_64_v3-ucrt-${{ github.run_id }}
           restore-keys: |
-            cross-gcc-mcf-
+            gcc-mcf-x86_64_v3-ucrt-
             
       - name: Building toolchain
         run: |
           PWD=$(pwd)
           if [[ ! "$(ls -A $PWD/cross/bin)" ]]; then
-            chmod +x ./cross-gcc-mcf.sh
-            ./cross-gcc-mcf.sh
+            chmod +x ./gcc-mcf-x86_64_v3.sh
+            ./gcc-mcf-x86_64_v3.sh
           fi  
 
       - name: Get current timestamp
-        run: echo "date=$(date +%Y-%m-%d)" >> $GITHUB_ENV
+        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
         
       - name: Get gcc version
         run: |
@@ -50,8 +50,8 @@ jobs:
 
       - name: Packaging toolchain
         run: |
-          7z a cross-gcc-mcf-${{ env.date }}-x64-ucrt.7z cross/*
-          7z a rustup-${{ env.date }}.7z rust/*
+          7z a gcc-mcf-${{ env.date }}-ucrt-x86_64_v3.7z cross/*
+          cp gcc-mcf-${{ env.date }}-ucrt-x86_64_v3.7z gcc-mcf-latest-ucrt-x86_64_v3.7z
 
       - name: Release
         continue-on-error: true
@@ -66,4 +66,4 @@ jobs:
         if: always()
         with:
           path: ${{ github.workspace }}/cross
-          key: cross-gcc-mcf-${{ github.run_id }}
+          key: gcc-mcf-x86_64_v3-ucrt-${{ github.run_id }}

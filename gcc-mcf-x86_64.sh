@@ -41,10 +41,7 @@ git clone https://github.com/gcc-mirror/gcc.git --branch $BRANCH_GCC
 git clone https://github.com/mingw-w64/mingw-w64.git --branch master
 
 #mcfgthread
-git clone https://github.com/lhmouse/mcfgthread.git --branch master 
-
-#pkgconf
-#git clone https://github.com/pkgconf/pkgconf --branch pkgconf-1.9.5
+git clone https://github.com/lhmouse/mcfgthread.git --branch master
 
 echo "building binutils"
 echo "======================="
@@ -88,16 +85,12 @@ ln -s $MINGW_TRIPLE mingw
 echo "building mcfgthread"
 echo "======================="
 cd $M_SOURCE/mcfgthread
-autoreconf -ivf
-cd $M_BUILD
-mkdir mcfgthread-build
-cd mcfgthread-build
-$M_SOURCE/mcfgthread/configure \
-  --host=$MINGW_TRIPLE \
-  --prefix=$M_CROSS/$MINGW_TRIPLE \
-  --disable-pch
-make -j$MJOBS
-make install
+meson setup build \
+  --prefix=$M_CROSS \
+  --cross-file=$TOP_DIR/cross.meson \
+  --buildtype=release
+meson compile -C build
+meson install -C build
 
 echo "building gcc-initial"
 echo "======================="
