@@ -10,7 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: docker://ghcr.io/eko5624/archlinux:latest
-    steps:          
+    steps:
+      - name: Install Dependencies
+        run: |
+          sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
+          sudo pacman -Syu --noconfirm
+          sudo pacman -S --noconfirm --needed mingw-w64-gcc    
       - uses: actions/checkout@main
       - name: Loading gcc cache
         uses: actions/cache/restore@main
