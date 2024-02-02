@@ -1,0 +1,65 @@
+name: gcc-posix-x86_64
+defaults:
+  run:
+    shell: bash
+on:
+  workflow_dispatch:
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux/archlinux:base-devel
+    steps:    
+      - name: Install Dependencies
+        run: |
+          sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
+          sudo pacman -Syu --noconfirm
+          sudo pacman -S --noconfirm --needed git gyp cvs mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf zip unzip p7zip xz python-pip curl jq wget
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global pull.rebase true
+          git config --global rebase.autoStash true
+          git config --global fetch.prune true
+          git config --global --add safe.directory $PWD
+          
+      - uses: actions/checkout@main
+      - name: Loading gcc cache
+        uses: actions/cache/restore@main
+        with:
+          path: ${{ github.workspace }}/cross
+          key: gcc-posix-x86_64-ucrt-${{ github.run_id }}
+          restore-keys: |
+            gcc-posix-x86_64-ucrt-
+            
+      - name: Building toolchain
+        run: |
+          PWD=$(pwd)
+          if [[ ! "$(ls -A $PWD/cross/bin)" ]]; then
+            chmod +x ./gcc-posix-x86_64.sh
+            ./gcc-posix-x86_64.sh
+          fi
+
+      - name: Get gcc version
+        run: |
+           echo "ver=$(cat cross/version.txt)" >> $GITHUB_ENV
+
+      - name: Packaging toolchain
+        run: |
+          7z a gcc-posix-${{ env.ver }}-ucrt-x86_64.7z cross/*
+
+      - name: Release
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./release-package.sh
+          ./release-package.sh
+
+      - name: Saving gcc cache
+        uses: actions/cache/save@main
+        if: always()
+        with:
+          path: ${{ github.workspace }}/cross
+          key: gcc-posix-x86_64-ucrt-${{ github.run_id }}
+          

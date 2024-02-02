@@ -8,10 +8,8 @@ source $TOP_DIR/ver.sh
 # Env Var NUMJOBS overrides automatic detection
 MJOBS=$(grep -c processor /proc/cpuinfo)
 
-CFLAGS="-pipe -O2"
-MINGW_TRIPLE="x86_64-w64-mingw32"
-export MINGW_TRIPLE
-export CFLAGS
+export CFLAGS="-pipe -O2"
+export MINGW_TRIPLE="x86_64-w64-mingw32"
 export CXXFLAGS=$CFLAGS
 
 export M_ROOT=$(pwd)
@@ -95,7 +93,7 @@ $M_SOURCE/gcc-$VER_GCC/configure \
   --disable-shared \
   --disable-win32-registry \
   --disable-libstdcxx-pch \
-  --with-arch=x86-64 \
+  --with-arch=x86-64-v3 \
   --with-tune=generic \
   --enable-threads=posix \
   --without-included-gettext \

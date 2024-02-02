@@ -1,4 +1,4 @@
-name: cross-gcc-posix
+name: gcc-posix-x86_64_v3
 defaults:
   run:
     shell: bash
@@ -15,7 +15,7 @@ jobs:
         run: |
           sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
           sudo pacman -Syu --noconfirm
-          sudo pacman -S --noconfirm --needed git gyp cvs mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf zip unzip p7zip xz gcc-multilib clang python-pip curl jq lib32-glib2 wget
+          sudo pacman -S --noconfirm --needed git gyp cvs mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf zip unzip p7zip xz python-pip curl jq wget
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global pull.rebase true
@@ -28,16 +28,16 @@ jobs:
         uses: actions/cache/restore@main
         with:
           path: ${{ github.workspace }}/cross
-          key: cross-gcc-ucrt-${{ github.run_id }}
+          key: gcc-posix-x86_64_v3-ucrt-${{ github.run_id }}
           restore-keys: |
-            cross-gcc-posix-
+            gcc-posix-x86_64_v3-ucrt-
             
       - name: Building toolchain
         run: |
           PWD=$(pwd)
           if [[ ! "$(ls -A $PWD/cross/bin)" ]]; then
-            chmod +x ./cross-gcc-posix.sh
-            ./cross-gcc-posix.sh
+            chmod +x ./gcc-posix-x86_64_v3.sh
+            ./gcc-posix-x86_64_v3.sh
           fi
 
       - name: Get gcc version
@@ -46,7 +46,7 @@ jobs:
 
       - name: Packaging toolchain
         run: |
-          7z a cross-gcc-posix-${{ env.ver }}-x64-ucrt.7z cross/*
+          7z a gcc-posix-${{ env.ver }}-ucrt-x86_64-v3.7z cross/*
 
       - name: Release
         continue-on-error: true
@@ -54,12 +54,12 @@ jobs:
           GH_TOKEN: ${{ github.token }} 
         run: |
           chmod +x ./release-package.sh
-          ./release-package.sh cross-gcc-posix-${{ env.ver }}-x64-ucrt.7z
+          ./release-package.sh
 
       - name: Saving gcc cache
         uses: actions/cache/save@main
         if: always()
         with:
           path: ${{ github.workspace }}/cross
-          key: cross-gcc-posix-${{ github.run_id }}
+          key: gcc-posix-x86_64_v3-ucrt-${{ github.run_id }}
           
