@@ -43,6 +43,17 @@ git clone https://github.com/mingw-w64/mingw-w64.git --branch master
 #mcfgthread
 git clone https://github.com/lhmouse/mcfgthread.git --branch master
 
+echo "building mcfgthread"
+echo "======================="
+cd $M_SOURCE/mcfgthread
+meson setup build \
+  --prefix=$M_CROSS/$MINGW_TRIPLE \
+  --cross-file=$TOP_DIR/cross.meson \
+  --buildtype=release
+meson compile -C build
+meson install -C build
+rm -rf $M_CROSS/$MINGW_TRIPLE/lib/pkgconfig
+
 echo "building binutils"
 echo "======================="
 cd $M_BUILD
@@ -81,16 +92,6 @@ make -j$MJOBS
 make install
 cd $M_CROSS
 ln -s $MINGW_TRIPLE mingw
-
-echo "building mcfgthread"
-echo "======================="
-cd $M_SOURCE/mcfgthread
-meson setup build \
-  --prefix=$M_CROSS \
-  --cross-file=$TOP_DIR/cross.meson \
-  --buildtype=release
-meson compile -C build
-meson install -C build
 
 echo "building gcc-initial"
 echo "======================="
@@ -168,6 +169,7 @@ find $MINGW_TRIPLE/lib -type f -name "*.dll.a" -print0 | xargs -0 -I {} rm {}
 mv $MINGW_TRIPLE/bin/libmcfgthread-1.dll bin
 rm -f mingw
 rm -rf share
+rm -rf include
 echo "$VER_GCC" > $M_CROSS/version.txt
 
 echo "building rustup"
