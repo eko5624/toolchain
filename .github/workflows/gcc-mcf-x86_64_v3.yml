@@ -25,10 +25,7 @@ jobs:
           if [[ ! "$(ls -A cross/bin)" ]]; then
             chmod +x ./gcc-mcf-x86_64_v3.sh
             ./gcc-mcf-x86_64_v3.sh
-          fi  
-
-      - name: Get current timestamp
-        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
+          fi
         
       - name: Get gcc version
         run: |
@@ -36,8 +33,8 @@ jobs:
 
       - name: Packaging toolchain
         run: |
-          7z a gcc-mcf-${{ env.date }}-ucrt-x86_64_v3.7z cross/*
-          cp gcc-mcf-${{ env.date }}-ucrt-x86_64_v3.7z gcc-mcf-latest-ucrt-x86_64_v3.7z
+          7z a gcc-mcf-${{ env.ver }}-ucrt-x86_64_v3.7z cross/*
+          cp gcc-mcf-${{ env.ver }}-ucrt-x86_64_v3.7z gcc-mcf-latest-ucrt-x86_64_v3.7z
 
       - name: Delete
         env:

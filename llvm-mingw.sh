@@ -237,29 +237,29 @@ cmake --install compiler-rt-build
 mkdir -p $M_CROSS/$MINGW_TRIPLE/bin
 mv $(x86_64-w64-mingw32-clang --print-resource-dir)/lib/windows/*.dll $M_CROSS/$MINGW_TRIPLE/bin
 
-echo "building llvm-openmp"
-echo "======================="
-cd $M_BUILD
-mkdir openmp-build
-cd openmp-build
-curl -OL https://raw.githubusercontent.com/shinchiro/mpv-winbuild-cmake/master/toolchain/llvm/llvm-openmp-0001-support-static-lib.patch
-cd $M_SOURCE/llvm-project
-patch -p1 -i $M_BUILD/openmp-build/llvm-openmp-0001-support-static-lib.patch
-cd $M_BUILD
-cmake -G Ninja -H$M_SOURCE/llvm-project/openmp -B$M_BUILD/openmp-build \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_INSTALL_PREFIX=$M_CROSS/$MINGW_TRIPLE \
-  -DCMAKE_C_COMPILER=$MINGW_TRIPLE-clang \
-  -DCMAKE_CXX_COMPILER=$MINGW_TRIPLE-clang++ \
-  -DCMAKE_RC_COMPILER=$MINGW_TRIPLE-windres \
-  -DCMAKE_ASM_MASM_COMPILER=llvm-ml \
-  -DCMAKE_SYSTEM_NAME=Windows \
-  -DCMAKE_AR=$M_CROSS/bin/llvm-ar \
-  -DCMAKE_RANLIB=$M_CROSS/bin/llvm-ranlib \
-  -DLIBOMP_ENABLE_SHARED=FALSE \
-  -DLIBOMP_ASMFLAGS=-m64
-cmake --build openmp-build -j$MJOBS
-cmake --install openmp-build
+#echo "building llvm-openmp"
+#echo "======================="
+#cd $M_BUILD
+#mkdir openmp-build
+#cd openmp-build
+#curl -OL https://raw.githubusercontent.com/shinchiro/mpv-winbuild-cmake/master/toolchain/llvm/llvm-openmp-0001-support-static-lib.patch
+#cd $M_SOURCE/llvm-project
+#patch -p1 -i $M_BUILD/openmp-build/llvm-openmp-0001-support-static-lib.patch
+#cd $M_BUILD
+#cmake -G Ninja -H$M_SOURCE/llvm-project/openmp -B$M_BUILD/openmp-build \
+#  -DCMAKE_BUILD_TYPE=Release \
+#  -DCMAKE_INSTALL_PREFIX=$M_CROSS/$MINGW_TRIPLE \
+#  -DCMAKE_C_COMPILER=$MINGW_TRIPLE-clang \
+#  -DCMAKE_CXX_COMPILER=$MINGW_TRIPLE-clang++ \
+#  -DCMAKE_RC_COMPILER=$MINGW_TRIPLE-windres \
+#  -DCMAKE_ASM_MASM_COMPILER=llvm-ml \
+#  -DCMAKE_SYSTEM_NAME=Windows \
+#  -DCMAKE_AR=$M_CROSS/bin/llvm-ar \
+#  -DCMAKE_RANLIB=$M_CROSS/bin/llvm-ranlib \
+#  -DLIBOMP_ENABLE_SHARED=FALSE \
+#  -DLIBOMP_ASMFLAGS=-m64
+#cmake --build openmp-build -j$MJOBS
+#cmake --install openmp-build
 
 #echo "removing *.dll.a"
 #echo "======================="

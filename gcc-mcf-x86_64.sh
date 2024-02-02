@@ -104,6 +104,11 @@ ln -s $MINGW_TRIPLE mingw
 
 echo "building gcc-initial"
 echo "======================="
+cd $M_SOURCE/gcc
+_gcc_version=$(head -n 34 gcc/BASE-VER | sed -e 's/.* //' | tr -d '"\n')
+_gcc_date=$(head -n 34 gcc/DATESTAMP | sed -e 's/.* //' | tr -d '"\n')
+VER=$(printf "%s-%s" "$_gcc_version" "$_gcc_date")
+
 cd $M_BUILD
 mkdir gcc-build
 cd gcc-build
@@ -196,4 +201,4 @@ mv $MINGW_TRIPLE/bin/libmcfgthread-1.dll bin
 rm -f mingw
 rm -rf share
 rm -rf include
-echo "$VER_GCC" > $M_CROSS/version.txt
+echo "$VER" > $M_CROSS/version.txt

@@ -3,6 +3,7 @@ set -e
 
 TOP_DIR=$(pwd)
 source $TOP_DIR/ver.sh
+export BRANCH_GCC=releases/gcc-13
 
 # Speed up the process
 # Env Var NUMJOBS overrides automatic detection
@@ -31,8 +32,7 @@ wget -c -O binutils-$VER_BINUTILS.tar.bz2 http://ftp.gnu.org/gnu/binutils/binuti
 tar xjf binutils-$VER_BINUTILS.tar.bz2
 
 #gcc
-wget -c -O gcc-$VER_GCC.tar.xz https://ftp.gnu.org/gnu/gcc/gcc-$VER_GCC/gcc-$VER_GCC.tar.xz
-xz -c -d gcc-$VER_GCC.tar.xz | tar xf -
+git clone https://github.com/gcc-mirror/gcc.git --branch $BRANCH_GCC
 
 #mingw-w64
 git clone https://github.com/mingw-w64/mingw-w64.git --branch master --depth 1
@@ -78,10 +78,15 @@ ln -s $MINGW_TRIPLE mingw
 
 echo "building gcc-initial"
 echo "======================="
+cd $M_SOURCE/gcc
+_gcc_version=$(head -n 34 gcc/BASE-VER | sed -e 's/.* //' | tr -d '"\n')
+_gcc_date=$(head -n 34 gcc/DATESTAMP | sed -e 's/.* //' | tr -d '"\n')
+VER=$(printf "%s-%s" "$_gcc_version" "$_gcc_date")
+
 cd $M_BUILD
 mkdir gcc-build
 cd gcc-build
-$M_SOURCE/gcc-$VER_GCC/configure \
+$M_SOURCE/gcc/configure \
   --target=$MINGW_TRIPLE \
   --prefix=$M_CROSS \
   --libdir=$M_CROSS/lib \
@@ -152,4 +157,4 @@ find $MINGW_TRIPLE/lib -type f -name "*.la" -print0 | xargs -0 -I {} rm {}
 find $MINGW_TRIPLE/lib -type f -name "*.dll.a" -print0 | xargs -0 -I {} rm {}
 rm -f mingw
 rm -rf share
-echo "$VER_GCC" > $M_CROSS/version.txt
+echo "$VER" > $M_CROSS/version.txt
