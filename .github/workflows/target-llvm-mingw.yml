@@ -1,4 +1,4 @@
-name: target-llvm-mingw
+name: Build target-llvm-mingw-ucrt-x86_64
 defaults:
   run:
     shell: bash
@@ -16,22 +16,21 @@ jobs:
         
       - name: Setup Cross Toolchain
         run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-mingw-2024-01-25-ucrt-x86_64.7z
-          7z x cross*.7z
-          rm cross*.7z
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-2024-01-25-ucrt-x86_64.7z
+          7z x llvm-mingw*.7z
+          rm llvm-mingw*.7z
           
       - name: Loading target llvm cache
         uses: actions/cache/restore@main
         with:
           path: ${{ github.workspace }}/target
-          key: target-llvm-${{ github.run_id }}
+          key: target-llvm-mingw-${{ github.run_id }}
           restore-keys: |
-            target-llvm-
+            target-llvm-mingw-
             
       - name: Building toolchain
         run: |
-          PWD=$(pwd)
-          if [[ ! "$(ls -A $PWD/target/bin)" ]]; then
+          if [[ ! "$(ls -A target/bin)" ]]; then
             chmod +x ./target-llvm-mingw.sh
             ./target-llvm-mingw.sh
           fi
@@ -48,12 +47,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }} 
         run: |
-          chmod +x ./release-package.sh
-          ./release-package.sh
+          chmod +x ./package-release.sh
+          ./package-release.sh
 
       - name: Saving llvm cache
         uses: actions/cache/save@main
         if: always()
         with:
           path: ${{ github.workspace }}/target
-          key: target-llvm-${{ github.run_id }}
+          key: target-llvm-mingw-${{ github.run_id }}

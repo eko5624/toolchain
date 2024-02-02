@@ -15,7 +15,7 @@ jobs:
         run: |
           sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
           sudo pacman -Syu --noconfirm docker
-          sudo pacman -S --noconfirm --needed git gyp mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf unzip p7zip xz gcc-multilib clang python-pip python-cairo curl jq lib32-glib2 wget
+          sudo pacman -S --noconfirm --needed git gyp mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf unzip p7zip xz clang python-pip python-cairo curl jq wget
           pip3 install -U --break-system-packages setuptools rst2pdf mako jsonschema meson
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -44,14 +44,14 @@ jobs:
       - name: Building gcc with thread win32
         run: |
           PWD=$(pwd)
-          if [[ ! "$(ls -A $PWD/target/bin)" ]]; then
+          if [[ ! "$(ls -A target/bin)" ]]; then
             chmod +x ./target-gcc-win32.sh
             ./target-gcc-win32.sh
           fi  
 
       - name: Get gcc version
         run: |
-           echo "ver=$(cat target/version.txt)" >> $GITHUB_ENV
+          echo "ver=$(cat target/version.txt)" >> $GITHUB_ENV
            
       - name: Packaging toolchain
         run: |
@@ -62,8 +62,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }} 
         run: |
-          chmod +x ./release-package.sh
-          ./release-package.sh target-gcc-with-win32-${{ env.ver }}-x64-ucrt.7z
+          chmod +x ./package-release.sh
+          ./package-release.sh
 
       - name: Saving target gcc cache
         uses: actions/cache/save@main

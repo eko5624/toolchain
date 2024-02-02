@@ -1,4 +1,4 @@
-name: target-gcc-posix
+name: Build target-gcc-posix-ucrt-x86_64
 defaults:
   run:
     shell: bash
@@ -9,29 +9,16 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: archlinux/archlinux:base-devel
-    steps:    
-      - name: Install Dependencies
-        run: |
-          sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
-          sudo pacman -Syu --noconfirm docker
-          sudo pacman -S --noconfirm --needed git gyp mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf unzip p7zip xz gcc-multilib clang python-pip python-cairo curl jq lib32-glib2 wget
-          pip3 install -U --break-system-packages setuptools rst2pdf mako jsonschema meson
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --global pull.rebase true
-          git config --global rebase.autoStash true
-          git config --global fetch.prune true
-          git config --global --add safe.directory $PWD
-          
+      image: docker://ghcr.io/eko5624/archlinux:latest
+    steps:
       - name: Checkout
         uses: actions/checkout@main
         
       - name: Setup Toolchain
         run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-gcc-posix-13.2.0-x64-ucrt.7z
-          7z x cross-gcc-posix*.7z
-          rm cross-gcc-posix*.7z
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/gcc-posix-latest-ucrt-x86_64.7z
+          7z x gcc-posix*.7z
+          rm gcc-posix*.7z
             
       - name: Loading target gcc cache
         uses: actions/cache/restore@main
@@ -44,7 +31,7 @@ jobs:
       - name: Building gcc with posix
         run: |
           PWD=$(pwd)
-          if [[ ! "$(ls -A $PWD/target/bin)" ]]; then
+          if [[ ! "$(ls -A target/bin)" ]]; then
             chmod +x ./target-gcc-posix.sh
             ./target-gcc-posix.sh
           fi  

@@ -15,7 +15,7 @@ jobs:
         run: |
           sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
           sudo pacman -Syu --noconfirm
-          sudo pacman -S --noconfirm --needed git gyp cvs mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf zip unzip p7zip xz gcc-multilib clang python-pip curl jq lib32-glib2 wget
+          sudo pacman -S --noconfirm --needed git gyp cvs mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf zip unzip p7zip xz clang python-pip curl jq wget
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global pull.rebase true
@@ -35,14 +35,14 @@ jobs:
       - name: Building toolchain
         run: |
           PWD=$(pwd)
-          if [[ ! "$(ls -A $PWD/cross/bin)" ]]; then
+          if [[ ! "$(ls -A cross/bin)" ]]; then
             chmod +x ./cross-gcc-win32.sh
             ./cross-gcc-win32.sh
           fi
 
       - name: Get gcc version
         run: |
-           echo "ver=$(cat cross/version.txt)" >> $GITHUB_ENV
+          echo "ver=$(cat cross/version.txt)" >> $GITHUB_ENV
 
       - name: Packaging toolchain
         run: |
@@ -53,8 +53,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }} 
         run: |
-          chmod +x ./release-package.sh
-          ./release-package.sh cross-gcc-win32-${{ env.ver }}-x64-ucrt.7z
+          chmod +x ./package-release.sh
+          ./package-release.sh
 
       - name: Saving gcc cache
         uses: actions/cache/save@main

@@ -1,4 +1,4 @@
-name: gcc-mcf-x86_64_v3
+name: Build gcc-mcf-x86_64_v3
 defaults:
   run:
     shell: bash
@@ -9,21 +9,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: archlinux/archlinux:base-devel
-    steps:    
-      - name: Install Dependencies
-        run: |
-          sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
-          sudo pacman -Syu --noconfirm
-          sudo pacman -S --noconfirm --needed git gyp cvs mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf zip unzip p7zip xz mingw-w64-gcc python-pip curl jq wget
-          pip3 install -U --break-system-packages setuptools rst2pdf mako jsonschema meson
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --global pull.rebase true
-          git config --global rebase.autoStash true
-          git config --global fetch.prune true
-          git config --global --add safe.directory $PWD
-          
+      image: docker://ghcr.io/eko5624/archlinux:latest
+    steps:          
       - uses: actions/checkout@main
       - name: Loading gcc cache
         uses: actions/cache/restore@main
@@ -35,8 +22,7 @@ jobs:
             
       - name: Building toolchain
         run: |
-          PWD=$(pwd)
-          if [[ ! "$(ls -A $PWD/cross/bin)" ]]; then
+          if [[ ! "$(ls -A cross/bin)" ]]; then
             chmod +x ./gcc-mcf-x86_64_v3.sh
             ./gcc-mcf-x86_64_v3.sh
           fi  
@@ -53,13 +39,18 @@ jobs:
           7z a gcc-mcf-${{ env.date }}-ucrt-x86_64_v3.7z cross/*
           cp gcc-mcf-${{ env.date }}-ucrt-x86_64_v3.7z gcc-mcf-latest-ucrt-x86_64_v3.7z
 
-      - name: Release
-        continue-on-error: true
+      - name: Delete
         env:
           GH_TOKEN: ${{ github.token }} 
         run: |
-          chmod +x ./release-package.sh
-          ./release-package.sh
+          chmod +x ./package-delete.sh
+          ./package-delete.sh gcc-mcf-latest-ucrt-x86_64_v3.7z
+      - name: Release
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-release.sh
+          ./package-release.sh
 
       - name: Saving gcc cache
         uses: actions/cache/save@main

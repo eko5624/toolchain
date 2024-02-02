@@ -9,21 +9,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: archlinux/archlinux:base-devel
-    steps:    
-      - name: Install Dependencies
-        run: |
-          sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
-          sudo pacman -Syu --noconfirm
-          sudo pacman -S --noconfirm --needed git ninja meson cmake yasm nasm zip unzip p7zip clang lld libc++ libc++abi python-pip curl jq wget
-          pip3 install -U --break-system-packages setuptools rst2pdf mako jsonschema
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --global pull.rebase true
-          git config --global rebase.autoStash true
-          git config --global fetch.prune true
-          git config --global --add safe.directory $PWD
-          
+      image: docker://ghcr.io/eko5624/archlinux:latest
+    steps:          
       - uses: actions/checkout@main
       - name: Loading llvm cache
         uses: actions/cache/restore@main
@@ -35,8 +22,7 @@ jobs:
             
       - name: Building toolchain
         run: |
-          PWD=$(pwd)
-          if [[ ! "$(ls -A $PWD/cross/bin)" ]]; then
+          if [[ ! "$(ls -A cross/bin)" ]]; then
             chmod +x ./llvm-mingw.sh
             ./llvm-mingw.sh
           fi
@@ -53,8 +39,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }} 
         run: |
-          chmod +x ./release-package.sh
-          ./release-package.sh
+          chmod +x ./package-release.sh
+          ./package-release.sh
 
       - name: Saving llvm cache
         uses: actions/cache/save@main

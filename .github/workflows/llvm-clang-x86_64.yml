@@ -1,4 +1,4 @@
-name: llvm-clang-x86_64
+name: Build llvm-clang-x86_64
 defaults:
   run:
     shell: bash
@@ -9,25 +9,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: archlinux/archlinux:base-devel
-    steps:    
-      - name: Install Dependencies
-        run: |
-          sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
-          sudo pacman -Syu --noconfirm
-          sudo pacman -S --noconfirm --needed git ninja meson cmake yasm nasm zip unzip p7zip clang lld libc++ libc++abi python-pip curl jq wget
-          pip3 install -U --break-system-packages setuptools rst2pdf mako jsonschema
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --global pull.rebase true
-          git config --global rebase.autoStash true
-          git config --global fetch.prune true
-          git config --global --add safe.directory $PWD
-
+      image: docker://ghcr.io/eko5624/archlinux:latest
+    steps:
       - uses: actions/checkout@main          
       - name: Setup llvm
         run: |
-          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/llvm-20240128-ucrt.7z
+          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/llvm-latest-ucrt.7z
           7z x llvm*.7z
           rm llvm*.7z
             
@@ -43,14 +30,18 @@ jobs:
         run: |
           7z a llvm-clang-${{ env.date }}-ucrt-x86_64.7z cross/*
           cp llvm-clang-${{ env.date }}-ucrt-x86_64.7z llvm-clang-latest-ucrt-x86_64.7z
-          7z a rustup-${{ env.date }}.7z rust/*
-          cp rustup-${{ env.date }}.7z rustup-latest.7z
 
+      - name: Delete
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-delete.sh
+          ./package-delete.sh llvm-clang-latest-ucrt-x86_64.7z
       - name: Release
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          chmod +x ./release-package.sh
-          ./release-package.sh
+          chmod +x ./package-release.sh
+          ./package-release.sh
 

@@ -1,4 +1,4 @@
-name: target-gcc-mcf
+name: Build target-gcc-mcf-ucrt-x86_64
 defaults:
   run:
     shell: bash
@@ -16,9 +16,9 @@ jobs:
         
       - name: Setup Toolchain
         run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-gcc-mcf-2024-01-25-x64-ucrt.7z
-          7z x cross-gcc-mcf*.7z
-          rm cross-gcc-mcf*.7z
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/gcc-mcf-latest-ucrt-x86_64.7z
+          7z x gcc-mcf*.7z
+          rm gcc-mcf*.7z
  
       - name: Loading target gcc cache
         uses: actions/cache/restore@main
@@ -30,8 +30,7 @@ jobs:
             
       - name: Building gcc with mcf
         run: |
-          PWD=$(pwd)
-          if [[ ! "$(ls -A $PWD/target/bin)" ]]; then
+          if [[ ! "$(ls target/bin)" ]]; then
             chmod +x ./target-gcc-mcf.sh
             ./target-gcc-mcf.sh
           fi  
@@ -42,15 +41,22 @@ jobs:
       
       - name: Packaging toolchain
         run: |
-          7z a target-gcc-mcf-${{ env.ver }}-x64-ucrt.7z target/*
+          7z a target-gcc-mcf-${{ env.ver }}-ucrt-x86_64.7z target/*
+          cp target-gcc-mcf-${{ env.ver }}-ucrt-x86_64.7z target-gcc-mcf-latest-ucrt-x86_64.7z
 
+      - name: Delete
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-delete.sh
+          ./package-delete.sh target-gcc-mcf-latest-ucrt-x86_64.7z
       - name: Release
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }} 
         run: |
-          chmod +x ./release-package.sh
-          ./release-package.sh target-gcc-mcf-${{ env.ver }}-x64-ucrt.7z
+          chmod +x ./package-release.sh
+          ./package-release.sh
           
       - name: Saving target gcc cache
         uses: actions/cache/save@main
