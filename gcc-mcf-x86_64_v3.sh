@@ -9,8 +9,6 @@ export BRANCH_GCC=releases/gcc-13
 # Env Var NUMJOBS overrides automatic detection
 MJOBS=$(grep -c processor /proc/cpuinfo)
 
-export CFLAGS="-pipe -O2"
-export CXXFLAGS=$CFLAGS
 export MINGW_TRIPLE="x86_64-w64-mingw32"
 
 export M_ROOT=$(pwd)
@@ -60,6 +58,7 @@ $M_SOURCE/binutils-$VER_BINUTILS/configure \
   --target=$MINGW_TRIPLE \
   --prefix=$M_CROSS \
   --with-sysroot=$M_CROSS \
+  --program-prefix=cross- \
   --disable-multilib \
   --disable-nls \
   --disable-shared \
@@ -71,6 +70,18 @@ $M_SOURCE/binutils-$VER_BINUTILS/configure \
 make -j$MJOBS
 make install
 cd $M_CROSS/bin
+ln -s cross-as $MINGW_TRIPLE-as
+ln -s cross-ar $MINGW_TRIPLE-ar
+ln -s cross-ranlib $MINGW_TRIPLE-ranlib
+ln -s cross-dlltool $MINGW_TRIPLE-dlltool
+ln -s cross-objcopy $MINGW_TRIPLE-objcopy
+ln -s cross-strip $MINGW_TRIPLE-strip
+ln -s cross-size $MINGW_TRIPLE-size
+ln -s cross-strings $MINGW_TRIPLE-strings
+ln -s cross-nm $MINGW_TRIPLE-nm
+ln -s cross-readelf $MINGW_TRIPLE-readelf
+ln -s cross-windres $MINGW_TRIPLE-windres
+ln -s cross-addr2line $MINGW_TRIPLE-addr2line
 ln -s $(which pkgconf) $MINGW_TRIPLE-pkg-config
 ln -s $(which pkgconf) $MINGW_TRIPLE-pkgconf
 
@@ -100,6 +111,7 @@ $M_SOURCE/gcc/configure \
   --prefix=$M_CROSS \
   --libdir=$M_CROSS/lib \
   --with-sysroot=$M_CROSS \
+  --program-prefix=cross- \
   --with-pkgversion="GCC with MCF thread model" \
   --disable-multilib \
   --enable-languages=c,c++ \
@@ -115,6 +127,23 @@ $M_SOURCE/gcc/configure \
   --enable-checking=release
 make -j$MJOBS all-gcc
 make install-strip-gcc
+
+echo "installing wrappers for x86-64"
+echo "======================="
+cd $M_CROSS/bin
+cp $TOP_DIR/gcc-wrapper-x86_64_v3/x86_64-w64-mingw32-c++ ./
+cp $TOP_DIR/gcc-wrapper-x86_64_v3/x86_64-w64-mingw32-cpp ./
+cp $TOP_DIR/gcc-wrapper-x86_64_v3/x86_64-w64-mingw32-g++ ./
+cp $TOP_DIR/gcc-wrapper-x86_64_v3/x86_64-w64-mingw32-gcc ./
+cp $TOP_DIR/gcc-wrapper-x86_64_v3/x86_64-w64-mingw32-ld ./
+cp $TOP_DIR/gcc-wrapper-x86_64_v3/x86_64-w64-mingw32-ld.bfd ./
+
+chmod 755 x86_64-w64-mingw32-c++
+chmod 755 x86_64-w64-mingw32-cpp
+chmod 755 x86_64-w64-mingw32-g++
+chmod 755 x86_64-w64-mingw32-gcc
+chmod 755 x86_64-w64-mingw32-ld
+chmod 755 x86_64-w64-mingw32-ld.bfd
 
 echo "building gendef"
 echo "======================="
