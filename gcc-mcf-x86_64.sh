@@ -15,11 +15,8 @@ export M_ROOT=$(pwd)
 export M_SOURCE=$M_ROOT/source
 export M_BUILD=$M_ROOT/build
 export M_CROSS=$M_ROOT/cross
-export RUSTUP_LOCATION=$M_ROOT/rust
 
-export PATH="$M_CROSS/bin:$RUSTUP_LOCATION/.cargo/bin:$PATH"
-export RUSTUP_HOME="$RUSTUP_LOCATION/.rustup"
-export CARGO_HOME="$RUSTUP_LOCATION/.cargo"
+export PATH="$M_CROSS/bin:$PATH"
 
 mkdir -p $M_SOURCE
 mkdir -p $M_BUILD
@@ -71,7 +68,8 @@ $M_SOURCE/binutils-$VER_BINUTILS/configure \
   --enable-plugins \
   --enable-threads
 make -j$MJOBS
-make install
+make install-strip
+
 cd $M_CROSS/bin
 ln -s cross-as $MINGW_TRIPLE-as
 ln -s cross-ar $MINGW_TRIPLE-ar
@@ -100,7 +98,7 @@ $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
   --enable-idl \
   --with-default-msvcrt=ucrt
 make -j$MJOBS
-make install
+make install-strip
 cd $M_CROSS
 ln -s $MINGW_TRIPLE mingw
 
@@ -120,18 +118,17 @@ $M_SOURCE/gcc/configure \
   --enable-languages=c,c++ \
   --disable-nls \
   --disable-win32-registry \
-  --disable-libstdcxx-pch \
   --with-arch=x86-64 \
   --with-tune=generic \
   --enable-threads=mcf \
-  --enable-libstdcxx-threads=yes \
   --without-included-gettext \
   --enable-lto \
-  --enable-checking=release
+  --enable-checking=release \
+  --disable-sjlj-exceptions
 make -j$MJOBS all-gcc
 make install-strip-gcc
 
-echo "installing wrappers for x86-64"
+echo "installing wrappers for x86_64"
 echo "======================="
 cd $M_CROSS/bin
 cp $TOP_DIR/gcc-wrapper-x86_64/x86_64-w64-mingw32-c++ ./
@@ -155,7 +152,7 @@ mkdir gendef-build
 cd gendef-build
 $M_SOURCE/mingw-w64/mingw-w64-tools/gendef/configure --prefix=$M_CROSS
 make -j$MJOBS
-make install
+make install-strip
 
 echo "building winpthreads"
 echo "======================="
@@ -168,7 +165,7 @@ $M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
   --disable-shared \
   --enable-static
 make -j$MJOBS
-make install
+make install-strip
 
 echo "building mingw-w64-crt"
 echo "======================="
@@ -185,13 +182,13 @@ $M_SOURCE/mingw-w64/mingw-w64-crt/configure \
   --enable-lib64 \
   --disable-lib32
 make -j$MJOBS
-make install
+make install-strip
 
 echo "building gcc-final"
 echo "======================="
 cd $M_BUILD/gcc-build
 make -j$MJOBS
-make install
+make install-strip
 cd $M_CROSS
 find $MINGW_TRIPLE/lib -type f -name "*.la" -print0 | xargs -0 -I {} rm {}
 find $MINGW_TRIPLE/lib -type f -name "*.dll.a" -print0 | xargs -0 -I {} rm {}
@@ -200,22 +197,3 @@ rm -f mingw
 rm -rf share
 rm -rf include
 echo "$VER_GCC" > $M_CROSS/version.txt
-
-echo "building rustup"
-echo "======================="
-curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --target x86_64-pc-windows-gnu --no-modify-path --profile minimal
-rustup update
-cargo install cargo-c --profile=release-strip --features=vendored-openssl
-cat <<EOF >$CARGO_HOME/config
-[net]
-git-fetch-with-cli = true
-
-[target.x86_64-pc-windows-gnu]
-linker = "x86_64-w64-mingw32-gcc"
-ar = "x86_64-w64-mingw32-ar"
-rustflags = ["-C", "target-cpu=x86-64"]
-
-[profile.release]
-panic = "abort"
-strip = true
-EOF
