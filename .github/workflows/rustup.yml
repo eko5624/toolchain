@@ -1,0 +1,53 @@
+name: Build rustup
+defaults:
+  run:
+    shell: bash
+on:
+  workflow_dispatch:
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux/archlinux:base-devel
+    steps:    
+      - name: Install Dependencies
+        run: |
+          sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
+          sudo pacman -Syu --noconfirm
+          sudo pacman -S --noconfirm --needed git gyp cvs mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf zip unzip p7zip xz mingw-w64-gcc python-pip curl jq wget
+          pip3 install -U --break-system-packages setuptools rst2pdf mako jsonschema meson
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global pull.rebase true
+          git config --global rebase.autoStash true
+          git config --global fetch.prune true
+          git config --global --add safe.directory $PWD
+          
+      - uses: actions/checkout@main            
+      - name: Building rustup toolchain
+        run: |
+          chmod +x ./rustup.sh
+          ./rustup.sh 
+
+      - name: Get current timestamp
+        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
+
+      - name: Packaging toolchain
+        run: |
+          7z a rustup-${{ env.date }}.7z rust/*
+          cp rustup-${{ env.date }}.7z rustup-latest.7z
+
+      - name: Delete
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-delete.sh
+          ./package-delete.sh rustup-latest.7z
+      - name: Release
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-release.sh
+          ./package-release.sh
