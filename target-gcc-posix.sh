@@ -79,16 +79,16 @@ curl -OL https://github.com/ninja-build/ninja/releases/download/v$VER_NINJA/ninj
 7z x ninja*.zip
 
 #yasm
-#wget -c -O yasm-$VER_YASM.tar.gz http://www.tortall.net/projects/yasm/releases/yasm-$VER_YASM.tar.gz
-#tar xzf yasm-$VER_YASM.tar.gz
-curl -OL https://github.com/yasm/yasm/releases/download/v$VER_YASM/yasm-$VER_YASM-win64.exe
+#curl -OL https://github.com/yasm/yasm/releases/download/v$VER_YASM/yasm-$VER_YASM-win64.exe
+wget -c -O yasm-$VER_YASM.tar.gz http://www.tortall.net/projects/yasm/releases/yasm-$VER_YASM.tar.gz
+tar xzf yasm-$VER_YASM.tar.gz
 
 #nasm
-# nasm 2.16.01 faild, fatal error: asm/warnings.c: No such file or directory. Stick to 2.15.05.
+#curl -OL https://www.nasm.us/pub/nasm/releasebuilds/$VER_NASM/win64/nasm-$VER_NASM-win64.zip
+#7z x nasm*.zip
 #wget -c -O nasm-$VER_NASM.tar.gz http://www.nasm.us/pub/nasm/releasebuilds/$VER_NASM/nasm-$VER_NASM.tar.gz
 #tar xzf nasm-$VER_NASM.tar.gz
-curl -OL https://www.nasm.us/pub/nasm/releasebuilds/$VER_NASM/win64/nasm-$VER_NASM-win64.zip
-7z x nasm*.zip
+git clone https://github.com/netwide-assembler/nasm.git --branch nasm-$VER_NASM
 
 #curl
 curl -L -o curl-win64-mingw.zip 'https://curl.se/windows/latest.cgi?p=win64-mingw.zip'
