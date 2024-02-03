@@ -468,6 +468,45 @@ echo "#define HAVE_SYS_WAIT_H 1" >> $M_SOURCE/make-$VER_MAKE/src/config.h
 make -j$MJOBS
 make install
 
+#echo "building cmake"
+#echo "======================="
+#cd $M_BUILD
+#mkdir cmake-build
+#cmake -H$M_SOURCE/CMake -B$M_BUILD/cmake-build \
+#  -DCMAKE_INSTALL_PREFIX=$M_TARGET \
+#  -DCMAKE_TOOLCHAIN_FILE=$TOP_DIR/toolchain.cmake \
+#  -DCMAKE_BUILD_TYPE=Release \
+#  -DBUILD_SHARED_LIBS=OFF \
+#  -DCMAKE_USE_SYSTEM_LIBRARIES=OFF
+#make -j$MJOBS -C $M_BUILD/cmake-build
+#make install -C $M_BUILD/cmake-build
+
+#echo "building yasm"
+#echo "======================="
+cd $M_SOURCE/yasm-$VER_YASM
+./configure \
+  --host=$MINGW_TRIPLE \
+  --target=$MINGW_TRIPLE \
+  --prefix=$M_TARGET
+make -j$MJOBS
+make install
+rm -rf $M_TARGET/include/libyasm
+rm $M_TARGET/include/libyasm*
+rm $M_TARGET/lib/libyasm.a
+
+echo "building nasm"
+echo "======================="
+cd $M_SOURCE/nasm
+# work around /usr/bin/install: cannot stat './nasm.1': No such file or directory
+sed -i "/man1/d" Makefile.in
+./autogen.sh
+./configure \
+  --host=$MINGW_TRIPLE \
+  --target=$MINGW_TRIPLE \
+  --prefix=$M_TARGET
+make -j$MJOBS
+make install
+
 echo "building pkgconf"
 echo "======================="
 cd $M_BUILD
@@ -475,7 +514,6 @@ mkdir pkgconf-build && cd pkgconf-build
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-pkgconf/0002-size-t-format.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-pkgconf/0003-printf-format.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-pkgconf/0004-default-pure-static.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-pkgconf/384ade5f316367f15da9dbf09853e06fe29bf2bf.patch
 
 cd $M_SOURCE/pkgconf
 # https://github.com/msys2/MINGW-packages/issues/8473
@@ -483,29 +521,23 @@ patch -R -p1 -i $M_BUILD/pkgconf-build/0004-default-pure-static.patch
 patch -p1 -i $M_BUILD/pkgconf-build/0002-size-t-format.patch
 patch -p1 -i $M_BUILD/pkgconf-build/0003-printf-format.patch
 
-# https://github.com/pkgconf/pkgconf/issues/326
-patch -R -p1 -i $M_BUILD/pkgconf-build/384ade5f316367f15da9dbf09853e06fe29bf2bf.patch
-
-cd $M_BUILD/pkgconf-build
-meson setup . $M_SOURCE/pkgconf \
+meson setup $M_BUILD/pkgconf-build \
   --prefix=$M_TARGET \
   --cross-file=$TOP_DIR/cross.meson \
-  --buildtype=plain \
+  --buildtype=release \
   -Dtests=disabled
-ninja -j$MJOBS -C $M_BUILD/pkgconf-build
-ninja install -C $M_BUILD/pkgconf-build
+meson compile -C $M_BUILD/pkgconf-build
+meson install -C $M_BUILD/pkgconf-build
 cp $M_TARGET/bin/pkgconf.exe $M_TARGET/bin/pkg-config.exe
 cp $M_TARGET/bin/pkgconf.exe $M_TARGET/bin/x86_64-w64-mingw32-pkg-config.exe
+rm -rf $M_TARGET/lib/pkgconfig
 
 cd $M_TARGET
 rm -rf doc || true
 rm -rf man || true
-rm -rf lib/pkgconfig
 rm -f mingw
 echo "$VER" > $M_TARGET/version.txt
 
-cp $M_SOURCE/nasm-$VER_NASM/*.exe bin
-cp $M_SOURCE/yasm-$VER_YASM-win64.exe bin/yasm.exe
 cp $M_SOURCE/cmake-$VER_CMAKE-windows-x86_64/bin/cmake.exe bin
 cp -r $M_SOURCE/cmake-$VER_CMAKE-windows-x86_64/share/cmake* share
 cp $M_SOURCE/ninja.exe bin
