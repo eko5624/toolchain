@@ -49,8 +49,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }} 
         run: |
-          chmod +x ./release-package.sh
-          ./release-package.sh target-gcc-posix-${{ env.ver }}-x64-ucrt.7z
+          chmod +x ./package-release.sh
+          ./package-release.sh
 
       - name: Saving target gcc cache
         uses: actions/cache/save@main
