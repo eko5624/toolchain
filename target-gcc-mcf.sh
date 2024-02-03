@@ -448,10 +448,9 @@ $M_SOURCE/gcc/configure \
   --enable-fully-dynamic-string \
   --enable-libstdcxx-filesystem-ts \
   --enable-libstdcxx-time \
-  --enable-twoprocess \
+  --enable-libatomic \
   --enable-libgomp \
   --enable-threads=mcf \
-  --enable-libstdcxx-threads=yes \
   --enable-lto \
   --enable-checking=release \
   --enable-static \
