@@ -170,14 +170,9 @@ curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0500-fix-weak-undef-symbols-after-image-base-change.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/2001-ld-option-to-move-default-bases-under-4GB.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/2003-Restore-old-behaviour-of-windres-so-that-options-con.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/3001-hack-libiberty-link-order.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/libiberty-unlink-handle-windows-nul.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/reproducible-import-libraries.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/specify-timestamp.patch
-curl -L -o 6aadf8a04d162feb2afe3c41f5b36534d661d447.patch "https://sourceware.org/git/?p=binutils-gdb.git;a=commitdiff_plain;h=6aadf8a04d162feb2afe3c41f5b36534d661d447"
-curl -L -o 398f1ddf5e89e066aeee242ea854dcbaa8eb9539.patch "https://sourceware.org/git/?p=binutils-gdb.git;a=commitdiff_plain;h=398f1ddf5e89e066aeee242ea854dcbaa8eb9539"
-curl -L -o 26d0081b52dc482c59abba23ca495304e698ce4b.patch "https://sourceware.org/git/?p=binutils-gdb.git;a=commitdiff_plain;h=26d0081b52dc482c59abba23ca495304e698ce4b"
-curl -L -o 8606b47e94078e77a53f3cd714272c853d2add22.patch "https://sourceware.org/git/?p=binutils-gdb.git;a=commitdiff_plain;h=8606b47e94078e77a53f3cd714272c853d2add22"
-curl -L -o 54d57acf610e5db2e70afa234fd4018207606774.patch "https://sourceware.org/git/?p=binutils-gdb.git;a=commitdiff_plain;h=54d57acf610e5db2e70afa234fd4018207606774"
 
 apply_patch_for_binutils() {
   for patch in "$@"; do
@@ -203,7 +198,6 @@ patch -R -p1 -i $M_BUILD/binutils-build/2003-Restore-old-behaviour-of-windres-so
 # patches for reproducibility from Debian:
 # https://salsa.debian.org/mingw-w64-team/binutils-mingw-w64/-/tree/master/debian/patches
 patch -p2 -i $M_BUILD/binutils-build/reproducible-import-libraries.patch
-patch -p2 -i $M_BUILD/binutils-build/specify-timestamp.patch
 
 # Handle Windows nul device
 # https://github.com/msys2/MINGW-packages/issues/1840
@@ -214,12 +208,11 @@ patch -p2 -i $M_BUILD/binutils-build/specify-timestamp.patch
 # https://gcc.gnu.org/pipermail/gcc-patches/2023-January/609487.html
 patch -p1 -i $M_BUILD/binutils-build/libiberty-unlink-handle-windows-nul.patch
 
-apply_patch_for_binutils \
-  6aadf8a04d162feb2afe3c41f5b36534d661d447.patch \
-  398f1ddf5e89e066aeee242ea854dcbaa8eb9539.patch \
-  26d0081b52dc482c59abba23ca495304e698ce4b.patch \
-  8606b47e94078e77a53f3cd714272c853d2add22.patch \
-  54d57acf610e5db2e70afa234fd4018207606774.patch
+# XXX: make sure we link against the just built libiberty, not the system one
+# to avoid a linker error. All the ld deps contain system deps and system
+# search paths, so imho if things link against the system lib or the just
+# built one is just luck, and I don't know how that is supposed to work.
+patch -p1 -i $M_BUILD/binutils-build/3001-hack-libiberty-link-order.patch
 
 cd $M_BUILD/binutils-build
 $M_SOURCE/binutils-$VER_BINUTILS/configure \
@@ -227,10 +220,12 @@ $M_SOURCE/binutils-$VER_BINUTILS/configure \
   --target=$MINGW_TRIPLE \
   --prefix=$M_TARGET \
   --with-sysroot=$M_TARGET \
+  --disable-multilib \
   --disable-nls \
   --disable-werror \
   --disable-shared \
-  --enable-lto
+  --enable-lto \
+  --enable-64-bit-bfd
 make -j$MJOBS
 make install
 

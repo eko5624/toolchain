@@ -168,14 +168,9 @@ curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0500-fix-weak-undef-symbols-after-image-base-change.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/2001-ld-option-to-move-default-bases-under-4GB.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/2003-Restore-old-behaviour-of-windres-so-that-options-con.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/3001-hack-libiberty-link-order.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/libiberty-unlink-handle-windows-nul.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/reproducible-import-libraries.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/specify-timestamp.patch
-curl -L -o 6aadf8a04d162feb2afe3c41f5b36534d661d447.patch "https://sourceware.org/git/?p=binutils-gdb.git;a=commitdiff_plain;h=6aadf8a04d162feb2afe3c41f5b36534d661d447"
-curl -L -o 398f1ddf5e89e066aeee242ea854dcbaa8eb9539.patch "https://sourceware.org/git/?p=binutils-gdb.git;a=commitdiff_plain;h=398f1ddf5e89e066aeee242ea854dcbaa8eb9539"
-curl -L -o 26d0081b52dc482c59abba23ca495304e698ce4b.patch "https://sourceware.org/git/?p=binutils-gdb.git;a=commitdiff_plain;h=26d0081b52dc482c59abba23ca495304e698ce4b"
-curl -L -o 8606b47e94078e77a53f3cd714272c853d2add22.patch "https://sourceware.org/git/?p=binutils-gdb.git;a=commitdiff_plain;h=8606b47e94078e77a53f3cd714272c853d2add22"
-curl -L -o 54d57acf610e5db2e70afa234fd4018207606774.patch "https://sourceware.org/git/?p=binutils-gdb.git;a=commitdiff_plain;h=54d57acf610e5db2e70afa234fd4018207606774"
 
 apply_patch_for_binutils() {
   for patch in "$@"; do
@@ -201,7 +196,6 @@ patch -R -p1 -i $M_BUILD/binutils-build/2003-Restore-old-behaviour-of-windres-so
 # patches for reproducibility from Debian:
 # https://salsa.debian.org/mingw-w64-team/binutils-mingw-w64/-/tree/master/debian/patches
 patch -p2 -i $M_BUILD/binutils-build/reproducible-import-libraries.patch
-patch -p2 -i $M_BUILD/binutils-build/specify-timestamp.patch
 
 # Handle Windows nul device
 # https://github.com/msys2/MINGW-packages/issues/1840
@@ -212,12 +206,11 @@ patch -p2 -i $M_BUILD/binutils-build/specify-timestamp.patch
 # https://gcc.gnu.org/pipermail/gcc-patches/2023-January/609487.html
 patch -p1 -i $M_BUILD/binutils-build/libiberty-unlink-handle-windows-nul.patch
 
-apply_patch_for_binutils \
-  6aadf8a04d162feb2afe3c41f5b36534d661d447.patch \
-  398f1ddf5e89e066aeee242ea854dcbaa8eb9539.patch \
-  26d0081b52dc482c59abba23ca495304e698ce4b.patch \
-  8606b47e94078e77a53f3cd714272c853d2add22.patch \
-  54d57acf610e5db2e70afa234fd4018207606774.patch
+# XXX: make sure we link against the just built libiberty, not the system one
+# to avoid a linker error. All the ld deps contain system deps and system
+# search paths, so imho if things link against the system lib or the just
+# built one is just luck, and I don't know how that is supposed to work.
+patch -p1 -i $M_BUILD/binutils-build/3001-hack-libiberty-link-order.patch
 
 cd $M_BUILD/binutils-build
 $M_SOURCE/binutils-$VER_BINUTILS/configure \
@@ -225,10 +218,12 @@ $M_SOURCE/binutils-$VER_BINUTILS/configure \
   --target=$MINGW_TRIPLE \
   --prefix=$M_TARGET \
   --with-sysroot=$M_TARGET \
+  --disable-multilib \
   --disable-nls \
   --disable-werror \
   --disable-shared \
-  --enable-lto
+  --enable-lto \
+  --enable-64-bit-bfd
 make -j$MJOBS
 make install
 
@@ -304,18 +299,13 @@ make install
 echo "building mcfgthread"
 echo "======================="
 cd $M_SOURCE/mcfgthread
-git reset --hard
-git clean -fdx
-autoreconf -ivf
-
-cd $M_BUILD
-mkdir mcfgthread-build && cd mcfgthread-build
-$M_SOURCE/mcfgthread/configure \
-  --host=$MINGW_TRIPLE \
-  --prefix=$M_TARGET \
-  --disable-pch
-make -j$MJOBS
-make install
+meson setup build \
+  --prefix=$M_CROSS/$MINGW_TRIPLE \
+  --cross-file=$TOP_DIR/cross.meson \
+  --buildtype=release
+meson compile -C build
+meson install -C build
+rm -rf $M_CROSS/$MINGW_TRIPLE/lib/pkgconfig
 
 echo "building mingw-w64-crt"
 echo "======================="
@@ -379,6 +369,10 @@ curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0200-add-m-no-align-vector-insn-option-for-i386.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0300-override-builtin-printf-format.patch
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0400-gcc-Make-stupid-AT-T-syntax-not-default.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0401-Always-quote-labels-in-Intel-syntax.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/2000-enable-rust.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/2001-fix-building-rust-on-mingw-w64.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/777aa930b106fea2dd6ed9fe22b42a2717f1472d.patch
 curl -L -o 2f7e7bfa3c6327793cdcdcb5c770b93cecd49bd0.patch "https://gcc.gnu.org/git/?p=gcc.git;a=patch;h=2f7e7bfa3c6327793cdcdcb5c770b93cecd49bd0"
 curl -L -o 3eeb4801d6f45f6250fc77a6d3ab4e0115f8cfdd.patch "https://gcc.gnu.org/git/?p=gcc.git;a=patch;h=3eeb4801d6f45f6250fc77a6d3ab4e0115f8cfdd"
 
@@ -406,7 +400,10 @@ apply_patch_for_gcc \
   0140-gcc-diagnostic-color.patch \
   0200-add-m-no-align-vector-insn-option-for-i386.patch \
   0300-override-builtin-printf-format.patch \
-  0400-gcc-Make-stupid-AT-T-syntax-not-default.patch
+  0400-gcc-Make-stupid-AT-T-syntax-not-default.patch \
+  0401-Always-quote-labels-in-Intel-syntax.patch \
+  2000-enable-rust.patch \
+  2001-fix-building-rust-on-mingw-w64.patch
 
 # backport: https://github.com/msys2/MINGW-packages/issues/17599
 # https://inbox.sourceware.org/gcc-patches/a22433f5-b4d2-19b7-86a2-31e2ee45fb61@martin.st/T/
@@ -441,14 +438,18 @@ $M_SOURCE/gcc/configure \
   --disable-nls \
   --disable-werror \
   --disable-symvers \
+  --disable-libssp \
   --disable-libstdcxx-pch \
   --disable-libstdcxx-debug \
   --disable-libstdcxx-backtrace \
   --disable-win32-registry \
   --disable-version-specific-runtime-libs \
   --enable-languages=c,c++ \
+  --enable-fully-dynamic-string \
+  --enable-libstdcxx-filesystem-ts \
+  --enable-libstdcxx-time \
   --enable-twoprocess \
-  --enable-libssp \
+  --enable-libgomp \
   --enable-threads=mcf \
   --enable-libstdcxx-threads=yes \
   --enable-lto \
