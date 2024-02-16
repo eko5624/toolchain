@@ -300,12 +300,12 @@ echo "building mcfgthread"
 echo "======================="
 cd $M_SOURCE/mcfgthread
 meson setup build \
-  --prefix=$M_TARGET/$MINGW_TRIPLE \
+  --prefix=$M_TARGET \
   --cross-file=$TOP_DIR/cross.meson \
   --buildtype=release
 meson compile -C build
 meson install -C build
-rm -rf $M_TARGET/$MINGW_TRIPLE/lib/pkgconfig
+rm -rf $M_TARGET/lib/pkgconfig
 
 echo "building mingw-w64-crt"
 echo "======================="
