@@ -61,7 +61,7 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
   -DLLVM_ENABLE_TERMINFO=OFF \
   -DLLVM_TOOLCHAIN_TOOLS="llvm-ar;llvm-ranlib;llvm-objdump;llvm-rc;llvm-cvtres;llvm-nm;llvm-strings;llvm-readobj;llvm-dlltool;llvm-pdbutil;llvm-objcopy;llvm-strip;llvm-cov;llvm-profdata;llvm-addr2line;llvm-symbolizer;llvm-windres;llvm-ml;llvm-readelf;llvm-size;llvm-cxxfilt"
 cmake --build llvm-build -j$MJOBS
-cmake --install llvm-build --strip
+cmake --install llvm-build
 
 #echo "building lldb-mi"
 #echo "======================="
