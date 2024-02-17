@@ -152,7 +152,7 @@ NO_CONFLTO=1 cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B
   -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
   -DSANITIZER_CXX_ABI=libc++
 LTO=0 ninja -j$MJOBS -C builtins-build
-#cp builtins-build/lib/windows/libclang_rt.builtins-x86_64.a $M_CROSS/$MINGW_TRIPLE/lib
+cp builtins-build/lib/windows/libclang_rt.builtins-x86_64.a $M_CROSS/$MINGW_TRIPLE/lib
 LTO=0 ninja install -C builtins-build
 
 echo "building llvm-libcxx"
@@ -189,7 +189,7 @@ NO_CONFLTO=1 cmake -G Ninja -H$M_SOURCE/llvm-project/runtimes -B$M_BUILD/libcxx-
   -DLIBCXXABI_LIBDIR_SUFFIX=""
 LTO=0 ninja -j$MJOBS -C libcxx-build
 LTO=0 ninja install -C libcxx-build
-#cp $M_CROSS/$MINGW_TRIPLE/lib/libc++.a $M_CROSS/$MINGW_TRIPLE/lib/libstdc++.a
+cp $M_CROSS/$MINGW_TRIPLE/lib/libc++.a $M_CROSS/$MINGW_TRIPLE/lib/libstdc++.a
 
 echo "building llvm-compiler-rt"
 echo "======================="
@@ -221,6 +221,9 @@ LTO=0 cmake --install compiler-rt-build
 mkdir -p $M_CROSS/$MINGW_TRIPLE/bin
 mv $(x86_64-w64-mingw32-clang --print-resource-dir)/lib/windows/*.dll $M_CROSS/$MINGW_TRIPLE/bin
 
+#Copy libclang_rt.builtins-x86_64.a to runtime dir
+cp $M_CROSS/$MINGW_TRIPLE/lib/libclang_rt.builtins-x86_64.a $(x86_64-w64-mingw32-gcc -print-runtime-dir)
+
 #echo "building llvm-openmp"
 #echo "======================="
 #cd $M_BUILD
@@ -244,9 +247,6 @@ mv $(x86_64-w64-mingw32-clang --print-resource-dir)/lib/windows/*.dll $M_CROSS/$
 #  -DLIBOMP_ASMFLAGS=-m64
 #ninja -j$MJOBS -C openmp-build
 #ninja install -C openmp-build
-
-#Copy libclang_rt.builtins-x86_64.a to runtime dir
-#cp $M_CROSS/$MINGW_TRIPLE/lib/libclang_rt.builtins-x86_64.a $(x86_64-w64-mingw32-gcc -print-runtime-dir)
 
 echo "building rustup"
 echo "======================="
