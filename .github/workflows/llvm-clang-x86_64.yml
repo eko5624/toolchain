@@ -30,6 +30,8 @@ jobs:
         run: |
           7z a llvm-clang-${{ env.date }}-ucrt-x86_64.7z cross/*
           cp llvm-clang-${{ env.date }}-ucrt-x86_64.7z llvm-clang-latest-ucrt-x86_64.7z
+          7z a rustup-${{ env.date }}.7z rust/*
+          cp rustup-${{ env.date }}.7z rustup-latest.7z
 
       - name: Delete
         env:
@@ -37,6 +39,14 @@ jobs:
         run: |
           chmod +x ./package-delete.sh
           ./package-delete.sh llvm-clang-latest-ucrt-x86_64.7z
+      
+      - name: Delete
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-delete.sh
+          ./package-delete.sh rustup-latest.7z
+
       - name: Release
         continue-on-error: true
         env:
