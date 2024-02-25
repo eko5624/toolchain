@@ -28,7 +28,7 @@ echo "======================="
 cd $M_SOURCE
 
 #llvm
-git clone https://github.com/llvm/llvm-project.git --branch llvmorg-18.1.0-rc2
+git clone https://github.com/llvm/llvm-project.git --branch llvmorg-18.1.0-rc3
 
 #lldb-mi
 #git clone https://github.com/lldb-tools/lldb-mi.git
@@ -74,17 +74,23 @@ cmake --install llvm-build
 #cmake --build lldb-mi-build -j$MJOBS
 #cmake --install lldb-mi-build --strip
 
-echo "symlink pkgconf"
+echo "stripping llvm"
 echo "======================="
-cd $M_CROSS/bin
-ln -s $(which pkgconf) $MINGW_TRIPLE-pkg-config
-ln -s $(which pkgconf) $MINGW_TRIPLE-pkgconf
+cd $M_SOURCE/llvm-mingw
+./strip-llvm.sh $M_CROSS
 echo "... Done"
 
 echo "installing wrappers"
 echo "======================="
 cd $M_SOURCE/llvm-mingw
 ./install-wrappers.sh $M_CROSS
+echo "... Done"
+
+echo "symlink pkgconf"
+echo "======================="
+cd $M_CROSS/bin
+ln -s $(which pkgconf) $MINGW_TRIPLE-pkg-config
+ln -s $(which pkgconf) $MINGW_TRIPLE-pkgconf
 echo "... Done"
 
 echo "building gendef"
