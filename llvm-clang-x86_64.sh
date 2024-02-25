@@ -30,16 +30,14 @@ echo "======================="
 cd $M_SOURCE
 
 #llvm
-git clone https://github.com/llvm/llvm-project.git --branch release/17.x
+git clone https://github.com/llvm/llvm-project.git --branch llvmorg-18.1.0-rc3
 
 #mingw-w64
 git clone https://github.com/mingw-w64/mingw-w64.git --branch master
 
 echo "installing wrappers for x86-64"
 echo "======================="
-mkdir -p $M_CROSS/$MINGW_TRIPLE/lib
 cd $M_CROSS/bin
-ln -s llvm-as $MINGW_TRIPLE-as
 ln -s llvm-ar $MINGW_TRIPLE-ar
 ln -s llvm-ar $MINGW_TRIPLE-llvm-ar
 ln -s llvm-ar $MINGW_TRIPLE-ranlib
@@ -55,6 +53,7 @@ ln -s llvm-rc $MINGW_TRIPLE-windres
 ln -s llvm-addr2line $MINGW_TRIPLE-addr2line
 ln -s $(which pkgconf) $MINGW_TRIPLE-pkg-config
 ln -s $(which pkgconf) $MINGW_TRIPLE-pkgconf
+cp $TOP_DIR/llvm-wrapper-x86_64/x86_64-w64-mingw32-as ./
 cp $TOP_DIR/llvm-wrapper-x86_64/x86_64-w64-mingw32-clang ./
 cp $TOP_DIR/llvm-wrapper-x86_64/x86_64-w64-mingw32-clang++ ./
 cp $TOP_DIR/llvm-wrapper-x86_64/x86_64-w64-mingw32-ld ./
@@ -62,6 +61,7 @@ cp $TOP_DIR/llvm-wrapper-x86_64/x86_64-w64-mingw32-gcc ./
 cp $TOP_DIR/llvm-wrapper-x86_64/x86_64-w64-mingw32-g++ ./
 cp $TOP_DIR/llvm-wrapper-x86_64/x86_64-w64-mingw32-c++ ./
 
+chmod 755 x86_64-w64-mingw32-as
 chmod 755 x86_64-w64-mingw32-clang
 chmod 755 x86_64-w64-mingw32-clang++
 chmod 755 x86_64-w64-mingw32-ld
