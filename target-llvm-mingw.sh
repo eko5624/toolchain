@@ -18,10 +18,8 @@ export M_CROSS=$M_ROOT/cross
 export M_TARGET=$M_ROOT/target
 
 export MINGW_TRIPLE="x86_64-w64-mingw32"
-export TOOLCHAIN_ARCHS="x86_64"
-export TOOLCHAIN_TARGET_OSES="mingw32"
 export PATH="$M_CROSS/bin:$PATH"
-export CLANG_VER="17"
+export CLANG_VER="18"
 
 mkdir -p $M_SOURCE
 mkdir -p $M_BUILD
@@ -133,10 +131,34 @@ cmake --install llvm-build --strip
 #cmake --build lldb-mi-build -j$MJOBS
 #cmake --install lldb-mi-build --strip
 
-echo "stripping llvm"
+echo "installing wrappers"
 echo "======================="
-cd $M_SOURCE/llvm-mingw
-./strip-llvm.sh $M_TARGET --host=x86_64-w64-mingw32
+x86_64-w64-mingw32-gcc $M_SOURCE/llvm-mingw/wrappers/clang-target-wrapper.c -o $M_TARGET/bin/clang-target-wrapper.exe -O2 -Wl,-s -municode -DCLANG=\"clang.exe\"
+
+cd $M_TARGET/bin
+for exec in clang clang++ gcc g++ cc c++ as; do
+  ln -sf clang-target-wrapper.exe $MINGW_TRIPLE-$exec.exe
+done
+
+cp llvm-ar.exe $MINGW_TRIPLE-ar.exe
+cp llvm-ar.exe $MINGW_TRIPLE-llvm-ar.exe
+cp llvm-ar.exe $MINGW_TRIPLE-llvm-ranlib.exe
+cp llvm-ar.exe $MINGW_TRIPLE-dlltool.exe
+cp llvm-ar.exe $MINGW_TRIPLE-ranlib.exe
+cp llvm-addr2line.exe $MINGW_TRIPLE-addr2line.exe
+cp llvm-nm.exe $MINGW_TRIPLE-nm.exe
+cp llvm-objcopy.exe $MINGW_TRIPLE-objcopy.exe
+cp llvm-objcopy.exe $MINGW_TRIPLE-strip.exe
+cp llvm-rc.exe $MINGW_TRIPLE-windres.exe
+cp llvm-readelf.exe $MINGW_TRIPLE-readelf.exe
+cp llvm-size.exe $MINGW_TRIPLE-size.exe
+cp llvm-strings.exe $MINGW_TRIPLE-strings.exe
+cp -f clang.exe clang-$CLANG_VER.exe
+
+# Install unprefixed wrappers if $HOST is one of the architectures we are installing wrappers for.
+for exec in gcc g++ cc c++ addr2line ar dlltool ranlib nm objcopy readelf strings strip windres; do
+  ln -sf $MINGW_TRIPLE-$exec.exe $exec.exe
+done
 echo "... Done"
 
 echo "building gendef"
@@ -146,13 +168,7 @@ mkdir gendef-build
 cd gendef-build
 $M_SOURCE/mingw-w64/mingw-w64-tools/gendef/configure --prefix=$M_TARGET --host=x86_64-w64-mingw32
 make -j$MJOBS
-make install
-
-echo "installing wrappers"
-echo "======================="
-cd $M_SOURCE/llvm-mingw
-./install-wrappers.sh $M_TARGET --host=x86_64-w64-mingw32
-echo "... Done"
+make install-strip
 
 echo "building mingw-w64-headers"
 echo "======================="
@@ -163,9 +179,10 @@ $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
   --host=$MINGW_TRIPLE \
   --prefix=$M_TARGET/$MINGW_TRIPLE \
   --enable-idl \
+  --with-default-win32-winnt=0xA00 \
   --with-default-msvcrt=ucrt
 make -j$MJOBS
-make install
+make install-strip
 
 echo "building mingw-w64-crt"
 echo "======================="
@@ -183,12 +200,25 @@ $M_SOURCE/mingw-w64/mingw-w64-crt/configure \
   --disable-lib32 \
   --enable-cfguard \
   --disable-dependency-tracking
-make -j$MJOBS
-make install
+make -j$MJOBS GC=0
+make install-strip GC=0
 # Create empty dummy archives, to avoid failing when the compiler driver
 # adds -lssp -lssh_nonshared when linking.
 llvm-ar rcs $M_TARGET/lib/libssp.a
 llvm-ar rcs $M_TARGET/lib/libssp_nonshared.a
+
+echo "building winpthreads"
+echo "======================="
+cd $M_BUILD
+mkdir winpthreads-build
+cd winpthreads-build
+$M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
+  --host=$MINGW_TRIPLE \
+  --prefix=$M_TARGET/$MINGW_TRIPLE \
+  --disable-shared \
+  --enable-static
+make -j$MJOBS GC=0
+make install-strip GC=0
 
 echo "building llvm-compiler-rt-builtin"
 echo "======================="
@@ -213,10 +243,9 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B$M_BUILD/buil
   -DCMAKE_FIND_ROOT_PATH=$M_CROSS/$MINGW_TRIPLE \
   -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
   -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
-  -DSANITIZER_CXX_ABI=libc++ \
-  -DCMAKE_C_FLAGS_INIT="-mguard=cf" \
-  -DCMAKE_CXX_FLAGS_INIT="-mguard=cf"
+  -DSANITIZER_CXX_ABI=libc++
 cmake --build builtins-build -j$MJOBS
+cp builtins-build/lib/windows/libclang_rt.builtins-x86_64.a $M_TARGET/$MINGW_TRIPLE/lib
 cmake --install builtins-build
 
 echo "building llvm-libcxx"
@@ -232,8 +261,8 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/runtimes -B$M_BUILD/libcxx-build \
   -DCMAKE_SYSTEM_NAME=Windows \
   -DCMAKE_AR=$M_CROSS/bin/llvm-ar \
   -DCMAKE_RANLIB=$M_CROSS/bin/llvm-ranlib \
-  -DCMAKE_C_COMPILER_WORKS=TRUE \
-  -DCMAKE_CXX_COMPILER_WORKS=TRUE \
+  -DCMAKE_C_COMPILER_WORKS=1 \
+  -DCMAKE_CXX_COMPILER_WORKS=1 \
   -DLLVM_ENABLE_RUNTIMES="libunwind;libcxxabi;libcxx" \
   -DLLVM_PATH=$M_SOURCE/llvm-project/llvm \
   -DLIBUNWIND_USE_COMPILER_RT=TRUE \
@@ -247,27 +276,14 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/runtimes -B$M_BUILD/libcxx-build \
   -DLIBCXX_LIBDIR_SUFFIX="" \
   -DLIBCXX_INCLUDE_TESTS=FALSE \
   -DLIBCXX_ENABLE_ABI_LINKER_SCRIPT=FALSE \
+  -DLIBCXX_HAS_WIN32_THREAD_API=ON \
+  -DLIBCXXABI_HAS_WIN32_THREAD_API=ON \
   -DLIBCXXABI_USE_COMPILER_RT=ON \
   -DLIBCXXABI_USE_LLVM_UNWINDER=ON \
   -DLIBCXXABI_ENABLE_SHARED=OFF \
-  -DLIBCXXABI_LIBDIR_SUFFIX="" \
-  -DCMAKE_C_FLAGS_INIT="-mguard=cf" \
-  -DCMAKE_CXX_FLAGS_INIT="-mguard=cf"
+  -DLIBCXXABI_LIBDIR_SUFFIX=""
 cmake --build libcxx-build -j$MJOBS
 cmake --install libcxx-build
-
-echo "building winpthreads"
-echo "======================="
-cd $M_BUILD
-mkdir winpthreads-build
-cd winpthreads-build
-$M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
-  --host=$MINGW_TRIPLE \
-  --prefix=$M_TARGET/$MINGW_TRIPLE \
-  --disable-shared \
-  --enable-static
-make -j$MJOBS
-make install
 
 echo "building llvm-compiler-rt"
 echo "======================="
@@ -286,7 +302,6 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt -B$M_BUILD/compiler-rt-build
   -DCMAKE_C_COMPILER_TARGET=x86_64-w64-windows-gnu \
   -DCOMPILER_RT_DEFAULT_TARGET_ONLY=TRUE \
   -DCOMPILER_RT_USE_BUILTINS_LIBRARY=TRUE \
-  -DCOMPILER_RT_EXCLUDE_ATOMIC_BUILTIN=FALSE \
   -DCOMPILER_RT_BUILD_BUILTINS=FALSE \
   -DCOMPILER_RT_EXCLUDE_ATOMIC_BUILTIN=FALSE \
   -DLLVM_CONFIG_PATH="" \
@@ -294,45 +309,47 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt -B$M_BUILD/compiler-rt-build
   -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
   -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
   -DSANITIZER_CXX_ABI=libc++ \
-  -DCMAKE_C_FLAGS_INIT="-mguard=cf" \
-  -DCMAKE_CXX_FLAGS_INIT="-mguard=cf"
+  -DCMAKE_CXX_FLAGS='-std=c++11' \
+  -DCMAKE_EXE_LINKER_FLAGS_INIT='-lc++abi'
 cmake --build compiler-rt-build -j$MJOBS
 cmake --install compiler-rt-build
+
 mkdir -p $M_TARGET/$MINGW_TRIPLE/bin
 mv $M_TARGET/lib/clang/$CLANG_VER/lib/windows/*.dll $M_TARGET/$MINGW_TRIPLE/bin
 
-echo "building llvm-openmp"
-echo "======================="
-cd $M_BUILD
-mkdir openmp-build
-cd openmp-build
-curl -OL https://raw.githubusercontent.com/shinchiro/mpv-winbuild-cmake/master/toolchain/llvm/llvm-openmp-0001-support-static-lib.patch
-cd $M_SOURCE/llvm-project
-patch -p1 -i $M_BUILD/openmp-build/llvm-openmp-0001-support-static-lib.patch
-cd $M_BUILD
-cmake -G Ninja -H$M_SOURCE/llvm-project/openmp -B$M_BUILD/openmp-build \
-  -DCMAKE_TOOLCHAIN_FILE=$TOP_DIR/toolchain.cmake \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_INSTALL_PREFIX=$M_TARGET/$MINGW_TRIPLE \
-  -DCMAKE_C_COMPILER=$MINGW_TRIPLE-clang \
-  -DCMAKE_CXX_COMPILER=$MINGW_TRIPLE-clang++ \
-  -DCMAKE_RC_COMPILER=$MINGW_TRIPLE-windres \
-  -DCMAKE_ASM_MASM_COMPILER=llvm-ml \
-  -DCMAKE_SYSTEM_NAME=Windows \
-  -DCMAKE_AR=$M_CROSS/bin/llvm-ar \
-  -DCMAKE_RANLIB=$M_CROSS/bin/llvm-ranlib \
-  -DLIBOMP_ENABLE_SHARED=FALSE \
-  -DLIBOMP_ASMFLAGS=-m64 \
-  -DCMAKE_C_FLAGS_INIT="-mguard=cf" \
-  -DCMAKE_CXX_FLAGS_INIT="-mguard=cf"
-cmake --build openmp-build -j$MJOBS
-cmake --install openmp-build
-
 #Copy libclang_rt.builtins-x86_64.a to runtime dir
-#cp $M_TARGET/$MINGW_TRIPLE/lib/libclang_rt.builtins-x86_64.a $M_TARGET/lib/clang/$CLANG_VER/lib/windows
+cp $M_TARGET/$MINGW_TRIPLE/lib/libclang_rt.builtins-x86_64.a $M_TARGET/lib/clang/$CLANG_VER/lib/windows
+
 cp $M_TARGET/$MINGW_TRIPLE/bin/*.dll $M_TARGET/bin
 rm -rf $M_TARGET/include
 mv $M_TARGET/$MINGW_TRIPLE/include $M_TARGET
+
+#echo "building llvm-openmp"
+#echo "======================="
+#cd $M_BUILD
+#mkdir openmp-build
+#cd openmp-build
+#curl -OL https://raw.githubusercontent.com/shinchiro/mpv-winbuild-cmake/master/toolchain/llvm/llvm-openmp-0001-support-static-lib.patch
+#cd $M_SOURCE/llvm-project
+#patch -p1 -i $M_BUILD/openmp-build/llvm-openmp-0001-support-static-lib.patch
+#cd $M_BUILD
+#cmake -G Ninja -H$M_SOURCE/llvm-project/openmp -B$M_BUILD/openmp-build \
+#  -DCMAKE_TOOLCHAIN_FILE=$TOP_DIR/toolchain.cmake \
+#  -DCMAKE_BUILD_TYPE=Release \
+#  -DCMAKE_INSTALL_PREFIX=$M_TARGET/$MINGW_TRIPLE \
+#  -DCMAKE_C_COMPILER=$MINGW_TRIPLE-clang \
+#  -DCMAKE_CXX_COMPILER=$MINGW_TRIPLE-clang++ \
+#  -DCMAKE_RC_COMPILER=$MINGW_TRIPLE-windres \
+#  -DCMAKE_ASM_MASM_COMPILER=llvm-ml \
+#  -DCMAKE_SYSTEM_NAME=Windows \
+#  -DCMAKE_AR=$M_CROSS/bin/llvm-ar \
+#  -DCMAKE_RANLIB=$M_CROSS/bin/llvm-ranlib \
+#  -DLIBOMP_ENABLE_SHARED=FALSE \
+#  -DLIBOMP_ASMFLAGS=-m64 \
+#  -DCMAKE_C_FLAGS_INIT="-mguard=cf" \
+#  -DCMAKE_CXX_FLAGS_INIT="-mguard=cf"
+#cmake --build openmp-build -j$MJOBS
+#cmake --install openmp-build
 
 echo "building make"
 echo "======================="
