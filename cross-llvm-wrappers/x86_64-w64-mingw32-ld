@@ -1,0 +1,13 @@
+#!/bin/bash
+CROSS_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && cd .. && pwd)
+PROG=$CROSS_DIR/bin/ld.lld
+TARGET=x86_64-w64-mingw32
+FLAGS="-m i386pep"
+FLAGS="$FLAGS --pdb="
+FLAGS="$FLAGS -O3 -Xlink=-opt:lldlto=3 -Xlink=-opt:lldltocgo=3"
+
+if [ "$GC" != "0" ]; then
+    LLD_GC="--gc-sections -Xlink=-opt:safeicf"
+fi
+
+"$PROG" "$@" $FLAGS $LLD_GC $LLD_FLAGS
