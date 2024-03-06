@@ -4,28 +4,25 @@ PROG=$DIR/bin/clang++
 FLAGS="$FLAGS -target x86_64-w64-mingw32 -march=x86-64-v3 -mtune=generic"
 FLAGS="$FLAGS --driver-mode=g++ --sysroot $DIR/x86_64-w64-mingw32"
 FLAGS="$FLAGS -fuse-ld=lld --ld-path=x86_64-w64-mingw32-ld"
-FLAGS="$FLAGS -mguard=cf -O3"
-FLAGS="$FLAGS -gcodeview"
 FLAGS="$FLAGS -Wno-unused-command-line-argument"
-
-CPU_COUNT=$(grep -c processor /proc/cpuinfo)
-if [ "$LTO" != "0" ] && [ "$CLANG_PACKAGES_LTO" == "ON" ]; then
-    LTO_FLAGS="-flto=thin"
-    if [ "$LLD_LTO_ALL_THREADS" == "1" ] && [ "$LTO_JOB" != "1" ]; then
-        LTO_FLAGS="$LTO_FLAGS -flto-jobs=$CPU_COUNT"
-    fi
-fi
 
 if [ "$NO_CONFLTO" == "1" ]; then
     SKIP_OPT="-g0 -O0 -fno-lto -fno-data-sections -fno-function-sections"
 else
+    FLAGS="$FLAGS -gcodeview -mguard=cf -O3"
     if [ "$ENABLE_CCACHE" == "ON" ]; then
         CCACHE="ccache"
     fi
-fi
-
-if [ "$GC" != "0" ]; then
-    CLANG_GC="-fdata-sections -ffunction-sections"
+    if [ "$GC" != "0" ]; then
+        CLANG_GC="-fdata-sections -ffunction-sections"
+    fi
+    CPU_COUNT=$(grep -c processor /proc/cpuinfo)
+    if [ "$LTO" != "0" ] && [ "$CLANG_PACKAGES_LTO" == "ON" ]; then
+        LTO_FLAGS="-flto=thin"
+        if [ "$LLD_LTO_ALL_THREADS" == "1" ] && [ "$LTO_JOB" != "1" ]; then
+            LTO_FLAGS="$LTO_FLAGS -flto-jobs=$CPU_COUNT"
+        fi
+    fi
 fi
 
 $CCACHE "$PROG" $LTO_FLAGS "$@" $FLAGS $CLANG_GC $CLANG_FLAGS -lc++abi $SKIP_OPT

@@ -7,7 +7,6 @@ FLAGS="$FLAGS -rtlib=compiler-rt -unwindlib=libunwind -stdlib=libc++"
 FLAGS="$FLAGS --driver-mode=g++"
 FLAGS="$FLAGS --sysroot $DIR/x86_64-w64-mingw32"
 FLAGS="$FLAGS -fuse-ld=lld --ld-path=x86_64-w64-mingw32-ld"
-FLAGS="$FLAGS -gcodeview"
 FLAGS="$FLAGS -Wno-unused-command-line-argument"
 
 if [ "$GC" != "0" ]; then

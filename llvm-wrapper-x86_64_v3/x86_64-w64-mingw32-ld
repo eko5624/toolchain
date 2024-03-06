@@ -4,15 +4,19 @@ PROG=$DIR/bin/ld.lld
 TARGET=x86_64-w64-mingw32
 POLICY="cache_size_bytes=1g:prune_interval=1m"
 FLAGS="-m i386pep"
-FLAGS="$FLAGS --pdb= --thinlto-cache-dir=/github/home/thinlto -Xlink=-lldltocachepolicy:$POLICY"
+FLAGS="$FLAGS --thinlto-cache-dir=/github/home/thinlto --thinlto-cache-policy=$POLICY"
 FLAGS="$FLAGS -O3 -Xlink=-opt:lldlto=3 -Xlink=-opt:lldltocgo=3"
 
 if [ "$NO_CONFLTO" == "1" ]; then
-    SKIP_OPT="-O0 -Xlink=-opt:lldlto=0 -Xlink=-opt:lldltocgo=0 --no-gc-sections --no-guard-cf"
-fi
-
-if [ "$GC" != "0" ]; then
-    LLD_GC="--gc-sections -Xlink=-opt:safeicf"
+    SKIP_OPT="-O0 --lto-O0 --lto-CGO0 --no-gc-sections --no-guard-cf --build-id=none"
+else
+    FLAGS="$FLAGS -O3 --lto-O3 --lto-CGO3 -s"
+    if [ "$GC" != "0" ]; then
+        LLD_GC="--gc-sections --icf=safe"
+    fi
+    if [ "$PDB" == "1" ]; then
+        FLAGS="$FLAGS --pdb="
+    fi
 fi
 
 "$PROG" "$@" $FLAGS $LLD_GC $LLD_FLAGS $SKIP_OPT
