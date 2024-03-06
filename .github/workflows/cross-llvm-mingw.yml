@@ -10,41 +10,37 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: docker://ghcr.io/eko5624/archlinux:latest
-    steps:          
-      - uses: actions/checkout@main
-      - name: Loading llvm cache
-        uses: actions/cache/restore@main
-        with:
-          path: ${{ github.workspace }}/cross
-          key: llvm-mingw-${{ github.run_id }}
-          restore-keys: |
-            llvm-mingw-
+    steps:
+      - uses: actions/checkout@main          
+      - name: Setup cross-llvm
+        run: |
+          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/cross-llvm-latest-ucrt.7z
+          7z x cross*.7z
+          rm cross*.7z
             
       - name: Building toolchain
         run: |
-          if [[ ! "$(ls -A cross/bin)" ]]; then
-            chmod +x ./llvm-mingw.sh
-            ./llvm-mingw.sh
-          fi
+          chmod +x ./cross-llvm-mingw.sh
+          ./cross-llvm-mingw.sh
 
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV  
 
       - name: Packaging toolchain
         run: |
-          7z a llvm-mingw-${{ env.date }}-ucrt-x86_64.7z cross/*
+          7z a cross-llvm-mingw-${{ env.date }}-ucrt.7z cross/*
+          cp cross-llvm-mingw-${{ env.date }}-ucrt.7z cross-llvm-mingw-latest-ucrt.7z
 
-      - name: Release
-        continue-on-error: true
+      - name: Delete
         env:
           GH_TOKEN: ${{ github.token }} 
         run: |
+          chmod +x ./package-delete.sh
+          ./package-delete.sh cross-llvm-mingw-latest-ucrt.7z
+      - name: Release
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
           chmod +x ./package-release.sh
           ./package-release.sh
-
-      - name: Saving llvm cache
-        uses: actions/cache/save@main
-        if: always()
-        with:
-          path: ${{ github.workspace }}/cross
-          key: llvm-mingw-${{ github.run_id }}
