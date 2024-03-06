@@ -14,9 +14,9 @@ jobs:
       - uses: actions/checkout@main      
       - name: Setup cross-llvm-mingw
         run: |
-          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/llvm-mingw-20240225-ucrt-x86_64.7z
-          7z x llvm*.7z
-          rm llvm*.7z
+          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/cross-llvm-mingw-latest-ucrt-x86_64.7z
+          7z x cross*.7z
+          rm cross*.7z
       - name: Loading target-llvm cache
         uses: actions/cache/restore@main
         with:
