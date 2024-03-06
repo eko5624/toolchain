@@ -228,7 +228,6 @@ cmake --install compiler-rt-build
 mkdir -p $M_CROSS/$MINGW_TRIPLE/bin
 mv $(x86_64-w64-mingw32-clang --print-resource-dir)/lib/windows/*.dll $M_CROSS/$MINGW_TRIPLE/bin
 
-
 echo "fix cross-llvm-wrappers"
 echo "======================="
 sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $M_CROSS/bin/x86_64-w64-mingw32-as
