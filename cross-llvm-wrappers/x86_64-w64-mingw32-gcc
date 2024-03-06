@@ -1,10 +1,10 @@
 #!/bin/bash
-CROSS_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && cd .. && pwd)
-PROG=$CROSS_DIR/bin/clang
+DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && cd .. && pwd)
+PROG=$DIR/bin/clang
 FLAGS=""
 FLAGS="$FLAGS -target x86_64-w64-mingw32"
 FLAGS="$FLAGS -rtlib=compiler-rt -unwindlib=libunwind -stdlib=libc++"
-FLAGS="$FLAGS --sysroot $CROSS_DIR/x86_64-w64-mingw32"
+FLAGS="$FLAGS --sysroot $DIR/x86_64-w64-mingw32"
 FLAGS="$FLAGS -fuse-ld=lld --ld-path=x86_64-w64-mingw32-ld"
 FLAGS="$FLAGS -gcodeview"
 FLAGS="$FLAGS -Wno-unused-command-line-argument"
@@ -13,4 +13,4 @@ if [ "$GC" != "0" ]; then
     CLANG_GC="-fdata-sections -ffunction-sections"
 fi
 
-"$PROG" "$@" $FLAGS $CLANG_GC $CLANG_FLAGS
+"$PROG" $FLAGS "$@" $CLANG_GC $CLANG_FLAGS

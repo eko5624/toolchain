@@ -1,4 +1,4 @@
-name: Build llvm
+name: Build target-llvm
 defaults:
   run:
     shell: bash
@@ -11,20 +11,25 @@ jobs:
     container:
       image: docker://ghcr.io/eko5624/archlinux:latest
     steps:
-      - uses: actions/checkout@main
-      - name: Loading llvm cache
+      - uses: actions/checkout@main      
+      - name: Setup cross-llvm-mingw
+        run: |
+          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/llvm-mingw-20240225-ucrt-x86_64.7z
+          7z x llvm*.7z
+          rm llvm*.7z
+      - name: Loading target-llvm cache
         uses: actions/cache/restore@main
         with:
           path: ${{ github.workspace }}/cross
-          key: llvm-${{ github.run_id }}
+          key: target-llvm-${{ github.run_id }}
           restore-keys: |
-            llvm-
+            target-llvm-
             
       - name: Building toolchain
         run: |
-          if [[ ! "$(ls -A cross/bin)" ]]; then
-            chmod +x ./llvm.sh
-            ./llvm.sh
+          if [[ ! "$(ls -A target/bin)" ]]; then
+            chmod +x ./target-llvm.sh
+            ./target-llvm.sh
           fi
 
       - name: Get current timestamp
@@ -32,15 +37,15 @@ jobs:
 
       - name: Packaging toolchain
         run: |
-          7z a llvm-${{ env.date }}-ucrt.7z cross/*
-          cp llvm-${{ env.date }}-ucrt.7z llvm-latest-ucrt.7z
+          7z a target-llvm-${{ env.date }}-ucrt.7z target/*
+          cp target-llvm-${{ env.date }}-ucrt.7z target-llvm-latest-ucrt.7z
 
       - name: Delete
         env:
           GH_TOKEN: ${{ github.token }} 
         run: |
           chmod +x ./package-delete.sh
-          ./package-delete.sh llvm-latest-ucrt.7z
+          ./package-delete.sh target-llvm-latest-ucrt.7z
       - name: Release
         continue-on-error: true
         env:
@@ -49,9 +54,9 @@ jobs:
           chmod +x ./package-release.sh
           ./package-release.sh
 
-      - name: Saving llvm cache
+      - name: Saving target-llvm cache
         uses: actions/cache/save@main
         if: always()
         with:
           path: ${{ github.workspace }}/cross
-          key: llvm-${{ github.run_id }}
+          key: target-llvm-${{ github.run_id }}

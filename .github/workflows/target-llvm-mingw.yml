@@ -1,4 +1,4 @@
-name: Build target-llvm-mingw-ucrt-x86_64
+name: Build target-llvm-mingw
 defaults:
   run:
     shell: bash
@@ -14,26 +14,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@main
         
-      - name: Setup Cross Toolchain
+      - name: Setup cross-llvm-mingw and target-llvm
         run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-20240225-ucrt-x86_64.7z
-          7z x llvm-mingw*.7z
-          rm llvm-mingw*.7z
-          
-      - name: Loading target llvm cache
-        uses: actions/cache/restore@main
-        with:
-          path: ${{ github.workspace }}/target
-          key: target-llvm-mingw-${{ github.run_id }}
-          restore-keys: |
-            target-llvm-mingw-
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-mingw-latest-ucrt-x86_64.7z
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/target-llvm-latest-ucrt.7z
+          7z x cross*.7z
+          7z x target*.7z
+          rm *.7z
             
       - name: Building toolchain
         run: |
-          if [[ ! "$(ls -A target/bin)" ]]; then
-            chmod +x ./target-llvm-mingw.sh
-            ./target-llvm-mingw.sh
-          fi
+          chmod +x ./target-llvm-mingw.sh
+          ./target-llvm-mingw.sh
 
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
@@ -41,7 +33,14 @@ jobs:
       - name: Packaging toolchain
         run: |
           7z a -r -l target-llvm-mingw-${{ env.date }}-ucrt-x86_64.7z target/*
+          cp target-llvm-mingw-${{ env.date }}-ucrt-x86_64.7z target-llvm-mingw-latest-ucrt-x86_64.7z
 
+      - name: Delete
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-delete.sh
+          ./package-delete.sh target-llvm-mingw-latest-ucrt-x86_64.7z
       - name: Release
         continue-on-error: true
         env:
@@ -49,10 +48,3 @@ jobs:
         run: |
           chmod +x ./package-release.sh
           ./package-release.sh
-
-      - name: Saving llvm cache
-        uses: actions/cache/save@main
-        if: always()
-        with:
-          path: ${{ github.workspace }}/target
-          key: target-llvm-mingw-${{ github.run_id }}

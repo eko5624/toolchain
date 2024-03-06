@@ -1,6 +1,6 @@
 #!/bin/bash
-CROSS_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && cd .. && pwd)
-PROG=$CROSS_DIR/bin/ld.lld
+DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && cd .. && pwd)
+PROG=$DIR/bin/ld.lld
 TARGET=x86_64-w64-mingw32
 POLICY="cache_size_bytes=1g:prune_interval=1m"
 FLAGS="-m i386pep"

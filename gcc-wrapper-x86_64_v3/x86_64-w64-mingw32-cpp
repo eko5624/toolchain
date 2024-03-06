@@ -1,6 +1,6 @@
 #!/bin/bash
-CROSS_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && cd .. && pwd)
-PROG=$CROSS_DIR/bin/cross-cpp
+DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && cd .. && pwd)
+PROG=$DIR/bin/cross-cpp
 FLAGS="$FLAGS -O3"
 
 if [ "$NO_CONFLTO" == "1" ]; then

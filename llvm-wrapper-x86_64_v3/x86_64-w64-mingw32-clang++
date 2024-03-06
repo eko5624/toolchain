@@ -1,8 +1,8 @@
 #!/bin/bash
-CROSS_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && cd .. && pwd)
-PROG=$CROSS_DIR/bin/clang++
+DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && cd .. && pwd)
+PROG=$DIR/bin/clang++
 FLAGS="$FLAGS -target x86_64-w64-mingw32 -march=x86-64-v3 -mtune=generic"
-FLAGS="$FLAGS --driver-mode=g++ --sysroot $CROSS_DIR/x86_64-w64-mingw32"
+FLAGS="$FLAGS --driver-mode=g++ --sysroot $DIR/x86_64-w64-mingw32"
 FLAGS="$FLAGS -fuse-ld=lld --ld-path=x86_64-w64-mingw32-ld"
 FLAGS="$FLAGS -mguard=cf -O3"
 FLAGS="$FLAGS -gcodeview"

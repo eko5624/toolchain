@@ -1,6 +1,6 @@
 #!/bin/bash
-CROSS_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && cd .. && pwd)
-PROG=$CROSS_DIR/bin/cross-g++
+DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && cd .. && pwd)
+PROG=$DIR/bin/cross-g++
 
 if [ "$NO_CONFLTO" == "1" ]; then
     SKIP_OPT="-g0 -O0 -fno-lto -fno-data-sections -fno-function-sections"
