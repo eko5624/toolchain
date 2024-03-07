@@ -98,10 +98,16 @@ echo "stripping llvm"
 echo "======================="
 cd $M_TARGET/bin
 
+# Convert ld.lld from a symlink to a regular file, so we can remove
+# the one it points to. On MSYS, and if packaging built toolchains
+# in a zip file, symlinks are converted into copies.
+cp ld.lld.exe tmp && mv tmp ld.lld.exe
+
 # lld-link isn't used normally, but can be useful for debugging/testing,
 # and is kept in unix setups. Removing it when packaging for windows,
 # to conserve space.
-rm -f lld.exe lld-link.exe ld.lld.exe ld64.lld.exe wasm-ld.exe
+rm -f lld.exe lld-link.exe ld64.lld.exe wasm-ld.exe
+
 # Remove superfluous frontends; these aren't really used.
 rm -f clang-cpp* clang++*
 cd ..
