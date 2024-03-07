@@ -101,7 +101,7 @@ cd $M_TARGET/bin
 # lld-link isn't used normally, but can be useful for debugging/testing,
 # and is kept in unix setups. Removing it when packaging for windows,
 # to conserve space.
-rm -f lld.exe lld-link.exe
+rm -f lld.exe lld-link.exe ld.lld.exe ld64.lld.exe
 # Remove superfluous frontends; these aren't really used.
 rm -f clang-cpp* clang++*
 cd ..
