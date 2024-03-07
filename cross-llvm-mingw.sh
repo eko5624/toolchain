@@ -31,10 +31,16 @@ git clone https://github.com/llvm/llvm-project.git --branch llvmorg-18.1.0
 #git clone https://github.com/lldb-tools/lldb-mi.git
 
 #llvm-mingw
-#git clone https://github.com/mstorsjo/llvm-mingw.git --branch master
+git clone https://github.com/mstorsjo/llvm-mingw.git --branch master
 
 #mingw-w64
 git clone https://github.com/mingw-w64/mingw-w64.git --branch master
+
+echo "stripping llvm"
+echo "======================="
+cd $M_SOURCE/llvm-mingw
+./strip-llvm.sh $M_CROSS
+echo "... Done"
 
 echo "installing wrappers"
 echo "======================="
