@@ -30,7 +30,10 @@ echo "======================="
 cd $M_SOURCE
 
 #llvm
-git clone https://github.com/llvm/llvm-project.git --branch llvmorg-18.1.0
+git clone https://github.com/llvm/llvm-project.git --branch llvmorg-18.1.1
+cd llvm-project
+git sparse-checkout set --no-cone '/*' '!*/test'
+cd ..
 
 #llvm-mingw
 #git clone https://github.com/mstorsjo/llvm-mingw.git --branch master
