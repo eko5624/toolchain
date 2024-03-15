@@ -163,7 +163,7 @@ $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
   --host=$MINGW_TRIPLE \
   --prefix=$M_TARGET/$MINGW_TRIPLE \
   --enable-idl \
-  --with-default-win32-winnt=0x601 \ # Windows 7
+  --with-default-win32-winnt=0x601 \
   --with-default-msvcrt=ucrt
 make -j$MJOBS
 make install-strip
