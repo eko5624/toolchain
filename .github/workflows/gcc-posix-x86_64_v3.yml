@@ -1,4 +1,4 @@
-name: Build gcc-posix-x86_64_v3
+name: Build cross-gcc-posix-x86_64_v3
 defaults:
   run:
     shell: bash
@@ -16,15 +16,15 @@ jobs:
         uses: actions/cache/restore@main
         with:
           path: ${{ github.workspace }}/cross
-          key: gcc-posix-x86_64_v3-ucrt-${{ github.run_id }}
+          key: cross-gcc-posix-x86_64_v3-ucrt-${{ github.run_id }}
           restore-keys: |
-            gcc-posix-x86_64_v3-ucrt-
+            cross-gcc-posix-x86_64_v3-ucrt-
             
       - name: Building toolchain
         run: |
           if [[ ! "$(ls -A cross/bin)" ]]; then
-            chmod +x ./gcc-posix-x86_64_v3.sh
-            ./gcc-posix-x86_64_v3.sh
+            chmod +x ./cross-gcc-posix-x86_64_v3.sh
+            ./cross-gcc-posix-x86_64_v3.sh
           fi
 
       - name: Get gcc version
@@ -33,15 +33,15 @@ jobs:
 
       - name: Packaging toolchain
         run: |
-          7z a gcc-posix-${{ env.ver }}-ucrt-x86_64_v3.7z cross/*
-          cp gcc-posix-${{ env.ver }}-ucrt-x86_64_v3.7z gcc-posix-latest-ucrt-x86_64_v3.7z
+          7z a cross-gcc-posix-${{ env.ver }}-ucrt-x86_64_v3.7z cross/*
+          cp cross-gcc-posix-${{ env.ver }}-ucrt-x86_64_v3.7z cross-gcc-posix-latest-ucrt-x86_64_v3.7z
 
       - name: Delete
         env:
           GH_TOKEN: ${{ github.token }} 
         run: |
           chmod +x ./package-delete.sh
-          ./package-delete.sh gcc-posix-latest-ucrt-x86_64_v3.7z
+          ./package-delete.sh cross-gcc-posix-latest-ucrt-x86_64_v3.7z
       - name: Release
         continue-on-error: true
         env:
@@ -55,5 +55,5 @@ jobs:
         if: always()
         with:
           path: ${{ github.workspace }}/cross
-          key: gcc-posix-x86_64_v3-ucrt-${{ github.run_id }}
+          key: cross-gcc-posix-x86_64_v3-ucrt-${{ github.run_id }}
           
