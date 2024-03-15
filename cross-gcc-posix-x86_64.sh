@@ -70,6 +70,7 @@ $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
   --prefix=$M_CROSS/$MINGW_TRIPLE \
   --enable-sdk=all \
   --enable-idl \
+  --with-default-win32-winnt=0x601 \ # Windows 7
   --with-default-msvcrt=ucrt
 make -j$MJOBS
 make install

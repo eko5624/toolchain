@@ -246,6 +246,7 @@ $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
   --host=$MINGW_TRIPLE \
   --prefix=$M_TARGET \
   --enable-sdk=all \
+  --with-default-win32-winnt=0x601 \ # Windows 7
   --with-default-msvcrt=ucrt \
   --enable-idl \
   --without-widl
