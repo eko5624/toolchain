@@ -16,6 +16,7 @@ jobs:
           sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
           sudo pacman -Syu --noconfirm
           sudo pacman -S --noconfirm --needed mingw-w64-gcc
+      - uses: actions/checkout@main
       - name: Loading gcc cache
         uses: actions/cache/restore@main
         with:
