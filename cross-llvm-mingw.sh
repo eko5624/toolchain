@@ -233,9 +233,7 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt -B$M_BUILD/compiler-rt-build
   -DCMAKE_FIND_ROOT_PATH=$M_CROSS/$MINGW_TRIPLE \
   -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
   -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
-  -DSANITIZER_CXX_ABI=libc++ \
-  -DCMAKE_C_FLAGS_INIT="-mguard=cf" \
-  -DCMAKE_CXX_FLAGS_INIT="-mguard=cf"
+  -DSANITIZER_CXX_ABI=libc++
 cmake --build compiler-rt-build -j$MJOBS
 cmake --install compiler-rt-build
 mkdir -p $M_CROSS/$MINGW_TRIPLE/bin
