@@ -14,7 +14,7 @@ jobs:
       - uses: actions/checkout@main          
       - name: Setup llvm
         run: |
-          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/llvm-latest-ucrt.7z
+          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/llvm-latest.7z
           7z x llvm*.7z
           rm llvm*.7z
             

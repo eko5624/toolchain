@@ -32,15 +32,15 @@ jobs:
 
       - name: Packaging toolchain
         run: |
-          7z a llvm-${{ env.date }}-ucrt.7z cross/*
-          cp llvm-${{ env.date }}-ucrt.7z llvm-latest-ucrt.7z
+          7z a llvm-${{ env.date }}.7z cross/*
+          cp llvm-${{ env.date }}.7z llvm-latest.7z
 
       - name: Delete
         env:
           GH_TOKEN: ${{ github.token }} 
         run: |
           chmod +x ./package-delete.sh
-          ./package-delete.sh llvm-latest-ucrt.7z
+          ./package-delete.sh llvm-latest.7z
       - name: Release
         continue-on-error: true
         env:

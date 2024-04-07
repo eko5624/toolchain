@@ -17,7 +17,7 @@ jobs:
       - name: Setup cross-llvm-mingw and target-llvm
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-mingw-latest-ucrt-x86_64.7z
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/target-llvm-latest-ucrt.7z
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/target-llvm-latest.7z
           7z x cross*.7z
           7z x target*.7z
           rm *.7z
