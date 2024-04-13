@@ -60,8 +60,8 @@ jobs:
       - name: Build toolchain
         run: |
           set -x
-          chmod +x ./llvm-clang-x86_64.sh
-          ./llvm-clang-x86_64.sh $PGO
+          chmod +x ./cross-llvm-clang-x86_64.sh
+          ./cross-llvm-clang-x86_64.sh $PGO
 
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV  
