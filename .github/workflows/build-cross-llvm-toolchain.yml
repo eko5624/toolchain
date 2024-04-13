@@ -1,57 +1,142 @@
-name: Build llvm
+name: Build llvm toolchain
 defaults:
   run:
     shell: bash
 on:
   workflow_dispatch:
+    inputs:
+      pgo:
+        description: "Build LLVM with PGO"
+        required: false
+        default: "false"
+        type: boolean
+      llvm_lto:
+        description: "Build LLVM with ThinLTO"
+        required: false
+        default: "false"
+        type: boolean
+      llvm_ccache:
+        description: "Build LLVM with CCACHE"
+        required: false
+        default: "false"
+        type: boolean
+      package_lto:
+        description: "Build packages with ThinLTO"
+        required: false
+        default: "false"
+        type: boolean        
+      package_ccache:
+        description: "Build packages with CCACHE"
+        required: false
+        default: "false"
+        type: boolean
+        
   
 jobs:
-  build:
+  build_llvm:
     runs-on: ubuntu-latest
     container:
       image: docker://ghcr.io/eko5624/archlinux:latest
     steps:
-      - uses: actions/checkout@main
-      - name: Loading llvm cache
+      - name: Init variable
+        run: |
+          if [ ${{ inputs.pgo }} == 'true' ]; then
+            echo "PGO=--enable-pgo" >> $GITHUB_ENV
+            echo "IR=-ir" >> $GITHUB_ENV
+          else
+            unset PGO IR
+          fi  
+          if [ ${{ inputs.llvm_lto }} == 'true' ]; then
+            echo "LLVM_LTO=--enable-llvm-lto" >> $GITHUB_ENV
+          else
+            unset LLVM_LTO
+          fi  
+          if [ ${{ inputs.llvm_ccache }} == 'true' ]; then
+            echo "LLVM_CCACHE=--enable-llvm-ccache" >> $GITHUB_ENV
+          else
+            unset LLVM_CCACHE
+          fi        
+      
+      - name: Checkout
+        uses: actions/checkout@main
+
+      - name: Load llvm${{ env.IR }} cache
         uses: actions/cache/restore@main
+        id: llvm-cache
         with:
           path: ${{ github.workspace }}/cross
-          key: llvm-${{ github.run_id }}
+          key: llvm${{ env.IR }}-cache-${{ github.run_id }}
           restore-keys: |
-            llvm-
-            
-      - name: Building toolchain
-        run: |
-          if [[ ! "$(ls -A cross/bin)" ]]; then
-            chmod +x ./llvm.sh
-            ./llvm.sh
-          fi
+            llvm${{ env.IR }}-cache-
 
-      - name: Get current timestamp
-        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV  
-
-      - name: Packaging toolchain
+      - name: Setup llvm${{ env.IR }}
+        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_lto == 'true' }} || ${{ steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_ccache == 'true' }}
         run: |
-          7z a llvm-${{ env.date }}.7z cross/*
-          cp llvm-${{ env.date }}.7z llvm-latest.7z
-
-      - name: Delete
-        env:
-          GH_TOKEN: ${{ github.token }} 
+            curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm$IR-latest.7z || true
+            7z x llvm$IR-latest.7z || true 
+            rm llvm$IR-latest.7z || true
+            rm -rf cross/bin || true
+            rm -rf cross/lib || true
+          
+      - name: Build llvm${{ env.IR }}
+        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
         run: |
-          chmod +x ./package-delete.sh
-          ./package-delete.sh llvm-latest.7z
-      - name: Release
-        continue-on-error: true
-        env:
-          GH_TOKEN: ${{ github.token }} 
-        run: |
-          chmod +x ./package-release.sh
-          ./package-release.sh
+          set -x
+          chmod +x ./llvm.sh
+          ./llvm.sh $PGO $LLVM_LTO $LLVM_CCACHE
 
-      - name: Saving llvm cache
+      - name: Save llvm${{ env.IR }} cache
         uses: actions/cache/save@main
         if: always()
         with:
           path: ${{ github.workspace }}/cross
-          key: llvm-${{ github.run_id }}
+          key: llvm${{ env.IR }}-cache-${{ github.run_id }}
+
+      - name: Get current timestamp
+        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
+        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
+
+      - name: Package llvm
+        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
+        run: 7z a llvm$IR-latest.7z cross/*
+
+      - name: Delete
+        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-delete.sh
+          ./package-delete.sh llvm$IR-latest.7z
+      - name: Release
+        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          chmod +x ./package-release.sh
+          ./package-release.sh
+
+  build_llvm-clang-x86_64:
+    needs: build_llvm
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Run llvm-clang-x86_64.yml
+        run: |
+          curl -u eko5624:$GH_TOKEN \
+            -X POST -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/eko5624/toolchain/actions/workflows/llvm-clang-x86_64.yml/dispatches \
+            -d '{"ref":"main","inputs":{"pgo":"${{ inputs.pgo }}","llvm_lto":"${{ inputs.llvm_lto }}","llvm_ccache":"${{ inputs.llvm_ccache }}","package_lto":"${{ inputs.package_lto }}","package_ccache":"${{ inputs.package_ccache }}"}}'
+
+  build_llvm-clang-x86_64_v3:
+    needs: build_llvm
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Run llvm-clang-x86_64_v3.yml
+        run: |
+          curl -u eko5624:$GH_TOKEN \
+            -X POST -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/eko5624/toolchain/actions/workflows/llvm-clang-x86_64_v3.yml/dispatches \
+            -d '{"ref":"main","inputs":{"pgo":"${{ inputs.pgo }}","llvm_lto":"${{ inputs.llvm_lto }}","llvm_ccache":"${{ inputs.llvm_ccache }}","package_lto":"${{ inputs.package_lto }}","package_ccache":"${{ inputs.package_ccache }}"}}'
