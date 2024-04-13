@@ -103,7 +103,7 @@ jobs:
             -d '{"ref":"main"}'
           fi  
 
-  build_llvm-clang-pgo:
+  build_llvm-pgo:
     needs: build_llvm-clang-x86_64
     runs-on: ubuntu-latest
     env:
