@@ -2,6 +2,7 @@
 set -e
 
 TOP_DIR=$(pwd)
+source $TOP_DIR/ver.sh
 
 # worflows for clang compilation:
 # llvm -> mingw's header+crt -> compiler-rt builtins -> libcxx -> openmp
@@ -21,7 +22,7 @@ mkdir -p $M_BUILD
 echo "getting source"
 echo "======================="
 cd $M_SOURCE
-git clone https://github.com/llvm/llvm-project.git --branch llvmorg-18.1.1
+git clone https://github.com/llvm/llvm-project.git --branch llvmorg-$VER_LLVM
 cd llvm-project
 git sparse-checkout set --no-cone '/*' '!*/test'
 cd ..

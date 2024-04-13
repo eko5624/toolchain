@@ -68,8 +68,8 @@ echo "======================="
 cd $M_SOURCE
 
 #llvm
-#git clone https://github.com/llvm/llvm-project.git --branch llvmorg-$VER_LLVM
-git clone https://github.com/llvm/llvm-project.git --branch release/18.x
+git clone https://github.com/llvm/llvm-project.git --branch llvmorg-$VER_LLVM
+#git clone https://github.com/llvm/llvm-project.git --branch release/18.x
 cd llvm-project
 git sparse-checkout set --no-cone '/*' '!*/test'
 cd ..
