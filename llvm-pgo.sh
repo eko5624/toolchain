@@ -15,17 +15,15 @@ export M_ROOT=$(pwd)
 export M_SOURCE=$M_ROOT/source
 export M_BUILD=$M_ROOT/build
 export M_CROSS=$M_ROOT/cross
+export LLVM_ROOT=$M_ROOT/llvm_root
+export ORIG_PATH="$PATH"
 
 export LLVM_PROFILE_FILE="/dev/null"
-export LLVM_ENABLE_LTO="OFF" #STRING "OFF, ON, Thin and Full"
-export LLVM_ENABLE_PGO="OFF" #STRING "OFF, GEN, CSGEN, USE"
 export LLVM_CCACHE_BUILD="OFF"
+export LLVM_ENABLE_LTO="OFF" #STRING "OFF, ON, Thin and Full"
 
 while [ $# -gt 0 ]; do
     case "$1" in
-    --enable-pgo)
-        export LLVM_ENABLE_PGO="GEN" #STRING "OFF, GEN, CSGEN, USE"
-        ;;
     --enable-llvm-lto)
         export LLVM_ENABLE_LTO="Thin" #STRING "OFF, ON, Thin and Full"
         ;;
@@ -44,21 +42,11 @@ if [ "$LLVM_ENABLE_LTO" == "Thin" ]; then
     export llvm_lto="-flto=thin -fwhole-program-vtables -fsplit-lto-unit"
 fi
 
-if [ "$LLVM_ENABLE_PGO" == "GEN" ] || [ "$LLVM_ENABLE_PGO" == "CSGEN" ]; then
-    export LLVM_PROFILE_DATA_DIR="$M_CROSS/profiles" #PATH "Default profile generation directory"
-fi
-
-if [ "$LLVM_ENABLE_PGO" == "GEN" ]; then
-    export llvm_pgo="-fprofile-generate=${LLVM_PROFILE_DATA_DIR} -fprofile-update=atomic"
-elif [ "$LLVM_ENABLE_PGO" == "CSGEN" ]; then
-    export llvm_pgo="-fcs-profile-generate=${LLVM_PROFILE_DATA_DIR} -fprofile-update=atomic -fprofile-use=${LLVM_PROFDATA_FILE}"
-fi
-
 if [ "$LLVM_CCACHE_BUILD" == "ON" ]; then
     export LLVM_CCACHE_MAXSIZE="500M"
-    export LLVM_CCACHE_DIR=$M_CROSS/llvm-ccache
+    export LLVM_CCACHE_DIR=$LLVM_ROOT/llvm-ccache
     export llvm_ccache="-DLLVM_CCACHE_BUILD=ON -DLLVM_CCACHE_DIR=${LLVM_CCACHE_DIR} -DLLVM_CCACHE_MAXSIZE=${LLVM_CCACHE_MAXSIZE}"
-fi    
+fi
 
 mkdir -p $M_SOURCE
 mkdir -p $M_BUILD
@@ -74,12 +62,17 @@ cd llvm-project
 git sparse-checkout set --no-cone '/*' '!*/test'
 cd ..
 
-echo "building llvm with IR profile instrumentation"
-echo "======================="  
+echo "building llvm with pgo"
+echo "======================="
+export LLVM_ENABLE_PGO="USE"
+export LLVM_PROFDATA_FILE=$M_ROOT/llvm.profdata
+if [ "$LLVM_ENABLE_PGO" == "USE" ]; then
+    export llvm_pgo="-fprofile-use=${LLVM_PROFDATA_FILE}"
+fi    
 cd $M_BUILD
 mkdir llvm-build
-cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
-  -DCMAKE_INSTALL_PREFIX=$M_CROSS \
+PATH=$ORIG_PATH cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
+  -DCMAKE_INSTALL_PREFIX=$M_ROOT/llvm_root \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_C_COMPILER=clang \
   -DCMAKE_CXX_COMPILER=clang++ \
@@ -214,7 +207,7 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
   -DLLVM_TOOL_VERIFY_USELISTORDER_BUILD=OFF \
   -DLLVM_TOOL_VFABI_DEMANGLE_FUZZER_BUILD=OFF \
   -DLLVM_TOOL_XCODE_TOOLCHAIN_BUILD=OFF \
-  -DLLVM_THINLTO_CACHE_PATH="$M_CROSS/llvm-thinlto" \
+  -DLLVM_THINLTO_CACHE_PATH="$LLVM_ROOT/llvm-thinlto" \
   -DCMAKE_C_FLAGS="-g0 -ftls-model=local-exec ${llvm_lto} ${llvm_pgo}" \
   -DCMAKE_CXX_FLAGS="-g0 -ftls-model=local-exec ${llvm_lto} ${llvm_pgo}" \
   -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=lld -Xlinker -s -Xlinker --icf=all -Xlinker --thinlto-cache-policy=cache_size_bytes=1g:prune_interval=1m" \

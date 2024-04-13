@@ -23,6 +23,9 @@ else
             LTO_FLAGS="$LTO_FLAGS -flto-jobs=$CPU_COUNT"
         fi
     fi
+    if [ "$LLVM_ENABLE_PGO" == "GEN" ] || [ "$LLVM_ENABLE_PGO" == "CSGEN" ]; then
+        export LLVM_PROFILE_FILE="$LLVM_PROFILE_DATA_DIR/clang-%m.profraw" #enable profraw output only when NO_CONFLTO!=1
+    fi    
 fi
 
 $CCACHE "$PROG" $LTO_FLAGS "$@" $FLAGS $CLANG_GC $CLANG_FLAGS -lc++abi $SKIP_OPT

@@ -14,7 +14,7 @@ jobs:
       - uses: actions/checkout@main          
       - name: Setup cross-llvm
         run: |
-          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/cross-llvm-latest-ucrt.7z
+          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/cross-llvm-latest.7z
           7z x cross*.7z
           rm cross*.7z
             

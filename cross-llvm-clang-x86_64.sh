@@ -2,6 +2,7 @@
 set -e
 
 TOP_DIR=$(pwd)
+source $TOP_DIR/ver.sh
 
 # worflows for clang compilation:
 # llvm -> mingw's header+crt -> compiler-rt builtins -> libcxx -> openmp
@@ -21,6 +22,25 @@ export RUSTUP_LOCATION=$M_ROOT/rust
 export PATH="$M_CROSS/bin:$RUSTUP_LOCATION/.cargo/bin:$PATH"
 export RUSTUP_HOME="$RUSTUP_LOCATION/.rustup"
 export CARGO_HOME="$RUSTUP_LOCATION/.cargo"
+export LLVM_ENABLE_PGO="OFF" #STRING "OFF, GEN, CSGEN, USE"
+export LLVM_PROFILE_FILE="/dev/null"
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+    --enable-pgo)
+        export LLVM_ENABLE_PGO="GEN" #STRING "OFF, GEN, CSGEN, USE"
+        ;;
+    *)
+        echo Unrecognized parameter $1
+        exit 1
+        ;;
+    esac
+    shift
+done
+
+if [ "$LLVM_ENABLE_PGO" == "GEN" ] || [ "$LLVM_ENABLE_PGO" == "CSGEN" ]; then
+    export LLVM_PROFILE_DATA_DIR="$M_CROSS/profiles" #PATH "Default profile generation directory"
+fi
 
 mkdir -p $M_SOURCE
 mkdir -p $M_BUILD
@@ -30,7 +50,8 @@ echo "======================="
 cd $M_SOURCE
 
 #llvm
-git clone https://github.com/llvm/llvm-project.git --branch llvmorg-18.1.1
+#git clone https://github.com/llvm/llvm-project.git --branch llvmorg-$VER_LLVM
+git clone https://github.com/llvm/llvm-project.git --branch release/18.x
 cd llvm-project
 git sparse-checkout set --no-cone '/*' '!*/test'
 cd ..
@@ -235,6 +256,9 @@ mv $(x86_64-w64-mingw32-clang --print-resource-dir)/lib/windows/*.dll $M_CROSS/$
 #Copy libclang_rt.builtins-x86_64.a to runtime dir
 cp $M_CROSS/$MINGW_TRIPLE/lib/libclang_rt.builtins-x86_64.a $(x86_64-w64-mingw32-gcc -print-runtime-dir)
 
+#Remove profraw
+rm -rf $M_CROSS/profiles/* || true
+
 #echo "building llvm-openmp"
 #echo "======================="
 #cd $M_BUILD
@@ -258,22 +282,3 @@ cp $M_CROSS/$MINGW_TRIPLE/lib/libclang_rt.builtins-x86_64.a $(x86_64-w64-mingw32
 #  -DLIBOMP_ASMFLAGS=-m64
 #ninja -j$MJOBS -C openmp-build
 #ninja install -C openmp-build
-
-echo "building rustup"
-echo "======================="
-NO_CONFLTO=1 curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --target x86_64-pc-windows-gnu --no-modify-path --profile minimal
-rustup update
-cargo install cargo-c --profile=release-strip --features=vendored-openssl
-cat <<EOF >$CARGO_HOME/config
-[net]
-git-fetch-with-cli = true
-
-[target.x86_64-pc-windows-gnu]
-linker = "x86_64-w64-mingw32-gcc"
-ar = "x86_64-w64-mingw32-ar"
-rustflags = ["-C", "target-cpu=x86-64"]
-
-[profile.release]
-panic = "abort"
-strip = true
-EOF

@@ -4,6 +4,32 @@ defaults:
     shell: bash
 on:
   workflow_dispatch:
+    inputs:
+      pgo:
+        description: "Build toolchain with IR Profile Instrumentation"
+        required: false
+        default: "false"
+        type: boolean
+      llvm_lto:
+        description: "Build LLVM with ThinLTO"
+        required: false
+        default: "false"
+        type: boolean
+      llvm_ccache:
+        description: "Build LLVM with CCACHE"
+        required: false
+        default: "false"
+        type: boolean
+      package_lto:
+        description: "Build packages with ThinLTO"
+        required: false
+        default: "false"
+        type: boolean        
+      package_ccache:
+        description: "Build packages with CCACHE"
+        required: false
+        default: "false"
+        type: boolean
   
 jobs:
   build:
@@ -11,32 +37,47 @@ jobs:
     container:
       image: docker://ghcr.io/eko5624/archlinux:latest
     steps:
-      - uses: actions/checkout@main          
-      - name: Setup llvm
+      - name: Init variable
         run: |
-          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/llvm-latest.7z
+          if [ ${{ inputs.pgo }} == 'true' ]; then
+            echo "PGO=--enable-pgo" >> $GITHUB_ENV
+            echo "IR=-ir" >> $GITHUB_ENV
+          else  
+            unset PGO IR
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@main
+
+      - name: Setup llvm${{ env.IR }}
+        run: |
+          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/llvm$IR-latest.7z
           7z x llvm*.7z
           rm llvm*.7z
+          rm -rf cross/llvm-thinlto || true
+          rm -rf cross/llvm-ccache || true
             
-      - name: Building toolchain
+      - name: Build toolchain
         run: |
+          set -x
           chmod +x ./llvm-clang-x86_64_v3.sh
-          ./llvm-clang-x86_64_v3.sh
+          ./llvm-clang-x86_64_v3.sh $PGO
 
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV  
 
-      - name: Packaging toolchain
+      - name: Package toolchain
         run: |
-          7z a llvm-clang-${{ env.date }}-ucrt-x86_64_v3.7z cross/*
-          cp llvm-clang-${{ env.date }}-ucrt-x86_64_v3.7z llvm-clang-latest-ucrt-x86_64_v3.7z
-
+          7z a llvm-clang$IR-latest-ucrt-x86_64_v3.7z cross/*
+          if [ ${{ inputs.pgo }} != 'true' ]; then
+            cp llvm-clang$IR-latest-ucrt-x86_64_v3.7z llvm-clang$IR-${{ env.date }}-ucrt-x86_64_v3.7z
+          fi
       - name: Delete
         env:
           GH_TOKEN: ${{ github.token }} 
         run: |
           chmod +x ./package-delete.sh
-          ./package-delete.sh llvm-clang-latest-ucrt-x86_64_v3.7z
+          ./package-delete.sh llvm-clang$IR-latest-ucrt-x86_64_v3.7z
       - name: Release
         continue-on-error: true
         env:
@@ -44,4 +85,3 @@ jobs:
         run: |
           chmod +x ./package-release.sh
           ./package-release.sh
-

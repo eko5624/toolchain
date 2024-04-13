@@ -4,7 +4,7 @@ PROG=$DIR/bin/ld.lld
 TARGET=x86_64-w64-mingw32
 POLICY="cache_size_bytes=1g:prune_interval=1m"
 FLAGS="-m i386pep"
-FLAGS="$FLAGS --thinlto-cache-dir=/github/home/thinlto --thinlto-cache-policy=$POLICY"
+FLAGS="$FLAGS --thinlto-cache-dir=$PACKAGES_LTO_DIR --thinlto-cache-policy=$POLICY"
 FLAGS="$FLAGS -O3 -Xlink=-opt:lldlto=3 -Xlink=-opt:lldltocgo=3"
 
 if [ "$NO_CONFLTO" == "1" ]; then
@@ -16,6 +16,10 @@ else
     fi
     if [ "$PDB" == "1" ]; then
         FLAGS="$FLAGS --pdb="
+    fi
+    if [ "LLVM_ENABLE_PGO" == "GEN" ] || [ "LLVM_ENABLE_PGO" == "CSGEN" ]; then
+        export LLVM_PROFILE_FILE="$LLVM_PROFILE_DATA_DIR/lld-%m.profraw" #enable profraw output only when NO_CONFLTO!=1
+        export LLD_IN_TEST=1 #https://github.com/llvm/llvm-project/issues/52861
     fi
 fi
 

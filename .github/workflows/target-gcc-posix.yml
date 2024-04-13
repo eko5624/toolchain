@@ -16,9 +16,9 @@ jobs:
         
       - name: Setup Toolchain
         run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/gcc-posix-latest-ucrt-x86_64.7z
-          7z x gcc-posix*.7z
-          rm gcc-posix*.7z
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-gcc-posix-latest-ucrt-x86_64.7z
+          7z x cross-gcc-posix*.7z
+          rm cross-gcc-posix*.7z
             
       - name: Loading target gcc cache
         uses: actions/cache/restore@main

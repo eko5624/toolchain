@@ -1,4 +1,4 @@
-name: Build target-llvm
+name: Build target-llvm-mingw toolchain
 defaults:
   run:
     shell: bash
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   
 jobs:
-  build:
+  build_llvm:
     runs-on: ubuntu-latest
     container:
       image: docker://ghcr.io/eko5624/archlinux:latest
@@ -60,3 +60,16 @@ jobs:
         with:
           path: ${{ github.workspace }}/cross
           key: target-llvm-${{ github.run_id }}
+
+  build_llvm-mingw:
+    needs: build_llvm
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Run target-llvm-mingw.yml
+        run: |
+          curl -u eko5624:$GH_TOKEN \
+            -X POST -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/eko5624/toolchain/actions/workflows/target-llvm-mingw.yml/dispatches \
+            -d '{"ref":"main"}'

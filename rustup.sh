@@ -8,7 +8,7 @@ MJOBS=$(grep -c processor /proc/cpuinfo)
 export M_ROOT=$(pwd)
 export RUSTUP_LOCATION=$M_ROOT/rust
 
-export PATH="$RUSTUP_LOCATION/.cargo/bin:$PATH"
+export PATH="$M_CROSS/bin:$RUSTUP_LOCATION/.cargo/bin:$PATH"
 export RUSTUP_HOME="$RUSTUP_LOCATION/.rustup"
 export CARGO_HOME="$RUSTUP_LOCATION/.cargo"
 

@@ -2,6 +2,7 @@
 set -e
 
 TOP_DIR=$(pwd)
+source $TOP_DIR/ver.sh
 
 # worflows for clang compilation:
 # llvm -> mingw's header+crt -> compiler-rt builtins -> libcxx -> openmp
@@ -17,6 +18,25 @@ export M_SOURCE=$M_ROOT/source
 export M_BUILD=$M_ROOT/build
 export M_CROSS=$M_ROOT/cross
 export PATH="$M_CROSS/bin:$PATH"
+export LLVM_ENABLE_PGO="OFF" #STRING "OFF, GEN, CSGEN, USE"
+export LLVM_PROFILE_FILE="/dev/null"
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+    --enable-pgo)
+        export LLVM_ENABLE_PGO="GEN" #STRING "OFF, GEN, CSGEN, USE"
+        ;;
+    *)
+        echo Unrecognized parameter $1
+        exit 1
+        ;;
+    esac
+    shift
+done
+
+if [ "$LLVM_ENABLE_PGO" == "GEN" ] || [ "$LLVM_ENABLE_PGO" == "CSGEN" ]; then
+    export LLVM_PROFILE_DATA_DIR="$M_CROSS/profiles" #PATH "Default profile generation directory"
+fi
 
 mkdir -p $M_SOURCE
 mkdir -p $M_BUILD
@@ -26,7 +46,8 @@ echo "======================="
 cd $M_SOURCE
 
 #llvm
-git clone https://github.com/llvm/llvm-project.git --branch llvmorg-18.1.1
+#git clone https://github.com/llvm/llvm-project.git --branch llvmorg-$VER_LLVM
+git clone https://github.com/llvm/llvm-project.git --branch release/18.x
 cd llvm-project
 git sparse-checkout set --no-cone '/*' '!*/test'
 cd ..
@@ -230,6 +251,9 @@ mv $(x86_64-w64-mingw32-clang --print-resource-dir)/lib/windows/*.dll $M_CROSS/$
 
 #Copy libclang_rt.builtins-x86_64.a to runtime dir
 cp $M_CROSS/$MINGW_TRIPLE/lib/libclang_rt.builtins-x86_64.a $(x86_64-w64-mingw32-gcc -print-runtime-dir)
+
+#Remove profraw
+rm -rf $M_CROSS/profiles/* || true
 
 #echo "building llvm-openmp"
 #echo "======================="

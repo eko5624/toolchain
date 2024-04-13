@@ -9,22 +9,17 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: archlinux/archlinux:base-devel
-    steps:    
-      - name: Install Dependencies
+      image: docker://ghcr.io/eko5624/archlinux:latest
+    steps:          
+      - name: Checkout
+        uses: actions/checkout@main
+
+      - name: Setup llvm-clang-x86_64 toolchain
         run: |
-          sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
-          sudo pacman -Syu --noconfirm
-          sudo pacman -S --noconfirm --needed git gyp cvs mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf zip unzip p7zip xz mingw-w64-gcc python-pip curl jq wget
-          pip3 install -U --break-system-packages setuptools rst2pdf mako jsonschema meson
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --global pull.rebase true
-          git config --global rebase.autoStash true
-          git config --global fetch.prune true
-          git config --global --add safe.directory $PWD
-          
-      - uses: actions/checkout@main            
+          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/llvm-clang-latest-ucrt-x86_64.7z
+          7z x llvm*.7z
+          rm llvm*.7z
+
       - name: Building rustup toolchain
         run: |
           chmod +x ./rustup.sh
