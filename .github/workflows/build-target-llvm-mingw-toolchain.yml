@@ -36,9 +36,7 @@ jobs:
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV  
 
       - name: Packaging toolchain
-        run: |
-          7z a target-llvm-${{ env.date }}.7z target/*
-          cp target-llvm-${{ env.date }}.7z target-llvm-latest.7z
+        run: 7z a target-llvm-latest.7z target/*
 
       - name: Delete
         env:
