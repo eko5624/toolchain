@@ -74,7 +74,78 @@ cd llvm-project
 git sparse-checkout set --no-cone '/*' '!*/test'
 cd ..
 
-echo "building llvm with IR profile instrumentation"
+echo "building zlib-ng"
+echo "======================="
+git clone https://github.com/zlib-ng/zlib-ng.git
+cd $M_BUILD
+mkdir zlib-build
+cmake -G Ninja -H$M_SOURCE/zlib-ng -B$M_BUILD/zlib-build \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DBUILD_SHARED_LIBS=OFF \
+  -DCMAKE_INSTALL_PREFIX=$M_BUILD/opt \
+  -DCMAKE_C_COMPILER=clang \
+  -DCMAKE_CXX_COMPILER=clang++ \
+  -DSKIP_INSTALL_LIBRARIES=OFF \
+  -DZLIB_COMPAT=ON \
+  -DZLIB_ENABLE_TESTS=OFF \
+  -DZLIBNG_ENABLE_TESTS=OFF \
+  -DFNO_LTO_AVAILABLE=OFF \
+  -DCMAKE_C_FLAGS="-march=native -pipe -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections ${llvm_lto}" \
+  -DCMAKE_CXX_FLAGS="-march=native -pipe -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections ${llvm_lto}" \
+  -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=lld -Xlinker -s -Xlinker --icf=all -Xlinker --gc-sections"
+cmake --build zlib-build -j$MJOBS
+cmake --install zlib-build
+
+echo "building zstd"
+echo "======================="
+cd $M_SOURCE
+git clone https://github.com/facebook/zstd.git
+cd $M_BUILD
+mkdir zstd-build
+cmake -G Ninja -H$M_SOURCE/zstd/build/cmake -B$M_BUILD/zstd-build \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DBUILD_SHARED_LIBS=OFF \
+  -DCMAKE_INSTALL_PREFIX=$M_BUILD/opt \
+  -DCMAKE_C_COMPILER=clang \
+  -DCMAKE_CXX_COMPILER=clang++ \
+  -DZSTD_BUILD_CONTRIB=OFF \
+  -DZSTD_BUILD_TESTS=OFF \
+  -DZSTD_LEGACY_SUPPORT=OFF \
+  -DZSTD_BUILD_PROGRAMS=OFF \
+  -DZSTD_BUILD_SHARED=OFF \
+  -DZSTD_BUILD_STATIC=ON \
+  -DZSTD_MULTITHREAD_SUPPORT=ON \
+  -DCMAKE_C_FLAGS="-march=native -pipe -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections ${llvm_lto}" \
+  -DCMAKE_CXX_FLAGS="-march=native -pipe -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections ${llvm_lto}" \
+  -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=lld -Xlinker -s -Xlinker --icf=all -Xlinker --gc-sections"
+cmake --build zstd-build -j$MJOBS
+cmake --install zstd-build
+
+echo "building mimalloc"
+echo "======================="
+cd $M_SOURCE
+git clone https://github.com/microsoft/mimalloc.git
+cd $M_BUILD
+mkdir mimalloc-build
+cmake -G Ninja -H$M_SOURCE/mimalloc -B$M_BUILD/mimalloc-build \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DBUILD_SHARED_LIBS=OFF \
+  -DCMAKE_INSTALL_PREFIX=$M_BUILD/opt \
+  -DCMAKE_C_COMPILER=clang \
+  -DCMAKE_CXX_COMPILER=clang++ \
+  -DMI_USE_CXX=OFF \
+  -DMI_OVERRIDE=ON \
+  -DMI_INSTALL_TOPLEVEL=ON \
+  -DMI_BUILD_TESTS=OFF \
+  -DMI_BUILD_SHARED=OFF \
+  -DMI_BUILD_STATIC=OFF \
+  -DCMAKE_C_FLAGS="-march=native -pipe -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections -DMI_DEBUG=0 ${llvm_lto}" \
+  -DCMAKE_CXX_FLAGS="-march=native -pipe -ffp-contract=fast -ftls-model=local-exec -flto=thin -fsplit-lto-unit -fwhole-program-vtables -fdata-sections -ffunction-sections -DMI_DEBUG=0 ${llvm_lto}" \
+  -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=lld -Xlinker -s -Xlinker --icf=all -Xlinker --gc-sections"
+cmake --build mimalloc-build -j$MJOBS
+cmake --install mimalloc-build
+
+echo "building llvm"
 echo "======================="  
 cd $M_BUILD
 mkdir llvm-build
@@ -214,10 +285,15 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
   -DLLVM_TOOL_VERIFY_USELISTORDER_BUILD=OFF \
   -DLLVM_TOOL_VFABI_DEMANGLE_FUZZER_BUILD=OFF \
   -DLLVM_TOOL_XCODE_TOOLCHAIN_BUILD=OFF \
+  -DLLVM_ENABLE_ZLIB=ON \
+  -DZLIB_LIBRARY=$M_BUILD/opt/lib/libz.a \
+  -DZLIB_INCLUDE_DIR=$M_BUILD/opt/include \
+  -DLLVM_ENABLE_ZSTD=ON \
+  -DLLVM_USE_STATIC_ZSTD=ON \
   -DLLVM_THINLTO_CACHE_PATH="$M_CROSS/llvm-thinlto" \
   -DCMAKE_C_FLAGS="-g0 -ftls-model=local-exec ${llvm_lto} ${llvm_pgo}" \
   -DCMAKE_CXX_FLAGS="-g0 -ftls-model=local-exec ${llvm_lto} ${llvm_pgo}" \
-  -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=lld -Xlinker -s -Xlinker --icf=all -Xlinker --thinlto-cache-policy=cache_size_bytes=1g:prune_interval=1m" \
+  -DCMAKE_EXE_LINKER_FLAGS="$M_BUILD/opt/lib/mimalloc.o -fuse-ld=lld -Xlinker -s -Xlinker --icf=all -Xlinker --thinlto-cache-policy=cache_size_bytes=1g:prune_interval=1m" \
   -DLLVM_TOOLCHAIN_TOOLS="llvm-driver;llvm-ar;llvm-ranlib;llvm-objdump;llvm-rc;llvm-cvtres;llvm-nm;llvm-strings;llvm-readobj;llvm-dlltool;llvm-objcopy;llvm-strip;llvm-cov;llvm-profdata;llvm-addr2line;llvm-symbolizer;llvm-windres;llvm-ml;llvm-readelf;llvm-size"
 cmake --build llvm-build -j$MJOBS
 cmake --install llvm-build
