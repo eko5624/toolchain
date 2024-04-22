@@ -32,27 +32,9 @@ while [ $# -gt 0 ]; do
         ;;
     --build-x86_64)
         export LLvm_WRAPPER_DIR="llvm-wrapper-x86_64"
+        ;;
     --build-x86_64_v3)
         export LLvm_WRAPPER_DIR="llvm-wrapper-x86_64_v3"
-    *)
-        echo Unrecognized parameter $1
-        exit 1
-        ;;
-    esac
-    shift
-done
-
-
-while [ $# -gt 0 ]; do
-    case "$1" in
-    --enable-pgo)
-        export LLVM_ENABLE_PGO="GEN" #STRING "OFF, GEN, CSGEN, USE"
-        ;;
-    --enable-llvm-lto)
-        export LLVM_ENABLE_LTO="Thin" #STRING "OFF, ON, Thin and Full"
-        ;;
-    --enable-llvm-ccache)
-        export LLVM_CCACHE_BUILD="ON" #STRING "OFF, GEN, CSGEN, USE"
         ;;
     *)
         echo Unrecognized parameter $1

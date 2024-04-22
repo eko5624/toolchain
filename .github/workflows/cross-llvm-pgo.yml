@@ -5,8 +5,13 @@ defaults:
 on:
   workflow_dispatch:
     inputs:
-      llvm_lto:
+      llvm_thin_lto:
         description: "Build LLVM with ThinLTO"
+        required: false
+        default: "false"
+        type: boolean
+      llvm_full_lto:
+        description: "Build LLVM with FullLTO"
         required: false
         default: "false"
         type: boolean
@@ -34,8 +39,10 @@ jobs:
     steps:
       - name: Init variable
         run: |
-          if [ ${{ inputs.llvm_lto }} == 'true' ]; then
-            echo "LLVM_LTO=--enable-llvm-lto" >> $GITHUB_ENV
+          if [ ${{ inputs.llvm_thin_lto }} == 'true' ]; then
+            echo "LLVM_LTO=--enable-llvm-thin_lto" >> $GITHUB_ENV
+          elif [ ${{ inputs.llvm_full_lto }} == 'true' ]; then
+            echo "LLVM_LTO=--enable-llvm-full_lto" >> $GITHUB_ENV  
           else
             unset LLVM_LTO
           fi  
@@ -92,8 +99,8 @@ jobs:
       - name: Build llvm with pgo
         if: ${{ steps.llvm-pgo.outputs.cache-matched-key == '' }}
         run: |
-          chmod +x ./llvm-pgo.sh
-          ./llvm-pgo.sh $LLVM_LTO $LLVM_CCACHE
+          chmod +x ./llvm.sh
+          ./llvm.sh --enable-pgo_use $LLVM_LTO $LLVM_CCACHE
 
       - name: Save llvm-pgo cache
         uses: actions/cache/save@main
@@ -112,7 +119,7 @@ jobs:
       - name: Release
         continue-on-error: true
         env:
-          GH_TOKEN: ${{ github.token }} 
+          GH_TOKEN: ${{ github.token }}
         run: |
           chmod +x ./package-release.sh
           ./package-release.sh

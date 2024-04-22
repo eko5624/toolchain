@@ -10,8 +10,13 @@ on:
         required: false
         default: "false"
         type: boolean
-      llvm_lto:
+      llvm_thin_lto:
         description: "Build LLVM with ThinLTO"
+        required: false
+        default: "false"
+        type: boolean
+      llvm_full_lto:
+        description: "Build LLVM with FullLTO"
         required: false
         default: "false"
         type: boolean
@@ -46,8 +51,10 @@ jobs:
           else
             unset PGO IR
           fi  
-          if [ ${{ inputs.llvm_lto }} == 'true' ]; then
-            echo "LLVM_LTO=--enable-llvm-lto" >> $GITHUB_ENV
+          if [ ${{ inputs.llvm_thin_lto }} == 'true' ]; then
+            echo "LLVM_LTO=--enable-llvm-thin_lto" >> $GITHUB_ENV
+          elif [ ${{ inputs.llvm_full_lto }} == 'true' ]; then
+            echo "LLVM_LTO=--enable-llvm-full_lto" >> $GITHUB_ENV  
           else
             unset LLVM_LTO
           fi  

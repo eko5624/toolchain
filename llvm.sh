@@ -20,14 +20,21 @@ export LLVM_PROFILE_FILE="/dev/null"
 export LLVM_ENABLE_LTO="OFF" #STRING "OFF, ON, Thin and Full"
 export LLVM_ENABLE_PGO="OFF" #STRING "OFF, GEN, CSGEN, USE"
 export LLVM_CCACHE_BUILD="OFF"
+export PREFIX=$M_CROSS
 
 while [ $# -gt 0 ]; do
     case "$1" in
     --enable-pgo)
         export LLVM_ENABLE_PGO="GEN" #STRING "OFF, GEN, CSGEN, USE"
         ;;
-    --enable-llvm-lto)
+    --enable-pgo_use)
+        export LLVM_ENABLE_PGO="USE" #STRING "OFF, GEN, CSGEN, USE"
+        ;;
+    --enable-llvm-thin_lto)
         export LLVM_ENABLE_LTO="Thin" #STRING "OFF, ON, Thin and Full"
+        ;;
+    --enable-llvm-full_lto)
+        export LLVM_ENABLE_LTO="Full" #STRING "OFF, ON, Thin and Full"
         ;;
     --enable-llvm-ccache)
         export LLVM_CCACHE_BUILD="ON" #STRING "OFF, GEN, CSGEN, USE"
@@ -42,16 +49,24 @@ done
 
 if [ "$LLVM_ENABLE_LTO" == "Thin" ]; then
     export llvm_lto="-flto=thin -fwhole-program-vtables -fsplit-lto-unit"
+elif [ "$LLVM_ENABLE_LTO" == "Full" ]; then
+    export llvm_lto="-flto=full -fwhole-program-vtables -fsplit-lto-unit"
 fi
 
 if [ "$LLVM_ENABLE_PGO" == "GEN" ] || [ "$LLVM_ENABLE_PGO" == "CSGEN" ]; then
     export LLVM_PROFILE_DATA_DIR="$M_CROSS/profiles" #PATH "Default profile generation directory"
+fi
+if [ "$LLVM_ENABLE_PGO" == "USE" ] || [ "$LLVM_ENABLE_PGO" == "CSGEN" ]; then
+    export LLVM_PROFDATA_FILE=$M_ROOT/llvm.profdata
+    export PREFIX=$M_ROOT/llvm_root
 fi
 
 if [ "$LLVM_ENABLE_PGO" == "GEN" ]; then
     export llvm_pgo="-fprofile-generate=${LLVM_PROFILE_DATA_DIR} -fprofile-update=atomic"
 elif [ "$LLVM_ENABLE_PGO" == "CSGEN" ]; then
     export llvm_pgo="-fcs-profile-generate=${LLVM_PROFILE_DATA_DIR} -fprofile-update=atomic -fprofile-use=${LLVM_PROFDATA_FILE}"
+elif [ "$LLVM_ENABLE_PGO" == "USE" ]; then
+    export llvm_pgo="-fprofile-use=${LLVM_PROFDATA_FILE}"
 fi
 
 if [ "$LLVM_CCACHE_BUILD" == "ON" ]; then
@@ -150,7 +165,7 @@ echo "======================="
 cd $M_BUILD
 mkdir llvm-build
 cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
-  -DCMAKE_INSTALL_PREFIX=$M_CROSS \
+  -DCMAKE_INSTALL_PREFIX=$PREFIX \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_C_COMPILER=clang \
   -DCMAKE_CXX_COMPILER=clang++ \
