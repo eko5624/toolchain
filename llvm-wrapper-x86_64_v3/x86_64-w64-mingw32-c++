@@ -1,7 +1,7 @@
 #!/bin/bash
 DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && cd .. && pwd)
 PROG=$DIR/bin/clang++
-FLAGS="$FLAGS -target x86_64-w64-mingw32 -march=x86-64-v3 -mtune=generic"
+FLAGS="$FLAGS -target x86_64-pc-windows-gnu -march=x86-64-v3 -mtune=generic"
 FLAGS="$FLAGS --driver-mode=g++ -pthread --sysroot $DIR/x86_64-w64-mingw32"
 FLAGS="$FLAGS -fuse-ld=lld --ld-path=x86_64-w64-mingw32-ld"
 FLAGS="$FLAGS -Wno-unused-command-line-argument"

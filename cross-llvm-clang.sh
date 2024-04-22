@@ -17,7 +17,11 @@ export M_ROOT=$(pwd)
 export M_SOURCE=$M_ROOT/source
 export M_BUILD=$M_ROOT/build
 export M_CROSS=$M_ROOT/cross
-export PATH="$M_CROSS/bin:$PATH"
+export RUSTUP_LOCATION=$M_ROOT/rust
+
+export PATH="$M_CROSS/bin:$RUSTUP_LOCATION/.cargo/bin:$PATH"
+export RUSTUP_HOME="$RUSTUP_LOCATION/.rustup"
+export CARGO_HOME="$RUSTUP_LOCATION/.cargo"
 export LLVM_ENABLE_PGO="OFF" #STRING "OFF, GEN, CSGEN, USE"
 export LLVM_PROFILE_FILE="/dev/null"
 
@@ -25,6 +29,30 @@ while [ $# -gt 0 ]; do
     case "$1" in
     --enable-pgo)
         export LLVM_ENABLE_PGO="GEN" #STRING "OFF, GEN, CSGEN, USE"
+        ;;
+    --build-x86_64)
+        export LLvm_WRAPPER_DIR="llvm-wrapper-x86_64"
+    --build-x86_64_v3)
+        export LLvm_WRAPPER_DIR="llvm-wrapper-x86_64_v3"
+    *)
+        echo Unrecognized parameter $1
+        exit 1
+        ;;
+    esac
+    shift
+done
+
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+    --enable-pgo)
+        export LLVM_ENABLE_PGO="GEN" #STRING "OFF, GEN, CSGEN, USE"
+        ;;
+    --enable-llvm-lto)
+        export LLVM_ENABLE_LTO="Thin" #STRING "OFF, ON, Thin and Full"
+        ;;
+    --enable-llvm-ccache)
+        export LLVM_CCACHE_BUILD="ON" #STRING "OFF, GEN, CSGEN, USE"
         ;;
     *)
         echo Unrecognized parameter $1
@@ -55,7 +83,7 @@ cd ..
 #mingw-w64
 git clone https://github.com/mingw-w64/mingw-w64.git --branch master
 
-echo "installing wrappers for x86_64_v3"
+echo "installing llvm-wrappers"
 echo "======================="
 cd $M_CROSS/bin
 ln -s llvm-ar $MINGW_TRIPLE-ar
@@ -73,13 +101,13 @@ ln -s llvm-rc $MINGW_TRIPLE-windres
 ln -s llvm-addr2line $MINGW_TRIPLE-addr2line
 ln -s $(which pkgconf) $MINGW_TRIPLE-pkg-config
 ln -s $(which pkgconf) $MINGW_TRIPLE-pkgconf
-cp $TOP_DIR/llvm-wrapper-x86_64_v3/x86_64-w64-mingw32-as ./
-cp $TOP_DIR/llvm-wrapper-x86_64_v3/x86_64-w64-mingw32-clang ./
-cp $TOP_DIR/llvm-wrapper-x86_64_v3/x86_64-w64-mingw32-clang++ ./
-cp $TOP_DIR/llvm-wrapper-x86_64_v3/x86_64-w64-mingw32-ld ./
-cp $TOP_DIR/llvm-wrapper-x86_64_v3/x86_64-w64-mingw32-gcc ./
-cp $TOP_DIR/llvm-wrapper-x86_64_v3/x86_64-w64-mingw32-g++ ./
-cp $TOP_DIR/llvm-wrapper-x86_64_v3/x86_64-w64-mingw32-c++ ./
+cp $TOP_DIR/$LLvm_WRAPPER_DIR/x86_64-w64-mingw32-as ./
+cp $TOP_DIR/$LLvm_WRAPPER_DIR/x86_64-w64-mingw32-clang ./
+cp $TOP_DIR/$LLvm_WRAPPER_DIR/x86_64-w64-mingw32-clang++ ./
+cp $TOP_DIR/$LLvm_WRAPPER_DIR/x86_64-w64-mingw32-ld ./
+cp $TOP_DIR/$LLvm_WRAPPER_DIR/x86_64-w64-mingw32-gcc ./
+cp $TOP_DIR/$LLvm_WRAPPER_DIR/x86_64-w64-mingw32-g++ ./
+cp $TOP_DIR/$LLvm_WRAPPER_DIR/x86_64-w64-mingw32-c++ ./
 
 chmod 755 x86_64-w64-mingw32-as
 chmod 755 x86_64-w64-mingw32-clang
@@ -163,7 +191,8 @@ NO_CONFLTO=1 cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B
   -DCMAKE_RANLIB=$M_CROSS/bin/llvm-ranlib \
   -DCMAKE_C_COMPILER_WORKS=1 \
   -DCMAKE_CXX_COMPILER_WORKS=1 \
-  -DCMAKE_C_COMPILER_TARGET=x86_64-w64-windows-gnu \
+  -DCMAKE_C_COMPILER_TARGET=x86_64-pc-windows-gnu \
+  -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON \
   -DCOMPILER_RT_DEFAULT_TARGET_ONLY=TRUE \
   -DCOMPILER_RT_USE_BUILTINS_LIBRARY=TRUE \
   -DCOMPILER_RT_BUILD_BUILTINS=TRUE \
@@ -175,7 +204,7 @@ NO_CONFLTO=1 cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B
   -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
   -DSANITIZER_CXX_ABI=libc++
 LTO=0 ninja -j$MJOBS -C builtins-build
-cp builtins-build/lib/windows/libclang_rt.builtins-x86_64.a $M_CROSS/$MINGW_TRIPLE/lib
+cp builtins-build/lib/x86_64-pc-windows-gnu/libclang* $M_CROSS/$MINGW_TRIPLE/lib
 LTO=0 ninja install -C builtins-build
 
 echo "building llvm-libcxx"
@@ -192,7 +221,7 @@ NO_CONFLTO=1 cmake -G Ninja -H$M_SOURCE/llvm-project/runtimes -B$M_BUILD/libcxx-
   -DCMAKE_RANLIB=$M_CROSS/bin/llvm-ranlib \
   -DCMAKE_C_COMPILER_WORKS=1 \
   -DCMAKE_CXX_COMPILER_WORKS=1 \
-  -DCMAKE_C_COMPILER_TARGET=x86_64-w64-windows-gnu \
+  -DCMAKE_C_COMPILER_TARGET=x86_64-pc-windows-gnu \
   -DLLVM_ENABLE_RUNTIMES="libunwind;libcxxabi;libcxx" \
   -DLLVM_PATH=$M_SOURCE/llvm-project/llvm \
   -DLIBUNWIND_USE_COMPILER_RT=TRUE \
@@ -232,7 +261,8 @@ NO_CONFLTO=1 cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt -B$M_BUILD/comp
   -DCMAKE_RANLIB=$M_CROSS/bin/llvm-ranlib \
   -DCMAKE_C_COMPILER_WORKS=1 \
   -DCMAKE_CXX_COMPILER_WORKS=1 \
-  -DCMAKE_C_COMPILER_TARGET=x86_64-w64-windows-gnu \
+  -DCMAKE_C_COMPILER_TARGET=x86_64-pc-windows-gnu \
+  -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON \
   -DCOMPILER_RT_DEFAULT_TARGET_ONLY=TRUE \
   -DCOMPILER_RT_USE_BUILTINS_LIBRARY=TRUE \
   -DCOMPILER_RT_BUILD_BUILTINS=FALSE \

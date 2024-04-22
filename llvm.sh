@@ -154,6 +154,7 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_C_COMPILER=clang \
   -DCMAKE_CXX_COMPILER=clang++ \
+  -DLLVM_DEFAULT_TARGET_TRIPLE=x86_64-pc-windows-gnu \
   ${llvm_ccache} \
   -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
   -DLLVM_ENABLE_ASSERTIONS=OFF \
