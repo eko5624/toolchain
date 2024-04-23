@@ -15,6 +15,13 @@ export M_ROOT=$(pwd)
 export M_SOURCE=$M_ROOT/source
 export M_BUILD=$M_ROOT/build
 export M_CROSS=$M_ROOT/cross
+export M_INSTALL=$M_ROOT/install
+
+export PKG_CONFIG_LIBDIR="$M_INSTALL/lib/pkgconfig"
+export PKG_CONFIG="pkgconf --static"
+export CFLAGS="-I$M_INSTALL/include"
+export CPPFLAGS="-I$M_INSTALL/include"
+export LDFLAGS="-L$M_INSTALL/lib"
 
 export LLVM_PROFILE_FILE="/dev/null"
 export LLVM_ENABLE_LTO="OFF" #STRING "OFF, ON, Thin and Full"
@@ -83,10 +90,10 @@ echo "======================="
 cd $M_SOURCE
 
 #llvm
-git clone https://github.com/llvm/llvm-project.git --branch llvmorg-$VER_LLVM
-#git clone https://github.com/llvm/llvm-project.git --branch release/18.x
+#git clone https://github.com/llvm/llvm-project.git --branch llvmorg-$VER_LLVM
+git clone https://github.com/llvm/llvm-project.git --branch release/18.x
 cd llvm-project
-git sparse-checkout set --no-cone '/*' '!*/test'
+git sparse-checkout set --no-cone '/*' '!*/test' '!/lldb' '!/mlir' '!/clang-tools-extra' '!/polly' '!/libc' '!/flang'
 cd ..
 
 echo "building zlib-ng"
@@ -97,7 +104,7 @@ mkdir zlib-build
 cmake -G Ninja -H$M_SOURCE/zlib-ng -B$M_BUILD/zlib-build \
   -DCMAKE_BUILD_TYPE=Release \
   -DBUILD_SHARED_LIBS=OFF \
-  -DCMAKE_INSTALL_PREFIX=$M_BUILD/opt \
+  -DCMAKE_INSTALL_PREFIX=$M_INSTALL \
   -DCMAKE_C_COMPILER=clang \
   -DCMAKE_CXX_COMPILER=clang++ \
   -DSKIP_INSTALL_LIBRARIES=OFF \
@@ -120,7 +127,7 @@ mkdir zstd-build
 cmake -G Ninja -H$M_SOURCE/zstd/build/cmake -B$M_BUILD/zstd-build \
   -DCMAKE_BUILD_TYPE=Release \
   -DBUILD_SHARED_LIBS=OFF \
-  -DCMAKE_INSTALL_PREFIX=$M_BUILD/opt \
+  -DCMAKE_INSTALL_PREFIX=$M_INSTALL \
   -DCMAKE_C_COMPILER=clang \
   -DCMAKE_CXX_COMPILER=clang++ \
   -DZSTD_BUILD_CONTRIB=OFF \
@@ -139,13 +146,13 @@ cmake --install zstd-build
 echo "building mimalloc"
 echo "======================="
 cd $M_SOURCE
-git clone https://github.com/microsoft/mimalloc.git
+git clone https://github.com/microsoft/mimalloc.git --branch dev-slice
 cd $M_BUILD
 mkdir mimalloc-build
 cmake -G Ninja -H$M_SOURCE/mimalloc -B$M_BUILD/mimalloc-build \
   -DCMAKE_BUILD_TYPE=Release \
   -DBUILD_SHARED_LIBS=OFF \
-  -DCMAKE_INSTALL_PREFIX=$M_BUILD/opt \
+  -DCMAKE_INSTALL_PREFIX=$M_INSTALL \
   -DCMAKE_C_COMPILER=clang \
   -DCMAKE_CXX_COMPILER=clang++ \
   -DMI_USE_CXX=OFF \
@@ -302,14 +309,14 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
   -DLLVM_TOOL_VFABI_DEMANGLE_FUZZER_BUILD=OFF \
   -DLLVM_TOOL_XCODE_TOOLCHAIN_BUILD=OFF \
   -DLLVM_ENABLE_ZLIB=ON \
-  -DZLIB_LIBRARY=$M_BUILD/opt/lib/libz.a \
-  -DZLIB_INCLUDE_DIR=$M_BUILD/opt/include \
+  -DZLIB_LIBRARY=$M_INSTALL/lib/libz.a \
+  -DZLIB_INCLUDE_DIR=$M_INSTALL/include \
   -DLLVM_ENABLE_ZSTD=ON \
   -DLLVM_USE_STATIC_ZSTD=ON \
   -DLLVM_THINLTO_CACHE_PATH="$M_CROSS/llvm-thinlto" \
   -DCMAKE_C_FLAGS="-g0 -ftls-model=local-exec ${llvm_lto} ${llvm_pgo}" \
   -DCMAKE_CXX_FLAGS="-g0 -ftls-model=local-exec ${llvm_lto} ${llvm_pgo}" \
-  -DCMAKE_EXE_LINKER_FLAGS="$M_BUILD/opt/lib/mimalloc.o -fuse-ld=lld -Xlinker -s -Xlinker --icf=all -Xlinker --thinlto-cache-policy=cache_size_bytes=1g:prune_interval=1m" \
+  -DCMAKE_EXE_LINKER_FLAGS="$M_INSTALL/lib/mimalloc.o -fuse-ld=lld -Xlinker -s -Xlinker --icf=all -Xlinker -zcommon-page-size=2097152 -Xlinker -zmax-page-size=2097152 -Xlinker -zseparate-loadable-segments -Xlinker --thinlto-cache-policy=cache_size_bytes=1g:prune_interval=1m" \
   -DLLVM_TOOLCHAIN_TOOLS="llvm-driver;llvm-ar;llvm-ranlib;llvm-objdump;llvm-rc;llvm-cvtres;llvm-nm;llvm-strings;llvm-readobj;llvm-dlltool;llvm-objcopy;llvm-strip;llvm-cov;llvm-profdata;llvm-addr2line;llvm-symbolizer;llvm-windres;llvm-ml;llvm-readelf;llvm-size"
 cmake --build llvm-build -j$MJOBS
 cmake --install llvm-build
