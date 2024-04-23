@@ -313,6 +313,8 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
   -DZLIB_INCLUDE_DIR=$M_INSTALL/include \
   -DLLVM_ENABLE_ZSTD=ON \
   -DLLVM_USE_STATIC_ZSTD=ON \
+  -Dzstd_LIBRARY=$M_INSTALL/lib/libzstd.a \
+  -Dzstd_INCLUDE_DIR=$M_INSTALL/include \
   -DLLVM_THINLTO_CACHE_PATH="$M_CROSS/llvm-thinlto" \
   -DCMAKE_C_FLAGS="-g0 -ftls-model=local-exec ${llvm_lto} ${llvm_pgo}" \
   -DCMAKE_CXX_FLAGS="-g0 -ftls-model=local-exec ${llvm_lto} ${llvm_pgo}" \
