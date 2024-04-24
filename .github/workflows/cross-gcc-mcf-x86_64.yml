@@ -1,4 +1,4 @@
-name: Build cross-gcc-mcf-x86_64
+name: cross-gcc-mcf-x86_64
 defaults:
   run:
     shell: bash
