@@ -31,10 +31,10 @@ while [ $# -gt 0 ]; do
         export LLVM_ENABLE_PGO="GEN" #STRING "OFF, GEN, CSGEN, USE"
         ;;
     --build-x86_64)
-        export LLvm_WRAPPER_DIR="llvm-wrapper-x86_64"
+        export LLVM_WRAPPER_DIR="llvm-wrapper-x86_64"
         ;;
     --build-x86_64_v3)
-        export LLvm_WRAPPER_DIR="llvm-wrapper-x86_64_v3"
+        export LLVM_WRAPPER_DIR="llvm-wrapper-x86_64_v3"
         ;;
     *)
         echo Unrecognized parameter $1
@@ -56,8 +56,8 @@ echo "======================="
 cd $M_SOURCE
 
 #llvm
-git clone https://github.com/llvm/llvm-project.git --branch llvmorg-$VER_LLVM
-#git clone https://github.com/llvm/llvm-project.git --branch release/18.x
+#git clone https://github.com/llvm/llvm-project.git --branch llvmorg-$VER_LLVM
+git clone https://github.com/llvm/llvm-project.git --branch release/18.x
 cd llvm-project
 git sparse-checkout set --no-cone '/*' '!*/test'
 cd ..
@@ -83,13 +83,13 @@ ln -s llvm-rc $MINGW_TRIPLE-windres
 ln -s llvm-addr2line $MINGW_TRIPLE-addr2line
 ln -s $(which pkgconf) $MINGW_TRIPLE-pkg-config
 ln -s $(which pkgconf) $MINGW_TRIPLE-pkgconf
-cp $TOP_DIR/$LLvm_WRAPPER_DIR/x86_64-w64-mingw32-as ./
-cp $TOP_DIR/$LLvm_WRAPPER_DIR/x86_64-w64-mingw32-clang ./
-cp $TOP_DIR/$LLvm_WRAPPER_DIR/x86_64-w64-mingw32-clang++ ./
-cp $TOP_DIR/$LLvm_WRAPPER_DIR/x86_64-w64-mingw32-ld ./
-cp $TOP_DIR/$LLvm_WRAPPER_DIR/x86_64-w64-mingw32-gcc ./
-cp $TOP_DIR/$LLvm_WRAPPER_DIR/x86_64-w64-mingw32-g++ ./
-cp $TOP_DIR/$LLvm_WRAPPER_DIR/x86_64-w64-mingw32-c++ ./
+cp $TOP_DIR/$LLVM_WRAPPER_DIR/x86_64-w64-mingw32-as ./
+cp $TOP_DIR/$LLVM_WRAPPER_DIR/x86_64-w64-mingw32-clang ./
+cp $TOP_DIR/$LLVM_WRAPPER_DIR/x86_64-w64-mingw32-clang++ ./
+cp $TOP_DIR/$LLVM_WRAPPER_DIR/x86_64-w64-mingw32-ld ./
+cp $TOP_DIR/$LLVM_WRAPPER_DIR/x86_64-w64-mingw32-gcc ./
+cp $TOP_DIR/$LLVM_WRAPPER_DIR/x86_64-w64-mingw32-g++ ./
+cp $TOP_DIR/$LLVM_WRAPPER_DIR/x86_64-w64-mingw32-c++ ./
 
 chmod 755 x86_64-w64-mingw32-as
 chmod 755 x86_64-w64-mingw32-clang
@@ -257,10 +257,10 @@ NO_CONFLTO=1 cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt -B$M_BUILD/comp
 LTO=0 cmake --build compiler-rt-build -j$MJOBS
 LTO=0 cmake --install compiler-rt-build
 mkdir -p $M_CROSS/$MINGW_TRIPLE/bin
-mv $(x86_64-w64-mingw32-clang --print-resource-dir)/lib/windows/*.dll $M_CROSS/$MINGW_TRIPLE/bin
+mv $(x86_64-w64-mingw32-clang --print-resource-dir)/lib/x86_64-pc-windows-gnu/*.dll $M_CROSS/$MINGW_TRIPLE/bin
 
 #Copy libclang_rt.builtins-x86_64.a to runtime dir
-cp $M_CROSS/$MINGW_TRIPLE/lib/libclang_rt.builtins-x86_64.a $(x86_64-w64-mingw32-gcc -print-runtime-dir)
+cp $M_CROSS/$MINGW_TRIPLE/lib/libclang* $(x86_64-w64-mingw32-gcc -print-runtime-dir)
 
 #Remove profraw
 rm -rf $M_CROSS/profiles/* || true

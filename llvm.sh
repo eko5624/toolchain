@@ -17,6 +17,7 @@ export M_BUILD=$M_ROOT/build
 export M_CROSS=$M_ROOT/cross
 export M_INSTALL=$M_ROOT/install
 
+export PATH="/usr/local/fuchsia-clang/bin:$PATH"
 export PKG_CONFIG_LIBDIR="$M_INSTALL/lib/pkgconfig"
 export PKG_CONFIG="pkgconf --static"
 export CFLAGS="-I$M_INSTALL/include"

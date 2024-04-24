@@ -10,8 +10,13 @@ on:
         required: false
         default: "false"
         type: boolean
-      llvm_lto:
+      llvm_thin_lto:
         description: "Build LLVM with ThinLTO"
+        required: false
+        default: "false"
+        type: boolean
+      llvm_full_lto:
+        description: "Build LLVM with FullLTO"
         required: false
         default: "false"
         type: boolean
@@ -115,4 +120,4 @@ jobs:
           curl -u eko5624:$GH_TOKEN \
           -X POST -H "Accept: application/vnd.github.v3+json" \
           https://api.github.com/repos/eko5624/toolchain/actions/workflows/cross-llvm-pgo.yml/dispatches \
-          -d '{"ref":"main","inputs":{"llvm_lto":"${{ inputs.llvm_lto }}","llvm_ccache":"${{ inputs.llvm_ccache }}","package_lto":"${{ inputs.package_lto }}","package_ccache":"${{ inputs.package_ccache }}"}}'
+          -d '{"ref":"main","inputs":{"llvm_thin_lto":"${{ inputs.llvm_thin_lto }}","llvm_full_lto":"${{ inputs.llvm_full_lto }}","llvm_ccache":"${{ inputs.llvm_ccache }}","package_lto":"${{ inputs.package_lto }}","package_ccache":"${{ inputs.package_ccache }}"}}'

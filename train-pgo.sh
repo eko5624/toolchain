@@ -15,7 +15,7 @@ export M_SOURCE=$M_ROOT/source
 export M_BUILD=$M_ROOT/build
 export M_CROSS=$M_ROOT/cross
 export LLVM_ROOT=$M_ROOT/llvm_root
-export ORIG_PATH="$PATH"
+export ORIG_PATH="/usr/local/fuchsia-clang/bin:$PATH"
 export PATH="$M_CROSS/bin:$ORIG_PATH"
 export LLVM_PROFILE_FILE="/dev/null"
 

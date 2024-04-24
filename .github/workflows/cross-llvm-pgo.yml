@@ -61,7 +61,12 @@ jobs:
           else
             unset PACKAGE_CCACHE
           fi 
-      
+
+      - name: Install fuchsia-clang
+        run: |
+          sudo GOBIN=/usr/bin go install go.chromium.org/luci/cipd/client/cmd/...@latest
+          sudo cipd install fuchsia/third_party/clang/linux-amd64 latest -root /usr/local/fuchsia-clang
+     
       - name: Checkout
         uses: actions/checkout@main
         
@@ -82,7 +87,7 @@ jobs:
           rm llvm-clang-ir-latest-ucrt-x86_64.7z
 
       - name: Setup llvm-pgo-latest
-        if: ${{ steps.llvm-pgo.outputs.cache-matched-key == '' && inputs.llvm_lto == 'true' }} || ${{ steps.llvm-pgo.outputs.cache-matched-key == '' && inputs.llvm_ccache == 'true' }} || ${{ steps.llvm-pgo.outputs.cache-matched-key == '' && inputs.package_lto == 'true' }} || ${{ steps.llvm-pgo.outputs.cache-matched-key == '' && inputs.package_ccache == 'true' }}
+        if: ${{ steps.llvm-pgo.outputs.cache-matched-key == '' && inputs.llvm_thin_lto == 'true' }} || {{ steps.llvm-pgo.outputs.cache-matched-key == '' && inputs.llvm_full_lto == 'true' }} || ${{ steps.llvm-pgo.outputs.cache-matched-key == '' && inputs.llvm_ccache == 'true' }} || ${{ steps.llvm-pgo.outputs.cache-matched-key == '' && inputs.package_lto == 'true' }} || ${{ steps.llvm-pgo.outputs.cache-matched-key == '' && inputs.package_ccache == 'true' }}
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-pgo-latest.7z || true
           7z x llvm-pgo-latest.7z || true 
@@ -114,10 +119,10 @@ jobs:
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
 
       - name: Package llvm-pgo-latest
-        #if: ${{ steps.llvm-pgo.outputs.cache-matched-key == '' }}
+        if: ${{ steps.llvm-pgo.outputs.cache-matched-key == '' }}
         run: 7z a llvm-pgo-latest.7z llvm_root/*
       - name: Release
-        continue-on-error: true
+        if: ${{ steps.llvm-pgo.outputs.cache-matched-key == '' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

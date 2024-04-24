@@ -10,8 +10,13 @@ on:
         required: false
         default: "false"
         type: boolean
-      llvm_lto:
+      llvm_thin_lto:
         description: "Build LLVM with ThinLTO"
+        required: false
+        default: "false"
+        type: boolean
+      llvm_full_lto:
+        description: "Build LLVM with FullLTO"
         required: false
         default: "false"
         type: boolean
