@@ -1,4 +1,4 @@
-name: Autoupdate-ver
+name: Autoupdate ver.sh
 on: 
   workflow_dispatch:
   #schedule:
