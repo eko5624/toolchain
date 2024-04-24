@@ -27,7 +27,7 @@ export LLVM_PROFILE_FILE="/dev/null"
 
 while [ $# -gt 0 ]; do
     case "$1" in
-    --enable-pgo)
+    --enable-pgo_gen)
         export LLVM_ENABLE_PGO="GEN" #STRING "OFF, GEN, CSGEN, USE"
         ;;
     --build-x86_64)
