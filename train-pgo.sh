@@ -21,13 +21,19 @@ export LLVM_PROFILE_FILE="/dev/null"
 
 while [ $# -gt 0 ]; do
     case "$1" in
+    --enable-pgo_gen)
+        export LLVM_ENABLE_PGO="GEN" #STRING "OFF, GEN, CSGEN, USE"
+        ;;
+    --enable-pgo_csgen)
+        export LLVM_ENABLE_PGO="CSGEN" #STRING "OFF, GEN, CSGEN, USE"
+        ;;
     --enable-package-lto)
         export CLANG_PACKAGES_LTO="ON"
-        export PACKAGES_LTO_DIR=$LLVM_ROOT/thinlto
+        export PACKAGES_LTO_DIR=$LLVM_ROOT/package-lto
         ;;
     --enable-package-ccache)
         export CCACHE_MAXSIZE="500M"
-        export CCACHE_DIR=$LLVM_ROOT/ccache
+        export CCACHE_DIR=$LLVM_ROOT/package-ccache
         mkdir -p $CCACHE_DIR
         cat <<EOF >$CCACHE_DIR/ccache.conf
 cache_dir = "$CCACHE_DIR"
@@ -44,15 +50,15 @@ EOF
     shift
 done
 
+if [ "$LLVM_ENABLE_PGO" == "GEN" ] || [ "$LLVM_ENABLE_PGO" == "CSGEN" ]; then
+    export LLVM_PROFILE_DATA_DIR="$M_CROSS/profiles" #PATH "Default profile generation directory"
+fi
+
 mkdir -p $M_SOURCE
 mkdir -p $M_BUILD
 
 echo "pgo training with shaderc"
 echo "======================="
-export LLVM_ENABLE_PGO="GEN" #STRING "OFF, GEN, CSGEN, USE"
-if [ "$LLVM_ENABLE_PGO" == "GEN" ] || [ "$LLVM_ENABLE_PGO" == "CSGEN" ]; then
-    export LLVM_PROFILE_DATA_DIR="$M_CROSS/profiles" #PATH "Default profile generation directory"
-fi
 cd $M_SOURCE
 git clone https://github.com/google/shaderc.git
 cp shaderc/DEPS ./
@@ -91,5 +97,4 @@ unset LLVM_ENABLE_PGO
 echo "merging profraw to profdata"
 echo "======================="
 PATH=$ORIG_PATH llvm-profdata merge $M_CROSS/profiles/*.profraw -o $M_ROOT/llvm.profdata
-rm -rf $M_CROSS
 echo "... Done"

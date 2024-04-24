@@ -45,7 +45,7 @@ jobs:
       - name: Init variable
         run: |
           if [ ${{ inputs.pgo }} == 'true' ]; then
-            echo "PGO=--enable-pgo" >> $GITHUB_ENV
+            echo "PGO=--enable-pgo_gen" >> $GITHUB_ENV
             echo "IR=-ir" >> $GITHUB_ENV
           else  
             unset PGO IR
@@ -59,7 +59,7 @@ jobs:
           curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/llvm$IR-latest.7z
           7z x llvm*.7z
           rm llvm*.7z
-          rm -rf cross/llvm-thinlto || true
+          rm -rf cross/llvm-lto || true
           rm -rf cross/llvm-ccache || true
             
       - name: Build toolchain

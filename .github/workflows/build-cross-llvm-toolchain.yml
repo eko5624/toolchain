@@ -45,7 +45,7 @@ jobs:
       - name: Init variable
         run: |
           if [ ${{ inputs.pgo }} == 'true' ]; then
-            echo "PGO=--enable-pgo" >> $GITHUB_ENV
+            echo "PGO=--enable-pgo_gen" >> $GITHUB_ENV
             echo "IR=-ir" >> $GITHUB_ENV
           else
             unset PGO IR
@@ -81,7 +81,7 @@ jobs:
             llvm${{ env.IR }}-cache-
 
       - name: Setup llvm${{ env.IR }}
-        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_lto == 'true' }} || ${{ steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_ccache == 'true' }}
+        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_thin_lto == 'true' }} || ${{ steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_full_lto == 'true' }} || ${{ steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_ccache == 'true' }}
         run: |
             curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm$IR-latest.7z || true
             7z x llvm$IR-latest.7z || true 

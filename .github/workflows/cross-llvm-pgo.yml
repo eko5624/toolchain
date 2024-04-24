@@ -42,7 +42,7 @@ jobs:
           if [ ${{ inputs.llvm_thin_lto }} == 'true' ]; then
             echo "LLVM_LTO=--enable-llvm-thin_lto" >> $GITHUB_ENV
           elif [ ${{ inputs.llvm_full_lto }} == 'true' ]; then
-            echo "LLVM_LTO=--enable-llvm-full_lto" >> $GITHUB_ENV  
+            echo "LLVM_LTO=--enable-llvm-full_lto" >> $GITHUB_ENV
           else
             unset LLVM_LTO
           fi  
@@ -99,7 +99,7 @@ jobs:
         if: ${{ steps.llvm-pgo.outputs.cache-matched-key == '' }}
         run: |
           chmod +x ./train-pgo.sh
-          ./train-pgo.sh $PACKAGE_LTO $PACKAGE_CCACHE
+          ./train-pgo.sh --enable-pgo_gen $PACKAGE_LTO $PACKAGE_CCACHE
 
       - name: Build llvm with pgo
         if: ${{ steps.llvm-pgo.outputs.cache-matched-key == '' }}
@@ -129,19 +129,21 @@ jobs:
           chmod +x ./package-release.sh
           ./package-release.sh
 
+      - name: Remove lto and ccache dir
+        run: |
+          rm -rf llvm_root/llvm-lto || true
+          rm -rf llvm_root/llvm-ccache || true
+          rm -rf llvm_root/package-lto || true
+          rm -rf llvm_root/package-ccache || true
+
 
       - name: Package x86_64 toolchain
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-clang-ir-latest-ucrt-x86_64.7z
           7z x llvm-clang-ir-latest-ucrt-x86_64.7z
           rm llvm-clang-ir-latest-ucrt-x86_64.7z
-          ls llvm_root
-          rm -rf llvm_root/llvm-thinlto || true
-          rm -rf llvm_root/llvm-ccache || true
-          rm -rf llvm_root/ccache || true
-          rm -rf llvm_root/thinlto || true
+          rm -rf cross/profiles
           cp -rf llvm_root/* cross
-          rm -rf cross/profiles/*
           7z a llvm-clang-pgo-${{ env.date }}-ucrt-x86_64.7z cross/*
           cp llvm-clang-pgo-${{ env.date }}-ucrt-x86_64.7z llvm-clang-pgo-latest-ucrt-x86_64.7z
           rm -rf cross
@@ -158,8 +160,8 @@ jobs:
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-clang-ir-latest-ucrt-x86_64_v3.7z
           7z x llvm-clang-ir-latest-ucrt-x86_64_v3.7z
           rm llvm-clang-ir-latest-ucrt-x86_64_v3.7z
+          rm -rf cross/profiles
           cp -rf llvm_root/* cross
-          rm -rf cross/profiles/*
           7z a llvm-clang-pgo-${{ env.date }}-ucrt-x86_64_v3.7z cross/*
           cp llvm-clang-pgo-${{ env.date }}-ucrt-x86_64_v3.7z llvm-clang-pgo-latest-ucrt-x86_64_v3.7z
           rm -rf cross

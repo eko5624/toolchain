@@ -32,7 +32,7 @@ export PREFIX=$M_CROSS
 
 while [ $# -gt 0 ]; do
     case "$1" in
-    --enable-pgo)
+    --enable-pgo_gen)
         export LLVM_ENABLE_PGO="GEN" #STRING "OFF, GEN, CSGEN, USE"
         ;;
     --enable-pgo_use)
@@ -61,12 +61,15 @@ elif [ "$LLVM_ENABLE_LTO" == "Full" ]; then
     export llvm_lto="-flto=full -fwhole-program-vtables -fsplit-lto-unit"
 fi
 
-if [ "$LLVM_ENABLE_PGO" == "GEN" ] || [ "$LLVM_ENABLE_PGO" == "CSGEN" ]; then
-    export LLVM_PROFILE_DATA_DIR="$M_CROSS/profiles" #PATH "Default profile generation directory"
-fi
-if [ "$LLVM_ENABLE_PGO" == "USE" ] || [ "$LLVM_ENABLE_PGO" == "CSGEN" ]; then
-    export LLVM_PROFDATA_FILE=$M_ROOT/llvm.profdata
+if [ "$LLVM_ENABLE_PGO" == "GEN" ]; then
+    export PREFIX=$M_ROOT/cross
+    export LLVM_PROFILE_DATA_DIR="$PREFIX/profiles" #PATH "Default profile generation directory"
+elif [ "$LLVM_ENABLE_PGO" == "CSGEN" ]; then
     export PREFIX=$M_ROOT/llvm_root
+    export LLVM_PROFILE_DATA_DIR="$PREFIX/profiles" #PATH "Default profile generation directory"
+elif [ "$LLVM_ENABLE_PGO" == "USE" ]
+    export PREFIX=$M_ROOT/llvm_root
+    export LLVM_PROFDATA_FILE=$M_ROOT/llvm.profdata
 fi
 
 if [ "$LLVM_ENABLE_PGO" == "GEN" ]; then
@@ -79,9 +82,9 @@ fi
 
 if [ "$LLVM_CCACHE_BUILD" == "ON" ]; then
     export LLVM_CCACHE_MAXSIZE="500M"
-    export LLVM_CCACHE_DIR=$M_CROSS/llvm-ccache
+    export LLVM_CCACHE_DIR=$PREFIX/llvm-ccache
     export llvm_ccache="-DLLVM_CCACHE_BUILD=ON -DLLVM_CCACHE_DIR=${LLVM_CCACHE_DIR} -DLLVM_CCACHE_MAXSIZE=${LLVM_CCACHE_MAXSIZE}"
-fi    
+fi  
 
 mkdir -p $M_SOURCE
 mkdir -p $M_BUILD
@@ -316,7 +319,7 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
   -DLLVM_USE_STATIC_ZSTD=ON \
   -Dzstd_LIBRARY=$M_INSTALL/lib/libzstd.a \
   -Dzstd_INCLUDE_DIR=$M_INSTALL/include \
-  -DLLVM_THINLTO_CACHE_PATH="$M_CROSS/llvm-thinlto" \
+  -DLLVM_THINLTO_CACHE_PATH="$M_CROSS/llvm-lto" \
   -DCMAKE_C_FLAGS="-g0 -ftls-model=local-exec ${llvm_lto} ${llvm_pgo}" \
   -DCMAKE_CXX_FLAGS="-g0 -ftls-model=local-exec ${llvm_lto} ${llvm_pgo}" \
   -DCMAKE_EXE_LINKER_FLAGS="$M_INSTALL/lib/mimalloc.o -fuse-ld=lld -Xlinker -s -Xlinker --icf=all -Xlinker -zcommon-page-size=2097152 -Xlinker -zmax-page-size=2097152 -Xlinker -zseparate-loadable-segments -Xlinker --thinlto-cache-policy=cache_size_bytes=1g:prune_interval=1m" \
