@@ -152,7 +152,7 @@ $M_SOURCE/gcc/configure \
 make -j$MJOBS all-gcc
 make install-strip-gcc
 
-echo "installing wrappers for x86_64"
+echo "installing gcc-wrappers"
 echo "======================="
 cd $M_CROSS/bin
 cp $TOP_DIR/$GCC_WRAPPER_DIR/x86_64-w64-mingw32-c++ ./

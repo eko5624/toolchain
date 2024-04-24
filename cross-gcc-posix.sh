@@ -20,6 +20,24 @@ export M_CROSS=$M_ROOT/cross
 
 export PATH="$M_CROSS/bin:$PATH"
 
+while [ $# -gt 0 ]; do
+    case "$1" in
+    --build-x86_64)
+        GCC_ARCH="x86-64"
+        GCC_WRAPPER_DIR="gcc-wrapper-x86_64"
+        ;;
+    --build-x86_64_v3)
+        GCC_ARCH="x86-64-v3"
+        GCC_WRAPPER_DIR="gcc-wrapper-x86_64_v3"
+        ;;
+    *)
+        echo Unrecognized parameter $1
+        exit 1
+        ;;
+    esac
+    shift
+done
+
 mkdir -p $M_SOURCE
 mkdir -p $M_BUILD
 
@@ -46,6 +64,7 @@ $M_SOURCE/binutils-$VER_BINUTILS/configure \
   --target=$MINGW_TRIPLE \
   --prefix=$M_CROSS \
   --with-sysroot=$M_CROSS \
+  --program-prefix=cross- \
   --disable-multilib \
   --disable-nls \
   --disable-shared \
@@ -55,8 +74,21 @@ $M_SOURCE/binutils-$VER_BINUTILS/configure \
   --enable-plugins \
   --enable-threads
 make -j$MJOBS
-make install
+make install-strip
+
 cd $M_CROSS/bin
+ln -s cross-as $MINGW_TRIPLE-as
+ln -s cross-ar $MINGW_TRIPLE-ar
+ln -s cross-ranlib $MINGW_TRIPLE-ranlib
+ln -s cross-dlltool $MINGW_TRIPLE-dlltool
+ln -s cross-objcopy $MINGW_TRIPLE-objcopy
+ln -s cross-strip $MINGW_TRIPLE-strip
+ln -s cross-size $MINGW_TRIPLE-size
+ln -s cross-strings $MINGW_TRIPLE-strings
+ln -s cross-nm $MINGW_TRIPLE-nm
+ln -s cross-readelf $MINGW_TRIPLE-readelf
+ln -s cross-windres $MINGW_TRIPLE-windres
+ln -s cross-addr2line $MINGW_TRIPLE-addr2line
 ln -s $(which pkgconf) $MINGW_TRIPLE-pkg-config
 ln -s $(which pkgconf) $MINGW_TRIPLE-pkgconf
 
@@ -73,7 +105,7 @@ $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
   --with-default-win32-winnt=0x601 \
   --with-default-msvcrt=ucrt
 make -j$MJOBS
-make install
+make install-strip
 cd $M_CROSS
 ln -s $MINGW_TRIPLE mingw
 
@@ -92,6 +124,7 @@ $M_SOURCE/gcc/configure \
   --prefix=$M_CROSS \
   --libdir=$M_CROSS/lib \
   --with-sysroot=$M_CROSS \
+  --program-prefix=cross- \
   --with-pkgversion="GCC with posix thread model" \
   --disable-multilib \
   --enable-languages=c,c++ \
@@ -99,7 +132,7 @@ $M_SOURCE/gcc/configure \
   --disable-shared \
   --disable-win32-registry \
   --disable-libstdcxx-pch \
-  --with-arch=x86-64 \
+  --with-arch=$GCC_ARCH \
   --with-tune=generic \
   --enable-threads=posix \
   --without-included-gettext \
@@ -109,6 +142,23 @@ $M_SOURCE/gcc/configure \
 make -j$MJOBS all-gcc
 make install-strip-gcc
 
+echo "installing gcc-wrappers"
+echo "======================="
+cd $M_CROSS/bin
+cp $TOP_DIR/$GCC_WRAPPER_DIR/x86_64-w64-mingw32-c++ ./
+cp $TOP_DIR/$GCC_WRAPPER_DIR/x86_64-w64-mingw32-cpp ./
+cp $TOP_DIR/$GCC_WRAPPER_DIR/x86_64-w64-mingw32-g++ ./
+cp $TOP_DIR/$GCC_WRAPPER_DIR/x86_64-w64-mingw32-gcc ./
+cp $TOP_DIR/$GCC_WRAPPER_DIR/x86_64-w64-mingw32-ld ./
+cp $TOP_DIR/$GCC_WRAPPER_DIR/x86_64-w64-mingw32-ld.bfd ./
+
+chmod 755 x86_64-w64-mingw32-c++
+chmod 755 x86_64-w64-mingw32-cpp
+chmod 755 x86_64-w64-mingw32-g++
+chmod 755 x86_64-w64-mingw32-gcc
+chmod 755 x86_64-w64-mingw32-ld
+chmod 755 x86_64-w64-mingw32-ld.bfd
+
 echo "building gendef"
 echo "======================="
 cd $M_BUILD
@@ -116,7 +166,7 @@ mkdir gendef-build
 cd gendef-build
 $M_SOURCE/mingw-w64/mingw-w64-tools/gendef/configure --prefix=$M_CROSS
 make -j$MJOBS
-make install
+make install-strip
 
 echo "building mingw-w64-crt"
 echo "======================="
@@ -133,7 +183,7 @@ $M_SOURCE/mingw-w64/mingw-w64-crt/configure \
   --enable-lib64 \
   --disable-lib32
 make -j$MJOBS
-make install
+make install-strip
 
 echo "building winpthreads"
 echo "======================="
@@ -146,13 +196,13 @@ $M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
   --disable-shared \
   --enable-static
 make -j$MJOBS
-make install
+make install-strip
 
 echo "building gcc-final"
 echo "======================="
 cd $M_BUILD/gcc-build
 make -j$MJOBS
-make install
+make install-strip
 cd $M_CROSS
 find $MINGW_TRIPLE/lib -type f -name "*.la" -print0 | xargs -0 -I {} rm {}
 find $MINGW_TRIPLE/lib -type f -name "*.dll.a" -print0 | xargs -0 -I {} rm {}
