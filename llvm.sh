@@ -67,7 +67,7 @@ if [ "$LLVM_ENABLE_PGO" == "GEN" ]; then
 elif [ "$LLVM_ENABLE_PGO" == "CSGEN" ]; then
     export PREFIX=$M_ROOT/llvm_root
     export LLVM_PROFILE_DATA_DIR="$PREFIX/profiles" #PATH "Default profile generation directory"
-elif [ "$LLVM_ENABLE_PGO" == "USE" ]
+elif [ "$LLVM_ENABLE_PGO" == "USE" ]; then
     export PREFIX=$M_ROOT/llvm_root
     export LLVM_PROFDATA_FILE=$M_ROOT/llvm.profdata
 fi
