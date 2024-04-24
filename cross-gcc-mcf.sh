@@ -18,6 +18,24 @@ export M_CROSS=$M_ROOT/cross
 
 export PATH="$M_CROSS/bin:$PATH"
 
+while [ $# -gt 0 ]; do
+    case "$1" in
+    --build-x86_64)
+        GCC_ARCH="x86-64"
+        GCC_WRAPPER_DIR="gcc-wrapper-x86_64"
+        ;;
+    --build-x86_64_v3)
+        GCC_ARCH="x86-64-v3"
+        GCC_WRAPPER_DIR="gcc-wrapper-x86_64_v3"
+        ;;
+    *)
+        echo Unrecognized parameter $1
+        exit 1
+        ;;
+    esac
+    shift
+done
+
 mkdir -p $M_SOURCE
 mkdir -p $M_BUILD
 
@@ -124,7 +142,7 @@ $M_SOURCE/gcc/configure \
   --enable-languages=c,c++ \
   --disable-nls \
   --disable-win32-registry \
-  --with-arch=x86-64 \
+  --with-arch=$GCC_ARCH \
   --with-tune=generic \
   --enable-threads=mcf \
   --without-included-gettext \
@@ -137,12 +155,12 @@ make install-strip-gcc
 echo "installing wrappers for x86_64"
 echo "======================="
 cd $M_CROSS/bin
-cp $TOP_DIR/gcc-wrapper-x86_64/x86_64-w64-mingw32-c++ ./
-cp $TOP_DIR/gcc-wrapper-x86_64/x86_64-w64-mingw32-cpp ./
-cp $TOP_DIR/gcc-wrapper-x86_64/x86_64-w64-mingw32-g++ ./
-cp $TOP_DIR/gcc-wrapper-x86_64/x86_64-w64-mingw32-gcc ./
-cp $TOP_DIR/gcc-wrapper-x86_64/x86_64-w64-mingw32-ld ./
-cp $TOP_DIR/gcc-wrapper-x86_64/x86_64-w64-mingw32-ld.bfd ./
+cp $TOP_DIR/$GCC_WRAPPER_DIR/x86_64-w64-mingw32-c++ ./
+cp $TOP_DIR/$GCC_WRAPPER_DIR/x86_64-w64-mingw32-cpp ./
+cp $TOP_DIR/$GCC_WRAPPER_DIR/x86_64-w64-mingw32-g++ ./
+cp $TOP_DIR/$GCC_WRAPPER_DIR/x86_64-w64-mingw32-gcc ./
+cp $TOP_DIR/$GCC_WRAPPER_DIR/x86_64-w64-mingw32-ld ./
+cp $TOP_DIR/$GCC_WRAPPER_DIR/x86_64-w64-mingw32-ld.bfd ./
 
 chmod 755 x86_64-w64-mingw32-c++
 chmod 755 x86_64-w64-mingw32-cpp

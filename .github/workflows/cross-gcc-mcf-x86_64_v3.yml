@@ -28,8 +28,8 @@ jobs:
       - name: Building toolchain
         run: |
           if [[ ! "$(ls -A cross/bin)" ]]; then
-            chmod +x ./cross-gcc-mcf-x86_64_v3.sh
-            ./cross-gcc-mcf-x86_64_v3.sh
+            chmod +x ./cross-gcc-mcf.sh
+            ./cross-gcc-mcf.sh --build-x86_64_v3
           fi
         
       - name: Get gcc version

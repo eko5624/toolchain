@@ -1,0 +1,31 @@
+name: Build cross-gcc-mcf toolchain
+defaults:
+  run:
+    shell: bash
+on:
+  workflow_dispatch:
+ 
+jobs:
+  build_cross-gcc-mcf-x86_64:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Run cross-gcc-mcf-x86_64.yml
+        run: |
+          curl -u eko5624:$GH_TOKEN \
+            -X POST -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/eko5624/toolchain/actions/workflows/cross-gcc-mcf-x86_64.yml/dispatches \
+            -d '{"ref":"main"}'
+  build_cross-gcc-mcf-x86_64_v3:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Run cross-gcc-mcf-x86_64_v3.yml
+        run: |
+          curl -u eko5624:$GH_TOKEN \
+            -X POST -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/eko5624/toolchain/actions/workflows/cross-gcc-mcf-x86_64_v3.yml/dispatches \
+            -d '{"ref":"main"}'
+

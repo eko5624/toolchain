@@ -1,10 +1,10 @@
-name: Build cross-gcc-mcf-x86_64
+name: Build cross-gcc-mcf toolchain
 defaults:
   run:
     shell: bash
 on:
   workflow_dispatch:
-  
+ 
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -28,8 +28,8 @@ jobs:
       - name: Building toolchain
         run: |
           if [[ ! "$(ls -A cross/bin)" ]]; then
-            chmod +x ./cross-gcc-mcf-x86_64.sh
-            ./cross-gcc-mcf-x86_64.sh
+            chmod +x ./cross-gcc-mcf.sh
+            ./cross-gcc-mcf.sh --build-x86_64
           fi
         
       - name: Get gcc version

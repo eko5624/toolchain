@@ -34,8 +34,7 @@ on:
         description: "Build packages with CCACHE"
         required: false
         default: "false"
-        type: boolean
-        
+        type: boolean       
   
 jobs:
   build_llvm:
