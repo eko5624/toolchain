@@ -1,4 +1,4 @@
-name: Build llvm with pgo
+name: cross-llvm-pgo
 defaults:
   run:
     shell: bash

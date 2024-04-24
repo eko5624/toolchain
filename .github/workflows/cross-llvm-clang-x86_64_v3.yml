@@ -1,4 +1,4 @@
-name: Build llvm-clang-x86_64_v3
+name: cross-llvm-clang-x86_64_v3
 defaults:
   run:
     shell: bash

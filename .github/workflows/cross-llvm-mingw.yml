@@ -1,4 +1,4 @@
-name: Build cross-llvm-mingw
+name: cross-llvm-mingw
 defaults:
   run:
     shell: bash
