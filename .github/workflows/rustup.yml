@@ -1,4 +1,4 @@
-name: Build rustup
+name: rustup
 defaults:
   run:
     shell: bash
