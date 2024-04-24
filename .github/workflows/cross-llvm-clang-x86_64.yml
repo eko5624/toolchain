@@ -66,7 +66,7 @@ jobs:
         run: |
           set -x
           chmod +x ./cross-llvm-clang.sh
-          ./cross-llvm-clang.sh --build-x86_64
+          ./cross-llvm-clang.sh --build-x86_64 $PGO
 
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV  
