@@ -6,27 +6,27 @@ on:
   workflow_dispatch:
     inputs:
       llvm_thin_lto:
-        description: "Build LLVM with ThinLTO"
+        description: "Build llvm with thin-lto"
         required: false
         default: "false"
         type: boolean
       llvm_full_lto:
-        description: "Build LLVM with FullLTO"
+        description: "Build llvm with full-lto"
         required: false
         default: "false"
         type: boolean
       llvm_ccache:
-        description: "Build LLVM with CCACHE"
+        description: "Build llvm with ccache"
         required: false
         default: "false"
         type: boolean
       package_lto:
-        description: "Build packages with ThinLTO"
+        description: "Build packages with thin-lto"
         required: false
         default: "false"
         type: boolean        
       package_ccache:
-        description: "Build packages with CCACHE"
+        description: "Build packages with cache"
         required: false
         default: "false"
         type: boolean

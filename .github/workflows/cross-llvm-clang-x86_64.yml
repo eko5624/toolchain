@@ -11,27 +11,27 @@ on:
         default: "false"
         type: boolean
       llvm_thin_lto:
-        description: "Build LLVM with ThinLTO"
+        description: "Build llvm with thin-lto"
         required: false
         default: "false"
         type: boolean
       llvm_full_lto:
-        description: "Build LLVM with FullLTO"
+        description: "Build llvm with full-lto"
         required: false
         default: "false"
         type: boolean
       llvm_ccache:
-        description: "Build LLVM with CCACHE"
+        description: "Build llvm with ccache"
         required: false
         default: "false"
         type: boolean
       package_lto:
-        description: "Build packages with ThinLTO"
+        description: "Build packages with thin-lto"
         required: false
         default: "false"
         type: boolean        
       package_ccache:
-        description: "Build packages with CCACHE"
+        description: "Build packages with ccache"
         required: false
         default: "false"
         type: boolean
@@ -59,7 +59,7 @@ jobs:
           curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/llvm$IR-latest.7z
           7z x llvm*.7z
           rm llvm*.7z
-          rm -rf cross/llvm-thinlto || true
+          rm -rf cross/llvm-lto || true
           rm -rf cross/llvm-ccache || true
             
       - name: Build toolchain
