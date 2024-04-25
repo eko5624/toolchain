@@ -81,7 +81,7 @@ jobs:
             llvm${{ env.IR }}-cache-
 
       - name: Setup llvm${{ env.IR }}
-        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_thin_lto == 'true' }} || ${{ steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_full_lto == 'true' }} || ${{ steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_ccache == 'true' }}
+        if: (steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_thin_lto) || (steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_full_lto) || (steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_ccache)
         run: |
             curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm$IR-latest.7z || true
             7z x llvm$IR-latest.7z || true 

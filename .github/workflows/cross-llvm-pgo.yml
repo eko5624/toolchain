@@ -62,11 +62,6 @@ jobs:
             unset PACKAGE_CCACHE
           fi 
 
-      - name: Install fuchsia-clang
-        run: |
-          sudo GOBIN=/usr/bin go install go.chromium.org/luci/cipd/client/cmd/...@latest
-          sudo cipd install fuchsia/third_party/clang/linux-amd64 latest -root /usr/local/fuchsia-clang
-     
       - name: Checkout
         uses: actions/checkout@main
         
@@ -79,21 +74,27 @@ jobs:
           restore-keys: |
             llvm-pgo-
 
-      - name: Setup llvm-clang toolchain with IR Profile Instrumentation
+      - name: Install fuchsia-clang
         if: ${{ steps.llvm-pgo.outputs.cache-matched-key == '' }}
         run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-clang-ir-latest-ucrt-x86_64.7z
-          7z x llvm-clang-ir-latest-ucrt-x86_64.7z
-          rm llvm-clang-ir-latest-ucrt-x86_64.7z
-
+          sudo GOBIN=/usr/bin go install go.chromium.org/luci/cipd/client/cmd/...@latest
+          sudo cipd install fuchsia/third_party/clang/linux-amd64 latest -root /usr/local/fuchsia-clang
+      
       - name: Setup llvm-pgo-latest
-        if: ${{ steps.llvm-pgo.outputs.cache-matched-key == '' && inputs.llvm_thin_lto == 'true' }} || {{ steps.llvm-pgo.outputs.cache-matched-key == '' && inputs.llvm_full_lto == 'true' }} || ${{ steps.llvm-pgo.outputs.cache-matched-key == '' && inputs.llvm_ccache == 'true' }} || ${{ steps.llvm-pgo.outputs.cache-matched-key == '' && inputs.package_lto == 'true' }} || ${{ steps.llvm-pgo.outputs.cache-matched-key == '' && inputs.package_ccache == 'true' }}
+        if: (steps.llvm-pgo.outputs.cache-matched-key == '' && inputs.llvm_thin_lto) || (steps.llvm-pgo.outputs.cache-matched-key == '' && inputs.llvm_full_lto) || (steps.llvm-pgo.outputs.cache-matched-key == '' && inputs.llvm_ccache) || (steps.llvm-pgo.outputs.cache-matched-key == '' && inputs.package_lto) || (steps.llvm-pgo.outputs.cache-matched-key == '' && inputs.package_ccache)
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-pgo-latest.7z || true
           7z x llvm-pgo-latest.7z || true 
           rm llvm-pgo-latest.7z || true
           rm -rf llvm_root/bin || true
           rm -rf llvm_root/lib || true
+          
+      - name: Setup llvm-clang toolchain with IR Profile Instrumentation
+        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_thin_lto == 'true' }}
+        run: |
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-clang-ir-latest-ucrt-x86_64.7z
+          7z x llvm-clang-ir-latest-ucrt-x86_64.7z
+          rm llvm-clang-ir-latest-ucrt-x86_64.7z
 
       - name: Train pgo with shaderc
         if: ${{ steps.llvm-pgo.outputs.cache-matched-key == '' }}
@@ -108,14 +109,13 @@ jobs:
           ./llvm.sh --enable-pgo_use $LLVM_LTO $LLVM_CCACHE
 
       - name: Save llvm-pgo cache
+        if: ${{ steps.llvm-pgo.outputs.cache-matched-key == '' }}
         uses: actions/cache/save@main
-        if: always()
         with:
           path: ${{ github.workspace }}/llvm_root
           key: llvm-pgo-${{ github.run_id }}
 
       - name: Get current timestamp
-        if: ${{ steps.llvm-pgo.outputs.cache-matched-key == '' }}
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
 
       - name: Package llvm-pgo-latest
@@ -129,13 +129,13 @@ jobs:
           chmod +x ./package-release.sh
           ./package-release.sh
 
-      - name: Remove lto and ccache dir
+      - name: Remove cross lto ccache dirs
         run: |
+          rm -rf cross || true
           rm -rf llvm_root/llvm-lto || true
           rm -rf llvm_root/llvm-ccache || true
           rm -rf llvm_root/package-lto || true
           rm -rf llvm_root/package-ccache || true
-
 
       - name: Package x86_64 toolchain
         run: |
