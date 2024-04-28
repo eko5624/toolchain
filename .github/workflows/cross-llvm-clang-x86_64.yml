@@ -61,7 +61,14 @@ jobs:
           rm llvm*.7z
           rm -rf cross/llvm-lto || true
           rm -rf cross/llvm-ccache || true
-            
+
+      - name: Load llvm-project source
+        uses: actions/cache@main
+        id: llvm-source
+        with:
+          path: ${{ github.workspace }}/source/llvm-project
+          key: llvm-source-cache
+                      
       - name: Build toolchain
         run: |
           set -x

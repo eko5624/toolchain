@@ -9,7 +9,7 @@ FLAGS="$FLAGS --thinlto-cache-dir=$PACKAGES_LTO_DIR --thinlto-cache-policy=$POLI
 if [ "$NO_CONFLTO" == "1" ]; then
     SKIP_OPT="-O0 --lto-O0 --lto-CGO0 --no-gc-sections --no-guard-cf --build-id=none"
 else
-    FLAGS="$FLAGS -O3 --lto-O3 --lto-CGO3 -s -Xlink=-release @lld_cfi@"
+    FLAGS="$FLAGS -O3 --lto-O3 --lto-CGO3 -s -Xlink=-release@lld_cfi@"
     if [ "$GC" != "0" ]; then
         LLD_GC="--gc-sections --icf=safe"
     fi

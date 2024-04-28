@@ -71,6 +71,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@main
 
+      - name: Load llvm-project source
+        uses: actions/cache@main
+        id: llvm-source
+        with:
+          path: ${{ github.workspace }}/source/llvm-project
+          key: llvm-source-cache
+          
       - name: Load llvm${{ env.IR }} cache
         uses: actions/cache/restore@main
         id: llvm-cache

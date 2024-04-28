@@ -36,9 +36,9 @@ while [ $# -gt 0 ]; do
         ;;
     --build-x86_64_v3)
         GCC_ARCH="x86-64-v3"
-        CLANG_CFI="-mguard=cf -fcf-protection=full"
-        LLD_CFI="-Xlink=-cetcompat"
-        OPT="-O3"
+        CLANG_CFI=" -mguard=cf -fcf-protection=full"
+        LLD_CFI=" -Xlink=-cetcompat"
+        OPT=" -O3"
         ;;
     *)
         echo Unrecognized parameter $1
@@ -61,10 +61,12 @@ cd $M_SOURCE
 
 #llvm
 #git clone https://github.com/llvm/llvm-project.git --branch llvmorg-$VER_LLVM
-git clone https://github.com/llvm/llvm-project.git --branch release/18.x
-cd llvm-project
-git sparse-checkout set --no-cone '/*' '!*/test'
-cd ..
+if [ ! -d "$M_SOURCE/llvm-project" ]; then
+  git clone https://github.com/llvm/llvm-project.git --branch release/18.x
+  cd llvm-project
+  git sparse-checkout set --no-cone '/*' '!*/test' '!/lldb' '!/mlir' '!/clang-tools-extra' '!/polly' '!/libc' '!/flang'
+  cd ..
+fi  
 
 #mingw-w64
 git clone https://github.com/mingw-w64/mingw-w64.git --branch master
@@ -105,27 +107,26 @@ for i in clang++ g++ c++ clang gcc as; do
   x86_64-w64-mingw32-g++|x86_64-w64-mingw32-c++)
       DRIVER_MODE=" --driver-mode=g++ -pthread"
       CLANG_COMPILER="clang++"
-      replace_env $BASENAME
+      replace_env $M_CROSS/bin/$BASENAME
       unset CLANG_COMPILER DRIVER_MODE CLANG_CFI OPT LINKER
       ;;
   x86_64-w64-mingw32-clang++)
-      driver_mode=" --driver-mode=g++"
-      clang_compiler="clang++"
-      linker=" -lc++abi"
-      replace_env $BASENAME
+      DRIVER_MODE=" --driver-mode=g++"
+      CLANG_COMPILER="clang++"
+      LINKER=" -lc++abi"
+      replace_env $M_CROSS/bin/$BASENAME
       unset CLANG_COMPILER DRIVER_MODE CLANG_CFI OPT LINKER
       ;;
   *)
-      clang_compiler="clang"
-      replace_env $BASENAME
+      CLANG_COMPILER="clang"
+      replace_env $M_CROSS/bin/$BASENAME
       unset CLANG_COMPILER DRIVER_MODE CLANG_CFI OPT LINKER
       ;;
   esac
 done
 
 install -vm755 llvm-ld.in $M_CROSS/bin/x86_64-w64-mingw32-ld
-sed -i "s|@lld_cfi@|${LLD_CFI}|g" x86_64-w64-mingw32-ld
-
+sed -i "s|@lld_cfi@|${LLD_CFI}|g" $M_CROSS/bin/x86_64-w64-mingw32-ld
 
 echo "building gendef"
 echo "======================="
