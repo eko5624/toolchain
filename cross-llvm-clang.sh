@@ -31,10 +31,14 @@ while [ $# -gt 0 ]; do
         export LLVM_ENABLE_PGO="GEN" #STRING "OFF, GEN, CSGEN, USE"
         ;;
     --build-x86_64)
-        export LLVM_WRAPPER_DIR="llvm-wrapper-x86_64"
+        GCC_ARCH="x86-64"
+        unset CLANG_CFI LLD_CFI OPT
         ;;
     --build-x86_64_v3)
-        export LLVM_WRAPPER_DIR="llvm-wrapper-x86_64_v3"
+        GCC_ARCH="x86-64-v3"
+        CLANG_CFI="-mguard=cf -fcf-protection=full"
+        LLD_CFI="-Xlink=-cetcompat"
+        OPT="-O3"
         ;;
     *)
         echo Unrecognized parameter $1
@@ -83,21 +87,45 @@ ln -s llvm-rc $MINGW_TRIPLE-windres
 ln -s llvm-addr2line $MINGW_TRIPLE-addr2line
 ln -s $(which pkgconf) $MINGW_TRIPLE-pkg-config
 ln -s $(which pkgconf) $MINGW_TRIPLE-pkgconf
-cp $TOP_DIR/$LLVM_WRAPPER_DIR/x86_64-w64-mingw32-as ./
-cp $TOP_DIR/$LLVM_WRAPPER_DIR/x86_64-w64-mingw32-clang ./
-cp $TOP_DIR/$LLVM_WRAPPER_DIR/x86_64-w64-mingw32-clang++ ./
-cp $TOP_DIR/$LLVM_WRAPPER_DIR/x86_64-w64-mingw32-ld ./
-cp $TOP_DIR/$LLVM_WRAPPER_DIR/x86_64-w64-mingw32-gcc ./
-cp $TOP_DIR/$LLVM_WRAPPER_DIR/x86_64-w64-mingw32-g++ ./
-cp $TOP_DIR/$LLVM_WRAPPER_DIR/x86_64-w64-mingw32-c++ ./
 
-chmod 755 x86_64-w64-mingw32-as
-chmod 755 x86_64-w64-mingw32-clang
-chmod 755 x86_64-w64-mingw32-clang++
-chmod 755 x86_64-w64-mingw32-ld
-chmod 755 x86_64-w64-mingw32-gcc
-chmod 755 x86_64-w64-mingw32-g++
-chmod 755 x86_64-w64-mingw32-c++
+cd $TOP_DIR/llvm-wrapper
+replace_env() {
+  sed -e "s|@clang_compiler@|${CLANG_COMPILER}|g" \
+      -e "s|@gcc_arch@|${GCC_ARCH}|g" \
+      -e "s|@driver_mode@|${DRIVER_MODE}|g" \
+      -e "s|@clang_cfi@|${CLANG_CFI}|g" \
+      -e "s|@opt@|${OPT}|g" \
+      -e "s|@linker@|${LINKER}|g" \
+      -i "$1"
+}
+for i in clang++ g++ c++ clang gcc as; do
+  basename=x86_64-w64-mingw32-$i
+  install -vm755 llvm-compiler.in $basename
+  case $basename in
+  x86_64-w64-mingw32-g++|x86_64-w64-mingw32-c++)
+      DRIVER_MODE=" --driver-mode=g++ -pthread"
+      CLANG_COMPILER="clang++"
+      replace_env $basename
+      unset DRIVER_MODE CLANG_COMPILER LINKER
+      ;;
+  x86_64-w64-mingw32-clang++)
+      driver_mode=" --driver-mode=g++"
+      clang_compiler="clang++"
+      linker=" -lc++abi"
+      replace_env $basename
+      unset driver_mode clang_compiler linker
+      ;;
+  *)
+      clang_compiler="clang"
+      replace_env $basename
+      unset driver_mode clang_compiler linker
+      ;;
+  esac
+done
+
+install -vm755 llvm-ld.in x86_64-w64-mingw32-ld
+sed -i "s|@lld_cfi@|${LLD_CFI}|g" x86_64-w64-mingw32-ld 
+
 
 echo "building gendef"
 echo "======================="

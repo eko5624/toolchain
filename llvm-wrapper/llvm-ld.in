@@ -5,12 +5,11 @@ TARGET=x86_64-w64-mingw32
 POLICY="cache_size_bytes=1g:prune_interval=1m"
 FLAGS="-m i386pep"
 FLAGS="$FLAGS --thinlto-cache-dir=$PACKAGES_LTO_DIR --thinlto-cache-policy=$POLICY"
-FLAGS="$FLAGS -O3 -Xlink=-opt:lldlto=3 -Xlink=-opt:lldltocgo=3"
 
 if [ "$NO_CONFLTO" == "1" ]; then
     SKIP_OPT="-O0 --lto-O0 --lto-CGO0 --no-gc-sections --no-guard-cf --build-id=none"
 else
-    FLAGS="$FLAGS -O3 --lto-O3 --lto-CGO3 -s -Xlink=-release -Xlink=-cetcompat"
+    FLAGS="$FLAGS -O3 --lto-O3 --lto-CGO3 -s -Xlink=-release @lld_cfi@"
     if [ "$GC" != "0" ]; then
         LLD_GC="--gc-sections --icf=safe"
     fi
