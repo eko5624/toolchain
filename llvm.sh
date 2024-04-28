@@ -95,10 +95,12 @@ cd $M_SOURCE
 
 #llvm
 #git clone https://github.com/llvm/llvm-project.git --branch llvmorg-$VER_LLVM
-git clone https://github.com/llvm/llvm-project.git --branch release/18.x
-cd llvm-project
-git sparse-checkout set --no-cone '/*' '!*/test' '!/lldb' '!/mlir' '!/clang-tools-extra' '!/polly' '!/libc' '!/flang'
-cd ..
+if [ ! -d "$M_SOURCE/llvm-project" ]; then
+  git clone https://github.com/llvm/llvm-project.git --branch release/18.x
+  cd llvm-project
+  git sparse-checkout set --no-cone '/*' '!*/test' '!/lldb' '!/mlir' '!/clang-tools-extra' '!/polly' '!/libc' '!/flang'
+  cd ..
+fi
 
 echo "building zlib-ng"
 echo "======================="
