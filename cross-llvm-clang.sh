@@ -99,32 +99,32 @@ replace_env() {
       -i "$1"
 }
 for i in clang++ g++ c++ clang gcc as; do
-  basename=x86_64-w64-mingw32-$i
-  install -vm755 llvm-compiler.in $basename
-  case $basename in
+  BASENAME=x86_64-w64-mingw32-$i
+  install -vm755 llvm-compiler.in $M_CROSS/bin/$BASENAME
+  case $BASENAME in
   x86_64-w64-mingw32-g++|x86_64-w64-mingw32-c++)
       DRIVER_MODE=" --driver-mode=g++ -pthread"
       CLANG_COMPILER="clang++"
-      replace_env $basename
-      unset DRIVER_MODE CLANG_COMPILER LINKER
+      replace_env $BASENAME
+      unset CLANG_COMPILER DRIVER_MODE CLANG_CFI OPT LINKER
       ;;
   x86_64-w64-mingw32-clang++)
       driver_mode=" --driver-mode=g++"
       clang_compiler="clang++"
       linker=" -lc++abi"
-      replace_env $basename
-      unset driver_mode clang_compiler linker
+      replace_env $BASENAME
+      unset CLANG_COMPILER DRIVER_MODE CLANG_CFI OPT LINKER
       ;;
   *)
       clang_compiler="clang"
-      replace_env $basename
-      unset driver_mode clang_compiler linker
+      replace_env $BASENAME
+      unset CLANG_COMPILER DRIVER_MODE CLANG_CFI OPT LINKER
       ;;
   esac
 done
 
-install -vm755 llvm-ld.in x86_64-w64-mingw32-ld
-sed -i "s|@lld_cfi@|${LLD_CFI}|g" x86_64-w64-mingw32-ld 
+install -vm755 llvm-ld.in $M_CROSS/bin/x86_64-w64-mingw32-ld
+sed -i "s|@lld_cfi@|${LLD_CFI}|g" x86_64-w64-mingw32-ld
 
 
 echo "building gendef"
