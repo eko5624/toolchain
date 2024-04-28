@@ -73,7 +73,14 @@ jobs:
           key: llvm-pgo-${{ github.run_id }}
           restore-keys: |
             llvm-pgo-
-
+      
+      - name: Load llvm-project source
+        uses: actions/cache@main
+        id: llvm-source
+        with:
+          path: ${{ github.workspace }}/source/llvm-project
+          key: llvm-source-cache
+          
       - name: Install fuchsia-clang
         if: ${{ steps.llvm-pgo.outputs.cache-matched-key == '' }}
         run: |
