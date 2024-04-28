@@ -163,6 +163,7 @@ NO_CONFLTO=1 $M_SOURCE/mingw-w64/mingw-w64-crt/configure \
   --prefix=$M_CROSS/$MINGW_TRIPLE \
   --with-sysroot=$M_CROSS \
   --with-default-msvcrt=ucrt \
+  --enable-wildcard \
   --enable-lib64 \
   --disable-lib32 \
   --enable-cfguard \
