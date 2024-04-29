@@ -106,13 +106,15 @@ ln -s $(which pkgconf) $MINGW_TRIPLE-pkgconf
 
 cd $TOP_DIR/gcc-wrapper
 for i in g++ c++ cpp gcc; do
-  basename=x86_64-w64-mingw32-$i
+  BASENAME=x86_64-w64-mingw32-$i
   install -vm755 gcc-compiler.in $M_CROSS/bin/$BASENAME
-  sed -i "s|@opt@|${OPT}|g" $M_CROSS/bin/$BASENAME
+  sed -e "s|@opt@|${OPT}|g" \
+      -e "s|@compiler@|$i|g" \
+      -i $M_CROSS/bin/$BASENAME
 done
 
 for i in ld ld.bfd; do
-  basename=x86_64-w64-mingw32-$i
+  BASENAME=x86_64-w64-mingw32-$i
   install -vm755 gcc-ld.in $M_CROSS/bin/$BASENAME
 done
 
