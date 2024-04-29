@@ -1,7 +1,7 @@
 #!/bin/bash
 DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && cd .. && pwd)
-PROG=$DIR/bin/cross-c++
-FLAGS="$FLAGS -O3"
+PROG=$DIR/bin/cross-@compiler@
+FLAGS="$FLAGS@opt@"
 
 if [ "$NO_CONFLTO" == "1" ]; then
     SKIP_OPT="-g0 -O0 -fno-lto -fno-data-sections -fno-function-sections"
@@ -15,4 +15,4 @@ if [ "@GCC_ARCH_HAS_AVX512@" == "ON" ]; then
     FLAGS="$FLAGS -Wa,-muse-unaligned-vector-move"
 fi
 
-$CCACHE "$PROG" "$@" $FLAGS $SKIP_OPT
+$CCACHE "$PROG" "$@" $FLAGS $GCC_FLAGS $SKIP_OPT

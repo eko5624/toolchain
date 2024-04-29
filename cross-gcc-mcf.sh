@@ -22,11 +22,11 @@ while [ $# -gt 0 ]; do
     case "$1" in
     --build-x86_64)
         GCC_ARCH="x86-64"
-        GCC_WRAPPER_DIR="gcc-wrapper-x86_64"
+        unset OPT
         ;;
     --build-x86_64_v3)
         GCC_ARCH="x86-64-v3"
-        GCC_WRAPPER_DIR="gcc-wrapper-x86_64_v3"
+        OPT=" -O3"
         ;;
     *)
         echo Unrecognized parameter $1
@@ -103,6 +103,18 @@ ln -s cross-windres $MINGW_TRIPLE-windres
 ln -s cross-addr2line $MINGW_TRIPLE-addr2line
 ln -s $(which pkgconf) $MINGW_TRIPLE-pkg-config
 ln -s $(which pkgconf) $MINGW_TRIPLE-pkgconf
+
+cd $TOP_DIR/gcc-wrapper
+for i in g++ c++ cpp gcc; do
+  basename=x86_64-w64-mingw32-$i
+  install -vm755 gcc-compiler.in $M_CROSS/bin/$BASENAME
+  sed -i "s|@opt@|${OPT}|g" $M_CROSS/bin/$BASENAME
+done
+
+for i in ld ld.bfd; do
+  basename=x86_64-w64-mingw32-$i
+  install -vm755 gcc-ld.in $M_CROSS/bin/$BASENAME
+done
 
 echo "building mingw-w64-headers"
 echo "======================="
