@@ -95,13 +95,14 @@ jobs:
             rm llvm$IR-latest.7z || true
             rm -rf cross/bin || true
             rm -rf cross/lib || true
+            rm -rf cross/llvm-lto || true
           
       - name: Build llvm${{ env.IR }}
         if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
         run: |
           set -x
           chmod +x ./llvm.sh
-          ./llvm.sh $PGO $LLVM_LTO $LLVM_CCACHE
+          ./llvm.sh $PGO $LLVM_CCACHE
 
       - name: Save llvm${{ env.IR }} cache
         uses: actions/cache/save@main
