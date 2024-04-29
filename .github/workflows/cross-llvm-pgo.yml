@@ -97,7 +97,7 @@ jobs:
           rm -rf llvm_root/lib || true
           
       - name: Setup llvm-clang toolchain with IR Profile Instrumentation
-        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
+        if: ${{ steps.llvm-pgo.outputs.cache-matched-key == '' }}
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-clang-ir-latest-ucrt-x86_64.7z
           7z x llvm-clang-ir-latest-ucrt-x86_64.7z
