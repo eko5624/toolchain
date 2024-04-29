@@ -126,10 +126,8 @@ jobs:
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
 
       - name: Package llvm-pgo-latest
-        if: ${{ steps.llvm-pgo.outputs.cache-matched-key == '' }}
         run: 7z a llvm-pgo-latest.7z llvm_root/*
       - name: Delete
-        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
         env:
           GH_TOKEN: ${{ github.token }} 
         run: |
