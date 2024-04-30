@@ -321,7 +321,7 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
   -DLLVM_USE_STATIC_ZSTD=ON \
   -Dzstd_LIBRARY=$M_INSTALL/lib/libzstd.a \
   -Dzstd_INCLUDE_DIR=$M_INSTALL/include \
-  -DLLVM_THINLTO_CACHE_PATH="$M_CROSS/llvm-lto" \
+  -DLLVM_THINLTO_CACHE_PATH="$PREFIX/llvm-lto" \
   -DCMAKE_C_FLAGS="-g0 -ftls-model=local-exec ${llvm_lto} ${llvm_pgo}" \
   -DCMAKE_CXX_FLAGS="-g0 -ftls-model=local-exec ${llvm_lto} ${llvm_pgo}" \
   -DCMAKE_EXE_LINKER_FLAGS="$M_INSTALL/lib/mimalloc.o -fuse-ld=lld -Xlinker -s -Xlinker --icf=all -Xlinker -zpack-relative-relocs -Xlinker --thinlto-cache-policy=cache_size_bytes=1g:prune_interval=1m -Xlinker -zcommon-page-size=2097152 -Xlinker -zmax-page-size=2097152 -Xlinker -zseparate-loadable-segments" \
