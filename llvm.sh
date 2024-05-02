@@ -94,7 +94,7 @@ echo "======================="
 cd $M_SOURCE
 
 #llvm
-#git clone https://github.com/llvm/llvm-project.git --branch llvmorg-$VER_LLVM
+git clone https://github.com/llvm/llvm-project.git --branch llvmorg-$VER_LLVM
 if [ ! -d "$M_SOURCE/llvm-project" ]; then
   git clone https://github.com/llvm/llvm-project.git --branch release/18.x
   cd llvm-project
