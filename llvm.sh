@@ -19,10 +19,13 @@ M_INSTALL=$M_ROOT/install
 M_HOST=$M_ROOT/host
 PREFIX=$M_CROSS
 
+llvm_linker_flags=""
+
 PATH="$M_HOST/bin:/usr/local/fuchsia-clang/bin:$PATH"
 LLVM_PROFILE_FILE="/dev/null"
 LLVM_ENABLE_LTO="OFF" #STRING "OFF, ON, Thin and Full"
 LLVM_ENABLE_PGO="OFF" #STRING "OFF, GEN, CSGEN, USE"
+LLVM_ENABLE_2MB_ALIGN="ON" #Align LLVM binary to 2MiB, requires clang verison>=18.1.0
 LLVM_CCACHE_BUILD="OFF"
 
 while [ $# -gt 0 ]; do
@@ -51,9 +54,9 @@ while [ $# -gt 0 ]; do
 done
 
 if [ "$LLVM_ENABLE_LTO" == "Thin" ]; then
-    llvm_lto="-flto=thin -fwhole-program-vtables -fsplit-lto-unit"
+    llvm_lto=" -flto=thin -fwhole-program-vtables -fsplit-lto-unit"
 elif [ "$LLVM_ENABLE_LTO" == "Full" ]; then
-    llvm_lto="-flto=full -fwhole-program-vtables -fsplit-lto-unit"
+    llvm_lto=" -flto=full -fwhole-program-vtables -fsplit-lto-unit"
 fi
 
 if [ "$LLVM_ENABLE_PGO" == "GEN" ] || [ "$LLVM_ENABLE_PGO" == "CSGEN" ]; then
@@ -64,11 +67,15 @@ elif [ "$LLVM_ENABLE_PGO" == "USE" ]; then
 fi
 
 if [ "$LLVM_ENABLE_PGO" == "GEN" ]; then
-   llvm_pgo="-fprofile-generate=${LLVM_PROFILE_DATA_DIR} -fprofile-update=atomic"
+   llvm_pgo=" -fprofile-generate=${LLVM_PROFILE_DATA_DIR} -fprofile-update=atomic"
 elif [ "$LLVM_ENABLE_PGO" == "CSGEN" ]; then
-   llvm_pgo="-fcs-profile-generate=${LLVM_PROFILE_DATA_DIR} -fprofile-update=atomic -fprofile-use=${LLVM_PROFDATA_FILE}"
+   llvm_pgo=" -fcs-profile-generate=${LLVM_PROFILE_DATA_DIR} -fprofile-update=atomic -fprofile-use=${LLVM_PROFDATA_FILE}"
 elif [ "$LLVM_ENABLE_PGO" == "USE" ]; then
-   llvm_pgo="-fprofile-use=${LLVM_PROFDATA_FILE}"
+   llvm_pgo=" -fprofile-use=${LLVM_PROFDATA_FILE}"
+fi
+
+if [ "$LLVM_ENABLE_2MB_ALIGN" == "ON" ]; then
+    llvm_linker_flags+=" -Xlinker -zcommon-page-size=2097152 -Xlinker -zmax-page-size=2097152 -Xlinker -zseparate-loadable-segments"
 fi
 
 if [ "$LLVM_CCACHE_BUILD" == "ON" ]; then
@@ -109,8 +116,8 @@ cmake -G Ninja -H$M_SOURCE/zlib-ng -B$M_BUILD/zlib-build \
   -DZLIB_ENABLE_TESTS=OFF \
   -DZLIBNG_ENABLE_TESTS=OFF \
   -DFNO_LTO_AVAILABLE=OFF \
-  -DCMAKE_C_FLAGS="-pipe -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections ${llvm_lto}" \
-  -DCMAKE_CXX_FLAGS="-pipe -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections ${llvm_lto}" \
+  -DCMAKE_C_FLAGS="-pipe -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections${llvm_lto}" \
+  -DCMAKE_CXX_FLAGS="-pipe -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections${llvm_lto}" \
   -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=lld -Xlinker -s -Xlinker --icf=all -Xlinker --gc-sections"
 cmake --build zlib-build -j$MJOBS
 cmake --install zlib-build
@@ -134,8 +141,8 @@ cmake -G Ninja -H$M_SOURCE/zstd/build/cmake -B$M_BUILD/zstd-build \
   -DZSTD_BUILD_SHARED=OFF \
   -DZSTD_BUILD_STATIC=ON \
   -DZSTD_MULTITHREAD_SUPPORT=ON \
-  -DCMAKE_C_FLAGS="-pipe -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections ${llvm_lto}" \
-  -DCMAKE_CXX_FLAGS="-pipe -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections ${llvm_lto}" \
+  -DCMAKE_C_FLAGS="-pipe -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections${llvm_lto}" \
+  -DCMAKE_CXX_FLAGS="-pipe -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections${llvm_lto}" \
   -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=lld -Xlinker -s -Xlinker --icf=all -Xlinker --gc-sections"
 cmake --build zstd-build -j$MJOBS
 cmake --install zstd-build
@@ -158,8 +165,8 @@ cmake -G Ninja -H$M_SOURCE/mimalloc -B$M_BUILD/mimalloc-build \
   -DMI_BUILD_TESTS=OFF \
   -DMI_BUILD_SHARED=OFF \
   -DMI_BUILD_STATIC=OFF \
-  -DCMAKE_C_FLAGS="-pipe -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections -DMI_DEBUG=0 ${llvm_lto}" \
-  -DCMAKE_CXX_FLAGS="-pipe -ffp-contract=fast -ftls-model=local-exec -flto=thin -fsplit-lto-unit -fwhole-program-vtables -fdata-sections -ffunction-sections -DMI_DEBUG=0 ${llvm_lto}" \
+  -DCMAKE_C_FLAGS="-pipe -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections -DMI_DEBUG=0${llvm_lto}" \
+  -DCMAKE_CXX_FLAGS="-pipe -ffp-contract=fast -ftls-model=local-exec -flto=thin -fsplit-lto-unit -fwhole-program-vtables -fdata-sections -ffunction-sections -DMI_DEBUG=0${llvm_lto}" \
   -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=lld -Xlinker -s -Xlinker --icf=all -Xlinker --gc-sections"
 cmake --build mimalloc-build -j$MJOBS
 cmake --install mimalloc-build
@@ -315,9 +322,9 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
   -Dzstd_LIBRARY=$M_INSTALL/lib/libzstd.a \
   -Dzstd_INCLUDE_DIR=$M_INSTALL/include \
   -DLLVM_THINLTO_CACHE_PATH="$PREFIX/llvm-lto" \
-  -DCMAKE_C_FLAGS="-g0 -ftls-model=local-exec ${llvm_lto} ${llvm_pgo}" \
-  -DCMAKE_CXX_FLAGS="-g0 -ftls-model=local-exec ${llvm_lto} ${llvm_pgo}" \
-  -DCMAKE_EXE_LINKER_FLAGS="$M_INSTALL/lib/mimalloc.o -fuse-ld=lld -Xlinker -s -Xlinker --icf=all -Xlinker -zpack-relative-relocs -Xlinker --thinlto-cache-policy=cache_size_bytes=1g:prune_interval=1m -Xlinker -zcommon-page-size=2097152 -Xlinker -zmax-page-size=2097152 -Xlinker -zseparate-loadable-segments" \
+  -DCMAKE_C_FLAGS="-g0 -ftls-model=local-exec${llvm_lto}${llvm_pgo}" \
+  -DCMAKE_CXX_FLAGS="-g0 -ftls-model=local-exec${llvm_lto}${llvm_pgo}" \
+  -DCMAKE_EXE_LINKER_FLAGS="$M_INSTALL/lib/mimalloc.o -fuse-ld=lld -Xlinker -s -Xlinker --icf=all -Xlinker -zpack-relative-relocs -Xlinker --thinlto-cache-policy=cache_size_bytes=1g:prune_interval=1m${llvm_linker_flags} \
   -DLLVM_TOOLCHAIN_TOOLS="llvm-driver;llvm-ar;llvm-ranlib;llvm-objdump;llvm-rc;llvm-cvtres;llvm-nm;llvm-strings;llvm-readobj;llvm-dlltool;llvm-objcopy;llvm-strip;llvm-cov;llvm-profdata;llvm-addr2line;llvm-symbolizer;llvm-windres;llvm-ml;llvm-readelf;llvm-size"
 cmake --build llvm-build -j$MJOBS
 cmake --install llvm-build
