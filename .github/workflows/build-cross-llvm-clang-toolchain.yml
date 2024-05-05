@@ -82,11 +82,11 @@ jobs:
           restore-keys: |
             llvm${{ env.IR }}-cache-
 
-      - name: Install fuchsia-clang
-        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
-        run: |
-          sudo GOBIN=/usr/bin go install go.chromium.org/luci/cipd/client/cmd/...@latest
-          sudo cipd install fuchsia/third_party/clang/linux-amd64 latest -root /usr/local/fuchsia-clang
+      #- name: Install fuchsia-clang
+      #  if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
+      #  run: |
+      #    sudo GOBIN=/usr/bin go install go.chromium.org/luci/cipd/client/cmd/...@latest
+      #    sudo cipd install fuchsia/third_party/clang/linux-amd64 latest -root /usr/local/fuchsia-clang
 
       - name: Install cross-llvm-clang-pgo
         if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
@@ -94,7 +94,7 @@ jobs:
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.7z || true
           7z x cross-llvm-clang-pgo-latest-ucrt-x86_64.7z || true
           rm cross-llvm-clang-pgo-latest-ucrt-x86_64.7z || true
-          mv llvm_pgo host || true
+          mv cross host || true
 
       - name: Setup llvm-lto llvm-ccache
         if: (steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_thin_lto) || (steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_full_lto) || (steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_ccache)
