@@ -10,30 +10,31 @@ TOP_DIR=$(pwd)
 # Env Var NUMJOBS overrides automatic detection
 MJOBS=$(grep -c processor /proc/cpuinfo)
 
-export M_ROOT=$(pwd)
-export M_SOURCE=$M_ROOT/source
-export M_BUILD=$M_ROOT/build
-export M_CROSS=$M_ROOT/cross
-export LLVM_ROOT=$M_ROOT/llvm_root
-export ORIG_PATH="/usr/local/fuchsia-clang/bin:$PATH"
-export PATH="$M_CROSS/bin:$ORIG_PATH"
-export LLVM_PROFILE_FILE="/dev/null"
+M_ROOT=$(pwd)
+M_SOURCE=$M_ROOT/source
+M_BUILD=$M_ROOT/build
+M_CROSS=$M_ROOT/cross
+PACKAGE_ROOT=$M_ROOT/package
+M_HOST=$M_ROOT/host
+ORIG_PATH="$M_HOST/bin:/usr/local/fuchsia-clang/bin:$PATH"
+PATH="$M_CROSS/bin:$ORIG_PATH"
+LLVM_PROFILE_FILE="/dev/null"
 
 while [ $# -gt 0 ]; do
     case "$1" in
     --enable-pgo_gen)
-        export LLVM_ENABLE_PGO="GEN" #STRING "OFF, GEN, CSGEN, USE"
+        LLVM_ENABLE_PGO="GEN" #STRING "OFF, GEN, CSGEN, USE"
         ;;
     --enable-pgo_csgen)
-        export LLVM_ENABLE_PGO="CSGEN" #STRING "OFF, GEN, CSGEN, USE"
+        LLVM_ENABLE_PGO="CSGEN" #STRING "OFF, GEN, CSGEN, USE"
         ;;
     --enable-package-lto)
-        export CLANG_PACKAGES_LTO="ON"
-        export PACKAGES_LTO_DIR=$LLVM_ROOT/package-lto
+        CLANG_PACKAGES_LTO="ON"
+        PACKAGES_LTO_DIR=$PACKAGE_ROOT/package-lto
         ;;
     --enable-package-ccache)
-        export CCACHE_MAXSIZE="500M"
-        export CCACHE_DIR=$LLVM_ROOT/package-ccache
+        CCACHE_MAXSIZE="500M"
+        CCACHE_DIR=$PACKAGE_ROOT/package-ccache
         mkdir -p $CCACHE_DIR
         cat <<EOF >$CCACHE_DIR/ccache.conf
 cache_dir = "$CCACHE_DIR"
@@ -76,7 +77,7 @@ mv ../glslang third_party
 cd $M_BUILD
 mkdir shaderc-build
 LTO_JOB=1 NO_CONFLTO=1 cmake -G Ninja -H$M_SOURCE/shaderc -B$M_BUILD/shaderc-build \
-  -DCMAKE_INSTALL_PREFIX=$M_CROSS/shaderc \
+  -DCMAKE_INSTALL_PREFIX=$PACKAGE_ROOT/shaderc \
   -DCMAKE_TOOLCHAIN_FILE=$M_SOURCE/shaderc/cmake/linux-mingw-toolchain.cmake \
   -DCMAKE_BUILD_TYPE=Release \
   -DSHADERC_SKIP_TESTS=ON \
@@ -91,7 +92,7 @@ LTO_JOB=1 NO_CONFLTO=1 cmake -G Ninja -H$M_SOURCE/shaderc -B$M_BUILD/shaderc-bui
   -DSPIRV_TOOLS_LIBRARY_TYPE=STATIC \
   -DMINGW_COMPILER_PREFIX="x86_64-w64-mingw32"
 LTO_JOB=1 cmake --build shaderc-build -j$MJOBS
-rm -rf $M_CROSS/shaderc
+rm -rf $PACKAGE_ROOT/shaderc
 unset LLVM_ENABLE_PGO
 
 echo "merging profraw to profdata"

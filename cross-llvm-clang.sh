@@ -11,28 +11,27 @@ source $TOP_DIR/ver.sh
 # Env Var NUMJOBS overrides automatic detection
 MJOBS=$(grep -c processor /proc/cpuinfo)
 
-export MINGW_TRIPLE="x86_64-w64-mingw32"
+MINGW_TRIPLE="x86_64-w64-mingw32"
 
-export M_ROOT=$(pwd)
-export M_SOURCE=$M_ROOT/source
-export M_BUILD=$M_ROOT/build
-export M_CROSS=$M_ROOT/cross
-export RUSTUP_LOCATION=$M_ROOT/rust
+M_ROOT=$(pwd)
+M_SOURCE=$M_ROOT/source
+M_BUILD=$M_ROOT/build
+M_CROSS=$M_ROOT/cross
 
-export PATH="$M_CROSS/bin:$RUSTUP_LOCATION/.cargo/bin:$PATH"
-export RUSTUP_HOME="$RUSTUP_LOCATION/.rustup"
-export CARGO_HOME="$RUSTUP_LOCATION/.cargo"
-export LLVM_ENABLE_PGO="OFF" #STRING "OFF, GEN, CSGEN, USE"
-export LLVM_PROFILE_FILE="/dev/null"
+PATH="$M_CROSS/bin:$PATH"
+LLVM_ENABLE_PGO="OFF" #STRING "OFF, GEN, CSGEN, USE"
+LLVM_PROFILE_FILE="/dev/null"
 
 while [ $# -gt 0 ]; do
     case "$1" in
     --enable-pgo_gen)
-        export LLVM_ENABLE_PGO="GEN" #STRING "OFF, GEN, CSGEN, USE"
+        LLVM_ENABLE_PGO="GEN" #STRING "OFF, GEN, CSGEN, USE"
         ;;
     --build-x86_64)
         GCC_ARCH="x86-64"
-        unset CLANG_CFI LLD_CFI OPT
+        CLANG_CFI=""
+        LLD_CFI=""
+        OPT=""
         ;;
     --build-x86_64_v3)
         GCC_ARCH="x86-64-v3"
@@ -100,19 +99,23 @@ replace_env() {
       -e "s|@linker@|${LINKER}|g" \
       -i "$1"
 }
+
+CLANG_COMPILER=""
+DRIVER_MODE=""
+LINKER=""
 for i in clang++ g++ c++ clang gcc as; do
   BASENAME=x86_64-w64-mingw32-$i
   install -vm755 llvm-compiler.in $M_CROSS/bin/$BASENAME
   case $BASENAME in
   x86_64-w64-mingw32-g++|x86_64-w64-mingw32-c++)
-      DRIVER_MODE=" --driver-mode=g++ -pthread"
       CLANG_COMPILER="clang++"
+      DRIVER_MODE=" --driver-mode=g++ -pthread"
       replace_env $M_CROSS/bin/$BASENAME
       unset CLANG_COMPILER DRIVER_MODE CLANG_CFI OPT LINKER
       ;;
   x86_64-w64-mingw32-clang++)
-      DRIVER_MODE=" --driver-mode=g++"
       CLANG_COMPILER="clang++"
+      DRIVER_MODE=" --driver-mode=g++"
       LINKER=" -lc++abi"
       replace_env $M_CROSS/bin/$BASENAME
       unset CLANG_COMPILER DRIVER_MODE CLANG_CFI OPT LINKER
@@ -295,26 +298,3 @@ cp $M_CROSS/$MINGW_TRIPLE/lib/libclang* $(x86_64-w64-mingw32-gcc -print-runtime-
 #Remove profraw
 rm -rf $M_CROSS/profiles/* || true
 
-#echo "building llvm-openmp"
-#echo "======================="
-#cd $M_BUILD
-#mkdir openmp-build
-#cd openmp-build
-#curl -OL https://raw.githubusercontent.com/shinchiro/mpv-winbuild-cmake/master/toolchain/llvm/llvm-openmp-0001-support-static-lib.patch
-#cd $M_SOURCE/llvm-project
-#patch -p1 -i $M_BUILD/openmp-build/llvm-openmp-0001-support-static-lib.patch
-#cd $M_BUILD
-#NO_CONFLTO=1 cmake -G Ninja -H$M_SOURCE/llvm-project/openmp -B$M_BUILD/openmp-build \
-#  -DCMAKE_BUILD_TYPE=Release \
-#  -DCMAKE_INSTALL_PREFIX=$M_CROSS/$MINGW_TRIPLE \
-#  -DCMAKE_C_COMPILER=$MINGW_TRIPLE-clang \
-#  -DCMAKE_CXX_COMPILER=$MINGW_TRIPLE-clang++ \
-#  -DCMAKE_RC_COMPILER=$MINGW_TRIPLE-windres \
-#  -DCMAKE_ASM_MASM_COMPILER=llvm-ml \
-#  -DCMAKE_SYSTEM_NAME=Windows \
-#  -DCMAKE_AR=$M_CROSS/bin/llvm-ar \
-#  -DCMAKE_RANLIB=$M_CROSS/bin/llvm-ranlib \
-#  -DLIBOMP_ENABLE_SHARED=FALSE \
-#  -DLIBOMP_ASMFLAGS=-m64
-#ninja -j$MJOBS -C openmp-build
-#ninja install -C openmp-build

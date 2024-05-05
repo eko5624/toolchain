@@ -11,41 +11,36 @@ source $TOP_DIR/ver.sh
 # Env Var NUMJOBS overrides automatic detection
 MJOBS=$(grep -c processor /proc/cpuinfo)
 
-export M_ROOT=$(pwd)
-export M_SOURCE=$M_ROOT/source
-export M_BUILD=$M_ROOT/build
-export M_CROSS=$M_ROOT/cross
-export M_INSTALL=$M_ROOT/install
+M_ROOT=$(pwd)
+M_SOURCE=$M_ROOT/source
+M_BUILD=$M_ROOT/build
+M_CROSS=$M_ROOT/cross
+M_INSTALL=$M_ROOT/install
+M_HOST=$M_ROOT/host
+PREFIX=$M_CROSS
 
-export PATH="/usr/local/fuchsia-clang/bin:$PATH"
-export PKG_CONFIG_LIBDIR="$M_INSTALL/lib/pkgconfig"
-export PKG_CONFIG="pkgconf --static"
-export CFLAGS="-I$M_INSTALL/include"
-export CPPFLAGS="-I$M_INSTALL/include"
-export LDFLAGS="-L$M_INSTALL/lib"
-
-export LLVM_PROFILE_FILE="/dev/null"
-export LLVM_ENABLE_LTO="OFF" #STRING "OFF, ON, Thin and Full"
-export LLVM_ENABLE_PGO="OFF" #STRING "OFF, GEN, CSGEN, USE"
-export LLVM_CCACHE_BUILD="OFF"
-export PREFIX=$M_CROSS
+PATH="$M_HOST/bin:/usr/local/fuchsia-clang/bin:$PATH"
+LLVM_PROFILE_FILE="/dev/null"
+LLVM_ENABLE_LTO="OFF" #STRING "OFF, ON, Thin and Full"
+LLVM_ENABLE_PGO="OFF" #STRING "OFF, GEN, CSGEN, USE"
+LLVM_CCACHE_BUILD="OFF"
 
 while [ $# -gt 0 ]; do
     case "$1" in
     --enable-pgo_gen)
-        export LLVM_ENABLE_PGO="GEN" #STRING "OFF, GEN, CSGEN, USE"
+        LLVM_ENABLE_PGO="GEN" #STRING "OFF, GEN, CSGEN, USE"
         ;;
     --enable-pgo_use)
-        export LLVM_ENABLE_PGO="USE" #STRING "OFF, GEN, CSGEN, USE"
+        LLVM_ENABLE_PGO="USE" #STRING "OFF, GEN, CSGEN, USE"
         ;;
     --enable-llvm-thin_lto)
-        export LLVM_ENABLE_LTO="Thin" #STRING "OFF, ON, Thin and Full"
+        LLVM_ENABLE_LTO="Thin" #STRING "OFF, ON, Thin and Full"
         ;;
     --enable-llvm-full_lto)
-        export LLVM_ENABLE_LTO="Full" #STRING "OFF, ON, Thin and Full"
+        LLVM_ENABLE_LTO="Full" #STRING "OFF, ON, Thin and Full"
         ;;
     --enable-llvm-ccache)
-        export LLVM_CCACHE_BUILD="ON" #STRING "OFF, GEN, CSGEN, USE"
+        LLVM_CCACHE_BUILD="ON" #STRING "OFF, GEN, CSGEN, USE"
         ;;
     *)
         echo Unrecognized parameter $1
@@ -56,34 +51,30 @@ while [ $# -gt 0 ]; do
 done
 
 if [ "$LLVM_ENABLE_LTO" == "Thin" ]; then
-    export llvm_lto="-flto=thin -fwhole-program-vtables -fsplit-lto-unit"
+    llvm_lto="-flto=thin -fwhole-program-vtables -fsplit-lto-unit"
 elif [ "$LLVM_ENABLE_LTO" == "Full" ]; then
-    export llvm_lto="-flto=full -fwhole-program-vtables -fsplit-lto-unit"
+    llvm_lto="-flto=full -fwhole-program-vtables -fsplit-lto-unit"
+fi
+
+if [ "$LLVM_ENABLE_PGO" == "GEN" ] || [ "$LLVM_ENABLE_PGO" == "CSGEN" ]; then
+    LLVM_PROFILE_DATA_DIR="$PREFIX/profiles" #PATH "Default profile generation directory"
+elif [ "$LLVM_ENABLE_PGO" == "USE" ]; then
+    PREFIX=$M_ROOT/llvm_pgo
+    LLVM_PROFDATA_FILE=$M_ROOT/llvm.profdata
 fi
 
 if [ "$LLVM_ENABLE_PGO" == "GEN" ]; then
-    export PREFIX=$M_ROOT/cross
-    export LLVM_PROFILE_DATA_DIR="$PREFIX/profiles" #PATH "Default profile generation directory"
+   llvm_pgo="-fprofile-generate=${LLVM_PROFILE_DATA_DIR} -fprofile-update=atomic"
 elif [ "$LLVM_ENABLE_PGO" == "CSGEN" ]; then
-    export PREFIX=$M_ROOT/llvm_root
-    export LLVM_PROFILE_DATA_DIR="$PREFIX/profiles" #PATH "Default profile generation directory"
+   llvm_pgo="-fcs-profile-generate=${LLVM_PROFILE_DATA_DIR} -fprofile-update=atomic -fprofile-use=${LLVM_PROFDATA_FILE}"
 elif [ "$LLVM_ENABLE_PGO" == "USE" ]; then
-    export PREFIX=$M_ROOT/llvm_root
-    export LLVM_PROFDATA_FILE=$M_ROOT/llvm.profdata
-fi
-
-if [ "$LLVM_ENABLE_PGO" == "GEN" ]; then
-    export llvm_pgo="-fprofile-generate=${LLVM_PROFILE_DATA_DIR} -fprofile-update=atomic"
-elif [ "$LLVM_ENABLE_PGO" == "CSGEN" ]; then
-    export llvm_pgo="-fcs-profile-generate=${LLVM_PROFILE_DATA_DIR} -fprofile-update=atomic -fprofile-use=${LLVM_PROFDATA_FILE}"
-elif [ "$LLVM_ENABLE_PGO" == "USE" ]; then
-    export llvm_pgo="-fprofile-use=${LLVM_PROFDATA_FILE}"
+   llvm_pgo="-fprofile-use=${LLVM_PROFDATA_FILE}"
 fi
 
 if [ "$LLVM_CCACHE_BUILD" == "ON" ]; then
-    export LLVM_CCACHE_MAXSIZE="500M"
-    export LLVM_CCACHE_DIR=$PREFIX/llvm-ccache
-    export llvm_ccache="-DLLVM_CCACHE_BUILD=ON -DLLVM_CCACHE_DIR=${LLVM_CCACHE_DIR} -DLLVM_CCACHE_MAXSIZE=${LLVM_CCACHE_MAXSIZE}"
+    LLVM_CCACHE_MAXSIZE="500M"
+    LLVM_CCACHE_DIR=$PREFIX/llvm-ccache
+    llvm_ccache="-DLLVM_CCACHE_BUILD=ON -DLLVM_CCACHE_DIR=${LLVM_CCACHE_DIR} -DLLVM_CCACHE_MAXSIZE=${LLVM_CCACHE_MAXSIZE}"
 fi  
 
 mkdir -p $M_SOURCE
@@ -94,7 +85,7 @@ echo "======================="
 cd $M_SOURCE
 
 #llvm
-git clone https://github.com/llvm/llvm-project.git --branch llvmorg-$VER_LLVM
+#git clone https://github.com/llvm/llvm-project.git --branch release/18.x llvmorg-$VER_LLVM
 if [ ! -d "$M_SOURCE/llvm-project" ]; then
   git clone https://github.com/llvm/llvm-project.git --branch release/18.x
   cd llvm-project
@@ -118,8 +109,8 @@ cmake -G Ninja -H$M_SOURCE/zlib-ng -B$M_BUILD/zlib-build \
   -DZLIB_ENABLE_TESTS=OFF \
   -DZLIBNG_ENABLE_TESTS=OFF \
   -DFNO_LTO_AVAILABLE=OFF \
-  -DCMAKE_C_FLAGS="-march=native -pipe -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections ${llvm_lto}" \
-  -DCMAKE_CXX_FLAGS="-march=native -pipe -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections ${llvm_lto}" \
+  -DCMAKE_C_FLAGS="-pipe -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections ${llvm_lto}" \
+  -DCMAKE_CXX_FLAGS="-pipe -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections ${llvm_lto}" \
   -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=lld -Xlinker -s -Xlinker --icf=all -Xlinker --gc-sections"
 cmake --build zlib-build -j$MJOBS
 cmake --install zlib-build
@@ -143,8 +134,8 @@ cmake -G Ninja -H$M_SOURCE/zstd/build/cmake -B$M_BUILD/zstd-build \
   -DZSTD_BUILD_SHARED=OFF \
   -DZSTD_BUILD_STATIC=ON \
   -DZSTD_MULTITHREAD_SUPPORT=ON \
-  -DCMAKE_C_FLAGS="-march=native -pipe -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections ${llvm_lto}" \
-  -DCMAKE_CXX_FLAGS="-march=native -pipe -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections ${llvm_lto}" \
+  -DCMAKE_C_FLAGS="-pipe -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections ${llvm_lto}" \
+  -DCMAKE_CXX_FLAGS="-pipe -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections ${llvm_lto}" \
   -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=lld -Xlinker -s -Xlinker --icf=all -Xlinker --gc-sections"
 cmake --build zstd-build -j$MJOBS
 cmake --install zstd-build
@@ -167,8 +158,8 @@ cmake -G Ninja -H$M_SOURCE/mimalloc -B$M_BUILD/mimalloc-build \
   -DMI_BUILD_TESTS=OFF \
   -DMI_BUILD_SHARED=OFF \
   -DMI_BUILD_STATIC=OFF \
-  -DCMAKE_C_FLAGS="-march=native -pipe -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections -DMI_DEBUG=0 ${llvm_lto}" \
-  -DCMAKE_CXX_FLAGS="-march=native -pipe -ffp-contract=fast -ftls-model=local-exec -flto=thin -fsplit-lto-unit -fwhole-program-vtables -fdata-sections -ffunction-sections -DMI_DEBUG=0 ${llvm_lto}" \
+  -DCMAKE_C_FLAGS="-pipe -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections -DMI_DEBUG=0 ${llvm_lto}" \
+  -DCMAKE_CXX_FLAGS="-pipe -ffp-contract=fast -ftls-model=local-exec -flto=thin -fsplit-lto-unit -fwhole-program-vtables -fdata-sections -ffunction-sections -DMI_DEBUG=0 ${llvm_lto}" \
   -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=lld -Xlinker -s -Xlinker --icf=all -Xlinker --gc-sections"
 cmake --build mimalloc-build -j$MJOBS
 cmake --install mimalloc-build
@@ -182,7 +173,9 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_C_COMPILER=clang \
   -DCMAKE_CXX_COMPILER=clang++ \
-  -DLLVM_DEFAULT_TARGET_TRIPLE=x86_64-pc-windows-gnu \
+  -DCMAKE_C_COMPILER_TARGET=x86_64-unknown-linux-gnu \
+  -DCMAKE_CXX_COMPILER_TARGET=x86_64-unknown-linux-gnu \
+  -DLLVM_DEFAULT_TARGET_TRIPLE=x86_64-unknown-linux-gnu \
   ${llvm_ccache} \
   -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
   -DLLVM_ENABLE_ASSERTIONS=OFF \

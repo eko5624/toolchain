@@ -1,0 +1,288 @@
+name: llvm-pgo
+defaults:
+  run:
+    shell: bash
+on:
+  workflow_dispatch:
+    inputs:
+      llvm_thin_lto:
+        description: "Build llvm with thin-lto"
+        required: false
+        default: "false"
+        type: boolean
+      llvm_full_lto:
+        description: "Build llvm with full-lto"
+        required: false
+        default: "false"
+        type: boolean
+      llvm_ccache:
+        description: "Build llvm with ccache"
+        required: false
+        default: "false"
+        type: boolean
+      package_lto:
+        description: "Build packages with thin-lto"
+        required: false
+        default: "false"
+        type: boolean        
+      package_ccache:
+        description: "Build packages with cache"
+        required: false
+        default: "false"
+        type: boolean
+  
+jobs:
+  train_pgo:
+    runs-on: ubuntu-latest
+    container:
+      image: docker://ghcr.io/eko5624/archlinux:latest
+    steps:
+      - name: Init variable
+        run: |
+          if [ ${{ inputs.llvm_thin_lto }} == 'true' ]; then
+            echo "LLVM_LTO=--enable-llvm-thin_lto" >> $GITHUB_ENV
+          elif [ ${{ inputs.llvm_full_lto }} == 'true' ]; then
+            echo "LLVM_LTO=--enable-llvm-full_lto" >> $GITHUB_ENV
+          else
+            unset LLVM_LTO
+          fi  
+          if [ ${{ inputs.llvm_ccache }} == 'true' ]; then
+            echo "LLVM_CCACHE=--enable-llvm-ccache" >> $GITHUB_ENV
+          else
+            unset LLVM_CCACHE
+          fi
+          if [ ${{ inputs.package_lto }} == 'true' ]; then
+            echo "PACKAGE_LTO=--enable-package-lto" >> $GITHUB_ENV
+          else
+            unset PACKAGE_LTO
+          fi           
+          if [ ${{ inputs.package_ccache }} == 'true' ]; then
+            echo "PACKAGE_CCACHE=--enable-package-ccache" >> $GITHUB_ENV
+          else
+            unset PACKAGE_CCACHE
+          fi 
+
+      - name: Checkout
+        uses: actions/checkout@main
+
+      - name: Load llvm.profdata cache
+        uses: actions/cache/restore@main
+        id: llvm-profdata
+        with:
+          path: ${{ github.workspace }}/llvm.profdata
+          key: llvm-profdata-${{ github.run_id }}
+          restore-keys: |
+            llvm-profdata-
+
+      - name: Install fuchsia-clang
+        if: ${{ steps.llvm-profdata.outputs.cache-matched-key == '' }}
+        run: |
+          sudo GOBIN=/usr/bin go install go.chromium.org/luci/cipd/client/cmd/...@latest
+          sudo cipd install fuchsia/third_party/clang/linux-amd64 latest -root /usr/local/fuchsia-clang
+
+      - name: Install cross-llvm-clang-pgo
+        if: ${{ steps.llvm-profdata.outputs.cache-matched-key == '' }}
+        run: |
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.7z || true
+          7z x cross-llvm-clang-pgo-latest-ucrt-x86_64.7z || true
+          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.7z || true
+          mv llvm_host host || true
+
+      - name: Install shaderc package-lto and package-ccache
+        if: (steps.llvm-profdata.outputs.cache-matched-key == '' && inputs.package_lto) || (steps.llvm-profdata.outputs.cache-matched-key == '' && inputs.package_ccache)
+        run: |
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/shaderc-package.7z || true
+          7z x shaderc-package.7z || true 
+          rm shaderc-package.7z || true
+
+      - name: Setup llvm-clang toolchain with IR Profile Instrumentation
+        if: ${{ steps.llvm-profdata.outputs.cache-matched-key == '' }}
+        run: |
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-clang-ir-latest-ucrt-x86_64.7z
+          7z x llvm-clang-ir-latest-ucrt-x86_64.7z
+          rm llvm-clang-ir-latest-ucrt-x86_64.7z
+
+      - name: Train pgo with shaderc
+        if: ${{ steps.llvm-profdata.outputs.cache-matched-key == '' }}
+        run: |
+          chmod +x ./train-pgo.sh
+          ./train-pgo.sh --enable-pgo_gen
+
+      - name: Save llvm.profdata cache
+        if: ${{ steps.llvm-profdata.outputs.cache-matched-key == '' }}
+        uses: actions/cache/save@main
+        with:
+          path: ${{ github.workspace }}/llvm.profdata
+          key: llvm-profdata-${{ github.run_id }}
+
+  llvm_clang_pgo:
+    needs: train_pgo
+    runs-on: ubuntu-latest
+    container:
+      image: docker://ghcr.io/eko5624/archlinux:latest
+    steps:
+      - name: Init variable
+        run: |
+          if [ ${{ inputs.llvm_thin_lto }} == 'true' ]; then
+            echo "LLVM_LTO=--enable-llvm-thin_lto" >> $GITHUB_ENV
+          elif [ ${{ inputs.llvm_full_lto }} == 'true' ]; then
+            echo "LLVM_LTO=--enable-llvm-full_lto" >> $GITHUB_ENV
+          else
+            unset LLVM_LTO
+          fi  
+          if [ ${{ inputs.llvm_ccache }} == 'true' ]; then
+            echo "LLVM_CCACHE=--enable-llvm-ccache" >> $GITHUB_ENV
+          else
+            unset LLVM_CCACHE
+          fi
+          if [ ${{ inputs.package_lto }} == 'true' ]; then
+            echo "PACKAGE_LTO=--enable-package-lto" >> $GITHUB_ENV
+          else
+            unset PACKAGE_LTO
+          fi           
+          if [ ${{ inputs.package_ccache }} == 'true' ]; then
+            echo "PACKAGE_CCACHE=--enable-package-ccache" >> $GITHUB_ENV
+          else
+            unset PACKAGE_CCACHE
+          fi 
+
+      - name: Checkout
+        uses: actions/checkout@main
+
+      - name: Load cross-llvm-pgo cache
+        uses: actions/cache/restore@main
+        id: cross-llvm-pgo
+        with:
+          path: ${{ github.workspace }}/llvm_root
+          key: cross-llvm-pgo-${{ github.run_id }}
+          restore-keys: |
+            cross-llvm-pgo-
+
+      - name: Load llvm.profdata cache
+        uses: actions/cache/restore@main
+        id: llvm-profdata
+        with:
+          path: ${{ github.workspace }}/llvm.profdata
+          key: llvm-profdata-${{ github.run_id }}
+          restore-keys: |
+            llvm-profdata-
+
+      - name: Load llvm-project source
+        uses: actions/cache@main
+        id: llvm-source
+        with:
+          path: ${{ github.workspace }}/source/llvm-project
+          key: llvm-source-cache
+
+      - name: Install fuchsia-clang
+        if: ${{ steps.cross-llvm-pgo.outputs.cache-matched-key == '' }}
+        run: |
+          sudo GOBIN=/usr/bin go install go.chromium.org/luci/cipd/client/cmd/...@latest
+          sudo cipd install fuchsia/third_party/clang/linux-amd64 latest -root /usr/local/fuchsia-clang
+
+      - name: Install cross-llvm-clang-pgo
+        if: ${{ steps.cross-llvm-pgo.outputs.cache-matched-key == '' }}
+        run: |
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.7z || true
+          7z x cross-llvm-clang-pgo-latest-ucrt-x86_64.7z || true
+          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.7z || true
+          mv llvm_pgo host || true
+
+      - name: Install llvm-lto llvm-ccache
+        if: (steps.cross-llvm-pgo.outputs.cache-matched-key == '' && inputs.llvm_thin_lto) || (steps.llvm-pgo.outputs.cache-matched-key == '' && inputs.llvm_full_lto) || (steps.llvm-pgo.outputs.cache-matched-key == '' && inputs.llvm_ccache)
+        run: |
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-pgo-latest.7z || true
+          7z x cross-llvm-pgo-latest.7z || true 
+          rm cross-llvm-pgo-latest.7z || true
+          rm -rf llvm_pgo/bin || true
+          rm -rf llvm_pgo/lib || true
+
+      - name: Build llvm with pgo
+        if: ${{ steps.cross-llvm-pgo.outputs.cache-matched-key == '' }}
+        run: |
+          chmod +x ./llvm.sh
+          ./llvm.sh --enable-pgo_use $LLVM_LTO $LLVM_CCACHE
+
+      - name: Save cross-llvm-pgo cache
+        if: ${{ steps.cross-llvm-pgo.outputs.cache-matched-key == '' }}
+        uses: actions/cache/save@main
+        with:
+          path: ${{ github.workspace }}/llvm_pgo
+          key: cross-llvm-pgo-${{ github.run_id }}
+
+      - name: Get current timestamp
+        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
+
+      - name: Package cross-llvm-pgo
+        if: ${{ steps.cross-llvm-pgo.outputs.cache-matched-key == '' }}
+        run: 7z a cross-llvm-pgo-latest.7z llvm_pgo/*
+      - name: Delete
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-delete.sh
+          ./package-delete.sh cross-llvm-pgo-latest.7z
+      - name: Release
+        if: ${{ steps.cross-llvm-pgo.outputs.cache-matched-key == '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          chmod +x ./package-release.sh
+          ./package-release.sh
+
+      - name: Remove llvm-lto llvm-ccache dirs
+        run: |
+          rm -rf llvm_pgo/llvm-lto || true
+          rm -rf llvm_pgo/llvm-ccache || true
+
+      - name: Build host libcxx compiler-rt-builtin compiler-rt
+        run: |
+          chmod +x ./host-llvm-clang.sh
+          ./host-llvm-clang.sh
+
+      - name: Package x86_64 toolchain
+        run: |
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-clang-ir-latest-ucrt-x86_64.7z
+          7z x llvm-clang-ir-latest-ucrt-x86_64.7z
+          rm llvm-clang-ir-latest-ucrt-x86_64.7z
+          rm -rf cross/profiles
+          cp -rf llvm_pgo/* cross
+          7z a cross-llvm-clang-pgo-${{ env.date }}-ucrt-x86_64.7z cross/*
+          cp cross-llvm-clang-pgo-${{ env.date }}-ucrt-x86_64.7z cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
+          rm -rf cross
+      - name: Delete
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          chmod +x ./package-delete.sh
+          ./package-delete.sh cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
+
+      - name: Packaging x86_64_v3 toolchain
+        run: |
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-clang-ir-latest-ucrt-x86_64_v3.7z
+          7z x llvm-clang-ir-latest-ucrt-x86_64_v3.7z
+          rm llvm-clang-ir-latest-ucrt-x86_64_v3.7z
+          rm -rf cross/profiles
+          cp -rf llvm_pgo/* cross
+          7z a cross-llvm-clang-pgo-${{ env.date }}-ucrt-x86_64_v3.7z cross/*
+          cp cross-llvm-clang-pgo-${{ env.date }}-ucrt-x86_64_v3.7z cross-llvm-clang-pgo-latest-ucrt-x86_64_v3.7z
+          rm -rf cross
+      - name: Delete
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-delete.sh
+          ./package-delete.sh cross-llvm-clang-pgo-latest-ucrt-x86_64_v3.7z
+      - name: Release
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-release.sh
+          ./package-release.sh
+      - name: Remove all *.7z packages
+        continue-on-error: true
+        run: rm *.7z
+

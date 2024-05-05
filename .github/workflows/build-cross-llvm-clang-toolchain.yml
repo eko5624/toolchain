@@ -61,12 +61,7 @@ jobs:
             echo "LLVM_CCACHE=--enable-llvm-ccache" >> $GITHUB_ENV
           else
             unset LLVM_CCACHE
-          fi        
-
-      - name: Install fuchsia-clang
-        run: |
-          sudo GOBIN=/usr/bin go install go.chromium.org/luci/cipd/client/cmd/...@latest
-          sudo cipd install fuchsia/third_party/clang/linux-amd64 latest -root /usr/local/fuchsia-clang
+          fi
 
       - name: Checkout
         uses: actions/checkout@main
@@ -87,7 +82,21 @@ jobs:
           restore-keys: |
             llvm${{ env.IR }}-cache-
 
-      - name: Setup llvm${{ env.IR }}
+      - name: Install fuchsia-clang
+        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
+        run: |
+          sudo GOBIN=/usr/bin go install go.chromium.org/luci/cipd/client/cmd/...@latest
+          sudo cipd install fuchsia/third_party/clang/linux-amd64 latest -root /usr/local/fuchsia-clang
+
+      - name: Install cross-llvm-clang-pgo
+        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
+        run: |
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.7z || true
+          7z x cross-llvm-clang-pgo-latest-ucrt-x86_64.7z || true
+          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.7z || true
+          mv llvm_pgo host || true
+
+      - name: Setup llvm-lto llvm-ccache
         if: (steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_thin_lto) || (steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_full_lto) || (steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_ccache)
         run: |
             curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm$IR-latest.7z || true
@@ -95,7 +104,6 @@ jobs:
             rm llvm$IR-latest.7z || true
             rm -rf cross/bin || true
             rm -rf cross/lib || true
-            rm -rf cross/llvm-lto || true
           
       - name: Build llvm${{ env.IR }}
         if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
