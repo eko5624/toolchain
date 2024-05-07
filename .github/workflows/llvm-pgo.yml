@@ -189,7 +189,7 @@ jobs:
           mv cross host || true
 
       - name: Install llvm-lto llvm-ccache
-        if: (steps.cross-llvm-pgo.outputs.cache-matched-key == '' && inputs.llvm_thin_lto) || (steps.llvm-pgo.outputs.cache-matched-key == '' && inputs.llvm_full_lto) || (steps.llvm-pgo.outputs.cache-matched-key == '' && inputs.llvm_ccache)
+        if: (steps.cross-llvm-pgo.outputs.cache-matched-key == '' && inputs.llvm_thin_lto) || (steps.cross-llvm-pgo.outputs.cache-matched-key == '' && inputs.llvm_full_lto) || (steps.cross-llvm-pgo.outputs.cache-matched-key == '' && inputs.llvm_ccache)
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-pgo-latest.7z || true
           7z x cross-llvm-pgo-latest.7z || true 
