@@ -153,7 +153,7 @@ jobs:
         uses: actions/cache/restore@main
         id: cross-llvm-pgo
         with:
-          path: ${{ github.workspace }}/llvm_root
+          path: ${{ github.workspace }}/llvm_pgo
           key: cross-llvm-pgo-${{ github.run_id }}
           restore-keys: |
             cross-llvm-pgo-
