@@ -106,7 +106,7 @@ jobs:
         if: ${{ steps.llvm-profdata.outputs.cache-matched-key == '' }}
         run: |
           chmod +x ./train-pgo.sh
-          ./train-pgo.sh --enable-pgo_gen
+          ./train-pgo.sh --enable-pgo_gen $PACKAGE_LTO $PACKAGE_CCACHE
 
       - name: Save llvm.profdata cache
         if: ${{ steps.llvm-profdata.outputs.cache-matched-key == '' }}
@@ -114,6 +114,23 @@ jobs:
         with:
           path: ${{ github.workspace }}/llvm.profdata
           key: llvm-profdata-${{ github.run_id }}
+
+      - name: Package shaderc ccache
+        if: ${{ steps.llvm-profdata.outputs.cache-matched-key == '' }}
+        run: 7z a shaderc-package.7z package/*
+      - name: Delete
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-delete.sh
+          ./package-delete.sh shaderc-package.7z
+      - name: Release
+        if: ${{ steps.llvm-profdata.outputs.cache-matched-key == '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          chmod +x ./package-release.sh
+          ./package-release.sh
 
   llvm_clang_pgo:
     needs: train_pgo
@@ -201,7 +218,7 @@ jobs:
         if: ${{ steps.cross-llvm-pgo.outputs.cache-matched-key == '' }}
         run: |
           chmod +x ./llvm.sh
-          ./llvm.sh --enable-pgo_use $LLVM_LTO $LLVM_CCACHE
+          ./llvm.sh --enable-pgo_use --enable-bolt_use $LLVM_LTO $LLVM_CCACHE
 
       - name: Save cross-llvm-pgo cache
         if: ${{ steps.cross-llvm-pgo.outputs.cache-matched-key == '' }}
@@ -240,13 +257,17 @@ jobs:
           chmod +x ./host-llvm-clang.sh
           ./host-llvm-clang.sh
 
-      - name: Package x86_64 toolchain
+      - name: Train bolt with sqlite (x86_64)
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-clang-ir-latest-ucrt-x86_64.7z
           7z x llvm-clang-ir-latest-ucrt-x86_64.7z
           rm llvm-clang-ir-latest-ucrt-x86_64.7z
           rm -rf cross/profiles
           cp -rf llvm_pgo/* cross
+          chmod +x ./train-bolt.sh
+          ./train-bolt.sh
+      - name: Package x86_64 toolchain
+        run: |
           7z a cross-llvm-clang-pgo-${{ env.date }}-ucrt-x86_64.7z cross/*
           cp cross-llvm-clang-pgo-${{ env.date }}-ucrt-x86_64.7z cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
           rm -rf cross
@@ -258,13 +279,17 @@ jobs:
           chmod +x ./package-delete.sh
           ./package-delete.sh cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
 
-      - name: Packaging x86_64_v3 toolchain
+      - name: Train bolt with sqlite (x86_64_v3)
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-clang-ir-latest-ucrt-x86_64_v3.7z
           7z x llvm-clang-ir-latest-ucrt-x86_64_v3.7z
           rm llvm-clang-ir-latest-ucrt-x86_64_v3.7z
           rm -rf cross/profiles
           cp -rf llvm_pgo/* cross
+          chmod +x ./train-bolt.sh
+          ./train-bolt.sh
+      - name: Package x86_64_v3 toolchain   
+        run: |
           7z a cross-llvm-clang-pgo-${{ env.date }}-ucrt-x86_64_v3.7z cross/*
           cp cross-llvm-clang-pgo-${{ env.date }}-ucrt-x86_64_v3.7z cross-llvm-clang-pgo-latest-ucrt-x86_64_v3.7z
           rm -rf cross
@@ -275,6 +300,7 @@ jobs:
         run: |
           chmod +x ./package-delete.sh
           ./package-delete.sh cross-llvm-clang-pgo-latest-ucrt-x86_64_v3.7z
+
       - name: Release
         continue-on-error: true
         env:
@@ -285,4 +311,3 @@ jobs:
       - name: Remove all *.7z packages
         continue-on-error: true
         run: rm *.7z
-
