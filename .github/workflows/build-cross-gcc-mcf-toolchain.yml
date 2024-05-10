@@ -8,24 +8,111 @@ on:
 jobs:
   build_cross-gcc-mcf-x86_64:
     runs-on: ubuntu-latest
-    env:
-      GH_TOKEN: ${{ github.token }}
+    container:
+      image: docker://ghcr.io/eko5624/archlinux:latest
     steps:
-      - name: Run cross-gcc-mcf-x86_64.yml
+      - name: Install Dependencies
         run: |
-          curl -u eko5624:$GH_TOKEN \
-            -X POST -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/eko5624/toolchain/actions/workflows/cross-gcc-mcf-x86_64.yml/dispatches \
-            -d '{"ref":"main"}'
+          sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
+          sudo pacman -Syu --noconfirm
+          sudo pacman -S --noconfirm --needed mingw-w64-gcc
+      - uses: actions/checkout@main
+      - name: Loading gcc cache
+        uses: actions/cache/restore@main
+        with:
+          path: ${{ github.workspace }}/cross
+          key: cross-gcc-mcf-x86_64-ucrt-${{ github.run_id }}
+          restore-keys: |
+            cross-gcc-mcf-x86_64-ucrt-
+            
+      - name: Building toolchain
+        run: |
+          if [[ ! "$(ls -A cross/bin)" ]]; then
+            chmod +x ./cross-gcc-mcf.sh
+            ./cross-gcc-mcf.sh --build-x86_64
+          fi
+        
+      - name: Get gcc version
+        run: |
+           echo "ver=$(cat cross/version.txt)" >> $GITHUB_ENV
+
+      - name: Packaging toolchain
+        run: |
+          7z a cross-gcc-mcf-${{ env.ver }}-ucrt-x86_64.7z cross/*
+          cp cross-gcc-mcf-${{ env.ver }}-ucrt-x86_64.7z cross-gcc-mcf-latest-ucrt-x86_64.7z
+
+      - name: Delete
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-delete.sh
+          ./package-delete.sh cross-gcc-mcf-latest-ucrt-x86_64.7z
+      - name: Release
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-release.sh
+          ./package-release.sh
+
+      - name: Saving gcc cache
+        uses: actions/cache/save@main
+        if: always()
+        with:
+          path: ${{ github.workspace }}/cross
+          key: cross-gcc-mcf-x86_64-ucrt-${{ github.run_id }}
+
   build_cross-gcc-mcf-x86_64_v3:
     runs-on: ubuntu-latest
-    env:
-      GH_TOKEN: ${{ github.token }}
+    container:
+      image: docker://ghcr.io/eko5624/archlinux:latest
     steps:
-      - name: Run cross-gcc-mcf-x86_64_v3.yml
+      - name: Install Dependencies
         run: |
-          curl -u eko5624:$GH_TOKEN \
-            -X POST -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/eko5624/toolchain/actions/workflows/cross-gcc-mcf-x86_64_v3.yml/dispatches \
-            -d '{"ref":"main"}'
+          sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
+          sudo pacman -Syu --noconfirm
+          sudo pacman -S --noconfirm --needed mingw-w64-gcc    
+      - uses: actions/checkout@main
+      - name: Loading gcc cache
+        uses: actions/cache/restore@main
+        with:
+          path: ${{ github.workspace }}/cross
+          key: cross-gcc-mcf-x86_64_v3-ucrt-${{ github.run_id }}
+          restore-keys: |
+            cross-gcc-mcf-x86_64_v3-ucrt-
+            
+      - name: Building toolchain
+        run: |
+          if [[ ! "$(ls -A cross/bin)" ]]; then
+            chmod +x ./cross-gcc-mcf.sh
+            ./cross-gcc-mcf.sh --build-x86_64_v3
+          fi
+        
+      - name: Get gcc version
+        run: |
+           echo "ver=$(cat cross/version.txt)" >> $GITHUB_ENV
+
+      - name: Packaging toolchain
+        run: |
+          7z a cross-gcc-mcf-${{ env.ver }}-ucrt-x86_64_v3.7z cross/*
+          cp cross-gcc-mcf-${{ env.ver }}-ucrt-x86_64_v3.7z cross-gcc-mcf-latest-ucrt-x86_64_v3.7z
+
+      - name: Delete
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-delete.sh
+          ./package-delete.sh cross-gcc-mcf-latest-ucrt-x86_64_v3.7z
+      - name: Release
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-release.sh
+          ./package-release.sh
+
+      - name: Saving gcc cache
+        uses: actions/cache/save@main
+        if: always()
+        with:
+          path: ${{ github.workspace }}/cross
+          key: cross-gcc-mcf-x86_64_v3-ucrt-${{ github.run_id }}
 

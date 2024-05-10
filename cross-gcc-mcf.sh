@@ -3,7 +3,7 @@ set -e
 
 TOP_DIR=$(pwd)
 source $TOP_DIR/ver.sh
-export BRANCH_GCC=releases/gcc-13
+export BRANCH_GCC=releases/gcc-${VER_GCC%%.*}
 
 # Speed up the process
 # Env Var NUMJOBS overrides automatic detection
