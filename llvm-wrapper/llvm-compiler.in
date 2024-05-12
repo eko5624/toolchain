@@ -4,7 +4,7 @@ PROG=$DIR/bin/@clang_compiler@
 FLAGS="$FLAGS -target x86_64-pc-windows-gnu -march=@gcc_arch@ -mtune=generic"
 FLAGS="$FLAGS@driver_mode@ --sysroot $DIR/x86_64-w64-mingw32"
 FLAGS="$FLAGS -fuse-ld=lld --ld-path=x86_64-w64-mingw32-ld"
-FLAGS="$FLAGS -Wno-unused-command-line-argument"
+FLAGS="$FLAGS -Wno-unused-command-line-argument -Wno-int-conversion -Wno-unused-function"
 
 if [ "$NO_CONFLTO" == "1" ]; then
     SKIP_OPT="-g0 -O0 -fno-lto -fno-data-sections -fno-function-sections"
