@@ -1,4 +1,4 @@
-name: Build cross-llvm-clang-toolchain
+name: cross-llvm-clang-toolchain
 defaults:
   run:
     shell: bash

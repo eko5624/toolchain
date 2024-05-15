@@ -1,55 +1,53 @@
-name: cross-gcc-win32
+name: cross-gcc-win32 toolchain
 defaults:
   run:
     shell: bash
 on:
   workflow_dispatch:
-  
+ 
 jobs:
-  build:
+  build_cross-gcc-win32-x86_64:
     runs-on: ubuntu-latest
     container:
-      image: archlinux/archlinux:base-devel
-    steps:    
+      image: docker://ghcr.io/eko5624/archlinux:latest
+    steps:
       - name: Install Dependencies
         run: |
           sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
           sudo pacman -Syu --noconfirm
-          sudo pacman -S --noconfirm --needed git gyp cvs mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf zip unzip p7zip xz clang python-pip curl jq wget
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --global pull.rebase true
-          git config --global rebase.autoStash true
-          git config --global fetch.prune true
-          git config --global --add safe.directory $PWD
-          
+          sudo pacman -S --noconfirm --needed mingw-w64-gcc
       - uses: actions/checkout@main
       - name: Loading gcc cache
         uses: actions/cache/restore@main
         with:
           path: ${{ github.workspace }}/cross
-          key: cross-gcc-win32-${{ github.run_id }}
+          key: cross-gcc-win32-x86_64-ucrt-${{ github.run_id }}
           restore-keys: |
-            cross-gcc-win32-
+            cross-gcc-win32-x86_64-ucrt-
             
       - name: Building toolchain
         run: |
-          PWD=$(pwd)
           if [[ ! "$(ls -A cross/bin)" ]]; then
             chmod +x ./cross-gcc-win32.sh
-            ./cross-gcc-win32.sh
+            ./cross-gcc-win32.sh --build-x86_64
           fi
-
+        
       - name: Get gcc version
         run: |
-          echo "ver=$(cat cross/version.txt)" >> $GITHUB_ENV
+           echo "ver=$(cat cross/version.txt)" >> $GITHUB_ENV
 
       - name: Packaging toolchain
         run: |
-          7z a cross-gcc-win32-${{ env.ver }}-x64-ucrt.7z cross/*
+          7z a cross-gcc-win32-${{ env.ver }}-ucrt-x86_64.7z cross/*
+          cp cross-gcc-win32-${{ env.ver }}-ucrt-x86_64.7z cross-gcc-win32-latest-ucrt-x86_64.7z
 
+      - name: Delete
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-delete.sh
+          ./package-delete.sh cross-gcc-win32-latest-ucrt-x86_64.7z
       - name: Release
-        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }} 
         run: |
@@ -61,5 +59,60 @@ jobs:
         if: always()
         with:
           path: ${{ github.workspace }}/cross
-          key: cross-gcc-win32-${{ github.run_id }}
-          
+          key: cross-gcc-win32-x86_64-ucrt-${{ github.run_id }}
+
+  build_cross-gcc-win32-x86_64_v3:
+    runs-on: ubuntu-latest
+    container:
+      image: docker://ghcr.io/eko5624/archlinux:latest
+    steps:
+      - name: Install Dependencies
+        run: |
+          sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
+          sudo pacman -Syu --noconfirm
+          sudo pacman -S --noconfirm --needed mingw-w64-gcc    
+      - uses: actions/checkout@main
+      - name: Loading gcc cache
+        uses: actions/cache/restore@main
+        with:
+          path: ${{ github.workspace }}/cross
+          key: cross-gcc-win32-x86_64_v3-ucrt-${{ github.run_id }}
+          restore-keys: |
+            cross-gcc-win32-x86_64_v3-ucrt-
+            
+      - name: Building toolchain
+        run: |
+          if [[ ! "$(ls -A cross/bin)" ]]; then
+            chmod +x ./cross-gcc-win32.sh
+            ./cross-gcc-win32.sh --build-x86_64_v3
+          fi
+        
+      - name: Get gcc version
+        run: |
+           echo "ver=$(cat cross/version.txt)" >> $GITHUB_ENV
+
+      - name: Packaging toolchain
+        run: |
+          7z a cross-gcc-win32-${{ env.ver }}-ucrt-x86_64_v3.7z cross/*
+          cp cross-gcc-win32-${{ env.ver }}-ucrt-x86_64_v3.7z cross-gcc-win32-latest-ucrt-x86_64_v3.7z
+
+      - name: Delete
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-delete.sh
+          ./package-delete.sh cross-gcc-win32-latest-ucrt-x86_64_v3.7z
+      - name: Release
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-release.sh
+          ./package-release.sh
+
+      - name: Saving gcc cache
+        uses: actions/cache/save@main
+        if: always()
+        with:
+          path: ${{ github.workspace }}/cross
+          key: cross-gcc-win32-x86_64_v3-ucrt-${{ github.run_id }}
+

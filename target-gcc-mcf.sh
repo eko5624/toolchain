@@ -3,7 +3,7 @@ set -e
 
 TOP_DIR=$(pwd)
 source $TOP_DIR/ver.sh
-export BRANCH_GCC=releases/gcc-13
+export BRANCH_GCC=releases/gcc-${VER_GCC%%.*}
 
 # Speed up the process
 # Env Var NUMJOBS overrides automatic detection
@@ -39,10 +39,8 @@ cd $M_SOURCE
 #binutils
 wget -c -O binutils-$VER_BINUTILS.tar.bz2 http://ftp.gnu.org/gnu/binutils/binutils-$VER_BINUTILS.tar.bz2
 tar xjf binutils-$VER_BINUTILS.tar.bz2
-
-#gcc
-#wget -c -O gcc-$VER_GCC.tar.xz https://ftp.gnu.org/gnu/gcc/gcc-$VER_GCC/gcc-$VER_GCC.tar.xz
-#xz -c -d gcc-$VER_GCC.tar.xz | tar xf -
+#mkdir binutils
+#git clone https://sourceware.org/git/binutils-gdb.git --branch binutils-${VER_BINUTILS//./_}-branch binutils
 
 #gmp
 wget -c -O gmp-$VER_GMP.tar.bz2 https://ftp.gnu.org/gnu/gmp/gmp-$VER_GMP.tar.bz2
@@ -137,7 +135,7 @@ $M_SOURCE/mpc-$VER_MPC/configure \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
   --prefix=$M_BUILD/for_target \
-  --with-gmp=$M_BUILD/for_target \
+  --with-{gmp,mpfr}=$M_BUILD/for_target \
   --enable-static \
   --disable-shared
 make -j$MJOBS
@@ -162,9 +160,9 @@ echo "======================="
 cd $M_BUILD
 mkdir binutils-build && cd binutils-build
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0002-check-for-unusual-file-harder.patch
+#curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-binutils/0003-opcodes-i386-dis-Use-Intel-syntax-by-default.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0010-bfd-Increase-_bfd_coff_max_nscns-to-65279.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0110-binutils-mingw-gnu-print.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0410-windres-handle-spaces.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0500-fix-weak-undef-symbols-after-image-base-change.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/2001-ld-option-to-move-default-bases-under-4GB.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/2003-Restore-old-behaviour-of-windres-so-that-options-con.patch
@@ -184,6 +182,9 @@ apply_patch_for_binutils \
   0002-check-for-unusual-file-harder.patch \
   0010-bfd-Increase-_bfd_coff_max_nscns-to-65279.patch \
   0110-binutils-mingw-gnu-print.patch
+
+# ZZZ
+#apply_patch_for_binutils 0003-opcodes-i386-dis-Use-Intel-syntax-by-default.patch
 
 # Add an option to change default bases back below 4GB to ease transition
 # https://github.com/msys2/MINGW-packages/issues/7027
@@ -246,7 +247,6 @@ $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
   --host=$MINGW_TRIPLE \
   --prefix=$M_TARGET \
   --enable-sdk=all \
-  --with-default-win32-winnt=0x601 \
   --with-default-msvcrt=ucrt \
   --enable-idl \
   --without-widl
@@ -355,10 +355,8 @@ cd $M_SOURCE
 git clone git://gcc.gnu.org/git/gcc.git --branch $BRANCH_GCC
 cd $M_BUILD
 mkdir gcc-build && cd gcc-build
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0002-Relocate-libintl.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0003-Windows-Follow-Posix-dir-exists-semantics-more-close.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0005-Windows-Don-t-ignore-native-system-header-dir.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0006-Windows-New-feature-to-allow-overriding.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0007-Build-EXTRA_GNATTOOLS-for-Ada.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0008-Prettify-linking-no-undefined.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0011-Enable-shared-gnat-implib.patch
@@ -368,14 +366,10 @@ curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0021-PR14940-Allow-a-PCH-to-be-mapped-to-a-different-addr.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0140-gcc-diagnostic-color.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0200-add-m-no-align-vector-insn-option-for-i386.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0300-override-builtin-printf-format.patch
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0400-gcc-Make-stupid-AT-T-syntax-not-default.patch
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0401-Always-quote-labels-in-Intel-syntax.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/2000-enable-rust.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/2001-fix-building-rust-on-mingw-w64.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/777aa930b106fea2dd6ed9fe22b42a2717f1472d.patch
-curl -L -o 2f7e7bfa3c6327793cdcdcb5c770b93cecd49bd0.patch "https://gcc.gnu.org/git/?p=gcc.git;a=patch;h=2f7e7bfa3c6327793cdcdcb5c770b93cecd49bd0"
-curl -L -o 3eeb4801d6f45f6250fc77a6d3ab4e0115f8cfdd.patch "https://gcc.gnu.org/git/?p=gcc.git;a=patch;h=3eeb4801d6f45f6250fc77a6d3ab4e0115f8cfdd"
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/3001-fix-ice.patch
 
 apply_patch_for_gcc() {
   for patch in "$@"; do
@@ -387,30 +381,36 @@ apply_patch_for_gcc() {
 #cd $M_SOURCE/gcc-$VER_GCC
 cd $M_SOURCE/gcc
 apply_patch_for_gcc \
-  0002-Relocate-libintl.patch \
   0003-Windows-Follow-Posix-dir-exists-semantics-more-close.patch \
   0005-Windows-Don-t-ignore-native-system-header-dir.patch \
-  0006-Windows-New-feature-to-allow-overriding.patch \
   0007-Build-EXTRA_GNATTOOLS-for-Ada.patch \
   0008-Prettify-linking-no-undefined.patch \
   0011-Enable-shared-gnat-implib.patch \
   0012-Handle-spaces-in-path-for-default-manifest.patch \
   0014-gcc-9-branch-clone_function_name_1-Retain-any-stdcall-suffix.patch \
   0020-libgomp-Don-t-hard-code-MS-printf-attributes.patch \
-  0021-PR14940-Allow-a-PCH-to-be-mapped-to-a-different-addr.patch \
-  0140-gcc-diagnostic-color.patch \
-  0200-add-m-no-align-vector-insn-option-for-i386.patch \
-  0300-override-builtin-printf-format.patch \
-  0400-gcc-Make-stupid-AT-T-syntax-not-default.patch \
-  0401-Always-quote-labels-in-Intel-syntax.patch \
-  2000-enable-rust.patch \
-  2001-fix-building-rust-on-mingw-w64.patch
+  0021-PR14940-Allow-a-PCH-to-be-mapped-to-a-different-addr.patch
 
-# backport: https://github.com/msys2/MINGW-packages/issues/17599
-# https://inbox.sourceware.org/gcc-patches/a22433f5-b4d2-19b7-86a2-31e2ee45fb61@martin.st/T/
-apply_patch_for_gcc \
-  2f7e7bfa3c6327793cdcdcb5c770b93cecd49bd0.patch \
-  3eeb4801d6f45f6250fc77a6d3ab4e0115f8cfdd.patch
+# Enable diagnostic color under mintty
+# based on https://github.com/BurntSushi/ripgrep/issues/94#issuecomment-261761687
+apply_patch_for_gcc 0140-gcc-diagnostic-color.patch
+
+# ZZZ
+# XXX: GAS segfaults on i686?!
+apply_patch_for_gcc 0400-gcc-Make-stupid-AT-T-syntax-not-default.patch
+apply_patch_for_gcc 0401-Always-quote-labels-in-Intel-syntax.patch
+
+# workaround for AVX misalignment issue for pass-by-value arguments
+#   cf. https://github.com/msys2/MSYS2-packages/issues/1209
+#   cf. https://sourceforge.net/p/mingw-w64/discussion/723797/thread/bc936130/
+#  Issue is longstanding upstream at https://gcc.gnu.org/bugzilla/show_bug.cgi?id=54412
+#  Potential alternative: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=939559
+# https://github.com/msys2/MINGW-packages/pull/8317#issuecomment-824548411
+apply_patch_for_gcc 0200-add-m-no-align-vector-insn-option-for-i386.patch
+apply_patch_for_gcc 2001-fix-building-rust-on-mingw-w64.patch
+
+# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=115038
+apply_patch_for_gcc 3001-fix-ice.patch
 
 # so libgomp DLL gets built despide static libdl
 export lt_cv_deplibs_check_method='pass_all'
@@ -439,7 +439,7 @@ $M_SOURCE/gcc/configure \
   --disable-nls \
   --disable-werror \
   --disable-symvers \
-  --disable-libssp \
+  --enable-libssp \
   --disable-libstdcxx-pch \
   --disable-libstdcxx-debug \
   --disable-libstdcxx-backtrace \
@@ -451,17 +451,21 @@ $M_SOURCE/gcc/configure \
   --enable-libstdcxx-time \
   --enable-libatomic \
   --enable-libgomp \
+  --enable-__cxa_atexit \
+  --enable-graphite \
+  --enable-mingw-wildcard \
   --enable-threads=mcf \
   --enable-lto \
   --enable-checking=release \
   --enable-static \
   --enable-shared \
+  --with-arch=nocona \
   --with-tune=generic \
   --without-included-gettext \
   --with-pkgversion="GCC with MCF thread model" \
-  --with-boot-ldflags="$LDFLAGS -Wl,--disable-dynamicbase -static-libstdc++ -static-libgcc" \
-  CFLAGS='-Wno-int-conversion  -march=nocona -msahf -mtune=generic -O2' \
-  CXXFLAGS='-Wno-int-conversion  -march=nocona -msahf -mtune=generic -O2'
+  CFLAGS='-O2' \
+  CXXFLAGS='-O2' \
+  LDFLAGS='-Wl,--no-insert-timestamp -Wl,--dynamicbase -Wl,--high-entropy-va -Wl,--nxcompat -Wl,--tsaware'
 make -j$MJOBS
 make install
 for f in $M_TARGET/bin/*.exe; do
@@ -521,8 +525,8 @@ make install
 #make -j$MJOBS -C $M_BUILD/cmake-build
 #make install -C $M_BUILD/cmake-build
 
-#echo "building yasm"
-#echo "======================="
+echo "building yasm"
+echo "======================="
 cd $M_SOURCE/yasm-$VER_YASM
 ./configure \
   --host=$MINGW_TRIPLE \

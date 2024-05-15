@@ -1,4 +1,4 @@
-name: Build cross-gcc-posix toolchain
+name: cross-gcc-posix toolchain
 defaults:
   run:
     shell: bash

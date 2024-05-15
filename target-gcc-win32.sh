@@ -8,18 +8,15 @@ source $TOP_DIR/ver.sh
 # Env Var NUMJOBS overrides automatic detection
 MJOBS=$(grep -c processor /proc/cpuinfo)
 
-MINGW_TRIPLE="x86_64-w64-mingw32"
-export MINGW_TRIPLE
-
-CFLAGS="-pipe -O2"
-export CXXFLAGS=$CFLAGS
-
 export M_ROOT=$(pwd)
 export M_SOURCE=$M_ROOT/source
 export M_BUILD=$M_ROOT/build
 export M_CROSS=$M_ROOT/cross
 export M_TARGET=$M_ROOT/target
+export MINGW_TRIPLE="x86_64-w64-mingw32"
+export BRANCH_GCC=releases/gcc-${VER_GCC%%.*}
 
+export PATH="$M_CROSS/bin:$PATH"
 export CC=$M_CROSS/bin/$MINGW_TRIPLE-gcc
 export CXX=$M_CROSS/bin/$MINGW_TRIPLE-g++
 export AR=$M_CROSS/bin/$MINGW_TRIPLE-ar
@@ -30,8 +27,6 @@ export STRIP=$M_CROSS/bin/$MINGW_TRIPLE-strip
 export NM=$M_CROSS/bin/$MINGW_TRIPLE-nm
 export DLLTOOL=$M_CROSS/bin/$MINGW_TRIPLE-dlltool
 export WINDRES=$M_CROSS/bin/$MINGW_TRIPLE-windres
-
-export PATH="$M_CROSS/bin:$PATH"
 
 mkdir -p $M_SOURCE
 mkdir -p $M_BUILD
@@ -65,34 +60,43 @@ wget -c -O isl-$VER_ISL.tar.bz2 https://gcc.gnu.org/pub/gcc/infrastructure/isl-$
 tar xjf isl-$VER_ISL.tar.bz2
 
 #mingw-w64
-#git clone https://github.com/mingw-w64/mingw-w64.git --branch master --depth 1
+git clone https://github.com/mingw-w64/mingw-w64.git --branch master --depth 1
 
 #make
 wget -c -O make-$VER_MAKE.tar.gz https://ftp.gnu.org/pub/gnu/make/make-$VER_MAKE.tar.gz
 tar xzf make-$VER_MAKE.tar.gz
+
+#cmake
+#git clone https://github.com/Kitware/CMake.git --branch v$VER_CMAKE
+curl -OL https://github.com/Kitware/CMake/releases/download/v$VER_CMAKE/cmake-$VER_CMAKE-windows-x86_64.zip
+7z x cmake*.zip
+
+#ninja
+curl -OL https://github.com/ninja-build/ninja/releases/download/v$VER_NINJA/ninja-win.zip
+7z x ninja*.zip
+
+#yasm
+#curl -OL https://github.com/yasm/yasm/releases/download/v$VER_YASM/yasm-$VER_YASM-win64.exe
+wget -c -O yasm-$VER_YASM.tar.gz http://www.tortall.net/projects/yasm/releases/yasm-$VER_YASM.tar.gz
+tar xzf yasm-$VER_YASM.tar.gz
+
+#nasm
+#curl -OL https://www.nasm.us/pub/nasm/releasebuilds/$VER_NASM/win64/nasm-$VER_NASM-win64.zip
+#7z x nasm*.zip
+#wget -c -O nasm-$VER_NASM.tar.gz http://www.nasm.us/pub/nasm/releasebuilds/$VER_NASM/nasm-$VER_NASM.tar.gz
+#tar xzf nasm-$VER_NASM.tar.gz
+git clone https://github.com/netwide-assembler/nasm.git --branch nasm-$VER_NASM
+
+
+#curl
+curl -L -o curl-win64-mingw.zip 'https://curl.se/windows/latest.cgi?p=win64-mingw.zip'
+7z x curl*.zip
 
 #pkgconf
 git clone https://github.com/pkgconf/pkgconf --branch pkgconf-$VER_PKGCONF
 
 #windows-default-manifest
 git clone https://sourceware.org/git/cygwin-apps/windows-default-manifest.git
-
-echo "building binutils"
-echo "======================="
-cd $M_BUILD
-mkdir binutils-build
-cd binutils-build
-$M_SOURCE/binutils-$VER_BINUTILS/configure \
-  --host=$MINGW_TRIPLE \
-  --target=$MINGW_TRIPLE \
-  --prefix=$M_TARGET \
-  --with-sysroot=$M_TARGET \
-  --disable-nls \
-  --disable-werror \
-  --disable-shared \
-  --enable-lto
-make -j$MJOBS
-make install
 
 echo "building gmp"
 echo "======================="
@@ -132,7 +136,7 @@ $M_SOURCE/mpc-$VER_MPC/configure \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
   --prefix=$M_BUILD/for_target \
-  --with-gmp=$M_BUILD/for_target \
+  --with-{gmp,mpfr}=$M_BUILD/for_target \
   --enable-static \
   --disable-shared
 make -j$MJOBS
@@ -153,6 +157,25 @@ $M_SOURCE/isl-$VER_ISL/configure \
 make -j$MJOBS
 make install
 
+echo "building binutils"
+echo "======================="
+cd $M_BUILD
+mkdir binutils-build
+cd binutils-build
+$M_SOURCE/binutils-$VER_BINUTILS/configure \
+  --host=$MINGW_TRIPLE \
+  --target=$MINGW_TRIPLE \
+  --prefix=$M_TARGET \
+  --with-sysroot=$M_TARGET \
+  --disable-multilib \
+  --disable-nls \
+  --disable-werror \
+  --disable-shared \
+  --enable-lto \
+  --enable-64-bit-bfd
+make -j$MJOBS
+make install
+
 echo "building mingw-w64-headers"
 echo "======================="
 cd $M_BUILD
@@ -162,7 +185,6 @@ $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
   --host=$MINGW_TRIPLE \
   --prefix=$M_TARGET/$MINGW_TRIPLE \
   --enable-sdk=all \
-  --with-default-win32-winnt=0x601 \
   --with-default-msvcrt=ucrt \
   --enable-idl \
   --without-widl
@@ -170,6 +192,20 @@ make -j$MJOBS
 make install
 cd $M_TARGET
 ln -s $MINGW_TRIPLE mingw
+
+echo "building winpthreads"
+echo "======================="
+cd $M_BUILD
+mkdir winpthreads-build
+cd winpthreads-build
+$M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
+  --host=$MINGW_TRIPLE \
+  --prefix=$M_TARGET/$MINGW_TRIPLE \
+  --enable-static \
+  --enable-shared
+make -j$MJOBS
+make install
+mv $M_TARGET/$MINGW_TRIPLE/bin/libwinpthread-1.dll $M_TARGET/bin/
 
 echo "building mingw-w64-crt"
 echo "======================="
@@ -202,31 +238,16 @@ $M_SOURCE/mingw-w64/mingw-w64-tools/gendef/configure \
 make -j$MJOBS
 make install
 
-echo "building winpthreads"
-echo "======================="
-cd $M_BUILD
-mkdir winpthreads-build
-cd winpthreads-build
-$M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
-  --host=$MINGW_TRIPLE \
-  --prefix=$M_TARGET/$MINGW_TRIPLE \
-  --enable-static \
-  --enable-shared
-make -j$MJOBS
-make install
-mv $M_TARGET/$MINGW_TRIPLE/bin/libwinpthread-1.dll $M_TARGET/bin/
-
 echo "building gcc"
 echo "======================="
 cd $M_SOURCE
-git clone git://gcc.gnu.org/git/gcc.git --branch releases/gcc-13
+git clone git://gcc.gnu.org/git/gcc.git --branch releases/gcc-${VER_GCC%%.*}
 cd gcc
 _gcc_version=$(head -n 34 gcc/BASE-VER | sed -e 's/.* //' | tr -d '"\n')
 _gcc_date=$(head -n 34 gcc/DATESTAMP | sed -e 's/.* //' | tr -d '"\n')
 VER=$(printf "%s-%s" "$_gcc_version" "$_gcc_date")
 cd $M_BUILD
-mkdir gcc-build
-cd gcc-build
+mkdir gcc-build && cd gcc-build
 $M_SOURCE/gcc/configure \
   --build=x86_64-pc-linux-gnu \
   --host=$MINGW_TRIPLE \
@@ -235,7 +256,6 @@ $M_SOURCE/gcc/configure \
   --libexecdir=$M_TARGET/lib \
   --with-sysroot=$M_TARGET \
   --with-{gmp,mpfr,mpc,isl}=$M_BUILD/for_target \
-  --with-arch=nocona \
   --disable-rpath \
   --disable-multilib \
   --disable-dependency-tracking \
@@ -245,20 +265,30 @@ $M_SOURCE/gcc/configure \
   --disable-symvers \
   --disable-libstdcxx-pch \
   --disable-libstdcxx-debug \
+  --disable-libstdcxx-backtrace \
   --disable-win32-registry \
   --disable-version-specific-runtime-libs \
   --enable-languages=c,c++ \
-  --enable-twoprocess \
+  --enable-fully-dynamic-string \
+  --enable-libstdcxx-filesystem-ts \
+  --enable-libstdcxx-time \
+  --enable-libatomic \
+  --enable-libgomp \
   --enable-libssp \
+  --enable-mingw-wildcard \
   --enable-threads=win32 \
   --enable-libstdcxx-threads=yes \
   --enable-lto \
   --enable-checking=release \
   --enable-static \
   --enable-shared \
+  --with-arch=nocona \
   --with-tune=generic \
   --without-included-gettext \
-  --with-pkgversion="GCC with win32 thread model"
+  --with-pkgversion="GCC with win32 thread model" \
+  CFLAGS='-O2' \
+  CXXFLAGS='-O2' \
+  LDFLAGS='-Wl,--no-insert-timestamp -Wl,--dynamicbase -Wl,--high-entropy-va -Wl,--nxcompat -Wl,--tsaware -static-libstdc++ -static-libgcc'
 make -j$MJOBS
 make install
 
@@ -290,15 +320,41 @@ make install
 echo "building make"
 echo "======================="
 cd $M_BUILD
-mkdir make-build
-cd make-build
+mkdir make-build && cd make-build
 $M_SOURCE/make-$VER_MAKE/configure \
+  --host=$MINGW_TRIPLE \
+  --target=$MINGW_TRIPLE \
+  --prefix=$M_TARGET \
+  --program-prefix=mingw32- \
+  --disable-nls
+make -j$MJOBS
+make install
+
+echo "building yasm"
+echo "======================="
+cd $M_SOURCE/yasm-$VER_YASM
+./configure \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
   --prefix=$M_TARGET
 make -j$MJOBS
 make install
-cp $M_TARGET/bin/make.exe $M_TARGET/bin/mingw32-make.exe
+rm -rf $M_TARGET/include/libyasm
+rm $M_TARGET/include/libyasm*
+rm $M_TARGET/lib/libyasm.a
+
+echo "building nasm"
+echo "======================="
+cd $M_SOURCE/nasm
+# work around /usr/bin/install: cannot stat './nasm.1': No such file or directory
+sed -i "/man1/d" Makefile.in
+./autogen.sh
+./configure \
+  --host=$MINGW_TRIPLE \
+  --target=$MINGW_TRIPLE \
+  --prefix=$M_TARGET
+make -j$MJOBS
+make install
 
 echo "building pkgconf"
 echo "======================="
@@ -308,16 +364,22 @@ cd pkgconf-build
 meson setup . $M_SOURCE/pkgconf \
   --prefix=$M_TARGET \
   --cross-file=$TOP_DIR/cross.meson \
-  --buildtype=plain \
+  --buildtype=release \
   -Dtests=disabled
 ninja -j$MJOBS -C $M_BUILD/pkgconf-build
 ninja install -C $M_BUILD/pkgconf-build
 cp $M_TARGET/bin/pkgconf.exe $M_TARGET/bin/pkg-config.exe
 cp $M_TARGET/bin/pkgconf.exe $M_TARGET/bin/x86_64-w64-mingw32-pkg-config.exe
+rm -rf $M_TARGET/lib/pkgconfig
 
 cd $M_TARGET
-rm -rf lib/pkgconfig
-rm -rf include/pkgconf
+rm -rf doc || true
+rm -rf man || true
 rm -f mingw
-rm -rf $M_TARGET/share
 echo "$VER" > $M_TARGET/version.txt
+
+cp $M_SOURCE/cmake-$VER_CMAKE-windows-x86_64/bin/cmake.exe bin
+cp -r $M_SOURCE/cmake-$VER_CMAKE-windows-x86_64/share/cmake* share
+cp $M_SOURCE/ninja.exe bin
+cp $M_SOURCE/curl*/bin/curl-ca-bundle.crt bin
+cp $M_SOURCE/curl*/bin/curl.exe bin

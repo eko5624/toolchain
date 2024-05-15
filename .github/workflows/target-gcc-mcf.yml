@@ -1,4 +1,4 @@
-name: Build target-gcc-mcf-ucrt-x86_64
+name: target-gcc-mcf-ucrt(x86_64)
 defaults:
   run:
     shell: bash

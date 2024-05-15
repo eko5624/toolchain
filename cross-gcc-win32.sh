@@ -108,7 +108,8 @@ cd $TOP_DIR/gcc-wrapper
 for i in g++ c++ cpp gcc; do
   BASENAME=x86_64-w64-mingw32-$i
   install -vm755 gcc-compiler.in $M_CROSS/bin/$BASENAME
-  sed -e "s|@opt@|${OPT}|g" \
+  sed -e "s|@GCC_ARCH@|${GCC_ARCH}|g" \
+      -e "s|@opt@|${OPT}|g" \
       -e "s|@compiler@|$i|g" \
       -i $M_CROSS/bin/$BASENAME
 done
@@ -157,8 +158,6 @@ $M_SOURCE/gcc/configure \
   --disable-nls \
   --disable-shared \
   --disable-win32-registry \
-  --with-arch=$GCC_ARCH \
-  --with-tune=generic \
   --enable-threads=win32 \
   --enable-libstdcxx-threads=yes \
   --without-included-gettext \
@@ -220,7 +219,6 @@ make install-strip
 cd $M_CROSS
 find $MINGW_TRIPLE/lib -type f -name "*.la" -print0 | xargs -0 -I {} rm {}
 find $MINGW_TRIPLE/lib -type f -name "*.dll.a" -print0 | xargs -0 -I {} rm {}
-#mv $MINGW_TRIPLE/bin/libmcfgthread-1.dll bin
 rm -f mingw
 rm -rf share
 rm -rf include

@@ -1,4 +1,4 @@
-name: Build target-gcc-posix-ucrt-x86_64
+name: target-gcc-posix-ucrt(x86_64)
 defaults:
   run:
     shell: bash
@@ -42,7 +42,8 @@ jobs:
            
       - name: Packaging toolchain
         run: |
-          7z a target-gcc-posix-${{ env.ver }}-x64-ucrt.7z target/*
+          7z a target-gcc-posix-${{ env.ver }}-ucrt-x86_64.7z target/*
+          cp target-gcc-posix-${{ env.ver }}-ucrt-x86_64.7z target-gcc-posix-latest-ucrt-x86_64.7z
 
       - name: Release
         continue-on-error: true

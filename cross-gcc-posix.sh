@@ -96,7 +96,8 @@ cd $TOP_DIR/gcc-wrapper
 for i in g++ c++ cpp gcc; do
   BASENAME=x86_64-w64-mingw32-$i
   install -vm755 gcc-compiler.in $M_CROSS/bin/$BASENAME
-  sed -e "s|@opt@|${OPT}|g" \
+  sed -e "s|@GCC_ARCH@|${GCC_ARCH}|g" \
+      -e "s|@opt@|${OPT}|g" \
       -e "s|@compiler@|$i|g" \
       -i $M_CROSS/bin/$BASENAME
 done
@@ -146,8 +147,6 @@ $M_SOURCE/gcc/configure \
   --disable-shared \
   --disable-win32-registry \
   --disable-libstdcxx-pch \
-  --with-arch=$GCC_ARCH \
-  --with-tune=generic \
   --enable-threads=posix \
   --without-included-gettext \
   --enable-lto \
@@ -155,23 +154,6 @@ $M_SOURCE/gcc/configure \
   --disable-sjlj-exceptions
 make -j$MJOBS all-gcc
 make install-strip-gcc
-
-echo "installing gcc-wrappers"
-echo "======================="
-cd $M_CROSS/bin
-cp $TOP_DIR/$GCC_WRAPPER_DIR/x86_64-w64-mingw32-c++ ./
-cp $TOP_DIR/$GCC_WRAPPER_DIR/x86_64-w64-mingw32-cpp ./
-cp $TOP_DIR/$GCC_WRAPPER_DIR/x86_64-w64-mingw32-g++ ./
-cp $TOP_DIR/$GCC_WRAPPER_DIR/x86_64-w64-mingw32-gcc ./
-cp $TOP_DIR/$GCC_WRAPPER_DIR/x86_64-w64-mingw32-ld ./
-cp $TOP_DIR/$GCC_WRAPPER_DIR/x86_64-w64-mingw32-ld.bfd ./
-
-chmod 755 x86_64-w64-mingw32-c++
-chmod 755 x86_64-w64-mingw32-cpp
-chmod 755 x86_64-w64-mingw32-g++
-chmod 755 x86_64-w64-mingw32-gcc
-chmod 755 x86_64-w64-mingw32-ld
-chmod 755 x86_64-w64-mingw32-ld.bfd
 
 echo "building gendef"
 echo "======================="
@@ -194,6 +176,7 @@ $M_SOURCE/mingw-w64/mingw-w64-crt/configure \
   --prefix=$M_CROSS/$MINGW_TRIPLE \
   --with-sysroot=$M_CROSS \
   --with-default-msvcrt=ucrt \
+  --enable-wildcard \
   --enable-lib64 \
   --disable-lib32
 make -j$MJOBS

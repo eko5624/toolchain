@@ -1,4 +1,4 @@
-name: target-gcc-win32
+name: target-gcc-win32-ucrt(x86_64)
 defaults:
   run:
     shell: bash
@@ -55,7 +55,8 @@ jobs:
            
       - name: Packaging toolchain
         run: |
-          7z a target-gcc-win32-${{ env.ver }}-x64-ucrt.7z target/*
+          7z a target-gcc-win32-${{ env.ver }}-ucrt-x86_64.7z target/*
+          cp target-gcc-win32-${{ env.ver }}-ucrt-x86_64.7z target-gcc-win32-latest-ucrt-x86_64.7z
 
       - name: Release
         continue-on-error: true
