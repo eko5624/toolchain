@@ -288,7 +288,7 @@ $M_SOURCE/gcc/configure \
   --with-pkgversion="GCC with win32 thread model" \
   CFLAGS='-O2' \
   CXXFLAGS='-O2' \
-  LDFLAGS='-Wl,--no-insert-timestamp -Wl,--dynamicbase -Wl,--high-entropy-va -Wl,--nxcompat -Wl,--tsaware -static-libstdc++ -static-libgcc'
+  LDFLAGS='-pthread -Wl,--no-insert-timestamp -Wl,--dynamicbase -Wl,--high-entropy-va -Wl,--nxcompat -Wl,--tsaware'
 make -j$MJOBS
 make install
 
