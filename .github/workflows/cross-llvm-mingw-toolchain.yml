@@ -57,12 +57,39 @@ jobs:
   build_llvm-mingw:
     needs: build_llvm
     runs-on: ubuntu-latest
-    env:
-      GH_TOKEN: ${{ github.token }}
+    container:
+      image: docker://ghcr.io/eko5624/archlinux:latest
     steps:
-      - name: Run cross-llvm-mingw.yml
+      - uses: actions/checkout@main          
+      - name: Setup cross-llvm
         run: |
-          curl -u eko5624:$GH_TOKEN \
-            -X POST -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/eko5624/toolchain/actions/workflows/cross-llvm-mingw.yml/dispatches \
-            -d '{"ref":"main"}'
+          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/cross-llvm-latest.7z
+          7z x cross*.7z
+          rm cross*.7z
+            
+      - name: Building toolchain
+        run: |
+          chmod +x ./cross-llvm-mingw.sh
+          ./cross-llvm-mingw.sh
+
+      - name: Get current timestamp
+        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV  
+
+      - name: Packaging toolchain
+        run: |
+          7z a cross-llvm-mingw-${{ env.date }}-ucrt-x86_64.7z cross/*
+          cp cross-llvm-mingw-${{ env.date }}-ucrt-x86_64.7z cross-llvm-mingw-latest-ucrt-x86_64.7z
+
+      - name: Delete
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-delete.sh
+          ./package-delete.sh cross-llvm-mingw-latest-ucrt-x86_64.7z
+      - name: Release
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          chmod +x ./package-release.sh
+          ./package-release.sh

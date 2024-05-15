@@ -15,7 +15,7 @@ jobs:
         run: |
           sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
           sudo pacman -Syu --noconfirm docker
-          sudo pacman -S --noconfirm --needed git gyp mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf unzip p7zip xz clang python-pip python-cairo curl jq wget
+          sudo pacman -S --noconfirm --needed git gyp mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf unzip p7zip xz python-pip python-cairo curl jq wget
           pip3 install -U --break-system-packages setuptools rst2pdf mako jsonschema meson
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -29,7 +29,7 @@ jobs:
         
       - name: Setup Toolchain
         run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-gcc-win32-13.2.0-x64-ucrt.7z
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-gcc-win32-latest-ucrt-x86_64.7z
           7z x cross-gcc-win32*.7z
           rm cross-gcc-win32*.7z
             
