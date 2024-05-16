@@ -11,7 +11,9 @@ jobs:
     container:
       image: docker://ghcr.io/eko5624/archlinux:latest
     steps:
-      - uses: actions/checkout@main
+      - name: Checkout
+        uses: actions/checkout@main
+      
       - name: Loading llvm cache
         uses: actions/cache/restore@main
         with:
@@ -19,6 +21,13 @@ jobs:
           key: cross-llvm-${{ github.run_id }}
           restore-keys: |
             cross-llvm-
+
+      - name: Load llvm-project source
+        uses: actions/cache@main
+        id: llvm-source
+        with:
+          path: ${{ github.workspace }}/source/llvm-project
+          key: llvm-source-cache            
 
       - name: Install cross-llvm-clang-pgo
         if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
@@ -68,7 +77,16 @@ jobs:
     container:
       image: docker://ghcr.io/eko5624/archlinux:latest
     steps:
-      - uses: actions/checkout@main          
+      - name: Checkout
+        uses: actions/checkout@main
+
+      - name: Load llvm-project source
+        uses: actions/cache@main
+        id: llvm-source
+        with:
+          path: ${{ github.workspace }}/source/llvm-project
+          key: llvm-source-cache
+          
       - name: Setup cross-llvm
         run: |
           curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/cross-llvm-latest.7z

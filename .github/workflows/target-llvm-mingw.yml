@@ -24,6 +24,13 @@ jobs:
           key: target-llvm-${{ github.run_id }}
           restore-keys: |
             target-llvm-
+
+      - name: Load llvm-project source
+        uses: actions/cache@main
+        id: llvm-source
+        with:
+          path: ${{ github.workspace }}/source/llvm-project
+          key: llvm-source-cache
             
       - name: Building toolchain
         run: |
@@ -67,7 +74,14 @@ jobs:
     steps:    
       - name: Checkout
         uses: actions/checkout@main
-        
+
+      - name: Load llvm-project source
+        uses: actions/cache@main
+        id: llvm-source
+        with:
+          path: ${{ github.workspace }}/source/llvm-project
+          key: llvm-source-cache
+                  
       - name: Setup cross-llvm-mingw and target-llvm
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-mingw-latest-ucrt-x86_64.7z
