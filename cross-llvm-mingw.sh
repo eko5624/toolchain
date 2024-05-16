@@ -26,10 +26,10 @@ echo "getting source"
 echo "======================="
 cd $M_SOURCE
 #llvm
-git clone https://github.com/llvm/llvm-project.git --branch llvmorg-$VER_LLVM
-cd llvm-project
-git sparse-checkout set --no-cone '/*' '!*/test'
-cd ..
+#git clone https://github.com/llvm/llvm-project.git --branch release/18.x llvmorg-$VER_LLVM
+if [ ! -d "$M_SOURCE/llvm-project" ]; then
+  git clone https://github.com/llvm/llvm-project.git --branch llvmorg-$VER_LLVM
+fi
 
 #lldb-mi
 #git clone https://github.com/lldb-tools/lldb-mi.git

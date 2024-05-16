@@ -25,10 +25,10 @@ mkdir -p $M_BUILD
 echo "getting source"
 echo "======================="
 cd $M_SOURCE
-git clone https://github.com/llvm/llvm-project.git --branch llvmorg-$VER_LLVM
-cd llvm-project
-git sparse-checkout set --no-cone '/*' '!*/test'
-cd ..
+#git clone https://github.com/llvm/llvm-project.git --branch release/18.x llvmorg-$VER_LLVM
+if [ ! -d "$M_SOURCE/llvm-project" ]; then
+  git clone https://github.com/llvm/llvm-project.git --branch llvmorg-$VER_LLVM
+fi
 
 echo "building llvm"
 echo "======================="
