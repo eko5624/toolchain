@@ -11,10 +11,13 @@ source $TOP_DIR/ver.sh
 # Env Var NUMJOBS overrides automatic detection
 MJOBS=$(grep -c processor /proc/cpuinfo)
 
-export M_ROOT=$(pwd)
-export M_SOURCE=$M_ROOT/source
-export M_BUILD=$M_ROOT/build
-export M_CROSS=$M_ROOT/cross
+M_ROOT=$(pwd)
+M_SOURCE=$M_ROOT/source
+M_BUILD=$M_ROOT/build
+M_CROSS=$M_ROOT/cross
+M_HOST=$M_ROOT/host
+
+PATH="$M_HOST/bin:$PATH"
 
 mkdir -p $M_SOURCE
 mkdir -p $M_BUILD

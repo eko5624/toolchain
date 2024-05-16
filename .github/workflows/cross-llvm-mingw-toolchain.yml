@@ -19,7 +19,15 @@ jobs:
           key: cross-llvm-${{ github.run_id }}
           restore-keys: |
             cross-llvm-
-            
+
+      - name: Install cross-llvm-clang-pgo
+        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
+        run: |
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
+          7z x cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
+          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
+          mv cross host
+
       - name: Building toolchain
         run: |
           if [[ ! "$(ls -A cross/bin)" ]]; then
