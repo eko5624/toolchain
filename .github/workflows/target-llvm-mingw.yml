@@ -1,4 +1,4 @@
-name: target-llvm-mingw toolchain
+name: target-llvm-mingw(x86_64)
 defaults:
   run:
     shell: bash
@@ -62,12 +62,43 @@ jobs:
   build_llvm-mingw:
     needs: build_llvm
     runs-on: ubuntu-latest
-    env:
-      GH_TOKEN: ${{ github.token }}
-    steps:
-      - name: Run target-llvm-mingw.yml
+    container:
+      image: docker://ghcr.io/eko5624/archlinux:latest
+    steps:    
+      - name: Checkout
+        uses: actions/checkout@main
+        
+      - name: Setup cross-llvm-mingw and target-llvm
         run: |
-          curl -u eko5624:$GH_TOKEN \
-            -X POST -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/eko5624/toolchain/actions/workflows/target-llvm-mingw.yml/dispatches \
-            -d '{"ref":"main"}'
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-mingw-latest-ucrt-x86_64.7z
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/target-llvm-latest.7z
+          7z x cross*.7z
+          7z x target*.7z
+          rm *.7z
+            
+      - name: Building toolchain
+        run: |
+          chmod +x ./target-llvm-mingw.sh
+          ./target-llvm-mingw.sh
+
+      - name: Get current timestamp
+        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
+
+      - name: Packaging toolchain
+        run: |
+          7z a -r -l target-llvm-mingw-${{ env.date }}-ucrt-x86_64.7z target/*
+          cp target-llvm-mingw-${{ env.date }}-ucrt-x86_64.7z target-llvm-mingw-latest-ucrt-x86_64.7z
+
+      - name: Delete
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-delete.sh
+          ./package-delete.sh target-llvm-mingw-latest-ucrt-x86_64.7z
+      - name: Release
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-release.sh
+          ./package-release.sh
