@@ -71,7 +71,6 @@ jobs:
       - name: Saving target-llvm cache
         if: ${{ steps.target-llvm.outputs.cache-matched-key == '' }}
         uses: actions/cache/save@main
-        if: always()
         with:
           path: ${{ github.workspace }}/cross
           key: target-llvm-${{ github.run_id }}
