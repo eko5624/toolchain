@@ -106,8 +106,7 @@ echo "... Done"
 echo "installing wrappers"
 echo "======================="
 cp -f $M_SOURCE/llvm-mingw/wrappers/*-wrapper.sh $M_TARGET/bin
-#x86_64-w64-mingw32-gcc $M_SOURCE/llvm-mingw/wrappers/clang-target-wrapper.c -o $M_TARGET/bin/clang-target-wrapper.exe -O2 -Wl,-s -municode -DCLANG=\"clang-$CLANG_VER.exe\"
-x86_64-w64-mingw32-gcc $TOP_DIR/target-llvm-wrappers/clang-target-wrapper.c -o $M_TARGET/bin/clang-target-wrapper.exe -O2 -Wl,-s -municode -DCLANG=\"clang-$CLANG_VER.exe\"
+x86_64-w64-mingw32-gcc $M_SOURCE/llvm-mingw/wrappers/clang-target-wrapper.c -o $M_TARGET/bin/clang-target-wrapper.exe -O2 -Wl,-s -municode -DCLANG=\"clang-$CLANG_VER.exe\"
 
 cd $M_TARGET/bin
 for exec in clang clang++ gcc g++ c++ as; do
