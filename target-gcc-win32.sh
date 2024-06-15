@@ -275,6 +275,8 @@ $M_SOURCE/gcc/configure \
   --enable-libatomic \
   --enable-libgomp \
   --enable-libssp \
+  --enable-__cxa_atexit \
+  --enable-graphite \
   --enable-mingw-wildcard \
   --enable-threads=win32 \
   --enable-libstdcxx-threads=yes \
