@@ -164,6 +164,8 @@ mkdir binutils-build && cd binutils-build
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0002-check-for-unusual-file-harder.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0010-bfd-Increase-_bfd_coff_max_nscns-to-65279.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0110-binutils-mingw-gnu-print.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0410-windres-handle-spaces.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0500-fix-weak-undef-symbols-after-image-base-change.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/2001-ld-option-to-move-default-bases-under-4GB.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/2003-Restore-old-behaviour-of-windres-so-that-options-con.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/3001-hack-libiberty-link-order.patch
@@ -229,15 +231,12 @@ echo "building mingw-w64-headers"
 echo "======================="
 cd $M_BUILD
 mkdir headers-build && cd headers-build
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-headers-git/0001-Allow-to-use-bessel-and-complex-functions-without-un.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-headers-git/0002-heades-add-full-name-winrt.patch
 
 cd $M_SOURCE/mingw-w64
-git apply $M_BUILD/headers-build/0001-Allow-to-use-bessel-and-complex-functions-without-un.patch
-git apply $M_BUILD/headers-build/0002-heades-add-full-name-winrt.patch
 
-cd $M_SOURCE/mingw-w64/mingw-w64-headers
-touch include/windows.*.h include/wincrypt.h include/prsht.h
+# https://bugs.winehq.org/show_bug.cgi?id=55347
+git apply $M_BUILD/headers-build/0002-heades-add-full-name-winrt.patch
 
 cd $M_BUILD/headers-build
 $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
@@ -259,15 +258,6 @@ echo "building mingw-w64-crt"
 echo "======================="
 cd $M_BUILD
 mkdir crt-build && cd crt-build
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-crt-git/0001-Allow-to-use-bessel-and-complex-functions-without-un.patch
-
-cd $M_SOURCE/mingw-w64
-git reset --hard
-git clean -fdx
-(cd mingw-w64-crt && automake)
-git apply $M_BUILD/crt-build/0001-Allow-to-use-bessel-and-complex-functions-without-un.patch
-
-cd $M_BUILD/crt-build
 $M_SOURCE/mingw-w64/mingw-w64-crt/configure \
   --host=$MINGW_TRIPLE \
   --prefix=$M_TARGET \
@@ -299,14 +289,31 @@ echo "building winpthreads"
 echo "======================="
 cd $M_BUILD
 mkdir winpthreads-build && cd winpthreads-build
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-winpthreads-git/0001-Define-__-de-register_frame_info-in-fake-libgcc_s.patch
+#curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-winpthreads-git/0001-Define-__-de-register_frame_info-in-fake-libgcc_s.patch
 
-cd $M_SOURCE/mingw-w64
-git apply $M_BUILD/winpthreads-build/0001-Define-__-de-register_frame_info-in-fake-libgcc_s.patch
+#cd $M_SOURCE/mingw-w64
+#git apply $M_BUILD/winpthreads-build/0001-Define-__-de-register_frame_info-in-fake-libgcc_s.patch
 
 cd $M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads
-autoreconf -vfi
 
+sed -i "s|fakelib_libgcc_s_a_SOURCES =|fakelib_libgcc_s_a_SOURCES = src/libgcc/dll_frame_info.c|" Makefile.am
+cat <<EOF >src/libgcc/dll_frame_info.c
+/* Because of:
+   https://github.com/Alexpux/MINGW-packages/blob/master/mingw-w64-gcc/955-4.9.2-apply-hack-so-gcc_s-isnt-stripped.patch
+   .. we need to define these functions.
+*/
+
+void __register_frame_info (__attribute__((unused)) const void *vp, __attribute__((unused)) void *op)
+{
+}
+
+void *__deregister_frame_info (__attribute__((unused)) const void *vp)
+{
+    return (void *)0;
+}
+EOF
+
+autoreconf -vfi
 cd $M_BUILD/winpthreads-build
 $M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
   --host=$MINGW_TRIPLE \
@@ -319,7 +326,8 @@ make install
 echo "building gcc"
 echo "======================="
 cd $M_SOURCE
-git clone git://gcc.gnu.org/git/gcc.git --branch $BRANCH_GCC
+#git clone git://gcc.gnu.org/git/gcc.git --branch releases/gcc-${VER_GCC%%.*}
+git clone git://gcc.gnu.org/git/gcc.git --branch releases/gcc-$BRANCH_GCC
 cd $M_BUILD
 mkdir gcc-build && cd gcc-build
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0003-Windows-Follow-Posix-dir-exists-semantics-more-close.patch

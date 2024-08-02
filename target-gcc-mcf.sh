@@ -160,9 +160,9 @@ echo "======================="
 cd $M_BUILD
 mkdir binutils-build && cd binutils-build
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0002-check-for-unusual-file-harder.patch
-#curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-binutils/0003-opcodes-i386-dis-Use-Intel-syntax-by-default.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0010-bfd-Increase-_bfd_coff_max_nscns-to-65279.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0110-binutils-mingw-gnu-print.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0410-windres-handle-spaces.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0500-fix-weak-undef-symbols-after-image-base-change.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/2001-ld-option-to-move-default-bases-under-4GB.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/2003-Restore-old-behaviour-of-windres-so-that-options-con.patch
@@ -182,9 +182,6 @@ apply_patch_for_binutils \
   0002-check-for-unusual-file-harder.patch \
   0010-bfd-Increase-_bfd_coff_max_nscns-to-65279.patch \
   0110-binutils-mingw-gnu-print.patch
-
-# ZZZ
-#apply_patch_for_binutils 0003-opcodes-i386-dis-Use-Intel-syntax-by-default.patch
 
 # Add an option to change default bases back below 4GB to ease transition
 # https://github.com/msys2/MINGW-packages/issues/7027
@@ -232,15 +229,12 @@ echo "building mingw-w64-headers"
 echo "======================="
 cd $M_BUILD
 mkdir headers-build && cd headers-build
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-headers-git/0001-Allow-to-use-bessel-and-complex-functions-without-un.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-headers-git/0002-heades-add-full-name-winrt.patch
 
 cd $M_SOURCE/mingw-w64
-git apply $M_BUILD/headers-build/0001-Allow-to-use-bessel-and-complex-functions-without-un.patch
-git apply $M_BUILD/headers-build/0002-heades-add-full-name-winrt.patch
 
-cd $M_SOURCE/mingw-w64/mingw-w64-headers
-touch include/windows.*.h include/wincrypt.h include/prsht.h
+# https://bugs.winehq.org/show_bug.cgi?id=55347
+git apply $M_BUILD/headers-build/0002-heades-add-full-name-winrt.patch
 
 cd $M_BUILD/headers-build
 $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
@@ -312,15 +306,6 @@ echo "building mingw-w64-crt"
 echo "======================="
 cd $M_BUILD
 mkdir crt-build && cd crt-build
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-crt-git/0001-Allow-to-use-bessel-and-complex-functions-without-un.patch
-
-cd $M_SOURCE/mingw-w64
-git reset --hard
-git clean -fdx
-(cd mingw-w64-crt && automake)
-git apply $M_BUILD/crt-build/0001-Allow-to-use-bessel-and-complex-functions-without-un.patch
-
-cd $M_BUILD/crt-build
 $M_SOURCE/mingw-w64/mingw-w64-crt/configure \
   --host=$MINGW_TRIPLE \
   --prefix=$M_TARGET \
@@ -330,7 +315,7 @@ $M_SOURCE/mingw-w64/mingw-w64-crt/configure \
   --disable-dependency-tracking \
   --enable-lib64 \
   --disable-lib32
-make -j$MJOBS
+make -j$MJOBS install-strip
 make install
 # Create empty dummy archives, to avoid failing when the compiler driver
 # adds -lssp -lssh_nonshared when linking.
@@ -352,7 +337,8 @@ rm -rf $M_SOURCE/mingw-w64
 echo "building gcc"
 echo "======================="
 cd $M_SOURCE
-git clone git://gcc.gnu.org/git/gcc.git --branch $BRANCH_GCC
+#git clone git://gcc.gnu.org/git/gcc.git --branch releases/gcc-${VER_GCC%%.*}
+git clone git://gcc.gnu.org/git/gcc.git --branch releases/gcc-$BRANCH_GCC
 cd $M_BUILD
 mkdir gcc-build && cd gcc-build
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0003-Windows-Follow-Posix-dir-exists-semantics-more-close.patch
@@ -369,7 +355,6 @@ curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0400-gcc-Make-stupid-AT-T-syntax-not-default.patch
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0401-Always-quote-labels-in-Intel-syntax.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/2001-fix-building-rust-on-mingw-w64.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/3001-fix-ice.patch
 
 apply_patch_for_gcc() {
   for patch in "$@"; do
@@ -408,9 +393,6 @@ apply_patch_for_gcc 0401-Always-quote-labels-in-Intel-syntax.patch
 # https://github.com/msys2/MINGW-packages/pull/8317#issuecomment-824548411
 apply_patch_for_gcc 0200-add-m-no-align-vector-insn-option-for-i386.patch
 apply_patch_for_gcc 2001-fix-building-rust-on-mingw-w64.patch
-
-# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=115038
-apply_patch_for_gcc 3001-fix-ice.patch
 
 # so libgomp DLL gets built despide static libdl
 export lt_cv_deplibs_check_method='pass_all'

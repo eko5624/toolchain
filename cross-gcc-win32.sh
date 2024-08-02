@@ -48,7 +48,7 @@ wget -c -O binutils-$VER_BINUTILS.tar.bz2 http://ftp.gnu.org/gnu/binutils/binuti
 tar xjf binutils-$VER_BINUTILS.tar.bz2
 
 #gcc
-git clone https://github.com/gcc-mirror/gcc.git --branch $BRANCH_GCC
+git clone https://github.com/gcc-mirror/gcc.git --branch releases/gcc-$BRANCH_GCC
 
 #mingw-w64
 git clone https://github.com/mingw-w64/mingw-w64.git --branch master
