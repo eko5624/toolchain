@@ -110,6 +110,7 @@ fi
 
 echo "building zlib-ng"
 echo "======================="
+cd $M_SOURCE
 git clone https://github.com/zlib-ng/zlib-ng.git
 cd $M_BUILD
 mkdir zlib-build
@@ -129,6 +130,37 @@ cmake -G Ninja -H$M_SOURCE/zlib-ng -B$M_BUILD/zlib-build \
   -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=lld -Xlinker -s -Xlinker --icf=all -Xlinker --gc-sections"
 cmake --build zlib-build -j$MJOBS
 cmake --install zlib-build
+
+echo "building libxml2"
+echo "======================="
+cd $M_SOURCE
+git clone https://github.com/GNOME/libxml2.git
+cd $M_BUILD
+mkdir libxml2-build
+cmake -G Ninja -H$M_SOURCE/libxml2 -B$M_BUILD/libxml2-build \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DBUILD_SHARED_LIBS=OFF \
+  -DCMAKE_INSTALL_PREFIX=$M_INSTALL \
+  -DCMAKE_C_COMPILER=clang \
+  -DCMAKE_CXX_COMPILER=clang++ \
+  -DLIBXML2_WITH_ICONV=OFF \
+  -DLIBXML2_WITH_ICU=OFF \
+  -DLIBXML2_WITH_LZMA=OFF \
+  -DLIBXML2_WITH_PYTHON=OFF \
+  -DLIBXML2_WITH_TESTS=OFF \
+  -DLIBXML2_WITH_HTTP=OFF \
+  -DLIBXML2_WITH_ZLIB=ON \
+  -DLIBXML2_WITH_TREE=ON \
+  -DLIBXML2_WITH_THREADS=ON
+  -DLIBXML2_WITH_THREAD_ALLOC=ON \
+  -DLIBXML2_WITH_TLS=ON \
+  -DLIBXML2_WITH_PROGRAMS=OFF \
+  -DZLIB_LIBRARY=$M_INSTALL/lib/libz.a \
+  -DZLIB_INCLUDE_DIR=$M_INSTALL/include \
+  -DCMAKE_C_FLAGS="-pipe -O3 -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections${llvm_lto}" \
+  -DCMAKE_CXX_FLAGS="-pipe -O3 -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections${llvm_lto}" \
+  -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=lld -Xlinker -s -Xlinker --icf=all -Xlinker --gc-sections"
+
 
 echo "building zstd"
 echo "======================="
@@ -179,6 +211,26 @@ cmake -G Ninja -H$M_SOURCE/mimalloc -B$M_BUILD/mimalloc-build \
 cmake --build mimalloc-build -j$MJOBS
 cmake --install mimalloc-build
 
+echo "building cppwinrt"
+echo "======================="
+cd $M_SOURCE
+git clone https://github.com/microsoft/cppwinrt.git --branch master
+cd $M_BUILD
+mkdir cppwinrt-build
+cmake -G Ninja -H$M_SOURCE/cppwinrt -B$M_BUILD/cppwinrt-build \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DBUILD_SHARED_LIBS=OFF \
+  -DCMAKE_INSTALL_PREFIX=$M_INSTALL \
+  -DCMAKE_C_COMPILER=clang \
+  -DCMAKE_CXX_COMPILER=clang++ \
+  -DCMAKE_C_FLAGS="-pipe -O3 -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections${llvm_lto}" \
+  -DCMAKE_CXX_FLAGS="-pipe -O3 -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections${llvm_lto}" \
+  -DCMAKE_EXE_LINKER_FLAGS="-static-pie $M_INSTALL/lib/mimalloc.o -fuse-ld=lld -Xlinker --lto-O3 -Xlinker --lto-CGO3 -Xlinker -s -Xlinker --icf=all -Xlinker --gc-sections"
+ninja -C cppwinrt-build
+ninja -C cppwinrt-build install
+curl -L https://github.com/microsoft/windows-rs/raw/master/crates/libs/bindgen/default/Windows.winmd -o cppwinrt-build/Windows.winmd
+cppwinrt -in cppwinrt-build/Windows.winmd -out $M_CROSS/include
+
 echo "building llvm"
 echo "======================="  
 cd $M_BUILD
@@ -209,7 +261,6 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
   -DCLANG_DEFAULT_CXX_STDLIB=libc++ \
   -DCLANG_DEFAULT_LINKER=lld \
   -DLLD_DEFAULT_LD_LLD_IS_MINGW=ON \
-  -DLLVM_ENABLE_LIBXML2=OFF \
   -DLLVM_ENABLE_TERMINFO=OFF \
   -DLLVM_LINK_LLVM_DYLIB=OFF \
   -DLLVM_BUILD_LLVM_DYLIB=OFF \
@@ -329,7 +380,10 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
   -DLLVM_USE_STATIC_ZSTD=ON \
   -Dzstd_LIBRARY=$M_INSTALL/lib/libzstd.a \
   -Dzstd_INCLUDE_DIR=$M_INSTALL/include \
-  -DLLVM_THINLTO_CACHE_PATH="$PREFIX/llvm-lto" \
+  -DLLVM_ENABLE_LIBXML2=ON \
+  -DLIBXML2_LIBRARIES=$M_INSTALL/lib/libxml2 \
+  -DLIBXML2_INCLUDE_DIRS=$M_INSTALL/include \
+  -DLLVM_THINLTO_CACHE_PATH=$PREFIX/llvm-lto \
   -DCMAKE_C_FLAGS="-pipe -O3 -ffp-contract=fast -ftls-model=local-exec${llvm_lto}${llvm_pgo}" \
   -DCMAKE_CXX_FLAGS="-pipe -O3 -ffp-contract=fast -ftls-model=local-exec${llvm_lto}${llvm_pgo}" \
   -DCMAKE_EXE_LINKER_FLAGS="$M_INSTALL/lib/mimalloc.o -fuse-ld=lld -Xlinker --lto-O3 -Xlinker --lto-CGO3 -Xlinker -q -Xlinker --icf=all -Xlinker -zpack-relative-relocs -Xlinker --thinlto-cache-policy=cache_size_bytes=1g:prune_interval=1m${llvm_linker_flags}" \

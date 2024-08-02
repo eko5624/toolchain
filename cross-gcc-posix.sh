@@ -56,6 +56,9 @@ git clone https://github.com/gcc-mirror/gcc.git --branch releases/gcc-$VER_GCC
 #mingw-w64
 git clone https://github.com/mingw-w64/mingw-w64.git --branch master --depth 1
 
+#cppwinrt
+git clone https://github.com/microsoft/cppwinrt.git --branch master
+
 echo "building binutils"
 echo "======================="
 cd $M_BUILD
@@ -195,6 +198,22 @@ $M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
   --enable-static
 make -j$MJOBS
 make install-strip
+
+echo "building cppwinrt"
+echo "======================="
+cd $M_BUILD
+mkdir cppwinrt-build
+cmake \
+  -G Ninja \
+  -H$M_SOURCE/cppwinrt \
+  -B$M_BUILD/cppwinrt-build \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DBUILD_SHARED_LIBS=OFF \
+  -DCMAKE_INSTALL_PREFIX=$M_CROSS
+ninja -C cppwinrt-build
+ninja -C cppwinrt-build install
+curl -L https://github.com/microsoft/windows-rs/raw/master/crates/libs/bindgen/default/Windows.winmd -o cppwinrt-build/Windows.winmd
+cppwinrt -in cppwinrt-build/Windows.winmd -out $M_CROSS/include
 
 echo "building gcc-final"
 echo "======================="
