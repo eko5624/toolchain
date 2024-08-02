@@ -337,8 +337,9 @@ rm -rf $M_SOURCE/mingw-w64
 echo "building gcc"
 echo "======================="
 cd $M_SOURCE
-#git clone git://gcc.gnu.org/git/gcc.git --branch releases/gcc-${VER_GCC%%.*}
-git clone git://gcc.gnu.org/git/gcc.git --branch releases/gcc-$BRANCH_GCC
+#git clone https://github.com/gcc-mirror/gcc.git --branch releases/gcc-$BRANCH_GCC
+git clone https://github.com/gcc-mirror/gcc.git --branch releases/gcc-$VER_GCC
+
 cd $M_BUILD
 mkdir gcc-build && cd gcc-build
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0003-Windows-Follow-Posix-dir-exists-semantics-more-close.patch

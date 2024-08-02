@@ -241,8 +241,9 @@ make install
 echo "building gcc"
 echo "======================="
 cd $M_SOURCE
-#git clone git://gcc.gnu.org/git/gcc.git --branch releases/gcc-${VER_GCC%%.*}
-git clone git://gcc.gnu.org/git/gcc.git --branch releases/gcc-$BRANCH_GCC
+#git clone https://github.com/gcc-mirror/gcc.git --branch releases/gcc-$BRANCH_GCC
+git clone https://github.com/gcc-mirror/gcc.git --branch releases/gcc-$VER_GCC
+
 cd gcc
 _gcc_version=$(head -n 34 gcc/BASE-VER | sed -e 's/.* //' | tr -d '"\n')
 _gcc_date=$(head -n 34 gcc/DATESTAMP | sed -e 's/.* //' | tr -d '"\n')
