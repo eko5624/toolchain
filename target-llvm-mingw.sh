@@ -47,7 +47,7 @@ git clone https://github.com/mingw-w64/mingw-w64.git --branch master
 
 #make
 wget -c -O make-$VER_MAKE.tar.gz https://ftp.gnu.org/pub/gnu/make/make-$VER_MAKE.tar.gz
-tar xzf make-$VER_MAKE.tar.gz
+tar xzf make-$VER_MAKE.tar.gz 2>/dev/null >/dev/null
 
 #cmake
 #git clone https://github.com/Kitware/CMake.git --branch v$VER_CMAKE

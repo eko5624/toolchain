@@ -38,25 +38,25 @@ cd $M_SOURCE
 
 #binutils
 wget -c -O binutils-$VER_BINUTILS.tar.bz2 http://ftp.gnu.org/gnu/binutils/binutils-$VER_BINUTILS.tar.bz2
-tar xjf binutils-$VER_BINUTILS.tar.bz2
+tar xjf binutils-$VER_BINUTILS.tar.bz2 2>/dev/null >/dev/null
 #mkdir binutils
 #git clone https://sourceware.org/git/binutils-gdb.git --branch binutils-${VER_BINUTILS//./_}-branch binutils
 
 #gmp
 wget -c -O gmp-$VER_GMP.tar.bz2 https://ftp.gnu.org/gnu/gmp/gmp-$VER_GMP.tar.bz2
-tar xjf gmp-$VER_GMP.tar.bz2
+tar xjf gmp-$VER_GMP.tar.bz2 2>/dev/null >/dev/null
 
 #mpfr
 wget -c -O mpfr-$VER_MPFR.tar.bz2 https://ftp.gnu.org/gnu/mpfr/mpfr-$VER_MPFR.tar.bz2
-tar xjf mpfr-$VER_MPFR.tar.bz2
+tar xjf mpfr-$VER_MPFR.tar.bz2 2>/dev/null >/dev/null
 
 #MPC
 wget -c -O mpc-$VER_MPC.tar.gz https://ftp.gnu.org/gnu/mpc/mpc-$VER_MPC.tar.gz
-tar xzf mpc-$VER_MPC.tar.gz
+tar xzf mpc-$VER_MPC.tar.gz 2>/dev/null >/dev/null
 
 #isl
 wget -c -O isl-$VER_ISL.tar.bz2 https://gcc.gnu.org/pub/gcc/infrastructure/isl-$VER_ISL.tar.bz2
-tar xjf isl-$VER_ISL.tar.bz2
+tar xjf isl-$VER_ISL.tar.bz2 2>/dev/null >/dev/null
 
 #mingw-w64
 git clone https://github.com/mingw-w64/mingw-w64.git --branch master
@@ -66,7 +66,7 @@ git clone https://github.com/lhmouse/mcfgthread.git --branch master
 
 #make
 wget -c -O make-$VER_MAKE.tar.gz https://ftp.gnu.org/pub/gnu/make/make-$VER_MAKE.tar.gz
-tar xzf make-$VER_MAKE.tar.gz
+tar xzf make-$VER_MAKE.tar.gz 2>/dev/null >/dev/null
 
 #cmake
 #git clone https://github.com/Kitware/CMake.git --branch v$VER_CMAKE
@@ -80,7 +80,7 @@ curl -OL https://github.com/ninja-build/ninja/releases/download/v$VER_NINJA/ninj
 #yasm
 #curl -OL https://github.com/yasm/yasm/releases/download/v$VER_YASM/yasm-$VER_YASM-win64.exe
 wget -c -O yasm-$VER_YASM.tar.gz http://www.tortall.net/projects/yasm/releases/yasm-$VER_YASM.tar.gz
-tar xzf yasm-$VER_YASM.tar.gz
+tar xzf yasm-$VER_YASM.tar.gz 2>/dev/null >/dev/null
 
 #nasm
 #curl -OL https://www.nasm.us/pub/nasm/releasebuilds/$VER_NASM/win64/nasm-$VER_NASM-win64.zip

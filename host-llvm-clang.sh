@@ -2,6 +2,7 @@
 set -e
 
 TOP_DIR=$(pwd)
+source $TOP_DIR/ver.sh
 
 # Speed up the process
 # Env Var NUMJOBS overrides automatic detection
@@ -24,7 +25,7 @@ cd $M_SOURCE
 #llvm
 #git clone https://github.com/llvm/llvm-project.git --branch llvmorg-$VER_LLVM
 if [ ! -d "$M_SOURCE/llvm-project" ]; then
-  git clone https://github.com/llvm/llvm-project.git --branch release/18.x
+  git clone https://github.com/llvm/llvm-project.git --branch llvmorg-$VER_LLVM
   cd llvm-project
   git sparse-checkout set --no-cone '/*' '!*/test' '!/lldb' '!/mlir' '!/clang-tools-extra' '!/polly' '!/libc' '!/flang'
   cd ..
