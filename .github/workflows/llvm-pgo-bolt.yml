@@ -61,10 +61,8 @@ jobs:
           else
             unset PACKAGE_CCACHE
           fi 
-
       - name: Checkout
         uses: actions/checkout@main
-
       - name: Load llvm.profdata cache
         uses: actions/cache/restore@main
         id: llvm-profdata
@@ -73,34 +71,29 @@ jobs:
           key: llvm-profdata-${{ github.run_id }}
           restore-keys: |
             llvm-profdata-
-
       #- name: Install fuchsia-clang
       #  if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
       #  run: |
       #    sudo GOBIN=/usr/bin go install go.chromium.org/luci/cipd/client/cmd/...@latest
       #    sudo cipd install fuchsia/third_party/clang/linux-amd64 latest -root /usr/local/fuchsia-clang
-
-      - name: Install cross-llvm-clang-pgo
+      - name: Install host clang toolchain
         if: ${{ steps.llvm-profdata.outputs.cache-matched-key == '' }}
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.7z || true
           7z x cross-llvm-clang-pgo-latest-ucrt-x86_64.7z || true
           rm cross-llvm-clang-pgo-latest-ucrt-x86_64.7z || true
           mv cross host || true
-
       - name: Setup llvm-clang toolchain with IR Profile Instrumentation
         if: ${{ steps.llvm-profdata.outputs.cache-matched-key == '' }}
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-clang-ir-latest-ucrt-x86_64.7z
           7z x llvm-clang-ir-latest-ucrt-x86_64.7z
           rm llvm-clang-ir-latest-ucrt-x86_64.7z
-
       - name: Train pgo with shaderc
         if: ${{ steps.llvm-profdata.outputs.cache-matched-key == '' }}
         run: |
           chmod +x ./train-pgo.sh
           ./train-pgo.sh --enable-pgo_gen $PACKAGE_LTO $PACKAGE_CCACHE
-
       - name: Save llvm.profdata cache
         if: ${{ steps.llvm-profdata.outputs.cache-matched-key == '' }}
         uses: actions/cache/save@main
@@ -138,10 +131,8 @@ jobs:
           else
             unset PACKAGE_CCACHE
           fi 
-
       - name: Checkout
         uses: actions/checkout@main
-
       - name: Load cross-llvm-pgo cache
         uses: actions/cache/restore@main
         id: cross-llvm-pgo
@@ -159,28 +150,24 @@ jobs:
           key: llvm-profdata-${{ github.run_id }}
           restore-keys: |
             llvm-profdata-
-
       - name: Load llvm-project source
         uses: actions/cache@main
         id: llvm-source
         with:
           path: ${{ github.workspace }}/source/llvm-project
           key: llvm-source-cache
-
       #- name: Install fuchsia-clang
       #  if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
       #  run: |
       #    sudo GOBIN=/usr/bin go install go.chromium.org/luci/cipd/client/cmd/...@latest
       #    sudo cipd install fuchsia/third_party/clang/linux-amd64 latest -root /usr/local/fuchsia-clang
-
-      - name: Install cross-llvm-clang-pgo
+      - name: Install host clang toolchain
         if: ${{ steps.cross-llvm-pgo.outputs.cache-matched-key == '' }}
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.7z || true
           7z x cross-llvm-clang-pgo-latest-ucrt-x86_64.7z || true
           rm cross-llvm-clang-pgo-latest-ucrt-x86_64.7z || true
           mv cross host || true
-
       - name: Install llvm-lto llvm-ccache
         if: (steps.cross-llvm-pgo.outputs.cache-matched-key == '' && inputs.llvm_thin_lto) || (steps.cross-llvm-pgo.outputs.cache-matched-key == '' && inputs.llvm_full_lto) || (steps.cross-llvm-pgo.outputs.cache-matched-key == '' && inputs.llvm_ccache)
         run: |
@@ -189,23 +176,19 @@ jobs:
           rm cross-llvm-pgo-latest.7z || true
           rm -rf llvm_pgo/bin || true
           rm -rf llvm_pgo/lib || true
-
       - name: Build llvm with pgo
         if: ${{ steps.cross-llvm-pgo.outputs.cache-matched-key == '' }}
         run: |
           chmod +x ./llvm.sh
           ./llvm.sh --enable-pgo_use --enable-bolt_use $LLVM_LTO $LLVM_CCACHE
-
       - name: Save cross-llvm-pgo cache
         if: ${{ steps.cross-llvm-pgo.outputs.cache-matched-key == '' }}
         uses: actions/cache/save@main
         with:
           path: ${{ github.workspace }}/llvm_pgo
           key: cross-llvm-pgo-${{ github.run_id }}
-
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
-
       - name: Package cross-llvm-pgo
         if: ${{ steps.cross-llvm-pgo.outputs.cache-matched-key == '' }}
         run: 7z a cross-llvm-pgo-latest.7z llvm_pgo/*
@@ -222,17 +205,14 @@ jobs:
         run: |
           chmod +x ./package-release.sh
           ./package-release.sh
-
       - name: Remove llvm-lto llvm-ccache dirs
         run: |
           rm -rf llvm_pgo/llvm-lto || true
           rm -rf llvm_pgo/llvm-ccache || true
-
       - name: Build host libcxx compiler-rt-builtin compiler-rt
         run: |
           chmod +x ./host-llvm-clang.sh
           ./host-llvm-clang.sh
-
       - name: Train bolt with sqlite (x86_64)
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-clang-ir-latest-ucrt-x86_64.7z
@@ -254,7 +234,6 @@ jobs:
         run: |
           chmod +x ./package-delete.sh
           ./package-delete.sh cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
-
       - name: Train bolt with sqlite (x86_64_v3)
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-clang-ir-latest-ucrt-x86_64_v3.7z
@@ -276,7 +255,6 @@ jobs:
         run: |
           chmod +x ./package-delete.sh
           ./package-delete.sh cross-llvm-clang-pgo-latest-ucrt-x86_64_v3.7z
-
       - name: Release
         continue-on-error: true
         env:

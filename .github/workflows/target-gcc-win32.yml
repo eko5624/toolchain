@@ -22,25 +22,21 @@ jobs:
           git config --global pull.rebase true
           git config --global rebase.autoStash true
           git config --global fetch.prune true
-          git config --global --add safe.directory $PWD
-          
+          git config --global --add safe.directory $PWD          
       - name: Checkout
-        uses: actions/checkout@main
-        
+        uses: actions/checkout@main        
       - name: Setup Toolchain
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-gcc-win32-latest-ucrt-x86_64.7z
           7z x cross-gcc-win32*.7z
-          rm cross-gcc-win32*.7z
-            
+          rm cross-gcc-win32*.7z            
       - name: Loading target gcc cache
         uses: actions/cache/restore@main
         with:
           path: ${{ github.workspace }}/target
           key: target-gcc-win32-${{ github.run_id }}
           restore-keys: |
-            target-gcc-win32-
-            
+            target-gcc-win32-            
       - name: Building gcc with thread win32
         run: |
           PWD=$(pwd)
@@ -48,16 +44,13 @@ jobs:
             chmod +x ./target-gcc-win32.sh
             ./target-gcc-win32.sh
           fi  
-
       - name: Get gcc version
         run: |
-          echo "ver=$(cat target/version.txt)" >> $GITHUB_ENV
-           
+          echo "ver=$(cat target/version.txt)" >> $GITHUB_ENV           
       - name: Packaging toolchain
         run: |
           7z a target-gcc-win32-${{ env.ver }}-ucrt-x86_64.7z target/*
           cp target-gcc-win32-${{ env.ver }}-ucrt-x86_64.7z target-gcc-win32-latest-ucrt-x86_64.7z
-
       - name: Release
         continue-on-error: true
         env:
@@ -65,7 +58,6 @@ jobs:
         run: |
           chmod +x ./package-release.sh
           ./package-release.sh
-
       - name: Saving target gcc cache
         uses: actions/cache/save@main
         if: always()

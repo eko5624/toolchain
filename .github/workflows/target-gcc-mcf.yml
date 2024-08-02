@@ -18,32 +18,27 @@ jobs:
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-gcc-mcf-latest-ucrt-x86_64.7z
           7z x cross-gcc-mcf*.7z
-          rm cross-gcc-mcf*.7z
- 
+          rm cross-gcc-mcf*.7z 
       - name: Loading target gcc cache
         uses: actions/cache/restore@main
         with:
           path: ${{ github.workspace }}/target
           key: target-gcc-mcf-${{ github.run_id }}
           restore-keys: |
-            target-gcc-mcf-
-            
+            target-gcc-mcf-           
       - name: Building gcc with mcf
         run: |
           if [[ ! "$(ls target/bin)" ]]; then
             chmod +x ./target-gcc-mcf.sh
             ./target-gcc-mcf.sh
           fi  
-
       - name: Get gcc version
         run: |
-           echo "ver=$(cat target/version.txt)" >> $GITHUB_ENV     
-      
+           echo "ver=$(cat target/version.txt)" >> $GITHUB_ENV           
       - name: Packaging toolchain
         run: |
           7z a target-gcc-mcf-${{ env.ver }}-ucrt-x86_64.7z target/*
           cp target-gcc-mcf-${{ env.ver }}-ucrt-x86_64.7z target-gcc-mcf-latest-ucrt-x86_64.7z
-
       - name: Delete
         env:
           GH_TOKEN: ${{ github.token }} 
@@ -56,8 +51,7 @@ jobs:
           GH_TOKEN: ${{ github.token }} 
         run: |
           chmod +x ./package-release.sh
-          ./package-release.sh
-          
+          ./package-release.sh          
       - name: Saving target gcc cache
         uses: actions/cache/save@main
         if: always()

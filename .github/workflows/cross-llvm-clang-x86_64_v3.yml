@@ -50,34 +50,28 @@ jobs:
           else  
             unset PGO IR
           fi
-
       - name: Checkout
         uses: actions/checkout@main
-
       - name: Setup llvm${{ env.IR }}
         run: |
           curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/llvm$IR-latest.7z
           7z x llvm*.7z
           rm llvm*.7z
           rm -rf cross/llvm-lto || true
-          rm -rf cross/llvm-ccache || true
-            
+          rm -rf cross/llvm-ccache || true            
       - name: Load llvm-project source
         uses: actions/cache@main
         id: llvm-source
         with:
           path: ${{ github.workspace }}/source/llvm-project
           key: llvm-source-cache
-
       - name: Build toolchain
         run: |
           set -x
           chmod +x ./cross-llvm-clang.sh
           ./cross-llvm-clang.sh --build-x86_64_v3 $PGO
-
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV  
-
       - name: Package toolchain
         run: |
           7z a llvm-clang$IR-latest-ucrt-x86_64_v3.7z cross/*

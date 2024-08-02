@@ -23,24 +23,20 @@ jobs:
           path: ${{ github.workspace }}/cross
           key: cross-gcc-win32-x86_64-ucrt-${{ github.run_id }}
           restore-keys: |
-            cross-gcc-win32-x86_64-ucrt-
-            
+            cross-gcc-win32-x86_64-ucrt-            
       - name: Building toolchain
         run: |
           if [[ ! "$(ls -A cross/bin)" ]]; then
             chmod +x ./cross-gcc-win32.sh
             ./cross-gcc-win32.sh --build-x86_64
-          fi
-        
+          fi        
       - name: Get gcc version
         run: |
            echo "ver=$(cat cross/version.txt)" >> $GITHUB_ENV
-
       - name: Packaging toolchain
         run: |
           7z a cross-gcc-win32-${{ env.ver }}-ucrt-x86_64.7z cross/*
           cp cross-gcc-win32-${{ env.ver }}-ucrt-x86_64.7z cross-gcc-win32-latest-ucrt-x86_64.7z
-
       - name: Delete
         env:
           GH_TOKEN: ${{ github.token }} 
@@ -53,7 +49,6 @@ jobs:
         run: |
           chmod +x ./package-release.sh
           ./package-release.sh
-
       - name: Saving gcc cache
         uses: actions/cache/save@main
         if: always()
@@ -78,24 +73,20 @@ jobs:
           path: ${{ github.workspace }}/cross
           key: cross-gcc-win32-x86_64_v3-ucrt-${{ github.run_id }}
           restore-keys: |
-            cross-gcc-win32-x86_64_v3-ucrt-
-            
+            cross-gcc-win32-x86_64_v3-ucrt-            
       - name: Building toolchain
         run: |
           if [[ ! "$(ls -A cross/bin)" ]]; then
             chmod +x ./cross-gcc-win32.sh
             ./cross-gcc-win32.sh --build-x86_64_v3
-          fi
-        
+          fi        
       - name: Get gcc version
         run: |
            echo "ver=$(cat cross/version.txt)" >> $GITHUB_ENV
-
       - name: Packaging toolchain
         run: |
           7z a cross-gcc-win32-${{ env.ver }}-ucrt-x86_64_v3.7z cross/*
           cp cross-gcc-win32-${{ env.ver }}-ucrt-x86_64_v3.7z cross-gcc-win32-latest-ucrt-x86_64_v3.7z
-
       - name: Delete
         env:
           GH_TOKEN: ${{ github.token }} 
@@ -108,7 +99,6 @@ jobs:
         run: |
           chmod +x ./package-release.sh
           ./package-release.sh
-
       - name: Saving gcc cache
         uses: actions/cache/save@main
         if: always()

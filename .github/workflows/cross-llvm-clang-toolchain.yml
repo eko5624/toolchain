@@ -62,17 +62,14 @@ jobs:
           else
             unset LLVM_CCACHE
           fi
-
       - name: Checkout
         uses: actions/checkout@main
-
       - name: Load llvm-project source
         uses: actions/cache@main
         id: llvm-source
         with:
           path: ${{ github.workspace }}/source/llvm-project
-          key: llvm-source-cache
-          
+          key: llvm-source-cache          
       - name: Load llvm${{ env.IR }} cache
         uses: actions/cache/restore@main
         id: llvm-cache
@@ -81,21 +78,18 @@ jobs:
           key: llvm${{ env.IR }}-cache-${{ github.run_id }}
           restore-keys: |
             llvm${{ env.IR }}-cache-
-
       #- name: Install fuchsia-clang
       #  if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
       #  run: |
       #    sudo GOBIN=/usr/bin go install go.chromium.org/luci/cipd/client/cmd/...@latest
       #    sudo cipd install fuchsia/third_party/clang/linux-amd64 latest -root /usr/local/fuchsia-clang
-
-      - name: Install cross-llvm-clang-pgo
+      - name: Install host clang toolchain
         if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.7z || true
           7z x cross-llvm-clang-pgo-latest-ucrt-x86_64.7z || true
           rm cross-llvm-clang-pgo-latest-ucrt-x86_64.7z || true
           mv cross host || true
-
       - name: Setup llvm-lto llvm-ccache
         if: (steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_thin_lto) || (steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_full_lto) || (steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_ccache)
         run: |
@@ -103,30 +97,25 @@ jobs:
             7z x llvm$IR-latest.7z || true 
             rm llvm$IR-latest.7z || true
             rm -rf cross/bin || true
-            rm -rf cross/lib || true
-          
+            rm -rf cross/lib || true          
       - name: Build llvm${{ env.IR }}
         if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
         run: |
           set -x
           chmod +x ./llvm.sh
           ./llvm.sh $PGO $LLVM_CCACHE
-
       - name: Save llvm${{ env.IR }} cache
         uses: actions/cache/save@main
         if: always()
         with:
           path: ${{ github.workspace }}/cross
           key: llvm${{ env.IR }}-cache-${{ github.run_id }}
-
       - name: Get current timestamp
         if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
-
       - name: Package llvm
         if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
         run: 7z a llvm$IR-latest.7z cross/*
-
       - name: Delete
         if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
         env:

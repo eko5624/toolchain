@@ -22,7 +22,6 @@ jobs:
           key: target-llvm-${{ github.run_id }}
           restore-keys: |
             target-llvm-
-
       - name: Load llvm-project source
         if: ${{ steps.target-llvm.outputs.cache-matched-key == '' }}
         uses: actions/cache@main
@@ -30,28 +29,23 @@ jobs:
         with:
           path: ${{ github.workspace }}/source/llvm-project
           key: llvm-source-cache
-
       - name: Setup cross-llvm-mingw
         if: ${{ steps.target-llvm.outputs.cache-matched-key == '' }}
         run: |
           curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/cross-llvm-mingw-latest-ucrt-x86_64.7z
           7z x cross*.7z
-          rm cross*.7z
-            
+          rm cross*.7z            
       - name: Building toolchain
         if: ${{ steps.target-llvm.outputs.cache-matched-key == '' }}
         run: |
           chmod +x ./target-llvm.sh
           ./target-llvm.sh
-
       - name: Get current timestamp
         if: ${{ steps.target-llvm.outputs.cache-matched-key == '' }}
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV  
-
       - name: Packaging toolchain
         if: ${{ steps.target-llvm.outputs.cache-matched-key == '' }}
         run: 7z a target-llvm-latest.7z target/*
-
       - name: Delete
         if: ${{ steps.target-llvm.outputs.cache-matched-key == '' }}
         env:
@@ -67,7 +61,6 @@ jobs:
         run: |
           chmod +x ./package-release.sh
           ./package-release.sh
-
       - name: Saving target-llvm cache
         if: ${{ steps.target-llvm.outputs.cache-matched-key == '' }}
         uses: actions/cache/save@main
@@ -83,35 +76,29 @@ jobs:
     steps:    
       - name: Checkout
         uses: actions/checkout@main
-
       - name: Load llvm-project source
         uses: actions/cache@main
         id: llvm-source
         with:
           path: ${{ github.workspace }}/source/llvm-project
-          key: llvm-source-cache
-                  
+          key: llvm-source-cache                  
       - name: Setup cross-llvm-mingw and target-llvm
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-mingw-latest-ucrt-x86_64.7z
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/target-llvm-latest.7z
           7z x cross*.7z
           7z x target*.7z
-          rm *.7z
-            
+          rm *.7z            
       - name: Building toolchain
         run: |
           chmod +x ./target-llvm-mingw.sh
           ./target-llvm-mingw.sh
-
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
-
       - name: Packaging toolchain
         run: |
           7z a -r -l target-llvm-mingw-${{ env.date }}-ucrt-x86_64.7z target/*
           cp target-llvm-mingw-${{ env.date }}-ucrt-x86_64.7z target-llvm-mingw-latest-ucrt-x86_64.7z
-
       - name: Delete
         env:
           GH_TOKEN: ${{ github.token }} 

@@ -18,16 +18,14 @@ jobs:
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-gcc-posix-latest-ucrt-x86_64.7z
           7z x cross-gcc-posix*.7z
-          rm cross-gcc-posix*.7z
-            
+          rm cross-gcc-posix*.7z            
       - name: Loading target gcc cache
         uses: actions/cache/restore@main
         with:
           path: ${{ github.workspace }}/target
           key: target-gcc-posix-${{ github.run_id }}
           restore-keys: |
-            target-gcc-posix-
-            
+            target-gcc-posix-            
       - name: Building gcc with posix
         run: |
           PWD=$(pwd)
@@ -35,16 +33,13 @@ jobs:
             chmod +x ./target-gcc-posix.sh
             ./target-gcc-posix.sh
           fi  
-
       - name: Get gcc version
         run: |
-           echo "ver=$(cat target/version.txt)" >> $GITHUB_ENV
-           
+           echo "ver=$(cat target/version.txt)" >> $GITHUB_ENV           
       - name: Packaging toolchain
         run: |
           7z a target-gcc-posix-${{ env.ver }}-ucrt-x86_64.7z target/*
           cp target-gcc-posix-${{ env.ver }}-ucrt-x86_64.7z target-gcc-posix-latest-ucrt-x86_64.7z
-
       - name: Release
         continue-on-error: true
         env:
@@ -52,7 +47,6 @@ jobs:
         run: |
           chmod +x ./package-release.sh
           ./package-release.sh
-
       - name: Saving target gcc cache
         uses: actions/cache/save@main
         if: always()

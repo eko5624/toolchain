@@ -12,8 +12,7 @@ jobs:
       image: docker://ghcr.io/eko5624/archlinux:latest
     steps:
       - name: Checkout
-        uses: actions/checkout@main
-      
+        uses: actions/checkout@main      
       - name: Loading llvm cache
         uses: actions/cache/restore@main
         with:
@@ -21,42 +20,35 @@ jobs:
           key: cross-llvm-${{ github.run_id }}
           restore-keys: |
             cross-llvm-
-
       - name: Load llvm-project source
         uses: actions/cache@main
         id: llvm-source
         with:
           path: ${{ github.workspace }}/source/llvm-project
           key: llvm-source-cache            
-
-      - name: Install cross-llvm-clang-pgo
+      - name: Install host clang toolchain
         if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
           7z x cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
           rm cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
           mv cross host
-
       - name: Building toolchain
         run: |
           if [[ ! "$(ls -A cross/bin)" ]]; then
             chmod +x ./cross-llvm.sh
             ./cross-llvm.sh
           fi
-
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV  
-
       - name: Packaging toolchain
         run: 7z a cross-llvm-latest.7z cross/*
-
       - name: Saving llvm cache
         uses: actions/cache/save@main
         if: always()
         with:
           path: ${{ github.workspace }}/cross
           key: cross-llvm-${{ github.run_id }}
-
       - name: Delete
         env:
           GH_TOKEN: ${{ github.token }} 
@@ -79,33 +71,27 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@main
-
       - name: Load llvm-project source
         uses: actions/cache@main
         id: llvm-source
         with:
           path: ${{ github.workspace }}/source/llvm-project
-          key: llvm-source-cache
-          
+          key: llvm-source-cache          
       - name: Setup cross-llvm
         run: |
           curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/cross-llvm-latest.7z
           7z x cross*.7z
-          rm cross*.7z
-            
+          rm cross*.7z            
       - name: Building toolchain
         run: |
           chmod +x ./cross-llvm-mingw.sh
           ./cross-llvm-mingw.sh
-
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV  
-
       - name: Packaging toolchain
         run: |
           7z a cross-llvm-mingw-${{ env.date }}-ucrt-x86_64.7z cross/*
           cp cross-llvm-mingw-${{ env.date }}-ucrt-x86_64.7z cross-llvm-mingw-latest-ucrt-x86_64.7z
-
       - name: Delete
         env:
           GH_TOKEN: ${{ github.token }} 
