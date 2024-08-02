@@ -220,7 +220,7 @@ mkdir cppwinrt-build
 cmake -G Ninja -H$M_SOURCE/cppwinrt -B$M_BUILD/cppwinrt-build \
   -DCMAKE_BUILD_TYPE=Release \
   -DBUILD_SHARED_LIBS=OFF \
-  -DCMAKE_INSTALL_PREFIX=$M_INSTALL \
+  -DCMAKE_INSTALL_PREFIX=$PREFIX \
   -DCMAKE_C_COMPILER=clang \
   -DCMAKE_CXX_COMPILER=clang++ \
   -DCMAKE_C_FLAGS="-pipe -O3 -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections${llvm_lto}" \
