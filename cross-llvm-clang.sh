@@ -19,7 +19,7 @@ M_BUILD=$M_ROOT/build
 M_CROSS=$M_ROOT/cross
 M_HOST=$M_ROOT/host
 ORIG_PATH="$M_HOST/bin:/usr/local/fuchsia-clang/bin:$PATH"
-PATH="$M_CROSS/bin:$ORIG_PATH"
+PATH="$M_CROSS/bin:$PATH"
 LLVM_ENABLE_PGO="OFF" #STRING "OFF, GEN, CSGEN, USE"
 LLVM_PROFILE_FILE="/dev/null"
 
@@ -71,26 +71,6 @@ fi
 
 #mingw-w64
 git clone https://github.com/mingw-w64/mingw-w64.git --branch master
-
-echo "building cppwinrt"
-echo "======================="
-cd $M_SOURCE
-git clone https://github.com/microsoft/cppwinrt.git --branch master
-cd $M_BUILD
-mkdir cppwinrt-build
-NO_CONFLTO=1 PATH=$ORIG_PATH cmake -G Ninja -H$M_SOURCE/cppwinrt -B$M_BUILD/cppwinrt-build \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DBUILD_SHARED_LIBS=OFF \
-  -DCMAKE_INSTALL_PREFIX=$M_CROSS \
-  -DCMAKE_C_COMPILER=clang \
-  -DCMAKE_CXX_COMPILER=clang++ \
-  -DCMAKE_C_FLAGS="-pipe -O3 -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections${llvm_lto}" \
-  -DCMAKE_CXX_FLAGS="-pipe -O3 -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections${llvm_lto}" \
-  -DCMAKE_EXE_LINKER_FLAGS="-static-pie $M_INSTALL/lib/mimalloc.o -fuse-ld=lld -Xlinker --lto-O3 -Xlinker --lto-CGO3 -Xlinker -s -Xlinker --icf=all -Xlinker --gc-sections"
-ninja -C cppwinrt-build
-ninja -C cppwinrt-build install
-curl -L https://github.com/microsoft/windows-rs/raw/master/crates/libs/bindgen/default/Windows.winmd -o cppwinrt-build/Windows.winmd
-cppwinrt -in cppwinrt-build/Windows.winmd -out $M_CROSS/$MINGW_TRIPLE/include
 
 echo "installing llvm-wrappers"
 echo "======================="
@@ -152,6 +132,26 @@ done
 
 install -vm755 llvm-ld.in $M_CROSS/bin/x86_64-w64-mingw32-ld
 sed -i "s|@lld_cfi@|${LLD_CFI}|g" $M_CROSS/bin/x86_64-w64-mingw32-ld
+
+echo "building cppwinrt"
+echo "======================="
+cd $M_SOURCE
+git clone https://github.com/microsoft/cppwinrt.git --branch master
+cd $M_BUILD
+mkdir cppwinrt-build
+NO_CONFLTO=1 PATH=$ORIG_PATH cmake -G Ninja -H$M_SOURCE/cppwinrt -B$M_BUILD/cppwinrt-build \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DBUILD_SHARED_LIBS=OFF \
+  -DCMAKE_INSTALL_PREFIX=$M_CROSS \
+  -DCMAKE_C_COMPILER=clang \
+  -DCMAKE_CXX_COMPILER=clang++ \
+  -DCMAKE_C_FLAGS="-pipe -O3 -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections${llvm_lto}" \
+  -DCMAKE_CXX_FLAGS="-pipe -O3 -ffp-contract=fast -ftls-model=local-exec -fdata-sections -ffunction-sections${llvm_lto}" \
+  -DCMAKE_EXE_LINKER_FLAGS="-static-pie $M_INSTALL/lib/mimalloc.o -fuse-ld=lld -Xlinker --lto-O3 -Xlinker --lto-CGO3 -Xlinker -s -Xlinker --icf=all -Xlinker --gc-sections"
+PATH=$PATH ninja -C cppwinrt-build
+ninja -C cppwinrt-build install
+curl -L https://github.com/microsoft/windows-rs/raw/master/crates/libs/bindgen/default/Windows.winmd -o cppwinrt-build/Windows.winmd
+cppwinrt -in cppwinrt-build/Windows.winmd -out $M_CROSS/$MINGW_TRIPLE/include
 
 echo "building gendef"
 echo "======================="
