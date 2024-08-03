@@ -138,7 +138,7 @@ cd $M_SOURCE
 git clone https://github.com/microsoft/cppwinrt.git --branch master
 cd $M_BUILD
 mkdir cppwinrt-build
-cmake -G Ninja -H$M_SOURCE/cppwinrt -B$M_BUILD/cppwinrt-build \
+NO_CONFLTO=1 cmake -G Ninja -H$M_SOURCE/cppwinrt -B$M_BUILD/cppwinrt-build \
   -DCMAKE_BUILD_TYPE=Release \
   -DBUILD_SHARED_LIBS=OFF \
   -DCMAKE_INSTALL_PREFIX=$M_CROSS \
