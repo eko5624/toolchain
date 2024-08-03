@@ -17,8 +17,9 @@ M_ROOT=$(pwd)
 M_SOURCE=$M_ROOT/source
 M_BUILD=$M_ROOT/build
 M_CROSS=$M_ROOT/cross
-
-PATH="$M_CROSS/bin:$PATH"
+M_HOST=$M_ROOT/host
+ORIG_PATH="$M_HOST/bin:/usr/local/fuchsia-clang/bin:$PATH"
+PATH="$M_CROSS/bin:$ORIG_PATH"
 LLVM_ENABLE_PGO="OFF" #STRING "OFF, GEN, CSGEN, USE"
 LLVM_PROFILE_FILE="/dev/null"
 
@@ -138,7 +139,7 @@ cd $M_SOURCE
 git clone https://github.com/microsoft/cppwinrt.git --branch master
 cd $M_BUILD
 mkdir cppwinrt-build
-NO_CONFLTO=1 cmake -G Ninja -H$M_SOURCE/cppwinrt -B$M_BUILD/cppwinrt-build \
+NO_CONFLTO=1 PATH=$ORIG_PATH cmake -G Ninja -H$M_SOURCE/cppwinrt -B$M_BUILD/cppwinrt-build \
   -DCMAKE_BUILD_TYPE=Release \
   -DBUILD_SHARED_LIBS=OFF \
   -DCMAKE_INSTALL_PREFIX=$M_CROSS \

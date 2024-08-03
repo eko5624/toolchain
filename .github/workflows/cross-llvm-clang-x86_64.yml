@@ -51,7 +51,14 @@ jobs:
             unset PGO IR
           fi
       - name: Checkout
-        uses: actions/checkout@main         
+        uses: actions/checkout@main
+      - name: Install host clang toolchain
+        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
+        run: |
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
+          7z x cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
+          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
+          mv cross host       
       - name: Setup llvm${{ env.IR }}
         run: |
           curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/llvm$IR-latest.7z
