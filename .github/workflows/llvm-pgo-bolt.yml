@@ -141,7 +141,6 @@ jobs:
           key: cross-llvm-pgo-${{ github.run_id }}
           restore-keys: |
             cross-llvm-pgo-
-
       - name: Load llvm.profdata cache
         uses: actions/cache/restore@main
         id: llvm-profdata
