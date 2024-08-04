@@ -64,6 +64,9 @@ git clone https://github.com/mingw-w64/mingw-w64.git --branch master
 #mcfgthread
 git clone https://github.com/lhmouse/mcfgthread.git --branch master
 
+#cppwinrt
+git clone https://github.com/microsoft/cppwinrt.git --branch master
+
 #make
 wget -c -O make-$VER_MAKE.tar.gz https://ftp.gnu.org/pub/gnu/make/make-$VER_MAKE.tar.gz
 tar xzf make-$VER_MAKE.tar.gz 2>/dev/null >/dev/null
@@ -88,7 +91,6 @@ tar xzf yasm-$VER_YASM.tar.gz 2>/dev/null >/dev/null
 #wget -c -O nasm-$VER_NASM.tar.gz http://www.nasm.us/pub/nasm/releasebuilds/$VER_NASM/nasm-$VER_NASM.tar.gz
 #tar xzf nasm-$VER_NASM.tar.gz
 git clone https://github.com/netwide-assembler/nasm.git --branch nasm-$VER_NASM
-
 
 #curl
 curl -L -o curl-win64-mingw.zip 'https://curl.se/windows/latest.cgi?p=win64-mingw.zip'
@@ -333,6 +335,20 @@ $M_SOURCE/mingw-w64/mingw-w64-tools/gendef/configure \
 make -j$MJOBS
 make install
 rm -rf $M_SOURCE/mingw-w64
+
+echo "building cppwinrt"
+echo "======================="
+cd $M_BUILD
+mkdir cppwinrt-build
+cmake -G Ninja -H$M_SOURCE/cppwinrt -B$M_BUILD/cppwinrt-build \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DBUILD_SHARED_LIBS=OFF \
+  -DCMAKE_INSTALL_PREFIX=$M_TARGET
+ninja -C cppwinrt-build
+ninja -C cppwinrt-build install
+curl -L https://github.com/microsoft/windows-rs/raw/master/crates/libs/bindgen/default/Windows.winmd -o cppwinrt-build/Windows.winmd
+cppwinrt -in cppwinrt-build/Windows.winmd -out $M_TARGET/include
+
 
 echo "building gcc"
 echo "======================="
