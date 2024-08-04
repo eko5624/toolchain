@@ -46,7 +46,7 @@ echo "======================="
 cd $M_SOURCE
 
 #binutils
-wget -c -O binutils-$VER_BINUTILS.tar.bz2 http://ftp.gnu.org/gnu/binutils/binutils-$VER_BINUTILS.tar.bz2
+wget -c -O binutils-$VER_BINUTILS.tar.bz2 http://ftp.gnu.org/gnu/binutils/binutils-$VER_BINUTILS.tar.bz2 2>/dev/null >/dev/null
 tar xjf binutils-$VER_BINUTILS.tar.bz2 2>/dev/null >/dev/null
 
 #gcc
