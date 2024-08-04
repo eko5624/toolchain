@@ -52,6 +52,9 @@ tar xjf isl-$VER_ISL.tar.bz2 2>/dev/null >/dev/null
 #mingw-w64
 git clone https://github.com/mingw-w64/mingw-w64.git --branch master --depth 1
 
+#cppwinrt
+git clone https://github.com/microsoft/cppwinrt.git --branch master
+
 #make
 wget -c -O make-$VER_MAKE.tar.gz https://ftp.gnu.org/pub/gnu/make/make-$VER_MAKE.tar.gz 2>/dev/null >/dev/null
 tar xzf make-$VER_MAKE.tar.gz 2>/dev/null >/dev/null

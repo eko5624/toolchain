@@ -9,13 +9,13 @@ export BRANCH_GCC=releases/gcc-${VER_GCC%%.*}
 # Env Var NUMJOBS overrides automatic detection
 MJOBS=$(grep -c processor /proc/cpuinfo)
 
-export M_ROOT=$(pwd)
-export M_SOURCE=$M_ROOT/source
-export M_BUILD=$M_ROOT/build
-export M_CROSS=$M_ROOT/cross
-export M_TARGET=$M_ROOT/target
-export MINGW_TRIPLE="x86_64-w64-mingw32"
-export PATH="$M_CROSS/bin:$PATH"
+M_ROOT=$(pwd)
+M_SOURCE=$M_ROOT/source
+M_BUILD=$M_ROOT/build
+M_CROSS=$M_ROOT/cross
+M_TARGET=$M_ROOT/target
+MINGW_TRIPLE="x86_64-w64-mingw32"
+PATH="$M_CROSS/bin:$PATH"
 
 mkdir -p $M_SOURCE
 mkdir -p $M_BUILD
@@ -50,6 +50,9 @@ tar xjf isl-$VER_ISL.tar.bz2 2>/dev/null >/dev/null
 
 #mingw-w64
 git clone https://github.com/mingw-w64/mingw-w64.git --branch master --depth 1
+
+#cppwinrt
+git clone https://github.com/microsoft/cppwinrt.git --branch master
 
 #make
 wget -c -O make-$VER_MAKE.tar.gz https://ftp.gnu.org/pub/gnu/make/make-$VER_MAKE.tar.gz 2>/dev/null >/dev/null

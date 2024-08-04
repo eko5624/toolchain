@@ -45,6 +45,9 @@ git clone https://github.com/mstorsjo/llvm-mingw.git --branch master
 #mingw-w64
 git clone https://github.com/mingw-w64/mingw-w64.git --branch master
 
+#cppwinrt
+git clone https://github.com/microsoft/cppwinrt.git --branch master
+
 #make
 wget -c -O make-$VER_MAKE.tar.gz https://ftp.gnu.org/pub/gnu/make/make-$VER_MAKE.tar.gz
 tar xzf make-$VER_MAKE.tar.gz 2>/dev/null >/dev/null
@@ -144,6 +147,21 @@ for exec in ld objdump; do
   ln -sf $MINGW_TRIPLE-$exec $exec
 done
 echo "... Done"
+
+echo "building cppwinrt"
+echo "======================="
+cd $M_BUILD
+mkdir cppwinrt-build
+cmake -G Ninja -H$M_SOURCE/cppwinrt -B$M_BUILD/cppwinrt-build \
+  -DCMAKE_INSTALL_PREFIX=$M_TARGET \
+  -DCMAKE_TOOLCHAIN_FILE=$M_SOURCE/cppwinrt/cross-mingw-toolchain.cmake \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DBUILD_SHARED_LIBS=OFF \
+  -DBUILD_TESTING=OFF
+ninja -C cppwinrt-build
+ninja -C cppwinrt-build install
+curl -L https://github.com/microsoft/windows-rs/raw/master/crates/libs/bindgen/default/Windows.winmd -o cppwinrt-build/Windows.winmd
+cppwinrt -in cppwinrt-build/Windows.winmd -out $M_TARGET/include
 
 echo "building gendef"
 echo "======================="
