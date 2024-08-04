@@ -15,18 +15,6 @@ export M_BUILD=$M_ROOT/build
 export M_CROSS=$M_ROOT/cross
 export M_TARGET=$M_ROOT/target
 export MINGW_TRIPLE="x86_64-w64-mingw32"
-
-export CC=$M_CROSS/bin/$MINGW_TRIPLE-gcc
-export CXX=$M_CROSS/bin/$MINGW_TRIPLE-g++
-export AR=$M_CROSS/bin/$MINGW_TRIPLE-ar
-export RANLIB=$M_CROSS/bin/$MINGW_TRIPLE-ranlib
-export AS=$M_CROSS/bin/$MINGW_TRIPLE-as
-export LD=$M_CROSS/bin/$MINGW_TRIPLE-ld
-export STRIP=$M_CROSS/bin/$MINGW_TRIPLE-strip
-export NM=$M_CROSS/bin/$MINGW_TRIPLE-nm
-export DLLTOOL=$M_CROSS/bin/$MINGW_TRIPLE-dlltool
-export WINDRES=$M_CROSS/bin/$MINGW_TRIPLE-windres
-
 export PATH="$M_CROSS/bin:$PATH"
 
 mkdir -p $M_SOURCE
@@ -322,6 +310,21 @@ $M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
   --enable-shared
 make -j$MJOBS
 make install
+
+echo "building cppwinrt"
+echo "======================="
+cd $M_BUILD
+mkdir cppwinrt-build
+cmake -G Ninja -H$M_SOURCE/cppwinrt -B$M_BUILD/cppwinrt-build \
+  -DCMAKE_INSTALL_PREFIX=$M_TARGET \
+  -DCMAKE_TOOLCHAIN_FILE=$M_SOURCE/cppwinrt/cross-mingw-toolchain.cmake \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DBUILD_SHARED_LIBS=OFF \
+  -DBUILD_TESTING=OFF
+ninja -C cppwinrt-build
+ninja -C cppwinrt-build install
+curl -L https://github.com/microsoft/windows-rs/raw/master/crates/libs/bindgen/default/Windows.winmd -o cppwinrt-build/Windows.winmd
+cppwinrt -in cppwinrt-build/Windows.winmd -out $M_TARGET/include
 
 echo "building gcc"
 echo "======================="

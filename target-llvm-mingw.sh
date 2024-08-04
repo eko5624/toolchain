@@ -11,17 +11,17 @@ source $TOP_DIR/ver.sh
 # Env Var NUMJOBS overrides automatic detection
 MJOBS=$(grep -c processor /proc/cpuinfo)
 
-export M_ROOT=$(pwd)
-export M_SOURCE=$M_ROOT/source
-export M_BUILD=$M_ROOT/build
-export M_CROSS=$M_ROOT/cross
-export M_TARGET=$M_ROOT/target
+M_ROOT=$(pwd)
+M_SOURCE=$M_ROOT/source
+M_BUILD=$M_ROOT/build
+M_CROSS=$M_ROOT/cross
+M_TARGET=$M_ROOT/target
 
-export MINGW_TRIPLE="x86_64-w64-mingw32"
-export PATH="$M_CROSS/bin:$PATH"
-export TOOLCHAIN_ARCHS="x86_64"
-export TOOLCHAIN_TARGET_OSES="mingw32"
-export CLANG_VER="${VER_LLVM%%.*}"
+MINGW_TRIPLE="x86_64-w64-mingw32"
+PATH="$M_CROSS/bin:$PATH"
+TOOLCHAIN_ARCHS="x86_64"
+TOOLCHAIN_TARGET_OSES="mingw32"
+CLANG_VER="${VER_LLVM%%.*}"
 
 mkdir -p $M_SOURCE
 mkdir -p $M_BUILD

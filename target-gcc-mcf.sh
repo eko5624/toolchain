@@ -9,25 +9,13 @@ export BRANCH_GCC=releases/gcc-${VER_GCC%%.*}
 # Env Var NUMJOBS overrides automatic detection
 MJOBS=$(grep -c processor /proc/cpuinfo)
 
-
-export M_ROOT=$(pwd)
-export M_SOURCE=$M_ROOT/source
-export M_BUILD=$M_ROOT/build
-export M_CROSS=$M_ROOT/cross
-export M_TARGET=$M_ROOT/target
-export MINGW_TRIPLE="x86_64-w64-mingw32"
-
-export PATH="$M_CROSS/bin:$PATH"
-export CC=$M_CROSS/bin/$MINGW_TRIPLE-gcc
-export CXX=$M_CROSS/bin/$MINGW_TRIPLE-g++
-export AR=$M_CROSS/bin/$MINGW_TRIPLE-ar
-export RANLIB=$M_CROSS/bin/$MINGW_TRIPLE-ranlib
-export AS=$M_CROSS/bin/$MINGW_TRIPLE-as
-export LD=$M_CROSS/bin/$MINGW_TRIPLE-ld
-export STRIP=$M_CROSS/bin/$MINGW_TRIPLE-strip
-export NM=$M_CROSS/bin/$MINGW_TRIPLE-nm
-export DLLTOOL=$M_CROSS/bin/$MINGW_TRIPLE-dlltool
-export WINDRES=$M_CROSS/bin/$MINGW_TRIPLE-windres
+M_ROOT=$(pwd)
+M_SOURCE=$M_ROOT/source
+M_BUILD=$M_ROOT/build
+M_CROSS=$M_ROOT/cross
+M_TARGET=$M_ROOT/target
+MINGW_TRIPLE="x86_64-w64-mingw32"
+PATH="$M_CROSS/bin:$PATH"
 
 mkdir -p $M_SOURCE
 mkdir -p $M_BUILD
@@ -341,9 +329,11 @@ echo "======================="
 cd $M_BUILD
 mkdir cppwinrt-build
 cmake -G Ninja -H$M_SOURCE/cppwinrt -B$M_BUILD/cppwinrt-build \
+  -DCMAKE_INSTALL_PREFIX=$M_TARGET \
+  -DCMAKE_TOOLCHAIN_FILE=$M_SOURCE/cppwinrt/cross-mingw-toolchain.cmake \
   -DCMAKE_BUILD_TYPE=Release \
   -DBUILD_SHARED_LIBS=OFF \
-  -DCMAKE_INSTALL_PREFIX=$M_TARGET
+  -DBUILD_TESTING=OFF
 ninja -C cppwinrt-build
 ninja -C cppwinrt-build install
 curl -L https://github.com/microsoft/windows-rs/raw/master/crates/libs/bindgen/default/Windows.winmd -o cppwinrt-build/Windows.winmd
