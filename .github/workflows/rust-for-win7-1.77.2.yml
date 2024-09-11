@@ -1,4 +1,4 @@
-name: rust-1.77.2
+name: rust-for-win7-1.77.2
 defaults:
   run:
     shell: bash

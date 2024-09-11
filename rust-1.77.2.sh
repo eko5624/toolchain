@@ -20,6 +20,7 @@ curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --target
 rustup toolchain install 1.77.2-x86_64-unknown-linux-gnu
 rustup default 1.77.2-x86_64-unknown-linux-gnu
 LD_PRELOAD= cargo install --version "0.9.31+cargo-0.78" cargo-c --profile=release-strip --features=vendored-openssl --locked
+rm -rf $RUSTUP_HOME/stable-x86_64-unknown-linux-gnu
 cat <<EOF >$CARGO_HOME/config.toml
 [net]
 git-fetch-with-cli = true
