@@ -12,12 +12,12 @@ export PATH="$M_CROSS/bin:$RUSTUP_LOCATION/.cargo/bin:$PATH"
 export RUSTUP_HOME="$RUSTUP_LOCATION/.rustup"
 export CARGO_HOME="$RUSTUP_LOCATION/.cargo"
 
-echo "building rustup"
+echo "building rust toolchain"
 echo "======================="
 curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --target x86_64-pc-windows-gnu --no-modify-path --profile minimal
 rustup update
 LD_PRELOAD= cargo install cargo-c --profile=release-strip --features=vendored-openssl
-cat <<EOF >$CARGO_HOME/config
+cat <<EOF >$CARGO_HOME/config.toml
 [net]
 git-fetch-with-cli = true
 

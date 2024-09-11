@@ -1,4 +1,4 @@
-name: rustup
+name: rust-toolchain
 defaults:
   run:
     shell: bash
@@ -20,25 +20,25 @@ jobs:
           7z x llvm*.7z
           rm llvm*.7z
 
-      - name: Building rustup toolchain
+      - name: Building rust toolchain
         run: |
-          chmod +x ./rustup.sh
-          ./rustup.sh 
+          chmod +x ./rust.sh
+          ./rust.sh 
 
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
 
       - name: Packaging toolchain
         run: |
-          7z a rustup-${{ env.date }}.7z rust/*
-          cp rustup-${{ env.date }}.7z rustup-latest.7z
+          7z a rust-${{ env.date }}.7z rust/*
+          cp rust-${{ env.date }}.7z rust-latest.7z
 
       - name: Delete
         env:
           GH_TOKEN: ${{ github.token }} 
         run: |
           chmod +x ./package-delete.sh
-          ./package-delete.sh rustup-latest.7z
+          ./package-delete.sh rust-latest.7z
       - name: Release
         continue-on-error: true
         env:
