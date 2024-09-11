@@ -1,0 +1,40 @@
+name: rust-1.77.2
+defaults:
+  run:
+    shell: bash
+on:
+  workflow_dispatch:
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: docker://ghcr.io/eko5624/archlinux:latest
+    steps:          
+      - name: Checkout
+        uses: actions/checkout@main
+
+      - name: Setup llvm-clang-x86_64 toolchain
+        run: |
+          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/llvm-clang-latest-ucrt-x86_64.7z
+          7z x llvm*.7z
+          rm llvm*.7z
+
+      - name: Building rust toolchain
+        run: |
+          chmod +x ./rust-1.77.2.sh
+          ./rust-1.77.2.sh
+
+      - name: Get current timestamp
+        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
+
+      - name: Packaging toolchain
+        run: 7z a rust-for-win7-1.77.2.7z rust/*
+
+      - name: Release
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-release.sh
+          ./package-release.sh
