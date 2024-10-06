@@ -14,9 +14,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@main
 
-      - name: Setup llvm-clang-x86_64 toolchain
+      - name: Setup llvm-clang-pgo toolchain
         run: |
-          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/llvm-clang-latest-ucrt-x86_64.7z
+          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
           7z x llvm*.7z
           rm llvm*.7z
 
