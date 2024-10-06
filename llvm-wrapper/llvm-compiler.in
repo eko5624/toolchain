@@ -1,15 +1,31 @@
 #!/bin/bash
+
+CLANG_COMPILER="@clang_compiler@"
+DRIVER_MODE="@driver_mode@"
+LINKER="@linker@"
+TARGET_CPU="@target_cpu@"
+TARGET_ARCH="@target_arch@"
+GCC_ARCH="@gcc_arch@"
+CLANG_CFI="@clang_cfi@"
+OPT="@opt@"
+
 DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && cd .. && pwd)
-PROG=$DIR/bin/@clang_compiler@
-FLAGS="$FLAGS -target x86_64-pc-windows-gnu -march=@gcc_arch@ -mtune=generic"
-FLAGS="$FLAGS@driver_mode@ --sysroot $DIR/x86_64-w64-mingw32"
-FLAGS="$FLAGS -fuse-ld=lld --ld-path=x86_64-w64-mingw32-ld"
+PROG=$DIR/bin/$CLANG_COMPILER
+FLAGS="$FLAGS -target ${TARGET_CPU}-pc-windows-gnu"
+FLAGS="$FLAGS$DRIVER_MODE --sysroot $DIR/${TARGET_ARCH}"
+FLAGS="$FLAGS -fuse-ld=lld --ld-path=${TARGET_ARCH}-ld"
 FLAGS="$FLAGS -Wno-unused-command-line-argument -Wno-int-conversion -Wno-unused-function"
+
+if [ "${TARGET_CPU}" == "aarch64" ]; then
+    ARCH_FLAGS="-mcpu=${GCC_ARCH} -mtune=generic"
+else
+    ARCH_FLAGS="-march=${GCC_ARCH} -mtune=generic"
+fi
 
 if [ "$NO_CONFLTO" == "1" ]; then
     SKIP_OPT="-g0 -O0 -fno-lto -fno-data-sections -fno-function-sections"
 else
-    FLAGS="$FLAGS -gcodeview@clang_cfi@@opt@"
+    FLAGS="$FLAGS -gcodeview${CLANG_CFI}${OPT}"
     if [ "$ENABLE_CCACHE" == "ON" ]; then
         CCACHE="ccache"
     fi
@@ -28,4 +44,4 @@ else
     fi    
 fi
 
-$CCACHE "$PROG" $LTO_FLAGS "$@" $FLAGS $CLANG_GC $CLANG_FLAGS@linker@ $SKIP_OPT
+$CCACHE "$PROG" $LTO_FLAGS $ARCH_FLAGS "$@" $FLAGS $CLANG_GC $CLANG_FLAGS$LINKER $SKIP_OPT

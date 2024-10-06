@@ -71,9 +71,9 @@ elif [ "$LLVM_ENABLE_PGO" == "USE" ]; then
 fi
 
 if [ "$LLVM_ENABLE_PGO" == "GEN" ]; then
-   llvm_pgo=" -fprofile-generate=${LLVM_PROFILE_DATA_DIR} -fprofile-update=atomic"
+   llvm_pgo=" -fprofile-generate=${LLVM_PROFILE_DATA_DIR} -fprofile-update=atomic -mllvm -vp-counters-per-site=8"
 elif [ "$LLVM_ENABLE_PGO" == "CSGEN" ]; then
-   llvm_pgo=" -fcs-profile-generate=${LLVM_PROFILE_DATA_DIR} -fprofile-update=atomic -fprofile-use=${LLVM_PROFDATA_FILE}"
+   llvm_pgo=" -fcs-profile-generate=${LLVM_PROFILE_DATA_DIR} -fprofile-update=atomic -mllvm -vp-counters-per-site=8 -fprofile-use=${LLVM_PROFDATA_FILE}"
 elif [ "$LLVM_ENABLE_PGO" == "USE" ]; then
    llvm_pgo=" -fprofile-use=${LLVM_PROFDATA_FILE}"
 fi
@@ -227,7 +227,7 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
   -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
   -DLLVM_ENABLE_ASSERTIONS=OFF \
   -DLLVM_ENABLE_PROJECTS="clang;lld${llvm_bolt}" \
-  -DLLVM_TARGETS_TO_BUILD="X86;NVPTX" \
+  -DLLVM_TARGETS_TO_BUILD="AArch64;X86;NVPTX" \
   -DLLVM_INSTALL_TOOLCHAIN_ONLY=ON \
   -DLLVM_ENABLE_LIBCXX=ON \
   -DLLVM_ENABLE_LLD=ON \
@@ -261,6 +261,7 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
   -DCLANG_TOOL_CLANG_INSTALLAPI_BUILD=OFF \
   -DCLANG_TOOL_CLANG_IMPORT_TEST_BUILD=OFF \
   -DCLANG_TOOL_CLANG_LINKER_WRAPPER_BUILD=OFF \
+  -DCLANG_TOOL_CLANG_NVLINK_WRAPPER_BUILD=OFF \
   -DCLANG_TOOL_CLANG_OFFLOAD_BUNDLER_BUILD=OFF \
   -DCLANG_TOOL_CLANG_OFFLOAD_PACKAGER_BUILD=OFF \
   -DCLANG_TOOL_CLANG_REFACTOR_BUILD=OFF \
@@ -293,7 +294,9 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
   -DLLVM_TOOL_LLVM_C_TEST_BUILD=OFF \
   -DLLVM_TOOL_LLVM_CAT_BUILD=OFF \
   -DLLVM_TOOL_LLVM_CFI_VERIFY_BUILD=OFF \
+  -DLLVM_TOOL_LLVM_CONFIG_BUILD=OFF \
   -DLLVM_TOOL_LLVM_COV_BUILD=OFF \
+  -DLLVM_TOOL_LLVM_CTXPROF_UTIL_BUILD=OFF \
   -DLLVM_TOOL_LLVM_CXXDUMP_BUILD=OFF \
   -DLLVM_TOOL_LLVM_CXXFILT_BUILD=OFF \
   -DLLVM_TOOL_LLVM_CXXMAP_BUILD=OFF \
@@ -328,6 +331,8 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
   -DLLVM_TOOL_LLVM_MODEXTRACT_BUILD=OFF \
   -DLLVM_TOOL_LLVM_MT_BUILD=OFF \
   -DLLVM_TOOL_LLVM_OPT_FUZZER_BUILD=OFF \
+  -DLLVM_TOOL_LLVM_OPT_REPORT_BUILD=OFF \
+  -DLLVM_TOOL_LLVM_PDBUTIL_BUILD=OFF \
   -DLLVM_TOOL_LLVM_PROFGEN_BUILD=OFF \
   -DLLVM_TOOL_LLVM_READTAPI_BUILD=OFF \
   -DLLVM_TOOL_LLVM_REDUCE_BUILD=OFF \
@@ -344,8 +349,11 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
   -DLLVM_TOOL_LLVM_XRAY_BUILD=OFF \
   -DLLVM_TOOL_LLVM_YAML_NUMERIC_PARSER_FUZZER_BUILD=OFF \
   -DLLVM_TOOL_LLVM_YAML_PARSER_FUZZER_BUILD=OFF \
+  -DLLVM_TOOL_LTO_BUILD=OFF \
   -DLLVM_TOOL_OBJ2YAML_BUILD=OFF \
+  -DLLVM_TOOL_OPT_BUILD=OFF \
   -DLLVM_TOOL_OPT_VIEWER_BUILD=OFF \
+  -DLLVM_TOOL_REDUCE_CHUNK_LIST_BUILD=OFF \
   -DLLVM_TOOL_REMARKS_SHLIB_BUILD=OFF \
   -DLLVM_TOOL_SANCOV_BUILD=OFF \
   -DLLVM_TOOL_SANSTATS_BUILD=OFF \
@@ -353,6 +361,7 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
   -DLLVM_TOOL_VERIFY_USELISTORDER_BUILD=OFF \
   -DLLVM_TOOL_VFABI_DEMANGLE_FUZZER_BUILD=OFF \
   -DLLVM_TOOL_XCODE_TOOLCHAIN_BUILD=OFF \
+  -DLLVM_TOOL_YAML2OBJ_BUILD=OFF \
   -DLLVM_ENABLE_ZLIB=ON \
   -DZLIB_LIBRARY=$M_INSTALL/lib/libz.a \
   -DZLIB_INCLUDE_DIR=$M_INSTALL/include \
@@ -370,3 +379,4 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$M_BUILD/llvm-build \
   -DLLVM_TOOLCHAIN_TOOLS="llvm-driver;llvm-ar;llvm-ranlib;llvm-objdump;llvm-rc;llvm-cvtres;llvm-nm;llvm-strings;llvm-readobj;llvm-dlltool;llvm-objcopy;llvm-strip;llvm-cov;llvm-profdata;llvm-addr2line;llvm-symbolizer;llvm-windres;llvm-ml;llvm-readelf;llvm-size"
 cmake --build llvm-build -j$MJOBS
 cmake --install llvm-build
+

@@ -1,0 +1,252 @@
+name: toolchain
+defaults:
+  run:
+    shell: bash
+on:
+  workflow_dispatch:
+    inputs:
+      pgo:
+        description: "Build llvm with PGO"
+        required: false
+        default: "false"
+        type: boolean
+  
+jobs:
+  x86_64:
+    runs-on: ubuntu-latest
+    container:
+      image: docker://ghcr.io/eko5624/archlinux:latest
+    steps:
+      - name: Init variable
+        run: |
+          if [ ${{ inputs.pgo }} == 'true' ]; then
+            echo "PGO=--enable-pgo_gen" >> $GITHUB_ENV
+            echo "NAME=-pgo" >> $GITHUB_ENV
+          else
+            unset PGO NAME
+          fi  
+      - name: Checkout
+        uses: actions/checkout@main
+      - name: Install host clang toolchain
+        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
+        run: |
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
+          7z x cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
+          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
+          mv cross host       
+      - name: Setup llvm
+        if: inputs.pgo == false
+        run: |
+          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/llvm-latest.7z
+          7z x llvm*.7z
+          rm llvm*.7z
+          rm -rf cross/llvm-lto || true
+          rm -rf cross/llvm-ccache || true 
+      - name: Setup llvm-pgo
+        if: ${{ inputs.pgo }}
+        run: |
+          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/cross-llvm-pgo-latest.7z
+          7z x cross-llvm-pgo-latest.7z
+          rm cross-llvm-pgo-latest.7z
+          rm -rf llvm_pgo/llvm-lto || true
+          rm -rf llvm_pgo/llvm-ccache || true
+          mv llvm_pgo cross
+      - name: Load llvm-project source
+        uses: actions/cache@main
+        id: llvm-source
+        with:
+          path: ${{ github.workspace }}/source/llvm-project
+          key: llvm-source-cache                      
+      - name: Build toolchain
+        run: |
+          set -x
+          chmod +x ./cross-llvm-wrapper.sh
+          ./cross-llvm-wrapper.sh --x86_64
+          chmod +x ./cross-llvm-clang.sh
+          ./cross-llvm-clang.sh $PGO --x86_64
+          chmod +x ./host-llvm-clang.sh
+          ./host-llvm-clang.sh
+      - name: Train bolt with sqlite
+        if: ${{ inputs.pgo }}
+        run: |
+          chmod +x ./train-bolt.sh 
+          ./train-bolt.sh --x86_64
+      - name: Get current timestamp
+        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
+      - name: Package x86_64 toolchain
+        run: |
+          7z a cross-llvm-clang$NAME-${{ env.date }}-ucrt-x86_64.7z cross/*
+          cp cross-llvm-clang$NAME-${{ env.date }}-ucrt-x86_64.7z cross-llvm-clang$NAME-latest-ucrt-x86_64.7z
+          rm -rf cross
+      - name: Delete
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-delete.sh
+          ./package-delete.sh cross-llvm-clang$NAME-latest-ucrt-x86_64.7z
+      - name: Release
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-release.sh
+          ./package-release.sh
+
+  x86_64_v3:
+    runs-on: ubuntu-latest
+    container:
+      image: docker://ghcr.io/eko5624/archlinux:latest
+    steps:
+      - name: Init variable
+        run: |
+          if [ ${{ inputs.pgo }} == 'true' ]; then
+            echo "PGO=--enable-pgo_gen" >> $GITHUB_ENV
+            echo "NAME=-pgo" >> $GITHUB_ENV
+          else
+            unset PGO NAME
+          fi  
+      - name: Checkout
+        uses: actions/checkout@main
+      - name: Install host clang toolchain
+        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
+        run: |
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
+          7z x cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
+          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
+          mv cross host       
+      - name: Setup llvm
+        if: inputs.pgo == false
+        run: |
+          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/llvm-latest.7z
+          7z x llvm*.7z
+          rm llvm*.7z
+          rm -rf cross/llvm-lto || true
+          rm -rf cross/llvm-ccache || true
+      - name: Setup llvm-pgo
+        if: ${{ inputs.pgo }}
+        run: |
+          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/cross-llvm-pgo-latest.7z
+          7z x cross-llvm-pgo-latest.7z
+          rm cross-llvm-pgo-latest.7z
+          rm -rf llvm_pgo/llvm-lto || true
+          rm -rf llvm_pgo/llvm-ccache || true
+          mv llvm_pgo cross
+      - name: Load llvm-project source
+        uses: actions/cache@main
+        id: llvm-source
+        with:
+          path: ${{ github.workspace }}/source/llvm-project
+          key: llvm-source-cache                      
+      - name: Build toolchain
+        run: |
+          set -x
+          chmod +x ./cross-llvm-wrapper.sh
+          ./cross-llvm-wrapper.sh --x86_64_v3
+          chmod +x ./cross-llvm-clang.sh
+          ./cross-llvm-clang.sh $PGO --x86_64_v3
+      - name: Train bolt with sqlite
+        if: ${{ inputs.pgo }}
+        run: |
+          chmod +x ./train-bolt.sh
+          ./train-bolt.sh --x86_64_v3
+      - name: Get current timestamp
+        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
+      - name: Package x86_64_v3 toolchain
+        run: |
+          7z a cross-llvm-clang$NAME-${{ env.date }}-ucrt-x86_64_v3.7z cross/*
+          cp cross-llvm-clang$NAME-${{ env.date }}-ucrt-x86_64_v3.7z cross-llvm-clang$NAME-latest-ucrt-x86_64_v3.7z
+          rm -rf cross
+      - name: Delete
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-delete.sh
+          ./package-delete.sh cross-llvm-clang$NAME-latest-ucrt-x86_64_v3.7z
+      - name: Release
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-release.sh
+          ./package-release.sh
+
+  aarch64:
+    runs-on: ubuntu-latest
+    container:
+      image: docker://ghcr.io/eko5624/archlinux:latest
+    steps:
+      - name: Init variable
+        run: |
+          if [ ${{ inputs.pgo }} == 'true' ]; then
+            echo "PGO=--enable-pgo_gen" >> $GITHUB_ENV
+            echo "NAME=-pgo" >> $GITHUB_ENV
+          else
+            unset PGO NAME
+          fi  
+      - name: Checkout
+        uses: actions/checkout@main
+      - name: Install host clang toolchain
+        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
+        run: |
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
+          7z x cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
+          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
+          mv cross host       
+      - name: Setup llvm
+        if: inputs.pgo == false
+        run: |
+          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/llvm-latest.7z
+          7z x llvm*.7z
+          rm llvm*.7z
+          rm -rf cross/llvm-lto || true
+          rm -rf cross/llvm-ccache || true
+      - name: Setup llvm-pgo
+        if: ${{ inputs.pgo }}
+        run: |
+          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/cross-llvm-pgo-latest.7z
+          7z x cross-llvm-pgo-latest.7z
+          rm cross-llvm-pgo-latest.7z
+          rm -rf llvm_pgo/llvm-lto || true
+          rm -rf llvm_pgo/llvm-ccache || true
+          mv llvm_pgo cross
+      - name: Load llvm-project source
+        uses: actions/cache@main
+        id: llvm-source
+        with:
+          path: ${{ github.workspace }}/source/llvm-project
+          key: llvm-source-cache                      
+      - name: Build toolchain
+        run: |
+          set -x
+          chmod +x ./cross-llvm-wrapper.sh
+          ./cross-llvm-wrapper.sh --aarch64
+          chmod +x ./cross-llvm-clang.sh
+          ./cross-llvm-clang.sh $PGO --aarch64
+      - name: Train bolt with sqlite
+        if: ${{ inputs.pgo }}
+        run: |
+          chmod +x ./train-bolt.sh
+          ./train-bolt.sh --aarch64
+      - name: Get current timestamp
+        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
+      - name: Package aarch64 toolchain
+        run: |
+          7z a cross-llvm-clang$NAME-${{ env.date }}-ucrt-aarch64.7z cross/*
+          cp cross-llvm-clang$NAME-${{ env.date }}-ucrt-aarch64.7z cross-llvm-clang$NAME-latest-ucrt-aarch64.7z
+          rm -rf cross
+      - name: Delete
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-delete.sh
+          ./package-delete.sh cross-llvm-clang$NAME-latest-ucrt-aarch64.7z
+      - name: Release
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-release.sh
+          ./package-release.sh   

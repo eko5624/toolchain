@@ -10,6 +10,7 @@ TOP_DIR=$(pwd)
 # Env Var NUMJOBS overrides automatic detection
 MJOBS=$(grep -c processor /proc/cpuinfo)
 
+TARGET=x86_64
 M_ROOT=$(pwd)
 M_SOURCE=$M_ROOT/source
 M_BUILD=$M_ROOT/build
@@ -66,14 +67,14 @@ cp shaderc/DEPS ./
 curl -OL https://github.com/KhronosGroup/glslang/archive/`cat DEPS | grep glslang | head -n1 | cut -d\' -f4`.tar.gz
 curl -OL https://github.com/KhronosGroup/SPIRV-Headers/archive/`cat DEPS | grep spirv_headers | head -n1 | cut -d\' -f4`.tar.gz
 curl -OL https://github.com/KhronosGroup/SPIRV-Tools/archive/`cat DEPS | grep spirv_tools | head -n1 | cut -d\' -f4`.tar.gz
-for f in *.gz; do tar xvf "$f"; done 
-mv glslang* glslang
-mv SPIRV-Headers* spirv-headers
-mv SPIRV-Tools* spirv-tools
+for f in *.gz; do tar xvf "$f" 2>/dev/null >/dev/null; done 
+mv glslang* glslang 2>/dev/null >/dev/null
+mv SPIRV-Headers* spirv-headers 2>/dev/null >/dev/null
+mv SPIRV-Tools* spirv-tools 2>/dev/null >/dev/null
 cd shaderc
-mv ../spirv-headers third_party
-mv ../spirv-tools third_party
-mv ../glslang third_party
+mv ../spirv-headers third_party 2>/dev/null >/dev/null
+mv ../spirv-tools third_party 2>/dev/null >/dev/null
+mv ../glslang third_party 2>/dev/null >/dev/null
 cd $M_BUILD
 mkdir shaderc-build
 LTO_JOB=1 NO_CONFLTO=1 cmake -G Ninja -H$M_SOURCE/shaderc -B$M_BUILD/shaderc-build \

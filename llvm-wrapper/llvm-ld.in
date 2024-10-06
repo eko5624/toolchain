@@ -1,15 +1,20 @@
 #!/bin/bash
+
 DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && cd .. && pwd)
 PROG=$DIR/bin/ld.lld
-TARGET=x86_64-w64-mingw32
+
+TARGET_ARCH="@target_arch@"
+LLD_CFI="@lld_cfi@"
+LD_M_FLAG="@ld_m_flag@"
+TARGET=${TARGET_ARCH}
 POLICY="cache_size_bytes=1g:prune_interval=1m"
-FLAGS="-m i386pep"
+FLAGS="-m ${LD_M_FLAG}"
 FLAGS="$FLAGS --thinlto-cache-dir=$PACKAGES_LTO_DIR --thinlto-cache-policy=$POLICY"
 
 if [ "$NO_CONFLTO" == "1" ]; then
     SKIP_OPT="-O0 --lto-O0 --lto-CGO0 --no-gc-sections --no-guard-cf --build-id=none"
 else
-    FLAGS="$FLAGS -O3 --lto-O3 --lto-CGO3 -s -Xlink=-release@lld_cfi@"
+    FLAGS="$FLAGS -O3 --lto-O3 --lto-CGO3 -s -Xlink=-release${LLD_CFI}"
     if [ "$GC" != "0" ]; then
         LLD_GC="--gc-sections --icf=safe"
     fi

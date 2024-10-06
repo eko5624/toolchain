@@ -8,13 +8,35 @@ PATH="$M_CROSS/bin:$PATH"
 
 mkdir -p $M_SOURCE
 
+while [ $# -gt 0 ]; do
+    case "$1" in
+    --x86_64)
+        _TARGET_CPU=x86_64
+        _TARGET_ARCH=x86_64-w64-mingw32
+        ;;
+    --x86_64_v3)
+        _TARGET_CPU=x86_64
+        _TARGET_ARCH=x86_64-w64-mingw32
+        ;;
+    --aarch64)
+        _TARGET_CPU=aarch64
+        _TARGET_ARCH=aarch64-w64-mingw32
+        ;;
+    *)
+        echo Unrecognized parameter $1
+        exit 1
+        ;;
+    esac
+    shift
+done
+
 echo "training sqlite"
 echo "======================="
 cd $M_SOURCE
-curl -OL "https://www.sqlite.org/2024/sqlite-autoconf-3450200.tar.gz"
-tar -xvf sqlite-autoconf-3450200.tar.gz
+curl -OL "https://www.sqlite.org/2024/sqlite-autoconf-3460000.tar.gz"
+tar -xvf sqlite-autoconf-3460000.tar.gz
 rm sqlite*.tar.gz
-cd sqlite-autoconf-3450200
+cd sqlite-autoconf-3460000
 llvm-bolt \
   --instrument \
   --instrumentation-file-append-pid \
@@ -22,8 +44,8 @@ llvm-bolt \
 $M_CROSS/bin/llvm -o $M_CROSS/bin/llvm.instr
 mkdir -p $M_CROSS/llvm-bolt
 $M_CROSS/bin/llvm.instr clang \
-  --target=x86_64-pc-windows-gnu \
-  --sysroot=$M_CROSS/x86_64-w64-mingw32 \
+  --target=${_TARGET_CPU}-pc-windows-gnu \
+  --sysroot=$M_CROSS/${_TARGET_ARCH} \
   -O3 \
   -pipe \
   -fdata-sections \
@@ -45,6 +67,7 @@ llvm-bolt \
   --frame-opt=hot \
   --icf=1 \
   --plt=hot \
+  --reg-reassign \
   --reorder-blocks=ext-tsp \
   --reorder-functions=cdsort \
   --split-all-cold \
