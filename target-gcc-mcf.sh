@@ -219,14 +219,6 @@ echo "building mingw-w64-headers"
 echo "======================="
 cd $M_BUILD
 mkdir headers-build && cd headers-build
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-headers-git/0002-heades-add-full-name-winrt.patch
-
-cd $M_SOURCE/mingw-w64
-
-# https://bugs.winehq.org/show_bug.cgi?id=55347
-git apply $M_BUILD/headers-build/0002-heades-add-full-name-winrt.patch
-
-cd $M_BUILD/headers-build
 $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
   --host=$MINGW_TRIPLE \
   --prefix=$M_TARGET \
@@ -361,6 +353,7 @@ curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0200-add-m-no-align-vector-insn-option-for-i386.patch
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0400-gcc-Make-stupid-AT-T-syntax-not-default.patch
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0401-Always-quote-labels-in-Intel-syntax.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/3001-gcc-lto-plugin-fixincludes-gnattools-c-tools-Improve.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/2001-fix-building-rust-on-mingw-w64.patch
 
 apply_patch_for_gcc() {
@@ -400,6 +393,7 @@ apply_patch_for_gcc 0401-Always-quote-labels-in-Intel-syntax.patch
 # https://github.com/msys2/MINGW-packages/pull/8317#issuecomment-824548411
 apply_patch_for_gcc 0200-add-m-no-align-vector-insn-option-for-i386.patch
 apply_patch_for_gcc 2001-fix-building-rust-on-mingw-w64.patch
+apply_patch_for_gcc 3001-gcc-lto-plugin-fixincludes-gnattools-c-tools-Improve.patch
 
 # so libgomp DLL gets built despide static libdl
 export lt_cv_deplibs_check_method='pass_all'
