@@ -55,7 +55,7 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B$M_BUILD/buil
   -DCOMPILER_RT_USE_BUILTINS_LIBRARY=TRUE \
   -DCOMPILER_RT_BUILD_BUILTINS=TRUE \
   -DCOMPILER_RT_INCLUDE_TESTS=FALSE \
-  -DLLVM_CONFIG_PATH="" \
+  -DLLVM_CONFIG_PATH='' \
   -DCMAKE_FIND_ROOT_PATH=$M_CROSS \
   -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
   -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
@@ -92,7 +92,7 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/runtimes -B$M_BUILD/libcxx-build \
   -DLIBCXX_ENABLE_STATIC=ON \
   -DLIBCXX_ENABLE_STATIC_ABI_LIBRARY=TRUE \
   -DLIBCXX_CXX_ABI=libcxxabi \
-  -DLIBCXX_LIBDIR_SUFFIX="" \
+  -DLIBCXX_LIBDIR_SUFFIX='' \
   -DLIBCXX_INCLUDE_TESTS=FALSE \
   -DLIBCXXABI_INCLUDE_TESTS=FALSE \
   -DLIBUNWIND_INCLUDE_TESTS=FALSE \
@@ -100,7 +100,7 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/runtimes -B$M_BUILD/libcxx-build \
   -DLIBCXXABI_USE_COMPILER_RT=ON \
   -DLIBCXXABI_USE_LLVM_UNWINDER=ON \
   -DLIBCXXABI_ENABLE_SHARED=OFF \
-  -DLIBCXXABI_LIBDIR_SUFFIX="" \
+  -DLIBCXXABI_LIBDIR_SUFFIX='' \
   -DCMAKE_C_FLAGS="-pipe -ffp-contract=fast -ftls-model=local-exec -flto=thin -fsplit-lto-unit -fwhole-program-vtables -fdata-sections -ffunction-sections" \
   -DCMAKE_CXX_FLAGS="-pipe -ffp-contract=fast -ftls-model=local-exec -flto=thin -fsplit-lto-unit -fwhole-program-vtables -fdata-sections -ffunction-sections" \
   -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=lld -Xlinker -s -Xlinker --icf=all -Xlinker --gc-sections"
@@ -130,7 +130,7 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt -B$M_BUILD/compiler-rt-build
   -DCOMPILER_RT_USE_BUILTINS_LIBRARY=TRUE \
   -DCOMPILER_RT_BUILD_BUILTINS=FALSE \
   -DCOMPILER_RT_INCLUDE_TESTS=FALSE \
-  -DLLVM_CONFIG_PATH="" \
+  -DLLVM_CONFIG_PATH='' \
   -DCMAKE_FIND_ROOT_PATH=$M_CROSS \
   -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
   -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
