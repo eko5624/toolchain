@@ -40,19 +40,19 @@ jobs:
           ver_array[$k]=$v  #把提取到的键值对存储到关联数组"ver_array"中
         done < <(echo "$ver_json" | jq -c 'to_entries | .[]')  # "to_entries"将对象转换键值对数组，-c表示输出一行，而不是格式化的多行"
         
-        echo "VER_LLVM=$(echo "${ver_array[data]}" | jq -r '.LLVM.version')" >> ver.sh
-        echo "VER_BINUTILS=$(echo "${ver_array[data]}" | jq -r '.binutils.version')" >> ver.sh
-        echo "VER_GCC=$(echo "${ver_array[data]}" | jq -r '.GCC.version')" >> ver.sh
-        echo "VER_GMP=$(echo "${ver_array[data]}" | jq -r '.gmp.version')" >> ver.sh
-        echo "VER_MPFR=$(echo "${ver_array[data]}" | jq -r '.mpfr.version')" >> ver.sh
-        echo "VER_MPC=$(echo "${ver_array[data]}" | jq -r '.mpc.version')" >> ver.sh
-        echo "VER_ISL=$(echo "${ver_array[data]}" | jq -r '.isl.version')" >> ver.sh
-        echo "VER_MAKE=$(echo "${ver_array[data]}" | jq -r '.make.version')" >> ver.sh
-        echo "VER_CMAKE=$(echo "${ver_array[data]}" | jq -r '.cmake.version')" >> ver.sh
-        echo "VER_NINJA=$(echo "${ver_array[data]}" | jq -r '.ninja.version')" >> ver.sh
-        echo "VER_NASM=$(echo "${ver_array[data]}" | jq -r '.nasm.version')" >> ver.sh
-        echo "VER_YASM=$(echo "${ver_array[data]}" | jq -r '.yasm.version')" >> ver.sh
-        echo "VER_PKGCONF=$(echo "${ver_array[data]}" | jq -r '.pkgconf.version')" >> ver.sh
+        echo "VER_LLVM=$(echo "${ver_array[data]}" | jq -r '."LLVM".version')" >> ver.sh
+        echo "VER_BINUTILS=$(echo "${ver_array[data]}" | jq -r '."binutils".version')" >> ver.sh
+        echo "VER_GCC=$(echo "${ver_array[data]}" | jq -r '."GCC".version')" >> ver.sh
+        echo "VER_GMP=$(echo "${ver_array[data]}" | jq -r '."gmp".version')" >> ver.sh
+        echo "VER_MPFR=$(echo "${ver_array[data]}" | jq -r '."mpfr".version')" >> ver.sh
+        echo "VER_MPC=$(echo "${ver_array[data]}" | jq -r '."mpc".version')" >> ver.sh
+        echo "VER_ISL=$(echo "${ver_array[data]}" | jq -r '."isl".version')" >> ver.sh
+        echo "VER_MAKE=$(echo "${ver_array[data]}" | jq -r '."make".version')" >> ver.sh
+        echo "VER_CMAKE=$(echo "${ver_array[data]}" | jq -r '."cmake".version')" >> ver.sh
+        echo "VER_NINJA=$(echo "${ver_array[data]}" | jq -r '."ninja".version')" >> ver.sh
+        echo "VER_NASM=$(echo "${ver_array[data]}" | jq -r '."nasm".version')" >> ver.sh
+        echo "VER_YASM=$(echo "${ver_array[data]}" | jq -r '."yasm".version')" >> ver.sh
+        echo "VER_PKGCONF=$(echo "${ver_array[data]}" | jq -r '."pkgconf".version')" >> ver.sh
     - name: release
       run: |
         git add -A
