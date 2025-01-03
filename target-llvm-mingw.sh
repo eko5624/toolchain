@@ -109,35 +109,41 @@ echo "... Done"
 echo "installing wrappers"
 echo "======================="
 cp -f $M_SOURCE/llvm-mingw/wrappers/*-wrapper.sh $M_TARGET/bin
-x86_64-w64-mingw32-gcc $M_SOURCE/llvm-mingw/wrappers/clang-target-wrapper.c -o $M_TARGET/bin/clang-target-wrapper.exe -O2 -Wl,-s -municode -DCLANG=\"clang-$CLANG_VER.exe\"
-
+cp -f $M_SOURCE/llvm-mingw/wrappers/mingw32-common.cfg $M_TARGET/bin
+cp -f $M_SOURCE/llvm-mingw/wrappers/x86_64-w64-windows-gnu.cfg $M_TARGET/bin
+x86_64-w64-mingw32-gcc $M_SOURCE/llvm-mingw/wrappers/clang-target-wrapper.c -o $M_TARGET/bin/clang-target-wrapper.exe -O2 -Wl,-s -municode -DCLANG=\"clang-$CLANG_VER.exe\" -DCLANG_SCAN_DEPS=\"clang-scan-deps-real\" -D__USE_MINGW_ANSI_STDIO=0
+x86_64-w64-mingw32-gcc $M_SOURCE/llvm-mingw/wrappers/clang-scan-deps-wrapper.c -o $M_TARGET/bin/clang-scan-deps-wrapper.exe -O2 -Wl,-s -municode -DCLANG=\"clang-$CLANG_VER.exe\" -DCLANG_SCAN_DEPS=\"clang-scan-deps-real\" -D__USE_MINGW_ANSI_STDIO=0
+x86_64-w64-mingw32-gcc $M_SOURCE/llvm-mingw/wrappers/llvm-wrapper.c -o $M_TARGET/bin/llvm-wrapper.exe -O2 -Wl,-s -municode -DCLANG=\"clang-$CLANG_VER.exe\" -DCLANG_SCAN_DEPS=\"clang-scan-deps-real\" -D__USE_MINGW_ANSI_STDIO=0
 cd $M_TARGET/bin
 for exec in clang clang++ gcc g++ c++ as; do
   ln -sf clang-target-wrapper.exe $MINGW_TRIPLE-$exec.exe
 done
+ln -sf clang-scan-deps-wrapper.exe $MINGW_TRIPLE-clang-scan-deps.exe
 
-cp llvm-ar.exe $MINGW_TRIPLE-ar.exe
-cp llvm-ar.exe $MINGW_TRIPLE-llvm-ar.exe
 cp llvm-ar.exe $MINGW_TRIPLE-llvm-ranlib.exe
-cp llvm-ar.exe $MINGW_TRIPLE-dlltool.exe
-cp llvm-ar.exe $MINGW_TRIPLE-ranlib.exe
+cp llvm-ar.exe $MINGW_TRIPLE-llvm-ar.exe
 cp llvm-addr2line.exe $MINGW_TRIPLE-addr2line.exe
+cp llvm-ar.exe $MINGW_TRIPLE-ar.exe
+cp llvm-ranlib.exe $MINGW_TRIPLE-ranlib.exe
 cp llvm-nm.exe $MINGW_TRIPLE-nm.exe
 cp llvm-objcopy.exe $MINGW_TRIPLE-objcopy.exe
-cp llvm-objcopy.exe $MINGW_TRIPLE-strip.exe
-cp llvm-rc.exe $MINGW_TRIPLE-windres.exe
 cp llvm-readelf.exe $MINGW_TRIPLE-readelf.exe
 cp llvm-size.exe $MINGW_TRIPLE-size.exe
 cp llvm-strings.exe $MINGW_TRIPLE-strings.exe
+cp llvm-strip.exe $MINGW_TRIPLE-strip.exe
 
+# windres and dlltool can't use llvm-wrapper, as that loses the original target arch prefix.
+ln -sf llvm-windres.exe $MINGW_TRIPLE-windres.exe
+ln -sf llvm-dlltool.exe $MINGW_TRIPLE-dlltool.exe
 for exec in ld objdump; do
   ln -sf $exec-wrapper.sh $MINGW_TRIPLE-$exec
 done
 
+mv clang-scan-deps.exe clang-scan-deps-real.exe
 mv clang.exe clang-$CLANG_VER.exe
 
 # Install unprefixed wrappers if $HOST is one of the architectures we are installing wrappers for.
-for exec in clang clang++ gcc g++ c++ addr2line ar dlltool ranlib nm objcopy readelf strings strip windres; do
+for exec in clang clang++ gcc g++ c++ addr2line ar dlltool ranlib nm objcopy readelf size strings strip windres clang-scan-deps; do
   ln -sf $MINGW_TRIPLE-$exec.exe $exec.exe
 done
 for exec in cc c99 c11; do
@@ -181,8 +187,8 @@ $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
   --host=$MINGW_TRIPLE \
   --prefix=$M_TARGET/$MINGW_TRIPLE \
   --enable-idl \
-  --with-default-win32-winnt=0x601 \
-  --with-default-msvcrt=ucrt
+  --with-default-msvcrt=ucrt \
+  INSTALL="install -C"
 make -j$MJOBS
 make install-strip
 
