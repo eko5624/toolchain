@@ -353,6 +353,8 @@ curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0200-add-m-no-align-vector-insn-option-for-i386.patch
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0400-gcc-Make-stupid-AT-T-syntax-not-default.patch
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0401-Always-quote-labels-in-Intel-syntax.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0402-native-tls.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0403-libstdc-Avoid-thread-local-states-for-MCF-thread-mod.patch
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/3001-gcc-lto-plugin-fixincludes-gnattools-c-tools-Improve.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/2001-fix-building-rust-on-mingw-w64.patch
 
@@ -380,10 +382,13 @@ apply_patch_for_gcc \
 # based on https://github.com/BurntSushi/ripgrep/issues/94#issuecomment-261761687
 apply_patch_for_gcc 0140-gcc-diagnostic-color.patch
 
-# ZZZ
 # XXX: GAS segfaults on i686?!
-apply_patch_for_gcc 0400-gcc-Make-stupid-AT-T-syntax-not-default.patch
-apply_patch_for_gcc 0401-Always-quote-labels-in-Intel-syntax.patch
+apply_patch_for_gcc \
+  0400-gcc-Make-stupid-AT-T-syntax-not-default.patch \
+  0401-Always-quote-labels-in-Intel-syntax.patch \
+  0402-native-tls.patch \
+  0403-libstdc-Avoid-thread-local-states-for-MCF-thread-mod.patch
+
 
 # workaround for AVX misalignment issue for pass-by-value arguments
 #   cf. https://github.com/msys2/MSYS2-packages/issues/1209
@@ -391,9 +396,10 @@ apply_patch_for_gcc 0401-Always-quote-labels-in-Intel-syntax.patch
 #  Issue is longstanding upstream at https://gcc.gnu.org/bugzilla/show_bug.cgi?id=54412
 #  Potential alternative: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=939559
 # https://github.com/msys2/MINGW-packages/pull/8317#issuecomment-824548411
-apply_patch_for_gcc 0200-add-m-no-align-vector-insn-option-for-i386.patch
-apply_patch_for_gcc 2001-fix-building-rust-on-mingw-w64.patch
-apply_patch_for_gcc 3001-gcc-lto-plugin-fixincludes-gnattools-c-tools-Improve.patch
+apply_patch_for_gcc \
+  0200-add-m-no-align-vector-insn-option-for-i386.patch \
+  2001-fix-building-rust-on-mingw-w64.patch \
+  3001-gcc-lto-plugin-fixincludes-gnattools-c-tools-Improve.patch
 
 # so libgomp DLL gets built despide static libdl
 export lt_cv_deplibs_check_method='pass_all'

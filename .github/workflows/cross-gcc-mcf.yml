@@ -35,20 +35,21 @@ jobs:
            echo "ver=$(cat cross/version.txt)" >> $GITHUB_ENV
       - name: Packaging toolchain
         run: |
-          7z a cross-gcc-mcf-${{ env.ver }}-ucrt-x86_64.7z cross/*
-          cp cross-gcc-mcf-${{ env.ver }}-ucrt-x86_64.7z cross-gcc-mcf-latest-ucrt-x86_64.7z
+          tar -zcvf cross-gcc-mcf-${{ env.ver }}-ucrt-x86_64.tar.xz cross 2>/dev/null >/dev/null
+          cp cross-gcc-mcf-${{ env.ver }}-ucrt-x86_64.tar.xz cross-gcc-mcf-latest-ucrt-x86_64.tar.xz
       - name: Delete
         env:
           GH_TOKEN: ${{ github.token }} 
         run: |
           chmod +x ./package-delete.sh
-          ./package-delete.sh cross-gcc-mcf-latest-ucrt-x86_64.7z
+          ./package-delete.sh cross-gcc-mcf-latest-ucrt-x86_64.tar.xz
       - name: Release
-        env:
-          GH_TOKEN: ${{ github.token }} 
-        run: |
-          chmod +x ./package-release.sh
-          ./package-release.sh
+        continue-on-error: true
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: toolchain
+          name: toolchain
+          files: cross-gcc-mcf*.tar.xz
       - name: Saving gcc cache
         uses: actions/cache/save@main
         if: always()
@@ -85,20 +86,21 @@ jobs:
            echo "ver=$(cat cross/version.txt)" >> $GITHUB_ENV
       - name: Packaging toolchain
         run: |
-          7z a cross-gcc-mcf-${{ env.ver }}-ucrt-x86_64_v3.7z cross/*
-          cp cross-gcc-mcf-${{ env.ver }}-ucrt-x86_64_v3.7z cross-gcc-mcf-latest-ucrt-x86_64_v3.7z
+          tar -zcvf cross-gcc-mcf-${{ env.ver }}-ucrt-x86_64_v3.tar.xz cross 2>/dev/null >/dev/null
+          cp cross-gcc-mcf-${{ env.ver }}-ucrt-x86_64_v3.tar.xz cross-gcc-mcf-latest-ucrt-x86_64_v3.tar.xz
       - name: Delete
         env:
           GH_TOKEN: ${{ github.token }} 
         run: |
           chmod +x ./package-delete.sh
-          ./package-delete.sh cross-gcc-mcf-latest-ucrt-x86_64_v3.7z
+          ./package-delete.sh cross-gcc-mcf-latest-ucrt-x86_64_v3.zip
       - name: Release
-        env:
-          GH_TOKEN: ${{ github.token }} 
-        run: |
-          chmod +x ./package-release.sh
-          ./package-release.sh
+        continue-on-error: true
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: toolchain
+          name: toolchain
+          files: cross-gcc-mcf*.tar.xz
       - name: Saving gcc cache
         uses: actions/cache/save@main
         if: always()

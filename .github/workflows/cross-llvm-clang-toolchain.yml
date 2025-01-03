@@ -15,26 +15,11 @@ on:
         required: false
         default: "false"
         type: boolean
-      llvm_full_lto:
-        description: "Build llvm with full-lto"
-        required: false
-        default: "false"
-        type: boolean
       llvm_ccache:
         description: "Build llvm with ccache"
         required: false
         default: "false"
-        type: boolean
-      package_lto:
-        description: "Build packages with thin-lto"
-        required: false
-        default: "false"
-        type: boolean        
-      package_ccache:
-        description: "Build packages with ccache"
-        required: false
-        default: "false"
-        type: boolean       
+        type: boolean     
   
 jobs:
   build_llvm:
@@ -86,16 +71,16 @@ jobs:
       - name: Install host clang toolchain
         if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
         run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.7z || true
-          7z x cross-llvm-clang-pgo-latest-ucrt-x86_64.7z || true
-          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.7z || true
-          mv cross host || true
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
+          tar -xvf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz 2>/dev/null >/dev/null
+          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
+          mv cross host
       - name: Setup llvm-lto llvm-ccache
         if: (steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_thin_lto) || (steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_full_lto) || (steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_ccache)
         run: |
-            curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm$IR-latest.7z || true
-            7z x llvm$IR-latest.7z || true 
-            rm llvm$IR-latest.7z || true
+            curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm$IR-latest.tar.xz || true
+            tar -xvf llvm$IR-latest.tar.xz 2>/dev/null >/dev/null || true 
+            rm llvm$IR-latest.tar.xz || true
             rm -rf cross/bin || true
             rm -rf cross/lib || true          
       - name: Build llvm${{ env.IR }}
@@ -115,43 +100,46 @@ jobs:
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Package llvm
         if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
-        run: 7z a llvm$IR-latest.7z cross/*
+        run: tar -zcvf llvm${{ env.IR }}-latest.tar.xz cross 2>/dev/null >/dev/null
       - name: Delete
         if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
         env:
           GH_TOKEN: ${{ github.token }} 
         run: |
           chmod +x ./package-delete.sh
-          ./package-delete.sh llvm$IR-latest.7z
+          ./package-delete.sh llvm${{ env.IR }}-latest.tar.xz
       - name: Release
         if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          chmod +x ./package-release.sh
-          ./package-release.sh
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: toolchain
+          name: toolchain
+          files: llvm${{ env.IR }}-latest.tar.xz
 
-  build_llvm-clang-x86_64:
+  build_llvm-pgo:
     needs: build_llvm
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
-      - name: Run cross-llvm-clang-x86_64.yml
+      - name: Run llvm-pgo.yml
+        if: ${{ inputs.pgo }}
         run: |
-          curl -u eko5624:$GH_TOKEN \
+          curl -u $GITHUB_ACTOR:$GH_TOKEN \
             -X POST -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/eko5624/toolchain/actions/workflows/cross-llvm-clang-x86_64.yml/dispatches \
-            -d '{"ref":"main","inputs":{"pgo":"${{ inputs.pgo }}","llvm_thin_lto":"${{ inputs.llvm_thin_lto }}","llvm_full_lto":"${{ inputs.llvm_full_lto }}","llvm_ccache":"${{ inputs.llvm_ccache }}","package_lto":"${{ inputs.package_lto }}","package_ccache":"${{ inputs.package_ccache }}"}}'
-  build_llvm-clang-x86_64_v3:
+            https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/llvm-pgo.yml/dispatches \
+            -d '{"ref":"main","inputs":{"llvm_thin_lto":"${{ inputs.llvm_thin_lto }}","llvm_ccache":"${{ inputs.llvm_ccache }}"}}'
+
+  build_toolchain_without_pgo:
     needs: build_llvm
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
-      - name: Run cross-llvm-clang-x86_64_v3.yml
+      - name: Run toolchain.yml
+        if: ${{ inputs.pgo }} != 'true'
         run: |
-          curl -u eko5624:$GH_TOKEN \
+          curl -u $GITHUB_ACTOR:$GH_TOKEN \
             -X POST -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/eko5624/toolchain/actions/workflows/cross-llvm-clang-x86_64_v3.yml/dispatches \
-            -d '{"ref":"main","inputs":{"pgo":"${{ inputs.pgo }}","llvm_thin_lto":"${{ inputs.llvm_thin_lto }}","llvm_full_lto":"${{ inputs.llvm_full_lto }}","llvm_ccache":"${{ inputs.llvm_ccache }}","package_lto":"${{ inputs.package_lto }}","package_ccache":"${{ inputs.package_ccache }}"}}'
+            https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/toolchain.yml/dispatches \
+            -d '{"ref":"main","inputs":{"pgo":"false"}}'

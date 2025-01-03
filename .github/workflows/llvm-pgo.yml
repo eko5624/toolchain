@@ -57,16 +57,16 @@ jobs:
       - name: Install host clang toolchain
         if: ${{ steps.llvm-profdata.outputs.cache-matched-key == '' }}
         run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.7z || true
-          7z x cross-llvm-clang-pgo-latest-ucrt-x86_64.7z || true
-          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.7z || true
-          mv cross host || true
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
+          tar -xvf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz 2>/dev/null >/dev/null
+          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
+          mv cross host
       - name: Setup llvm-ir
         if: ${{ steps.llvm-profdata.outputs.cache-matched-key == '' }}
         run: |
-          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/llvm-ir-latest.7z
-          7z x llvm*.7z
-          rm llvm*.7z
+          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/llvm-ir-latest.tar.xz
+          tar -xvf llvm-ir-latest.tar.xz 2>/dev/null >/dev/null
+          rm llvm*.tar.xz
           rm -rf cross/llvm-lto || true
           rm -rf cross/llvm-ccache || true
       - name: Load llvm-project source
@@ -145,16 +145,16 @@ jobs:
       - name: Install host clang toolchain
         if: ${{ steps.cross-llvm-pgo.outputs.cache-matched-key == '' }}
         run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.7z || true
-          7z x cross-llvm-clang-pgo-latest-ucrt-x86_64.7z || true
-          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.7z || true
-          mv cross host || true
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
+          tar -xvf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz 2>/dev/null >/dev/null
+          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
+          mv cross host
       - name: Install llvm-lto llvm-ccache
         if: (steps.cross-llvm-pgo.outputs.cache-matched-key == '' && inputs.llvm_thin_lto) || (steps.cross-llvm-pgo.outputs.cache-matched-key == '' && inputs.llvm_ccache)
         run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-pgo-latest.7z || true
-          7z x cross-llvm-pgo-latest.7z || true 
-          rm cross-llvm-pgo-latest.7z || true
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-pgo-latest.tar.xz || true
+          tar -xvf cross-llvm-pgo-latest.tar.xz 2>/dev/null >/dev/null || true
+          rm cross-llvm-pgo-latest.tar.xz || true
           rm -rf llvm_pgo/bin || true
           rm -rf llvm_pgo/lib || true
       - name: Build llvm with pgo
@@ -172,21 +172,21 @@ jobs:
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Package cross-llvm-pgo
         if: ${{ steps.cross-llvm-pgo.outputs.cache-matched-key == '' }}
-        run: 7z a cross-llvm-pgo-latest.7z llvm_pgo/*
+        run: tar -zcvf cross-llvm-pgo-latest.tar.xz llvm_pgo 2>/dev/null >/dev/null
       - name: Delete
         if: ${{ steps.cross-llvm-pgo.outputs.cache-matched-key == '' }}
         env:
           GH_TOKEN: ${{ github.token }} 
         run: |
           chmod +x ./package-delete.sh
-          ./package-delete.sh cross-llvm-pgo-latest.7z
+          ./package-delete.sh cross-llvm-pgo-latest.tar.xz
       - name: Release
         if: ${{ steps.cross-llvm-pgo.outputs.cache-matched-key == '' }}
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          chmod +x ./package-release.sh
-          ./package-release.sh
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: toolchain
+          name: toolchain
+          files: cross-llvm-pgo-latest.tar.xz
 
   build_toolchain_with_pgo:
     needs: llvm_pgo
@@ -199,6 +199,6 @@ jobs:
           curl -u $GITHUB_ACTOR:$GH_TOKEN \
             -X POST -H "Accept: application/vnd.github.v3+json" \
             https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/toolchain.yml/dispatches \
-            -d '{"ref":"main","inputs":{"pgo":"true"}}'
+            -d '{"ref":"main","inputs":{"pgo":"true","llvm_thin_lto":"false","llvm_ccache":"false"}}'
 
             

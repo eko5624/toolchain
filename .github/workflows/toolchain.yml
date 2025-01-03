@@ -10,6 +10,16 @@ on:
         required: false
         default: "false"
         type: boolean
+      llvm_thin_lto:
+        description: "Build llvm with thin-lto"
+        required: false
+        default: "false"
+        type: boolean
+      llvm_ccache:
+        description: "Build llvm with ccache"
+        required: false
+        default: "false"
+        type: boolean
   
 jobs:
   x86_64:
@@ -28,26 +38,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@main
       - name: Install host clang toolchain
-        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
         run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
-          7z x cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
-          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
-          mv cross host       
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
+          tar -xvf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz 2>/dev/null >/dev/null
+          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
+          mv cross host    
       - name: Setup llvm
         if: inputs.pgo == false
         run: |
-          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/llvm-latest.7z
-          7z x llvm*.7z
-          rm llvm*.7z
+          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/llvm-latest.tar.xz
+          tar xvf llvm-latest.tar.xz 2>/dev/null >/dev/null
+          rm llvm*.tar.xz
           rm -rf cross/llvm-lto || true
-          rm -rf cross/llvm-ccache || true 
+          rm -rf cross/llvm-ccache || true
       - name: Setup llvm-pgo
         if: ${{ inputs.pgo }}
         run: |
-          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/cross-llvm-pgo-latest.7z
-          7z x cross-llvm-pgo-latest.7z
-          rm cross-llvm-pgo-latest.7z
+          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/cross-llvm-pgo-latest.tar.xz
+          tar xvf cross-llvm-pgo-latest.tar.xz 2>/dev/null >/dev/null
+          rm cross-llvm-pgo-latest.tar.xz
           rm -rf llvm_pgo/llvm-lto || true
           rm -rf llvm_pgo/llvm-ccache || true
           mv llvm_pgo cross
@@ -64,8 +73,10 @@ jobs:
           ./cross-llvm-wrapper.sh --x86_64
           chmod +x ./cross-llvm-clang.sh
           ./cross-llvm-clang.sh $PGO --x86_64
-          chmod +x ./host-llvm-clang.sh
-          ./host-llvm-clang.sh
+          if [ ${{ inputs.pgo }} == 'true' ]; then
+            chmod +x ./host-llvm-clang.sh
+            ./host-llvm-clang.sh
+          fi
       - name: Train bolt with sqlite
         if: ${{ inputs.pgo }}
         run: |
@@ -75,8 +86,8 @@ jobs:
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Package x86_64 toolchain
         run: |
-          7z a cross-llvm-clang$NAME-${{ env.date }}-ucrt-x86_64.7z cross/*
-          cp cross-llvm-clang$NAME-${{ env.date }}-ucrt-x86_64.7z cross-llvm-clang$NAME-latest-ucrt-x86_64.7z
+          tar -zcvf cross-llvm-clang${{ env.NAME }}-${{ env.date }}-ucrt-x86_64.tar.xz cross 2>/dev/null >/dev/null
+          cp cross-llvm-clang${{ env.NAME }}-${{ env.date }}-ucrt-x86_64.tar.xz cross-llvm-clang${{ env.NAME }}-latest-ucrt-x86_64.tar.xz
           rm -rf cross
       - name: Delete
         continue-on-error: true
@@ -84,14 +95,14 @@ jobs:
           GH_TOKEN: ${{ github.token }} 
         run: |
           chmod +x ./package-delete.sh
-          ./package-delete.sh cross-llvm-clang$NAME-latest-ucrt-x86_64.7z
+          ./package-delete.sh cross-llvm-clang${{ env.NAME }}-latest-ucrt-x86_64.tar.xz
       - name: Release
         continue-on-error: true
-        env:
-          GH_TOKEN: ${{ github.token }} 
-        run: |
-          chmod +x ./package-release.sh
-          ./package-release.sh
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: toolchain
+          name: toolchain
+          files: cross-llvm-clang*.tar.xz
 
   x86_64_v3:
     runs-on: ubuntu-latest
@@ -109,26 +120,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@main
       - name: Install host clang toolchain
-        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
         run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
-          7z x cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
-          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
+          tar -xvf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz 2>/dev/null >/dev/null
+          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
           mv cross host       
       - name: Setup llvm
         if: inputs.pgo == false
         run: |
-          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/llvm-latest.7z
-          7z x llvm*.7z
-          rm llvm*.7z
+          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/llvm-latest.tar.xz
+          tar xvf llvm*.tar.xz 2>/dev/null >/dev/null
+          rm llvm*.tar.xz
           rm -rf cross/llvm-lto || true
           rm -rf cross/llvm-ccache || true
       - name: Setup llvm-pgo
         if: ${{ inputs.pgo }}
         run: |
-          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/cross-llvm-pgo-latest.7z
-          7z x cross-llvm-pgo-latest.7z
-          rm cross-llvm-pgo-latest.7z
+          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/cross-llvm-pgo-latest.tar.xz
+          tar xvf cross-llvm-pgo-latest.tar.xz 2>/dev/null >/dev/null
+          rm cross-llvm-pgo-latest.tar.xz
           rm -rf llvm_pgo/llvm-lto || true
           rm -rf llvm_pgo/llvm-ccache || true
           mv llvm_pgo cross
@@ -154,8 +164,8 @@ jobs:
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Package x86_64_v3 toolchain
         run: |
-          7z a cross-llvm-clang$NAME-${{ env.date }}-ucrt-x86_64_v3.7z cross/*
-          cp cross-llvm-clang$NAME-${{ env.date }}-ucrt-x86_64_v3.7z cross-llvm-clang$NAME-latest-ucrt-x86_64_v3.7z
+          tar -zcvf cross-llvm-clang${{ env.NAME }}-${{ env.date }}-ucrt-x86_64_v3.tar.xz cross 2>/dev/null >/dev/null
+          cp cross-llvm-clang${{ env.NAME }}-${{ env.date }}-ucrt-x86_64_v3.tar.xz cross-llvm-clang${{ env.NAME }}-latest-ucrt-x86_64_v3.tar.xz
           rm -rf cross
       - name: Delete
         continue-on-error: true
@@ -163,14 +173,14 @@ jobs:
           GH_TOKEN: ${{ github.token }} 
         run: |
           chmod +x ./package-delete.sh
-          ./package-delete.sh cross-llvm-clang$NAME-latest-ucrt-x86_64_v3.7z
+          ./package-delete.sh cross-llvm-clang${{ env.NAME }}-latest-ucrt-x86_64_v3.tar.xz
       - name: Release
         continue-on-error: true
-        env:
-          GH_TOKEN: ${{ github.token }} 
-        run: |
-          chmod +x ./package-release.sh
-          ./package-release.sh
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: toolchain
+          name: toolchain
+          files: cross-llvm-clang*.tar.xz
 
   aarch64:
     runs-on: ubuntu-latest
@@ -188,26 +198,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@main
       - name: Install host clang toolchain
-        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
         run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
-          7z x cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
-          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.7z
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
+          tar -xvf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz 2>/dev/null >/dev/null
+          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
           mv cross host       
       - name: Setup llvm
         if: inputs.pgo == false
         run: |
-          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/llvm-latest.7z
-          7z x llvm*.7z
-          rm llvm*.7z
+          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/llvm-latest.tar.xz
+          tar xvf llvm*.tar.xz 2>/dev/null >/dev/null
+          rm llvm*.tar.xz
           rm -rf cross/llvm-lto || true
           rm -rf cross/llvm-ccache || true
       - name: Setup llvm-pgo
         if: ${{ inputs.pgo }}
         run: |
-          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/cross-llvm-pgo-latest.7z
-          7z x cross-llvm-pgo-latest.7z
-          rm cross-llvm-pgo-latest.7z
+          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/cross-llvm-pgo-latest.tar.xz
+          tar xvf cross-llvm-pgo-latest.tar.xz 2>/dev/null >/dev/null
+          rm cross-llvm-pgo-latest.tar.xz
           rm -rf llvm_pgo/llvm-lto || true
           rm -rf llvm_pgo/llvm-ccache || true
           mv llvm_pgo cross
@@ -233,8 +242,8 @@ jobs:
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Package aarch64 toolchain
         run: |
-          7z a cross-llvm-clang$NAME-${{ env.date }}-ucrt-aarch64.7z cross/*
-          cp cross-llvm-clang$NAME-${{ env.date }}-ucrt-aarch64.7z cross-llvm-clang$NAME-latest-ucrt-aarch64.7z
+          tar -zcvf cross-llvm-clang${{ env.NAME }}-${{ env.date }}-ucrt-aarch64.tar.xz cross 2>/dev/null >/dev/null
+          cp cross-llvm-clang${{ env.NAME }}-${{ env.date }}-ucrt-aarch64.tar.xz cross-llvm-clang${{ env.NAME }}-latest-ucrt-aarch64.tar.xz
           rm -rf cross
       - name: Delete
         continue-on-error: true
@@ -242,11 +251,11 @@ jobs:
           GH_TOKEN: ${{ github.token }} 
         run: |
           chmod +x ./package-delete.sh
-          ./package-delete.sh cross-llvm-clang$NAME-latest-ucrt-aarch64.7z
+          ./package-delete.sh cross-llvm-clang${{ env.NAME }}-latest-ucrt-aarch64.tar.xz
       - name: Release
         continue-on-error: true
-        env:
-          GH_TOKEN: ${{ github.token }} 
-        run: |
-          chmod +x ./package-release.sh
-          ./package-release.sh   
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: toolchain
+          name: toolchain
+          files: cross-llvm-clang*.tar.xz

@@ -41,6 +41,9 @@ git clone https://github.com/mstorsjo/llvm-mingw.git --branch master
 #mingw-w64
 git clone https://github.com/mingw-w64/mingw-w64.git --branch master
 
+#pkgconf
+git clone https://github.com/pkgconf/pkgconf --branch pkgconf-$VER_PKGCONF
+
 echo "stripping llvm"
 echo "======================="
 cd $M_SOURCE/llvm-mingw
@@ -257,6 +260,22 @@ cmake --build compiler-rt-build -j$MJOBS
 cmake --install compiler-rt-build
 mkdir -p $M_CROSS/$MINGW_TRIPLE/bin
 mv $(x86_64-w64-mingw32-clang --print-resource-dir)/lib/windows/*.dll $M_CROSS/$MINGW_TRIPLE/bin
+
+echo "building pkgconf"
+echo "======================="
+cd $M_BUILD
+mkdir pkgconf-build
+cd $M_SOURCE/pkgconf
+meson setup $M_BUILD/pkgconf-build \
+  --prefix=$M_CROSS \
+  --buildtype=release \
+  -Dtests=disabled
+meson compile -C $M_BUILD/pkgconf-build
+meson install -C $M_BUILD/pkgconf-build
+cd $M_CROSS/bin
+#ln -s pkgconf x86_64-w64-mingw32-pkgconf
+#ln -s pkgconf x86_64-w64-mingw32-pkg-config
+rm -rf $M_CROSS/lib/pkgconfig
 
 echo "fix cross-llvm-wrappers"
 echo "======================="
