@@ -231,8 +231,8 @@ cd $M_BUILD/gcc-build
 make -j$MJOBS
 make install-strip
 cd $M_CROSS
-find $MINGW_TRIPLE/lib -type f -name "*.la" -print0 | xargs -0 -I {} rm {}
-find $MINGW_TRIPLE/lib -type f -name "*.dll.a" -print0 | xargs -0 -I {} rm {}
+#find $MINGW_TRIPLE/lib -type f -name "*.la" -print0 | xargs -0 -I {} rm {}
+#find $MINGW_TRIPLE/lib -type f -name "*.dll.a" -print0 | xargs -0 -I {} rm {}
 mv $MINGW_TRIPLE/bin/libmcfgthread-minimal-2.dll bin
 mv $MINGW_TRIPLE/bin/libmcfgthread-2.dll bin
 rm -f mingw
