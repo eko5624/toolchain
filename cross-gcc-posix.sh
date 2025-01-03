@@ -221,8 +221,8 @@ cd $M_BUILD/gcc-build
 make -j$MJOBS
 make install-strip
 cd $M_CROSS
-find $MINGW_TRIPLE/lib -type f -name "*.la" -print0 | xargs -0 -I {} rm {}
-find $MINGW_TRIPLE/lib -type f -name "*.dll.a" -print0 | xargs -0 -I {} rm {}
+#find $MINGW_TRIPLE/lib -type f -name "*.la" -print0 | xargs -0 -I {} rm {}
+#find $MINGW_TRIPLE/lib -type f -name "*.dll.a" -print0 | xargs -0 -I {} rm {}
 rm -f mingw
 rm -rf share
 echo "$VER" > $M_CROSS/version.txt
