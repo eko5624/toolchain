@@ -222,14 +222,6 @@ echo "building mingw-w64-headers"
 echo "======================="
 cd $M_BUILD
 mkdir headers-build && cd headers-build
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-headers-git/0002-heades-add-full-name-winrt.patch
-
-cd $M_SOURCE/mingw-w64
-
-# https://bugs.winehq.org/show_bug.cgi?id=55347
-git apply $M_BUILD/headers-build/0002-heades-add-full-name-winrt.patch
-
-cd $M_BUILD/headers-build
 $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
   --host=$MINGW_TRIPLE \
   --prefix=$M_TARGET \
@@ -258,7 +250,7 @@ $M_SOURCE/mingw-w64/mingw-w64-crt/configure \
   --disable-dependency-tracking \
   --enable-lib64 \
   --disable-lib32
-make -j$MJOBS
+make -j$MJOBS install-strip
 make install
 # Create empty dummy archives, to avoid failing when the compiler driver
 # adds -lssp -lssh_nonshared when linking.
