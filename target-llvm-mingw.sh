@@ -120,21 +120,23 @@ for exec in clang clang++ gcc g++ c++ as; do
 done
 ln -sf clang-scan-deps-wrapper.exe $MINGW_TRIPLE-clang-scan-deps.exe
 
-cp llvm-ar.exe $MINGW_TRIPLE-llvm-ranlib.exe
-cp llvm-ar.exe $MINGW_TRIPLE-llvm-ar.exe
-cp llvm-addr2line.exe $MINGW_TRIPLE-addr2line.exe
 cp llvm-ar.exe $MINGW_TRIPLE-ar.exe
-cp llvm-ranlib.exe $MINGW_TRIPLE-ranlib.exe
+cp llvm-ar.exe $MINGW_TRIPLE-llvm-ar.exe
+cp llvm-ar.exe $MINGW_TRIPLE-llvm-ranlib.exe
+cp llvm-ar.exe $MINGW_TRIPLE-dlltool.exe
+cp llvm-ar.exe $MINGW_TRIPLE-ranlib.exe
+cp llvm-addr2line.exe $MINGW_TRIPLE-addr2line.exe
 cp llvm-nm.exe $MINGW_TRIPLE-nm.exe
 cp llvm-objcopy.exe $MINGW_TRIPLE-objcopy.exe
+cp llvm-objcopy.exe $MINGW_TRIPLE-strip.exe
+cp llvm-rc.exe $MINGW_TRIPLE-windres.exe
 cp llvm-readelf.exe $MINGW_TRIPLE-readelf.exe
 cp llvm-size.exe $MINGW_TRIPLE-size.exe
 cp llvm-strings.exe $MINGW_TRIPLE-strings.exe
-cp llvm-strip.exe $MINGW_TRIPLE-strip.exe
 
 # windres and dlltool can't use llvm-wrapper, as that loses the original target arch prefix.
-ln -sf llvm-windres.exe $MINGW_TRIPLE-windres.exe
-ln -sf llvm-dlltool.exe $MINGW_TRIPLE-dlltool.exe
+#cp llvm-windres.exe $MINGW_TRIPLE-windres.exe
+#cp llvm-dlltool.exe $MINGW_TRIPLE-dlltool.exe
 for exec in ld objdump; do
   ln -sf $exec-wrapper.sh $MINGW_TRIPLE-$exec
 done
@@ -187,8 +189,8 @@ $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
   --host=$MINGW_TRIPLE \
   --prefix=$M_TARGET/$MINGW_TRIPLE \
   --enable-idl \
-  --with-default-msvcrt=ucrt \
-  INSTALL="install -C"
+  --with-default-win32-winnt=0x601 \
+  --with-default-msvcrt=ucrt
 make -j$MJOBS
 make install-strip
 
