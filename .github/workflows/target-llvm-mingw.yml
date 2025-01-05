@@ -84,11 +84,11 @@ jobs:
           key: llvm-source-cache                  
       - name: Setup cross-llvm-mingw and target-llvm
         run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-mingw-latest-ucrt-x86_64.7z
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-mingw-latest-ucrt-x86_64.tar.xz
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/target-llvm-latest.7z
-          7z x cross*.7z
+          tar -xvf cross*.tar.xz 2>/dev/null >/dev/null
           7z x target*.7z
-          rm *.7z            
+          rm *.tar.xz *.7z      
       - name: Building toolchain
         run: |
           chmod +x ./target-llvm-mingw.sh
@@ -97,7 +97,7 @@ jobs:
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Packaging toolchain
         run: |
-          7z a -r -l target-llvm-mingw-${{ env.date }}-ucrt-x86_64.7z target/*
+          7z a -r target-llvm-mingw-${{ env.date }}-ucrt-x86_64.7z target/*
           cp target-llvm-mingw-${{ env.date }}-ucrt-x86_64.7z target-llvm-mingw-latest-ucrt-x86_64.7z
       - name: Delete
         env:
