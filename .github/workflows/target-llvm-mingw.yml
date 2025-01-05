@@ -86,7 +86,7 @@ jobs:
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-mingw-latest-ucrt-x86_64.tar.xz
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/target-llvm-latest.7z
-          tar -Jxf cross*.tar.xz
+          tar -xvf cross*.tar.xz 2>/dev/null >/dev/null
           7z x target*.7z
           rm *.tar.xz *.7z      
       - name: Building toolchain
