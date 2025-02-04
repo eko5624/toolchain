@@ -1,0 +1,113 @@
+name: cross-llvm-clang-without-pgo-toolchain
+defaults:
+  run:
+    shell: bash
+on:
+  workflow_dispatch:
+    inputs:
+      pgo:
+        description: "Build llvm with PGO"
+        required: false
+        default: "false"
+        type: boolean
+      llvm_ccache:
+        description: "Build llvm with ccache"
+        required: false
+        default: "false"
+        type: boolean     
+  
+jobs:
+  build_llvm:
+    runs-on: ubuntu-latest
+    container:
+      image: docker://ghcr.io/eko5624/archlinux:latest
+    steps:
+      - name: Init variable
+        run: |
+          if [ ${{ inputs.llvm_ccache }} == 'true' ]; then
+            echo "LLVM_CCACHE=--enable-llvm-ccache" >> $GITHUB_ENV
+          else
+            unset LLVM_CCACHE
+          fi
+      - name: Checkout
+        uses: actions/checkout@main
+      - name: Load llvm-project source
+        uses: actions/cache@main
+        id: llvm-source
+        with:
+          path: ${{ github.workspace }}/source/llvm-project
+          key: llvm-source-cache          
+      - name: Load llvm cache
+        uses: actions/cache/restore@main
+        id: llvm-cache
+        with:
+          path: ${{ github.workspace }}/cross
+          key: llvm-cache-${{ github.run_id }}
+          restore-keys: |
+            llvm-cache-
+      #- name: Install fuchsia-clang
+      #  if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
+      #  run: |
+      #    sudo GOBIN=/usr/bin go install go.chromium.org/luci/cipd/client/cmd/...@latest
+      #    sudo cipd install fuchsia/third_party/clang/linux-amd64 latest -root /usr/local/fuchsia-clang
+      - name: Install host clang toolchain
+        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
+        run: |
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
+          tar -xvf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz 2>/dev/null >/dev/null
+          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
+          mv cross host
+      - name: Setup llvm-ccache
+        if: (steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_ccache)
+        run: |
+            curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-latest.tar.xz || true
+            tar -xvf llvm-latest.tar.xz 2>/dev/null >/dev/null || true 
+            rm llvm-latest.tar.xz || true
+            rm -rf cross/bin || true
+            rm -rf cross/lib || true          
+      - name: Build llvm
+        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
+        run: |
+          set -x
+          chmod +x ./llvm.sh
+          ./llvm.sh $LLVM_CCACHE
+      - name: Save llvm cache
+        uses: actions/cache/save@main
+        if: always()
+        with:
+          path: ${{ github.workspace }}/cross
+          key: llvm-cache-${{ github.run_id }}
+      - name: Get current timestamp
+        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
+        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
+      - name: Package llvm
+        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
+        run: tar -zcvf llvm-latest.tar.xz cross 2>/dev/null >/dev/null
+      - name: Delete
+        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-delete.sh
+          ./package-delete.sh llvm-latest.tar.xz
+      - name: Release
+        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: toolchain
+          name: toolchain
+          files: llvm-latest.tar.xz
+
+  build_toolchain_without_pgo:
+    needs: build_llvm
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Run toolchain.yml
+        if: ${{ inputs.pgo }} != 'true'
+        run: |
+          curl -u $GITHUB_ACTOR:$GH_TOKEN \
+            -X POST -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/toolchain.yml/dispatches \
+            -d '{"ref":"main","inputs":{"pgo":"false"}}'

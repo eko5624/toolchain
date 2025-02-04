@@ -1,4 +1,4 @@
-name: cross-llvm-clang-toolchain
+name: cross-llvm-clang-pgo-toolchain
 defaults:
   run:
     shell: bash
@@ -8,17 +8,17 @@ on:
       pgo:
         description: "Build llvm with PGO"
         required: false
-        default: "false"
+        default: "true"
         type: boolean
       llvm_thin_lto:
         description: "Build llvm with thin-lto"
         required: false
-        default: "false"
+        default: "true"
         type: boolean
       llvm_ccache:
         description: "Build llvm with ccache"
         required: false
-        default: "false"
+        default: "true"
         type: boolean     
   
 jobs:
@@ -29,16 +29,8 @@ jobs:
     steps:
       - name: Init variable
         run: |
-          if [ ${{ inputs.pgo }} == 'true' ]; then
-            echo "PGO=--enable-pgo_gen" >> $GITHUB_ENV
-            echo "IR=-ir" >> $GITHUB_ENV
-          else
-            unset PGO IR
-          fi  
           if [ ${{ inputs.llvm_thin_lto }} == 'true' ]; then
-            echo "LLVM_LTO=--enable-llvm-thin_lto" >> $GITHUB_ENV
-          elif [ ${{ inputs.llvm_full_lto }} == 'true' ]; then
-            echo "LLVM_LTO=--enable-llvm-full_lto" >> $GITHUB_ENV  
+            echo "LLVM_LTO=--enable-llvm-thin_lto" >> $GITHUB_ENV  
           else
             unset LLVM_LTO
           fi  
@@ -55,14 +47,14 @@ jobs:
         with:
           path: ${{ github.workspace }}/source/llvm-project
           key: llvm-source-cache          
-      - name: Load llvm${{ env.IR }} cache
+      - name: Load llvm-ir cache
         uses: actions/cache/restore@main
         id: llvm-cache
         with:
           path: ${{ github.workspace }}/cross
-          key: llvm${{ env.IR }}-cache-${{ github.run_id }}
+          key: llvm-ir-cache-${{ github.run_id }}
           restore-keys: |
-            llvm${{ env.IR }}-cache-
+            llvm-ir-cache-
       #- name: Install fuchsia-clang
       #  if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
       #  run: |
@@ -76,45 +68,45 @@ jobs:
           rm cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
           mv cross host
       - name: Setup llvm-lto llvm-ccache
-        if: (steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_thin_lto) || (steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_full_lto) || (steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_ccache)
+        if: (steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_thin_lto) || (steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_ccache)
         run: |
-            curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm$IR-latest.tar.xz || true
-            tar -xvf llvm$IR-latest.tar.xz 2>/dev/null >/dev/null || true 
-            rm llvm$IR-latest.tar.xz || true
+            curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-ir-latest.tar.xz || true
+            tar -xvf llvm-ir-latest.tar.xz 2>/dev/null >/dev/null || true 
+            rm llvm-ir-latest.tar.xz || true
             rm -rf cross/bin || true
             rm -rf cross/lib || true          
-      - name: Build llvm${{ env.IR }}
+      - name: Build llvm-ir
         if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
         run: |
           set -x
           chmod +x ./llvm.sh
-          ./llvm.sh $PGO $LLVM_CCACHE
-      - name: Save llvm${{ env.IR }} cache
+          ./llvm.sh --enable-pgo_gen $LLVM_CCACHE
+      - name: Save llvm-ir cache
         uses: actions/cache/save@main
         if: always()
         with:
           path: ${{ github.workspace }}/cross
-          key: llvm${{ env.IR }}-cache-${{ github.run_id }}
+          key: llvm-ir-cache-${{ github.run_id }}
       - name: Get current timestamp
         if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Package llvm
         if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
-        run: tar -zcvf llvm${{ env.IR }}-latest.tar.xz cross 2>/dev/null >/dev/null
+        run: tar -zcvf llvm-ir-latest.tar.xz cross 2>/dev/null >/dev/null
       - name: Delete
         if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
         env:
           GH_TOKEN: ${{ github.token }} 
         run: |
           chmod +x ./package-delete.sh
-          ./package-delete.sh llvm${{ env.IR }}-latest.tar.xz
+          ./package-delete.sh llvm-ir-latest.tar.xz
       - name: Release
         if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: toolchain
           name: toolchain
-          files: llvm${{ env.IR }}-latest.tar.xz
+          files: llvm-ir-latest.tar.xz
 
   build_llvm-pgo:
     needs: build_llvm
@@ -130,16 +122,3 @@ jobs:
             https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/llvm-pgo.yml/dispatches \
             -d '{"ref":"main","inputs":{"llvm_thin_lto":"${{ inputs.llvm_thin_lto }}","llvm_ccache":"${{ inputs.llvm_ccache }}"}}'
 
-  build_toolchain_without_pgo:
-    needs: build_llvm
-    runs-on: ubuntu-latest
-    env:
-      GH_TOKEN: ${{ github.token }}
-    steps:
-      - name: Run toolchain.yml
-        if: ${{ inputs.pgo }} != 'true'
-        run: |
-          curl -u $GITHUB_ACTOR:$GH_TOKEN \
-            -X POST -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/toolchain.yml/dispatches \
-            -d '{"ref":"main","inputs":{"pgo":"false"}}'
