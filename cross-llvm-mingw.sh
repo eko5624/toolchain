@@ -142,7 +142,7 @@ $M_SOURCE/mingw-w64/mingw-w64-crt/configure \
   --enable-cfguard \
   --disable-dependency-tracking
 make -j$MJOBS GC=0
-make install-strip GC=0
+make install GC=0
 # Create empty dummy archives, to avoid failing when the compiler driver
 # adds -lssp -lssh_nonshared when linking.
 llvm-ar rcs $M_CROSS/lib/libssp.a
@@ -159,7 +159,7 @@ NO_CONFLTO=1 $M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
   --disable-shared \
   --enable-static
 make -j$MJOBS GC=0
-make install-strip GC=0
+make install GC=0
 
 echo "building llvm-compiler-rt-builtin"
 echo "======================="
