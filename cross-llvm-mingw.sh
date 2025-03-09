@@ -55,17 +55,26 @@ echo "======================="
 cd $M_CROSS/bin
 ln -s llvm-ar $MINGW_TRIPLE-ar
 ln -s llvm-ar $MINGW_TRIPLE-llvm-ar
-ln -s llvm-ar $MINGW_TRIPLE-ranlib
-ln -s llvm-ar $MINGW_TRIPLE-llvm-ranlib
-ln -s llvm-ar $MINGW_TRIPLE-dlltool
+ln -s llvm-ranlib $MINGW_TRIPLE-ranlib
+ln -s llvm-ranlib $MINGW_TRIPLE-llvm-ranlib
+ln -s llvm-dlltool $MINGW_TRIPLE-dlltool
+ln -s llvm-dlltool $MINGW_TRIPLE-llvm-dlltool
 ln -s llvm-objcopy $MINGW_TRIPLE-objcopy
-ln -s llvm-objcopy $MINGW_TRIPLE-strip
+ln -s llvm-objcopy $MINGW_TRIPLE-llvm-objcopy
+ln -s llvm-strip $MINGW_TRIPLE-strip
+ln -s llvm-strip $MINGW_TRIPLE-llvm-strip
 ln -s llvm-size $MINGW_TRIPLE-size
+ln -s llvm-size $MINGW_TRIPLE-llvm-size
 ln -s llvm-strings $MINGW_TRIPLE-strings
+ln -s llvm-strings $MINGW_TRIPLE-llvm-strings
 ln -s llvm-nm $MINGW_TRIPLE-nm
+ln -s llvm-nm $MINGW_TRIPLE-llvm-nm
 ln -s llvm-readelf $MINGW_TRIPLE-readelf
-ln -s llvm-rc $MINGW_TRIPLE-windres
+ln -s llvm-readelf $MINGW_TRIPLE-llvm-readelf
+ln -s llvm-windres $MINGW_TRIPLE-windres
+ln -s llvm-windres $MINGW_TRIPLE-llvm-windres
 ln -s llvm-addr2line $MINGW_TRIPLE-addr2line
+ln -s llvm-addr2line $MINGW_TRIPLE-llvm-addr2line
 ln -s $(which pkgconf) $MINGW_TRIPLE-pkg-config
 ln -s $(which pkgconf) $MINGW_TRIPLE-pkgconf
 cp $TOP_DIR/cross-llvm-wrappers/x86_64-w64-mingw32-as ./
