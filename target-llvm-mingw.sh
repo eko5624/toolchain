@@ -120,11 +120,11 @@ for exec in clang clang++ gcc g++ c++ as; do
 done
 ln -sf clang-scan-deps-wrapper.exe $MINGW_TRIPLE-clang-scan-deps.exe
 
-cp llvm-ar.exe $MINGW_TRIPLE-llvm-ranlib.exe
-cp llvm-ar.exe $MINGW_TRIPLE-llvm-ar.exe
 cp llvm-addr2line.exe $MINGW_TRIPLE-addr2line.exe
 cp llvm-ar.exe $MINGW_TRIPLE-ar.exe
+cp llvm-ar.exe $MINGW_TRIPLE-llvm-ar.exe
 cp llvm-ranlib.exe $MINGW_TRIPLE-ranlib.exe
+cp llvm-ranlib.exe $MINGW_TRIPLE-llvm-ranlib.exe
 cp llvm-nm.exe $MINGW_TRIPLE-nm.exe
 cp llvm-objcopy.exe $MINGW_TRIPLE-objcopy.exe
 cp llvm-readelf.exe $MINGW_TRIPLE-readelf.exe
