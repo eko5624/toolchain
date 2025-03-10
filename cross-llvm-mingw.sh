@@ -77,21 +77,15 @@ ln -s llvm-addr2line $MINGW_TRIPLE-addr2line
 ln -s llvm-addr2line $MINGW_TRIPLE-llvm-addr2line
 ln -s $(which pkgconf) $MINGW_TRIPLE-pkg-config
 ln -s $(which pkgconf) $MINGW_TRIPLE-pkgconf
-cp $TOP_DIR/cross-llvm-wrappers/x86_64-w64-mingw32-as ./
-cp $TOP_DIR/cross-llvm-wrappers/x86_64-w64-mingw32-clang ./
-cp $TOP_DIR/cross-llvm-wrappers/x86_64-w64-mingw32-clang++ ./
-cp $TOP_DIR/cross-llvm-wrappers/x86_64-w64-mingw32-ld ./
-cp $TOP_DIR/cross-llvm-wrappers/x86_64-w64-mingw32-gcc ./
-cp $TOP_DIR/cross-llvm-wrappers/x86_64-w64-mingw32-g++ ./
-cp $TOP_DIR/cross-llvm-wrappers/x86_64-w64-mingw32-c++ ./
 
-chmod 755 x86_64-w64-mingw32-as
-chmod 755 x86_64-w64-mingw32-clang
-chmod 755 x86_64-w64-mingw32-clang++
-chmod 755 x86_64-w64-mingw32-ld
-chmod 755 x86_64-w64-mingw32-gcc
-chmod 755 x86_64-w64-mingw32-g++
-chmod 755 x86_64-w64-mingw32-c++
+cd $TOP_DIR/llvm-mingw-wrappers
+install -vm755 x86_64-w64-mingw32-as $M_CROSS/bin/x86_64-w64-mingw32-as
+install -vm755 x86_64-w64-mingw32-clang $M_CROSS/bin/x86_64-w64-mingw32-clang
+install -vm755 x86_64-w64-mingw32-clang++ $M_CROSS/bin/x86_64-w64-mingw32-clang++
+install -vm755 x86_64-w64-mingw32-ld $M_CROSS/bin/x86_64-w64-mingw32-ld
+install -vm755 x86_64-w64-mingw32-gcc $M_CROSS/bin/x86_64-w64-mingw32-gcc
+install -vm755 x86_64-w64-mingw32-g++ $M_CROSS/bin/x86_64-w64-mingw32-g++
+install -vm755 x86_64-w64-mingw32-c++ $M_CROSS/bin/x86_64-w64-mingw32-c++
 
 echo "building cppwinrt"
 echo "======================="
