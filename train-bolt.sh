@@ -78,9 +78,7 @@ $M_CROSS/bin/llvm.instr clang \
   -fno-unique-section-names \
   -gcodeview \
   -mguard=cf \
-  -Wl,-mllvm,-slp-revec,-mllvm,-disable-auto-upgrade-debug-info \
   -g3 \
-  -Wl,--gc-sections,--icf=all,-O3,--lto-O3,--lto-CGO3,--disable-runtime-pseudo-reloc,--pdb= \
   sqlite3.c shell.c -o sqlite3.exe
 $M_CROSS/bin/llvm.instr clang \
   --target=${_TARGET_CPU}-pc-windows-gnu \
@@ -110,9 +108,9 @@ $M_CROSS/bin/llvm.instr clang \
   -fno-unique-section-names \
   -gcodeview \
   -mguard=cf \
-  -mllvm -slp-revec \
+  -mllvm \
+  -slp-revec \
   -g3 \
-  -Wl,--gc-sections,--icf=all,-O3,--lto-O3,--lto-CGO3,--disable-runtime-pseudo-reloc,--pdb= \
   sqlite3.c shell.c -o sqlite3.exe
 rm sqlite3.exe ld.lld $M_CROSS/bin/llvm.instr
 merge-fdata $M_CROSS/llvm-bolt/* -o $M_CROSS/llvm.fdata
