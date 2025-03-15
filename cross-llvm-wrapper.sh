@@ -48,6 +48,8 @@ ln -s llvm-strip ${_TARGET_ARCH}-strip
 ln -s llvm-strip ${_TARGET_ARCH}-llvm-strip
 ln -s llvm-size ${_TARGET_ARCH}-size
 ln -s llvm-size ${_TARGET_ARCH}-llvm-size
+ln -s llvm-strings ${_TARGET_ARCH}-strings
+ln -s llvm-strings ${_TARGET_ARCH}-llvm-strings
 ln -s llvm-nm ${_TARGET_ARCH}-nm
 ln -s llvm-nm ${_TARGET_ARCH}-llvm-nm
 ln -s llvm-readelf ${_TARGET_ARCH}-readelf

@@ -453,7 +453,7 @@ NO_CONFLTO=1 PKG_CONFIG_LIBDIR= cmake -G Ninja -H$M_SOURCE/llvm-project/llvm -B$
   -DCMAKE_CXX_FLAGS="-DBLAKE3_NO_SSE2 -DBLAKE3_NO_SSE41 ${llvm_cflags}${llvm_lto}${llvm_pgo}" \
   -DCMAKE_ASM_FLAGS="-DBLAKE3_NO_SSE2 -DBLAKE3_NO_SSE41 ${llvm_cflags}${llvm_lto}${llvm_pgo}" \
   -DCMAKE_EXE_LINKER_FLAGS="$M_INSTALL/lib/mimalloc.o -fuse-ld=lld -flto-jobs=${MJOBS} -Wl,--lto-whole-program-visibility,-Bsymbolic,--build-id=fast,-O3,--lto-O3,--lto-CGO3,--icf=all,--gc-sections,-s,-znow,-zrodynamic,-zpack-relative-relocs,-zcommon-page-size=2097152,-zmax-page-size=2097152,-zseparate-loadable-segments,-zkeep-text-section-prefix,-zstart-stop-visibility=hidden" \
-  -DLLVM_TOOLCHAIN_TOOLS="llvm-driver;llvm-ar;llvm-ranlib;llvm-objdump;llvm-rc;llvm-nm;llvm-readobj;llvm-dlltool;llvm-objcopy;llvm-strip;llvm-profdata;llvm-addr2line;llvm-symbolizer;llvm-windres;llvm-ml;llvm-mt;llvm-readelf;llvm-size"
-ninja -j$MJOBS -C llvm-build llvm-driver
-ninja -C llvm-build install-llvm-driver install-clang-resource-headers
+  -DLLVM_TOOLCHAIN_TOOLS="llvm-driver;llvm-ar;llvm-ranlib;llvm-objdump;llvm-rc;llvm-nm;llvm-strings;llvm-readobj;llvm-dlltool;llvm-objcopy;llvm-strip;llvm-profdata;llvm-addr2line;llvm-symbolizer;llvm-windres;llvm-ml;llvm-mt;llvm-readelf;llvm-size"
+cmake --build llvm-build -j$MJOBS
+cmake --install llvm-build
 
