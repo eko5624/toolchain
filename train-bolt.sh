@@ -33,18 +33,15 @@ done
 echo "training sqlite"
 echo "======================="
 cd $M_SOURCE
-curl -OL "https://www.sqlite.org/2024/sqlite-autoconf-3470200.tar.gz"
-tar -xvf sqlite-autoconf-3470200.tar.gz
+curl -OL "https://www.sqlite.org/2024/sqlite-autoconf-3460000.tar.gz"
+tar -xvf sqlite-autoconf-3460000.tar.gz
 rm sqlite*.tar.gz
-cd sqlite-autoconf-3470200
-llvm-bolt $M_CROSS/bin/llvm \
-  -o $M_CROSS/bin/llvm.instr \
+cd sqlite-autoconf-3460000
+llvm-bolt \
   --instrument \
   --instrumentation-file-append-pid \
   --instrumentation-file=$M_CROSS/llvm-bolt/llvm \
-  --lite=false \
-  --allow-stripped
-ln -s $M_CROSS/bin/llvm.instr ld.lld   
+$M_CROSS/bin/llvm -o $M_CROSS/bin/llvm.instr
 mkdir -p $M_CROSS/llvm-bolt
 $M_CROSS/bin/llvm.instr clang \
   --target=${_TARGET_CPU}-pc-windows-gnu \
@@ -59,47 +56,24 @@ $M_CROSS/bin/llvm.instr clang \
   -mguard=cf \
   -g3 \
   sqlite3.c shell.c -o sqlite3.exe
-rm sqlite3.exe ld.lld $M_CROSS/bin/llvm.instr
+rm sqlite3.exe $M_CROSS/bin/llvm.instr
 merge-fdata $M_CROSS/llvm-bolt/* -o $M_CROSS/llvm.fdata
 rm -r $M_CROSS/llvm-bolt
 llvm-bolt \
   --data $M_CROSS/llvm.fdata \
   $M_CROSS/bin/llvm -o $M_CROSS/bin/llvm.bolt \
-  --align-blocks \
-  --assume-abi \
-  --cg-use-split-hot-size \
-  --cmov-conversion \
   --dyno-stats \
-  --fix-block-counts \
-  --fix-func-counts \
-  --frame-opt-rm-stores \
-  --frame-opt=all \
-  --hot-data \
-  --hot-text \
-  --icf=all \
-  --icp-inline \
-  --icp-jump-tables-targets \
-  --icp=jump-tables \
-  --infer-fall-throughs \
-  --inline-ap \
-  --inline-small-functions \
-  --iterative-guess \
-  --jump-tables=aggressive \
-  --min-branch-clusters \
-  --peepholes=all \
-  --plt=all \
+  --eliminate-unreachable \
+  --frame-opt=hot \
+  --icf=1 \
+  --plt=hot \
   --reg-reassign \
   --reorder-blocks=ext-tsp \
   --reorder-functions=cdsort \
-  --sctc-mode=always \
-  --simplify-rodata-loads \
   --split-all-cold \
   --split-eh \
   --split-functions \
-  --split-strategy=cdsplit \
-  --stoke \
-  --tail-duplication=cache \
-  --three-way-branch
+  --use-gnu-stack
 llvm-strip -s $M_CROSS/bin/llvm.bolt
 rm -r $M_CROSS/llvm.fdata
 mv $M_CROSS/bin/llvm.bolt $M_CROSS/bin/llvm
