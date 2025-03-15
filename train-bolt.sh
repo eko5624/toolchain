@@ -42,7 +42,8 @@ llvm-bolt $M_CROSS/bin/llvm \
   --instrument \
   --instrumentation-file-append-pid \
   --instrumentation-file=$M_CROSS/llvm-bolt/llvm \
-  --lite=false
+  --lite=false \
+  --allow-stripped
 ln -s $M_CROSS/bin/llvm.instr ld.lld   
 mkdir -p $M_CROSS/llvm-bolt
 $M_CROSS/bin/llvm.instr clang \
