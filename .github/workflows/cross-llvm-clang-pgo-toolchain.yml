@@ -79,8 +79,8 @@ jobs:
         if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
         run: |
           set -x
-          chmod +x ./llvm.sh
-          ./llvm.sh --enable-pgo_gen $LLVM_CCACHE
+          chmod +x ./llvm-static.sh
+          ./llvm-static.sh --enable-pgo_gen $LLVM_CCACHE
       - name: Save llvm-ir cache
         uses: actions/cache/save@main
         if: always()

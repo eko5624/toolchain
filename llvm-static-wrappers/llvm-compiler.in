@@ -1,0 +1,58 @@
+#!/bin/bash
+
+CLANG_COMPILER="@clang_compiler@"
+TARGET_CPU="@target_cpu@"
+TARGET_ARCH="@target_arch@"
+GCC_ARCH="@gcc_arch@"
+
+DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && cd .. && pwd)
+PROG=$DIR/bin/$CLANG_COMPILER
+FLAGS="$FLAGS -target ${TARGET_CPU}-pc-windows-gnu"
+FLAGS="$FLAGS --sysroot $DIR/${TARGET_ARCH}"
+FLAGS="$FLAGS -fuse-ld=lld --ld-path=${TARGET_ARCH}-ld"
+FLAGS="$FLAGS -Wno-unused-command-line-argument"
+FLAGS="$FLAGS -fno-auto-import -fno-temp-file"
+FLAGS="$FLAGS -DNDEBUG -D__CRT__NO_INLINE"
+FLAGS="$FLAGS -fno-builtin-sin -fno-builtin-sinf -fno-builtin-cos -fno-builtin-cosf -fno-builtin-sinl -fno-builtin-cosl"
+
+if [ "${TARGET_CPU}" == "aarch64" ]; then
+    ARCH_FLAGS="-mcpu=${GCC_ARCH} -mtune=generic"
+else
+    ARCH_FLAGS="-march=${GCC_ARCH} -mtune=generic"
+fi
+
+if [ "$NO_CONFLTO" == "1" ]; then
+    SKIP_OPT="-g0 -O0 -fno-lto -fno-data-sections -fno-function-sections"
+else
+    FLAGS="$FLAGS -mguard=cf -gcodeview -gno-codeview-command-line -O3 -fsized-deallocation -fnew-infallible -faligned-allocation -fstrict-flex-arrays=3 -fno-math-errno -fno-signed-zeros -fno-trapping-math -ffp-contract=fast -fomit-frame-pointer -fdata-sections -fno-stack-protector -fdata-sections -fslp-vectorize -ftree-vectorize -fvectorize"
+    if [ "$ENABLE_CCACHE" == "ON" ]; then
+        CCACHE="ccache"
+    fi
+    if [ "$GC" != "0" ]; then
+        FLAGS="$FLAGS -ffunction-sections"
+    fi
+    if [ "$GCC_ARCH_HAS_AVX" == "ON" ]; then
+        FLAGS="$FLAGS -Wa,-msse2avx -mno-vzeroupper"
+        if [ "$GCC_ARCH_HAS_AVX512" != "ON" ]; then
+            FLAGS="$FLAGS -mno-gather"
+        fi
+    fi
+    if [ "$HIDE" == "1" ]; then
+        FLAGS="$FLAGS -fvisibility-from-dllstorageclass -fvisibility-dllexport=hidden"
+    fi
+    if [ "$NO_DEBUG" != "1" ]; then
+        FLAGS="$FLAGS -gline-tables-only -fdebug-info-for-profiling"
+    fi  
+    CPU_COUNT=$(grep -c processor /proc/cpuinfo)
+    if [ "$LTO" != "0" ] && [ "$CLANG_PACKAGES_LTO" == "ON" ]; then
+        LTO_FLAGS="-flto=thin"
+        if [ "$LLD_LTO_ALL_THREADS" == "1" ] && [ "$LTO_JOB" != "1" ]; then
+            LTO_FLAGS="$LTO_FLAGS -flto-jobs=$CPU_COUNT"
+        fi
+    fi
+    if [ "$LLVM_ENABLE_PGO" == "GEN" ] || [ "$LLVM_ENABLE_PGO" == "CSGEN" ]; then
+        export LLVM_PROFILE_FILE="$LLVM_PROFILE_DATA_DIR/clang-%m.profraw" #enable profraw output only when NO_CONFLTO!=1
+    fi    
+fi
+
+$CCACHE "$PROG" $LTO_FLAGS $ARCH_FLAGS "$@" $FLAGS $CLANG_FLAGS $SKIP_OPT
