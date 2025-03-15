@@ -37,7 +37,7 @@ curl -OL "https://www.sqlite.org/2024/sqlite-autoconf-3470200.tar.gz"
 tar -xvf sqlite-autoconf-3470200.tar.gz
 rm sqlite*.tar.gz
 cd sqlite-autoconf-3470200
-llvm-bolt $M_CROSS/bin/llvm
+llvm-bolt $M_CROSS/bin/llvm \
   -o $M_CROSS/bin/llvm.instr \
   --instrument \
   --instrumentation-file-append-pid \
