@@ -47,17 +47,26 @@ echo "======================="
 cd $M_CROSS/bin
 ln -s llvm-ar ${_TARGET_ARCH}-ar
 ln -s llvm-ar ${_TARGET_ARCH}-llvm-ar
-ln -s llvm-ar ${_TARGET_ARCH}-ranlib
-ln -s llvm-ar ${_TARGET_ARCH}-llvm-ranlib
-ln -s llvm-ar ${_TARGET_ARCH}-dlltool
+ln -s llvm-ranlib ${_TARGET_ARCH}-ranlib
+ln -s llvm-ranlib ${_TARGET_ARCH}-llvm-ranlib
+ln -s llvm-dlltool ${_TARGET_ARCH}-dlltool
+ln -s llvm-dlltool ${_TARGET_ARCH}-llvm-dlltool
 ln -s llvm-objcopy ${_TARGET_ARCH}-objcopy
-ln -s llvm-objcopy ${_TARGET_ARCH}-strip
+ln -s llvm-objcopy ${_TARGET_ARCH}-llvm-objcopy
+ln -s llvm-strip ${_TARGET_ARCH}-strip
+ln -s llvm-strip ${_TARGET_ARCH}-llvm-strip
 ln -s llvm-size ${_TARGET_ARCH}-size
+ln -s llvm-size ${_TARGET_ARCH}-llvm-size
 ln -s llvm-strings ${_TARGET_ARCH}-strings
+ln -s llvm-strings ${_TARGET_ARCH}-llvm-strings
 ln -s llvm-nm ${_TARGET_ARCH}-nm
+ln -s llvm-nm ${_TARGET_ARCH}-llvm-nm
 ln -s llvm-readelf ${_TARGET_ARCH}-readelf
-ln -s llvm-rc ${_TARGET_ARCH}-windres
+ln -s llvm-readelf ${_TARGET_ARCH}-llvm-readelf
+ln -s llvm-windres ${_TARGET_ARCH}-windres
+ln -s llvm-windres ${_TARGET_ARCH}-llvm-windres
 ln -s llvm-addr2line ${_TARGET_ARCH}-addr2line
+ln -s llvm-addr2line ${_TARGET_ARCH}-llvm-addr2line
 ln -s $(which pkgconf) ${_TARGET_ARCH}-pkg-config
 ln -s $(which pkgconf) ${_TARGET_ARCH}-pkgconf
 
