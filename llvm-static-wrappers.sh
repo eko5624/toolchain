@@ -11,28 +11,19 @@ while [ $# -gt 0 ]; do
         _TARGET_CPU=x86_64
         _TARGET_ARCH=x86_64-w64-mingw32
         _GCC_ARCH="x86-64"
-        _CLANG_CFI=""
-        _LLD_CFI=""
         _LD_M_FLAG="i386pep"
-        _OPT=""
         ;;
     --x86_64_v3)
         _TARGET_CPU=x86_64
         _TARGET_ARCH=x86_64-w64-mingw32
         _GCC_ARCH="x86-64-v3"
-        _CLANG_CFI=" -mguard=cf"
-        _LLD_CFI=" -Xlink=-guard:cf,longjmp -Xlink=-cetcompat"
         _LD_M_FLAG="i386pep"
-        _OPT=" -O3"
         ;;
     --aarch64)
         _TARGET_CPU=aarch64
         _TARGET_ARCH=aarch64-w64-mingw32
         _GCC_ARCH="cortex-a76"
-        _CLANG_CFI=" -mguard=cf"
-        _LLD_CFI=" -Xlink=-guard:cf,longjmp -Xlink=-cetcompat"
         _LD_M_FLAG="arm64pe"
-        _OPT=" -O3"
         ;;
     *)
         echo Unrecognized parameter $1
@@ -76,9 +67,6 @@ replace_env() {
       -e "s|@target_arch@|${_TARGET_ARCH}|g" \
       -e "s|@gcc_arch@|${_GCC_ARCH}|g" \
       -e "s|@driver_mode@|${_DRIVER_MODE}|g" \
-      -e "s|@clang_cfi@|${_CLANG_CFI}|g" \
-      -e "s|@opt@|${_OPT}|g" \
-      -e "s|@linker@|${_LINKER}|g" \
       -i "$1"
 }
 
@@ -90,19 +78,16 @@ for i in clang++ g++ c++ clang gcc as; do
   ${_TARGET_ARCH}-g++|${_TARGET_ARCH}-c++)
       _CLANG_COMPILER="clang++"
       _DRIVER_MODE=" --driver-mode=g++ -pthread"
-      _LINKER=""
       replace_env $M_CROSS/bin/$BASENAME
       ;;
   ${_TARGET_ARCH}-clang++)
       _CLANG_COMPILER="clang++"
       _DRIVER_MODE=" --driver-mode=g++"
-      _LINKER=" -lc++abi"
       replace_env $M_CROSS/bin/$BASENAME
       ;;
   *)
       _CLANG_COMPILER="clang"
       _DRIVER_MODE=""
-      _LINKER=""
       replace_env $M_CROSS/bin/$BASENAME
       ;;
   esac
@@ -110,7 +95,6 @@ done
 
 install -vm755 llvm-ld.in $M_CROSS/bin/${_TARGET_ARCH}-ld
 sed -i "s|@target_arch@|${_TARGET_ARCH}|g" $M_CROSS/bin/${_TARGET_ARCH}-ld
-sed -i "s|@lld_cfi@|${_LLD_CFI}|g" $M_CROSS/bin/${_TARGET_ARCH}-ld
 sed -i "s|@ld_m_flag@|${_LD_M_FLAG}|g" $M_CROSS/bin/${_TARGET_ARCH}-ld
 
 

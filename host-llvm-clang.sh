@@ -13,8 +13,50 @@ M_SOURCE=$M_ROOT/source
 M_BUILD=$M_ROOT/build
 M_CROSS=$M_ROOT/cross
 
+llvm_cflags="-march=native -fno-ident -fno-temp-file -fno-math-errno -ftls-model=local-exec"
+
 PATH="$M_CROSS/bin:$PATH"
 HOST_ARCH="x86_64-unknown-linux-gnu"
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+  --enable-pgo_gen)
+      LLVM_ENABLE_PGO="GEN" #STRING "OFF, GEN, CSGEN, USE"
+      ;;
+  --enable-llvm-thin_lto)
+      LLVM_ENABLE_LTO="Thin" #STRING "OFF, ON, Thin and Full"
+      ;;
+  --enable-llvm-full_lto)
+      LLVM_ENABLE_LTO="Full" #STRING "OFF, ON, Thin and Full"
+      ;;
+  *)
+    echo Unrecognized parameter $1
+    exit 1
+    ;;
+  esac
+  shift
+done
+
+if [ "$LLVM_ENABLE_LTO" == "Thin" ]; then
+    llvm_lto=" -flto=thin -fwhole-program-vtables -fsplit-lto-unit"
+elif [ "$LLVM_ENABLE_LTO" == "Full" ]; then
+    llvm_lto=" -flto=full -fwhole-program-vtables -fsplit-lto-unit"
+fi
+
+if [ "$LLVM_ENABLE_PGO" == "GEN" ] || [ "$LLVM_ENABLE_PGO" == "CSGEN" ]; then
+    LLVM_PROFILE_DATA_DIR="$PREFIX/profiles" #PATH "Default profile generation directory"
+elif [ "$LLVM_ENABLE_PGO" == "USE" ]; then
+    PREFIX=$M_ROOT/llvm_pgo
+    LLVM_PROFDATA_FILE=$M_ROOT/llvm.profdata
+fi
+
+if [ "$LLVM_ENABLE_PGO" == "GEN" ]; then
+   llvm_pgo=" -fprofile-generate=${LLVM_PROFILE_DATA_DIR} -fprofile-update=atomic -mllvm -vp-counters-per-site=8"
+elif [ "$LLVM_ENABLE_PGO" == "CSGEN" ]; then
+   llvm_pgo=" -fcs-profile-generate=${LLVM_PROFILE_DATA_DIR} -fprofile-update=atomic -mllvm -vp-counters-per-site=8 -fprofile-use=${LLVM_PROFDATA_FILE}"
+elif [ "$LLVM_ENABLE_PGO" == "USE" ]; then
+   llvm_pgo=" -fprofile-use=${LLVM_PROFDATA_FILE}"
+fi
 
 mkdir -p $M_SOURCE
 mkdir -p $M_BUILD
@@ -36,30 +78,28 @@ echo "building llvm-compiler-rt-builtin"
 echo "======================="
 cd $M_BUILD
 rm -rf builtins-build && mkdir builtins-build
-cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B$M_BUILD/builtins-build \
+NO_CONFLTO=1 cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B$M_BUILD/builtins-build \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX="$(clang --print-resource-dir)" \
   -DCMAKE_C_COMPILER=clang \
   -DCMAKE_CXX_COMPILER=clang++ \
   -DCMAKE_AR=$M_CROSS/bin/llvm-ar \
   -DCMAKE_RANLIB=$M_CROSS/bin/llvm-ranlib \
-  -DCMAKE_C_COMPILER_WORKS=1 \
-  -DCMAKE_CXX_COMPILER_WORKS=1 \
+  -DCMAKE_C_COMPILER_WORKS=ON \
+  -DCMAKE_CXX_COMPILER_WORKS=ON \
   -DCMAKE_SYSTEM_NAME=Linux \
   -DCMAKE_C_COMPILER_TARGET=${HOST_ARCH} \
   -DCMAKE_CXX_COMPILER_TARGET=${HOST_ARCH} \
   -DCMAKE_ASM_COMPILER_TARGET=${HOST_ARCH} \
   -DLLVM_DEFAULT_TARGET_TRIPLE=${HOST_ARCH} \
+  -DCMAKE_DISABLE_FIND_PACKAGE_LLVM=ON \
+  -DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON \
+  -DCOMPILER_RT_USE_BUILTINS_LIBRARY=ON \
+  -DCOMPILER_RT_INCLUDE_TESTS=OFF \
+  -DCOMPILER_RT_EXCLUDE_ATOMIC_BUILTIN=OFF \
   -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON \
-  -DCOMPILER_RT_DEFAULT_TARGET_ONLY=TRUE \
-  -DCOMPILER_RT_USE_BUILTINS_LIBRARY=TRUE \
-  -DCOMPILER_RT_BUILD_BUILTINS=TRUE \
-  -DCOMPILER_RT_INCLUDE_TESTS=FALSE \
-  -DLLVM_CONFIG_PATH='' \
-  -DCMAKE_FIND_ROOT_PATH=$M_CROSS \
-  -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
-  -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
-  -DSANITIZER_CXX_ABI=libc++
+  -DCOMPILER_RT_HAS_FNO_LTO_FLAG=OFF \
+  -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY
 cmake --build builtins-build -j$MJOBS
 cmake --install builtins-build
 
@@ -72,38 +112,48 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/runtimes -B$M_BUILD/libcxx-build \
   -DCMAKE_INSTALL_PREFIX=$M_CROSS \
   -DCMAKE_C_COMPILER=clang \
   -DCMAKE_CXX_COMPILER=clang++ \
+  -DCMAKE_ASM_COMPILER=clang \
+  -DCMAKE_C_COMPILER_WORKS=ON \
+  -DCMAKE_CXX_COMPILER_WORKS=ON \
+  -DCMAKE_ASM_COMPILER_WORKS=ON \
+  -DCMAKE_DISABLE_FIND_PACKAGE_LLVM=ON \
+  -DCMAKE_DISABLE_FIND_PACKAGE_Clang=ON \
   -DCMAKE_SYSTEM_NAME=Linux \
   -DCMAKE_AR=$M_CROSS/bin/llvm-ar \
   -DCMAKE_RANLIB=$M_CROSS/bin/llvm-ranlib \
-  -DCMAKE_C_COMPILER_WORKS=1 \
-  -DCMAKE_CXX_COMPILER_WORKS=1 \
+  -DCMAKE_C_COMPILER_WORKS=ON \
+  -DCMAKE_CXX_COMPILER_WORKS=ON \
   -DCMAKE_C_COMPILER_TARGET=${HOST_ARCH} \
   -DCMAKE_CXX_COMPILER_TARGET=${HOST_ARCH} \
   -DCMAKE_ASM_COMPILER_TARGET=${HOST_ARCH} \
   -DLLVM_DEFAULT_TARGET_TRIPLE=${HOST_ARCH} \
   -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON \
   -DLLVM_ENABLE_RUNTIMES="libunwind;libcxxabi;libcxx" \
-  -DLLVM_PATH=$M_SOURCE/llvm-project/llvm \
-  -DLIBUNWIND_USE_COMPILER_RT=TRUE \
+  -DLIBUNWIND_USE_COMPILER_RT=ON \
   -DLIBUNWIND_ENABLE_SHARED=OFF \
   -DLIBUNWIND_ENABLE_STATIC=ON \
   -DLIBCXX_USE_COMPILER_RT=ON \
   -DLIBCXX_ENABLE_SHARED=OFF \
   -DLIBCXX_ENABLE_STATIC=ON \
-  -DLIBCXX_ENABLE_STATIC_ABI_LIBRARY=TRUE \
+  -DLIBCXX_ENABLE_STATIC_ABI_LIBRARY=ON \
+  -DLIBCXX_INSTALL_MODULES=OFF \
   -DLIBCXX_CXX_ABI=libcxxabi \
-  -DLIBCXX_LIBDIR_SUFFIX='' \
-  -DLIBCXX_INCLUDE_TESTS=FALSE \
-  -DLIBCXXABI_INCLUDE_TESTS=FALSE \
-  -DLIBUNWIND_INCLUDE_TESTS=FALSE \
-  -DLIBCXX_ENABLE_ABI_LINKER_SCRIPT=FALSE \
+  -DLIBCXX_INCLUDE_TESTS=OFF \
+  -DLIBCXXABI_INCLUDE_TESTS=OFF \
+  -DLIBUNWIND_INCLUDE_TESTS=OFF \
+  -DLIBCXX_ENABLE_ABI_LINKER_SCRIPT=OFF \
   -DLIBCXXABI_USE_COMPILER_RT=ON \
   -DLIBCXXABI_USE_LLVM_UNWINDER=ON \
   -DLIBCXXABI_ENABLE_SHARED=OFF \
-  -DLIBCXXABI_LIBDIR_SUFFIX='' \
-  -DCMAKE_C_FLAGS="-pipe -ffp-contract=fast -ftls-model=local-exec -flto=thin -fsplit-lto-unit -fwhole-program-vtables -fdata-sections -ffunction-sections" \
-  -DCMAKE_CXX_FLAGS="-pipe -ffp-contract=fast -ftls-model=local-exec -flto=thin -fsplit-lto-unit -fwhole-program-vtables -fdata-sections -ffunction-sections" \
-  -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=lld -Xlinker -s -Xlinker --icf=all -Xlinker --gc-sections"
+  -DLIBUNWIND_INCLUDE_DOCS=OFF \
+  -DLIBCXX_INCLUDE_DOCS=OFF \
+  -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON \
+  -DLIBCXXABI_ENABLE_ASSERTIONS=OFF \
+  -DLIBUNWIND_ENABLE_ASSERTIONS=OFF \
+  -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY \
+  -DCMAKE_C_FLAGS="-DMI_DEFAULT_ALLOW_LARGE_OS_PAGES=1 -DMI_DEFAULT_ARENA_EAGER_COMMIT=1 -DMI_DEBUG=0 ${llvm_cflags}${llvm_lto}${llvm_pgo}" \
+  -DCMAKE_CXX_FLAGS="-DMI_DEFAULT_ALLOW_LARGE_OS_PAGES=1 -DMI_DEFAULT_ARENA_EAGER_COMMIT=1 -DMI_DEBUG=0 ${llvm_cflags}${llvm_lto}${llvm_pgo}" \
+  -DCMAKE_ASM_FLAGS="-DMI_DEFAULT_ALLOW_LARGE_OS_PAGES=1 -DMI_DEFAULT_ARENA_EAGER_COMMIT=1 -DMI_DEBUG=0 ${llvm_cflags}${llvm_lto}${llvm_pgo}"
 cmake --build libcxx-build -j$MJOBS
 cmake --install libcxx-build
 
@@ -116,26 +166,40 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt -B$M_BUILD/compiler-rt-build
   -DCMAKE_INSTALL_PREFIX="$(clang --print-resource-dir)" \
   -DCMAKE_C_COMPILER=clang \
   -DCMAKE_CXX_COMPILER=clang++ \
+  -DCMAKE_ASM_COMPILER=clang \
+  -DCMAKE_C_COMPILER_WORKS=ON \
+  -DCMAKE_CXX_COMPILER_WORKS=ON \
+  -DCMAKE_ASM_COMPILER_WORKS=ON \
   -DCMAKE_AR=$M_CROSS/bin/llvm-ar \
   -DCMAKE_RANLIB=$M_CROSS/bin/llvm-ranlib \
-  -DCMAKE_C_COMPILER_WORKS=1 \
-  -DCMAKE_CXX_COMPILER_WORKS=1 \
+  -DCMAKE_C_COMPILER_WORKS=ON \
+  -DCMAKE_CXX_COMPILER_WORKS=ON \
   -DCMAKE_SYSTEM_NAME=Linux \
   -DCMAKE_C_COMPILER_TARGET=${HOST_ARCH} \
   -DCMAKE_CXX_COMPILER_TARGET=${HOST_ARCH} \
   -DCMAKE_ASM_COMPILER_TARGET=${HOST_ARCH} \
   -DLLVM_DEFAULT_TARGET_TRIPLE=${HOST_ARCH} \
-  -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON \
-  -DCOMPILER_RT_DEFAULT_TARGET_ONLY=TRUE \
-  -DCOMPILER_RT_USE_BUILTINS_LIBRARY=TRUE \
-  -DCOMPILER_RT_BUILD_BUILTINS=FALSE \
-  -DCOMPILER_RT_INCLUDE_TESTS=FALSE \
-  -DLLVM_CONFIG_PATH='' \
-  -DCMAKE_FIND_ROOT_PATH=$M_CROSS \
-  -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
-  -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
+  -DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON \
+  -DCOMPILER_RT_USE_BUILTINS_LIBRARY=ON \
+  -DCOMPILER_RT_BUILD_BUILTINS=OFF \
+  -DCOMPILER_RT_INCLUDE_TESTS=OFF \
   -DSANITIZER_CXX_ABI=libc++ \
-  -DCMAKE_EXE_LINKER_FLAGS_INIT='-lc++abi' \
-  -DCOMPILER_RT_BUILD_SANITIZERS=OFF
+  -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON \
+  -DCOMPILER_RT_BUILD_SANITIZERS=OFF \
+  -DCOMPILER_RT_BUILD_CTX_PROFILE=OFF \
+  -DCOMPILER_RT_BUILD_XRAY=OFF \
+  -DCOMPILER_RT_BUILD_LIBFUZZER=OFF \
+  -DCOMPILER_RT_BUILD_MEMPROF=OFF \
+  -DCOMPILER_RT_BUILD_ORC=OFF \
+  -DCOMPILER_RT_HAS_UBSAN=OFF \
+  -DCOMPILER_RT_HAS_VERSION_SCRIPT=OFF \
+  -DCOMPILER_RT_TARGET_HAS_ATOMICS=ON \
+  -DCOMPILER_RT_TARGET_HAS_FCNTL_LCK=ON \
+  -DCOMPILER_RT_TARGET_HAS_FLOCK=ON \
+  -DCOMPILER_RT_TARGET_HAS_UNAME=ON \
+  -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY \
+  -DCMAKE_C_FLAGS="-DMI_DEFAULT_ALLOW_LARGE_OS_PAGES=1 -DMI_DEFAULT_ARENA_EAGER_COMMIT=1 -DMI_DEBUG=0 ${llvm_cflags}${llvm_lto}${llvm_pgo}" \
+  -DCMAKE_CXX_FLAGS="-DMI_DEFAULT_ALLOW_LARGE_OS_PAGES=1 -DMI_DEFAULT_ARENA_EAGER_COMMIT=1 -DMI_DEBUG=0 ${llvm_cflags}${llvm_lto}${llvm_pgo}" \
+  -DCMAKE_ASM_FLAGS="-DMI_DEFAULT_ALLOW_LARGE_OS_PAGES=1 -DMI_DEFAULT_ARENA_EAGER_COMMIT=1 -DMI_DEBUG=0 ${llvm_cflags}${llvm_lto}${llvm_pgo}"
 cmake --build compiler-rt-build -j$MJOBS
 cmake --install compiler-rt-build

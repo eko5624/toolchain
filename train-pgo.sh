@@ -17,8 +17,8 @@ M_BUILD=$M_ROOT/build
 M_CROSS=$M_ROOT/cross
 PACKAGE_ROOT=$M_ROOT/package
 M_HOST=$M_ROOT/host
-ORIG_PATH="$M_HOST/bin:/usr/local/fuchsia-clang/bin:$PATH"
-PATH="$M_CROSS/bin:$ORIG_PATH"
+O_PATH="$M_HOST/bin:/usr/local/fuchsia-clang/bin:$PATH"
+PATH="$M_CROSS/bin:$O_PATH"
 LLVM_PROFILE_FILE="/dev/null"
 
 while [ $# -gt 0 ]; do
@@ -77,9 +77,9 @@ mv ../spirv-tools third_party 2>/dev/null >/dev/null
 mv ../glslang third_party 2>/dev/null >/dev/null
 cd $M_BUILD
 mkdir shaderc-build
-LTO_JOB=1 NO_CONFLTO=1 cmake -G Ninja -H$M_SOURCE/shaderc -B$M_BUILD/shaderc-build \
+NO_CONFLTO=1 cmake -G Ninja -H$M_SOURCE/shaderc -B$M_BUILD/shaderc-build \
   -DCMAKE_INSTALL_PREFIX=$PACKAGE_ROOT/shaderc \
-  -DCMAKE_TOOLCHAIN_FILE=$M_SOURCE/shaderc/cmake/linux-mingw-toolchain.cmake \
+  -DCMAKE_TOOLCHAIN_FILE=$TOP_DIR/toolchain.cmake \
   -DCMAKE_BUILD_TYPE=Release \
   -DSHADERC_SKIP_TESTS=ON \
   -DSHADERC_SKIP_SPVC=ON \
@@ -91,12 +91,14 @@ LTO_JOB=1 NO_CONFLTO=1 cmake -G Ninja -H$M_SOURCE/shaderc -B$M_BUILD/shaderc-bui
   -DENABLE_GLSLANG_BINARIES=OFF \
   -DSPIRV_TOOLS_BUILD_STATIC=ON \
   -DSPIRV_TOOLS_LIBRARY_TYPE=STATIC \
+  -DDISABLE_RTTI=ON \
+  -DDISABLE_EXCEPTIONS=ON \
   -DMINGW_COMPILER_PREFIX="x86_64-w64-mingw32"
-LTO_JOB=1 cmake --build shaderc-build -j$MJOBS
+ninja -C shaderc-build libshaderc_combined.a shaderc_combined-pkg-config
 rm -rf $PACKAGE_ROOT/shaderc
 unset LLVM_ENABLE_PGO
 
 echo "merging profraw to profdata"
 echo "======================="
-PATH=$ORIG_PATH llvm-profdata merge $M_CROSS/profiles/*.profraw -o $M_ROOT/llvm.profdata
+PATH=$O_PATH llvm-profdata merge $M_CROSS/profiles/*.profraw -o $M_ROOT/llvm.profdata
 echo "... Done"

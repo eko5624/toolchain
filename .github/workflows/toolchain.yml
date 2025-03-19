@@ -75,7 +75,7 @@ jobs:
           ./cross-llvm-clang.sh $PGO --x86_64
           if [ ${{ inputs.pgo }} == 'true' ]; then
             chmod +x ./host-llvm-clang.sh
-            ./host-llvm-clang.sh
+            ./host-llvm-clang.sh  --enable-llvm-thin_lto --enable-pgo_gen
           fi
       - name: Train bolt with sqlite
         if: ${{ inputs.pgo }}

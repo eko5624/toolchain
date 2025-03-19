@@ -16,7 +16,7 @@ M_SOURCE=$M_ROOT/source
 M_BUILD=$M_ROOT/build
 M_CROSS=$M_ROOT/cross
 M_HOST=$M_ROOT/host
-ORIG_PATH="$M_HOST/bin:/usr/local/fuchsia-clang/bin:$PATH"
+O_PATH="$M_HOST/bin:/usr/local/fuchsia-clang/bin:$PATH"
 PATH="$M_CROSS/bin:$PATH"
 LLVM_ENABLE_PGO="OFF" #STRING "OFF, GEN, CSGEN, USE"
 LLVM_PROFILE_FILE="/dev/null"
@@ -79,14 +79,20 @@ cd $M_SOURCE
 git clone https://github.com/microsoft/cppwinrt.git --branch master
 cd $M_BUILD
 mkdir cppwinrt-build
-NO_CONFLTO=1 PATH=$ORIG_PATH cmake -G Ninja -H$M_SOURCE/cppwinrt -B$M_BUILD/cppwinrt-build \
+NO_CONFLTO=1 PATH=$O_PATH cmake -G Ninja -H$M_SOURCE/cppwinrt -B$M_BUILD/cppwinrt-build \
   -DCMAKE_BUILD_TYPE=Release \
   -DBUILD_SHARED_LIBS=OFF \
   -DCMAKE_INSTALL_PREFIX=$M_CROSS \
   -DCMAKE_C_COMPILER=clang \
-  -DCMAKE_CXX_COMPILER=clang++
-ninja -C cppwinrt-build
-ninja -C cppwinrt-build install
+  -DCMAKE_CXX_COMPILER=clang++ \
+  -DCMAKE_ASM_COMPILER=clang \
+  -DCMAKE_C_COMPILER_WORKS=ON \
+  -DCMAKE_CXX_COMPILER_WORKS=ON \
+  -DCMAKE_ASM_COMPILER_WORKS=ON
+cmake --build cppwinrt-build
+#ninja -C cppwinrt-build
+#ninja -C cppwinrt-build install
+cmake --install cppwinrt-build
 curl -L https://github.com/microsoft/windows-rs/raw/master/crates/libs/bindgen/default/Windows.winmd -o cppwinrt-build/Windows.winmd
 cppwinrt -in cppwinrt-build/Windows.winmd -out $M_CROSS/${_TARGET_ARCH}/include
 
@@ -95,9 +101,9 @@ echo "======================="
 cd $M_BUILD
 mkdir gendef-build
 cd gendef-build
-NO_CONFLTO=1 $M_SOURCE/mingw-w64/mingw-w64-tools/gendef/configure --prefix=$M_CROSS
+NO_CONFLTO=1 PATH=$O_PATH $M_SOURCE/mingw-w64/mingw-w64-tools/gendef/configure --prefix=$M_CROSS
 make -j$MJOBS
-make install-strip
+make install
 
 echo "building mingw-w64-headers"
 echo "======================="
@@ -112,7 +118,7 @@ $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
   --with-default-win32-winnt=0x601 \
   --with-default-msvcrt=ucrt
 make -j$MJOBS
-make install-strip
+make install
 
 echo "building mingw-w64-crt"
 echo "======================="
@@ -131,7 +137,7 @@ NO_CONFLTO=1 $M_SOURCE/mingw-w64/mingw-w64-crt/configure \
   --enable-cfguard \
   --disable-dependency-tracking
 make -j$MJOBS LTO=0 GC=0
-make install LTO=0 GC=0
+make install
 # Create empty dummy archives, to avoid failing when the compiler driver
 # adds -lssp -lssh_nonshared when linking.
 llvm-ar rcs $M_CROSS/${_TARGET_ARCH}/lib/libssp.a
@@ -148,7 +154,7 @@ NO_CONFLTO=1 $M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
   --disable-shared \
   --enable-static
 make -j$MJOBS LTO=0 GC=0
-make install LTO=0 GC=0
+make install
 
 echo "building llvm-compiler-rt-builtin"
 echo "======================="
@@ -162,23 +168,22 @@ NO_CONFLTO=1 cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B
   -DCMAKE_SYSTEM_NAME=Windows \
   -DCMAKE_AR=$M_CROSS/bin/llvm-ar \
   -DCMAKE_RANLIB=$M_CROSS/bin/llvm-ranlib \
-  -DCMAKE_C_COMPILER_WORKS=1 \
-  -DCMAKE_CXX_COMPILER_WORKS=1 \
+  -DCMAKE_C_COMPILER_WORKS=ON \
+  -DCMAKE_CXX_COMPILER_WORKS=ON \
   -DCMAKE_C_COMPILER_TARGET=${_TARGET_CPU}-pc-windows-gnu \
+  -DCMAKE_DISABLE_FIND_PACKAGE_LLVM=ON \
+  -DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON \
+  -DCOMPILER_RT_USE_BUILTINS_LIBRARY=ON \
+  -DCOMPILER_RT_INCLUDE_TESTS=OFF \
+  -DCOMPILER_RT_EXCLUDE_ATOMIC_BUILTIN=OFF \
   -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON \
-  -DCOMPILER_RT_DEFAULT_TARGET_ONLY=TRUE \
-  -DCOMPILER_RT_USE_BUILTINS_LIBRARY=TRUE \
-  -DCOMPILER_RT_BUILD_BUILTINS=TRUE \
-  -DCOMPILER_RT_INCLUDE_TESTS=FALSE \
-  -DCOMPILER_RT_EXCLUDE_ATOMIC_BUILTIN=FALSE \
-  -DLLVM_CONFIG_PATH='' \
+  -DCOMPILER_RT_HAS_FNO_LTO_FLAG=OFF \
+  -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY \
   -DCMAKE_FIND_ROOT_PATH=$M_CROSS/${_TARGET_ARCH} \
   -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
-  -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
-  -DSANITIZER_CXX_ABI=libc++
-LTO=0 ninja -j$MJOBS -C builtins-build
-cp builtins-build/lib/${_TARGET_CPU}-pc-windows-gnu/libclang* $M_CROSS/${_TARGET_ARCH}/lib
-LTO=0 ninja install -C builtins-build
+  -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY
+cmake --build builtins-build -j$MJOBS
+LTO=0 cmake --install builtins-build
 
 echo "building llvm-libcxx"
 echo "======================="
@@ -192,32 +197,37 @@ NO_CONFLTO=1 cmake -G Ninja -H$M_SOURCE/llvm-project/runtimes -B$M_BUILD/libcxx-
   -DCMAKE_SYSTEM_NAME=Windows \
   -DCMAKE_AR=$M_CROSS/bin/llvm-ar \
   -DCMAKE_RANLIB=$M_CROSS/bin/llvm-ranlib \
-  -DCMAKE_C_COMPILER_WORKS=1 \
-  -DCMAKE_CXX_COMPILER_WORKS=1 \
+  -DCMAKE_DISABLE_FIND_PACKAGE_LLVM=ON \
+  -DCMAKE_DISABLE_FIND_PACKAGE_Clang=ON \
+  -DCMAKE_C_COMPILER_WORKS=ON \
+  -DCMAKE_CXX_COMPILER_WORKS=ON \
   -DCMAKE_C_COMPILER_TARGET=${_TARGET_CPU}-pc-windows-gnu \
   -DLLVM_ENABLE_RUNTIMES="libunwind;libcxxabi;libcxx" \
-  -DLLVM_PATH=$M_SOURCE/llvm-project/llvm \
-  -DLIBUNWIND_USE_COMPILER_RT=TRUE \
+  -DLIBUNWIND_USE_COMPILER_RT=ON \
   -DLIBUNWIND_ENABLE_SHARED=OFF \
   -DLIBUNWIND_ENABLE_STATIC=ON \
   -DLIBCXX_USE_COMPILER_RT=ON \
   -DLIBCXX_ENABLE_SHARED=OFF \
   -DLIBCXX_ENABLE_STATIC=ON \
-  -DLIBCXX_ENABLE_STATIC_ABI_LIBRARY=TRUE \
+  -DLIBCXX_INSTALL_MODULES=OFF \
+  -DLIBCXX_ENABLE_STATIC_ABI_LIBRARY=ON \
   -DLIBCXX_CXX_ABI=libcxxabi \
-  -DLIBCXX_LIBDIR_SUFFIX='' \
-  -DLIBCXX_INCLUDE_TESTS=FALSE \
-  -DLIBCXXABI_INCLUDE_TESTS=FALSE \
-  -DLIBUNWIND_INCLUDE_TESTS=FALSE \
-  -DLIBCXX_ENABLE_ABI_LINKER_SCRIPT=FALSE \
+  -DLIBCXX_INCLUDE_TESTS=OFF \
+  -DLIBCXXABI_INCLUDE_TESTS=OFF \
+  -DLIBUNWIND_INCLUDE_TESTS=OFF \
+  -DLIBCXX_INCLUDE_DOCS=OFF \
+  -DLIBCXX_ENABLE_ABI_LINKER_SCRIPT=OFF \
   -DLIBCXX_HAS_WIN32_THREAD_API=ON \
   -DLIBCXXABI_HAS_WIN32_THREAD_API=ON \
   -DLIBCXXABI_USE_COMPILER_RT=ON \
   -DLIBCXXABI_USE_LLVM_UNWINDER=ON \
   -DLIBCXXABI_ENABLE_SHARED=OFF \
-  -DLIBCXXABI_LIBDIR_SUFFIX=''
-LTO=0 ninja -j$MJOBS -C libcxx-build
-LTO=0 ninja install -C libcxx-build
+  -DLIBUNWIND_INCLUDE_DOCS=OFF \
+  -DLIBCXXABI_ENABLE_ASSERTIONS=OFF \
+  -DLIBUNWIND_ENABLE_ASSERTIONS=OFF \
+  -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY
+cmake --build libcxx-build -j$MJOBS
+cmake --install libcxx-build
 cp $M_CROSS/${_TARGET_ARCH}/lib/libc++.a $M_CROSS/${_TARGET_ARCH}/lib/libstdc++.a 
 
 # Remove profraw
