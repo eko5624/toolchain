@@ -69,8 +69,8 @@ jobs:
       - name: Build toolchain
         run: |
           set -x
-          chmod +x ./cross-llvm-wrapper.sh
-          ./cross-llvm-wrapper.sh --x86_64
+          chmod +x ./llvm-static-wrappers.sh
+          ./llvm-static-wrappers.sh --x86_64
           chmod +x ./cross-llvm-clang.sh
           ./cross-llvm-clang.sh $PGO --x86_64
           if [ ${{ inputs.pgo }} == 'true' ]; then
@@ -151,8 +151,8 @@ jobs:
       - name: Build toolchain
         run: |
           set -x
-          chmod +x ./cross-llvm-wrapper.sh
-          ./cross-llvm-wrapper.sh --x86_64_v3
+          chmod +x ./llvm-static-wrappers.sh
+          ./llvm-static-wrappers.sh --x86_64_v3
           chmod +x ./cross-llvm-clang.sh
           ./cross-llvm-clang.sh $PGO --x86_64_v3
       - name: Train bolt with sqlite
@@ -229,8 +229,8 @@ jobs:
       - name: Build toolchain
         run: |
           set -x
-          chmod +x ./cross-llvm-wrapper.sh
-          ./cross-llvm-wrapper.sh --aarch64
+          chmod +x ./llvm-static-wrappers.sh
+          ./llvm-static-wrappers.sh --aarch64
           chmod +x ./cross-llvm-clang.sh
           ./cross-llvm-clang.sh $PGO --aarch64
       - name: Train bolt with sqlite

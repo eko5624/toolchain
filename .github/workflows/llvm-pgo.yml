@@ -79,8 +79,8 @@ jobs:
         if: ${{ steps.llvm-profdata.outputs.cache-matched-key == '' }}
         run: |
           set -x
-          chmod +x ./cross-llvm-wrapper.sh
-          ./cross-llvm-wrapper.sh --x86_64
+          chmod +x ./llvm-static-wrappers.sh
+          ./llvm-static-wrappers.sh --x86_64
           chmod +x ./cross-llvm-clang.sh
           ./cross-llvm-clang.sh --enable-pgo_gen --x86_64
       - name: Train pgo with shaderc
@@ -160,8 +160,8 @@ jobs:
       - name: Build llvm with pgo
         if: ${{ steps.cross-llvm-pgo.outputs.cache-matched-key == '' }}
         run: |
-          chmod +x ./llvm.sh
-          ./llvm.sh --enable-bolt_use --enable-pgo_use $LLVM_LTO $LLVM_CCACHE
+          chmod +x ./llvm-static.sh
+          ./llvm-static.sh --enable-bolt_use --enable-pgo_use $LLVM_LTO $LLVM_CCACHE
       - name: Save cross-llvm-pgo cache
         if: ${{ steps.cross-llvm-pgo.outputs.cache-matched-key == '' }}
         uses: actions/cache/save@main

@@ -82,7 +82,7 @@ replace_env() {
       -i "$1"
 }
 
-cd $TOP_DIR/llvm-wrapper
+cd $TOP_DIR/llvm-static-wrappers
 for i in clang++ g++ c++ clang gcc as; do
   BASENAME=${_TARGET_ARCH}-$i
   install -vm755 llvm-compiler.in $M_CROSS/bin/$BASENAME

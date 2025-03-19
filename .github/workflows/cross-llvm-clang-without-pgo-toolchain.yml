@@ -69,8 +69,8 @@ jobs:
         if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
         run: |
           set -x
-          chmod +x ./llvm.sh
-          ./llvm.sh $LLVM_CCACHE
+          chmod +x ./llvm-static.sh
+          ./llvm-static.sh $LLVM_CCACHE
       - name: Save llvm cache
         uses: actions/cache/save@main
         if: always()
