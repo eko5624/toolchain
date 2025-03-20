@@ -22,6 +22,7 @@ else
     fi
     if [ "$GCC_ARCH_HAS_AVX" == "ON" ]; then
         FLAGS="$FLAGS -mllvm -x86-use-vzeroupper=false"
+    fi    
     if [ "$LLVM_ENABLE_PGO" == "GEN" ] || [ "$LLVM_ENABLE_PGO" == "CSGEN" ]; then
         export LLVM_PROFILE_FILE="$LLVM_PROFILE_DATA_DIR/lld-%m.profraw" #enable profraw output only when NO_CONFLTO!=1
         export LLD_IN_TEST=1 #https://github.com/llvm/llvm-project/issues/52861
