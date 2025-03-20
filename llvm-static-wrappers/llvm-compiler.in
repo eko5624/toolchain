@@ -13,7 +13,7 @@ FLAGS="$FLAGS$DRIVER_MODE --sysroot $DIR/${TARGET_ARCH}"
 FLAGS="$FLAGS -fuse-ld=lld --ld-path=${TARGET_ARCH}-ld"
 FLAGS="$FLAGS -Wno-unused-command-line-argument"
 FLAGS="$FLAGS -fno-auto-import -fno-temp-file"
-FLAGS="$FLAGS -DNDEBUG -D__CRT__NO_INLINE"
+FLAGS="$FLAGS -D_WIN32_WINNT=0x0A00 -DWINVER=0x0A00 -DNDEBUG -D__CRT__NO_INLINE"
 FLAGS="$FLAGS -fno-builtin-sin -fno-builtin-sinf -fno-builtin-cos -fno-builtin-cosf -fno-builtin-sinl -fno-builtin-cosl"
 
 if [ "${TARGET_CPU}" == "aarch64" ]; then
