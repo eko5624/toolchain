@@ -5,7 +5,6 @@ PROG=$DIR/bin/ld.lld
 
 TARGET_ARCH="@target_arch@"
 LD_M_FLAG="@ld_m_flag@"
-TARGET=${TARGET_ARCH}
 POLICY="cache_size_bytes=1g:prune_interval=1m"
 FLAGS="-m ${LD_M_FLAG}"
 FLAGS="$FLAGS --no-insert-timestamp --major-os-version=10 --minor-os-version=0 --major-subsystem-version=6 --minor-subsystem-version=2 --file-alignment=4096 --disable-auto-import --disable-runtime-pseudo-reloc -mllvm -disable-auto-upgrade-debug-info"
@@ -23,7 +22,7 @@ else
     fi
     if [ "$GCC_ARCH_HAS_AVX" == "ON" ]; then
         FLAGS="$FLAGS -mllvm -x86-use-vzeroupper=false"
-    if [ "LLVM_ENABLE_PGO" == "GEN" ] || [ "LLVM_ENABLE_PGO" == "CSGEN" ]; then
+    if [ "$LLVM_ENABLE_PGO" == "GEN" ] || [ "$LLVM_ENABLE_PGO" == "CSGEN" ]; then
         export LLVM_PROFILE_FILE="$LLVM_PROFILE_DATA_DIR/lld-%m.profraw" #enable profraw output only when NO_CONFLTO!=1
         export LLD_IN_TEST=1 #https://github.com/llvm/llvm-project/issues/52861
     fi
