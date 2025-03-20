@@ -19,8 +19,8 @@ M_INSTALL=$M_ROOT/install
 M_HOST=$M_ROOT/host
 PREFIX=$M_CROSS
 
-llvm_cflags="-march=native -fno-ident -fno-temp-file -fno-math-errno -ftls-model=local-exec"
-
+#llvm_cflags="-march=native -fno-ident -fno-temp-file -fno-math-errno -ftls-model=local-exec"
+llvm_cflags=""
 PATH="$M_HOST/bin:/usr/local/fuchsia-clang/bin:$PATH"
 LLVM_PROFILE_FILE="/dev/null"
 LLVM_ENABLE_LTO="OFF" #STRING "OFF, ON, Thin and Full"
