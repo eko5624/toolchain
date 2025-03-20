@@ -33,6 +33,7 @@ while [ $# -gt 0 ]; do
     shift
 done
 
+
 echo "installing llvm-wrappers"
 echo "======================="
 cd $M_CROSS/bin
@@ -97,5 +98,5 @@ install -vm755 llvm-ld.in $M_CROSS/bin/${_TARGET_ARCH}-ld
 sed -i "s|@target_arch@|${_TARGET_ARCH}|g" $M_CROSS/bin/${_TARGET_ARCH}-ld
 sed -i "s|@ld_m_flag@|${_LD_M_FLAG}|g" $M_CROSS/bin/${_TARGET_ARCH}-ld
 
-
+cat $M_CROSS/bin/${_TARGET_ARCH}-ld
 
