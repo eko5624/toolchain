@@ -62,11 +62,11 @@ echo "======================="
 cd $M_SOURCE
 
 #llvm
-#git clone https://github.com/llvm/llvm-project.git --branch release/19.x
+#git clone https://github.com/llvm/llvm-project.git --branch release/20.x
 if [ ! -d "$M_SOURCE/llvm-project" ]; then
-  git clone https://github.com/llvm/llvm-project.git --branch llvmorg-$VER_LLVM
+  git clone --sparse --filter=tree:0 https://github.com/llvm/llvm-project.git --branch llvmorg-$VER_LLVM
   cd llvm-project
-  git sparse-checkout set --no-cone '/*' '!*/test' '!/lldb' '!/mlir' '!/clang-tools-extra' '!/polly' '!/libc' '!/flang'
+  git sparse-checkout set --no-cone '/*' '!*/test' '!/lldb' '!/mlir' '!/clang-tools-extra' '!/polly' '!/flang'
   cd ..
 fi  
 
@@ -165,19 +165,17 @@ NO_CONFLTO=1 cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B
   -DCMAKE_C_COMPILER_WORKS=1 \
   -DCMAKE_CXX_COMPILER_WORKS=1 \
   -DCMAKE_C_COMPILER_TARGET=${_TARGET_CPU}-pc-windows-gnu \
-  -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON \
   -DCOMPILER_RT_DEFAULT_TARGET_ONLY=TRUE \
   -DCOMPILER_RT_USE_BUILTINS_LIBRARY=TRUE \
   -DCOMPILER_RT_BUILD_BUILTINS=TRUE \
   -DCOMPILER_RT_INCLUDE_TESTS=FALSE \
   -DCOMPILER_RT_EXCLUDE_ATOMIC_BUILTIN=FALSE \
-  -DLLVM_CONFIG_PATH='' \
+  -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=TRUE \
   -DCMAKE_FIND_ROOT_PATH=$M_CROSS/${_TARGET_ARCH} \
   -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
   -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
   -DSANITIZER_CXX_ABI=libc++
 LTO=0 ninja -j$MJOBS -C builtins-build
-cp builtins-build/lib/${_TARGET_CPU}-pc-windows-gnu/libclang* $M_CROSS/${_TARGET_ARCH}/lib
 LTO=0 ninja install -C builtins-build
 
 echo "building llvm-libcxx"
@@ -196,7 +194,6 @@ NO_CONFLTO=1 cmake -G Ninja -H$M_SOURCE/llvm-project/runtimes -B$M_BUILD/libcxx-
   -DCMAKE_CXX_COMPILER_WORKS=1 \
   -DCMAKE_C_COMPILER_TARGET=${_TARGET_CPU}-pc-windows-gnu \
   -DLLVM_ENABLE_RUNTIMES="libunwind;libcxxabi;libcxx" \
-  -DLLVM_PATH=$M_SOURCE/llvm-project/llvm \
   -DLIBUNWIND_USE_COMPILER_RT=TRUE \
   -DLIBUNWIND_ENABLE_SHARED=OFF \
   -DLIBUNWIND_ENABLE_STATIC=ON \
@@ -238,23 +235,18 @@ rm -rf $M_CROSS/profiles/* || true
 #   -DCMAKE_C_COMPILER_WORKS=1 \
 #   -DCMAKE_CXX_COMPILER_WORKS=1 \
 #   -DCMAKE_C_COMPILER_TARGET=${_TARGET_CPU}-pc-windows-gnu \
-#   -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON \
 #   -DCOMPILER_RT_DEFAULT_TARGET_ONLY=TRUE \
 #   -DCOMPILER_RT_USE_BUILTINS_LIBRARY=TRUE \
 #   -DCOMPILER_RT_BUILD_BUILTINS=FALSE \
 #   -DCOMPILER_RT_INCLUDE_TESTS=FALSE \
-#   -DLLVM_CONFIG_PATH='' \
+#   -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=TRUE \
 #   -DCMAKE_FIND_ROOT_PATH=$M_CROSS/${_TARGET_ARCH} \
 #   -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
 #   -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
 #   -DSANITIZER_CXX_ABI=libc++ \
-#   -DCMAKE_EXE_LINKER_FLAGS_INIT='-lc++abi'
+#   -DCMAKE_CXX_FLAGS="-std=c++11" \
+#   -DCMAKE_EXE_LINKER_FLAGS_INIT="-lc++abi"
 # LTO=0 cmake --build compiler-rt-build -j$MJOBS
 # LTO=0 cmake --install compiler-rt-build
-# mkdir -p $M_CROSS/${_TARGET_ARCH}/bin
-# mv $(${_TARGET_ARCH}-clang --print-resource-dir)/lib/${_TARGET_CPU}-pc-windows-gnu/*.dll $M_CROSS/${_TARGET_ARCH}/bin
-
-# # Copy libclang_rt.builtins-x86_64.a to runtime dir
-# cp $M_CROSS/${_TARGET_ARCH}/lib/libclang* $(${_TARGET_ARCH}-gcc -print-runtime-dir)
 
 
