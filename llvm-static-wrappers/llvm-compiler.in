@@ -1,8 +1,7 @@
 #!/bin/bash
 
 CLANG_COMPILER="@clang_compiler@"
-#DRIVER_MODE="@driver_mode@"
-DRIVER_MODE=""
+DRIVER_MODE="@driver_mode@"
 TARGET_CPU="@target_cpu@"
 TARGET_ARCH="@target_arch@"
 GCC_ARCH="@gcc_arch@"
