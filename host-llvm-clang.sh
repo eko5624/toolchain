@@ -68,9 +68,9 @@ cd $M_SOURCE
 #llvm
 #git clone https://github.com/llvm/llvm-project.git --branch llvmorg-$VER_LLVM
 if [ ! -d "$M_SOURCE/llvm-project" ]; then
-  git clone https://github.com/llvm/llvm-project.git --branch llvmorg-$VER_LLVM
+  git clone --sparse --filter=tree:0 https://github.com/llvm/llvm-project.git --branch llvmorg-$VER_LLVM
   cd llvm-project
-  git sparse-checkout set --no-cone '/*' '!*/test' '!/lldb' '!/mlir' '!/clang-tools-extra' '!/polly' '!/libc' '!/flang'
+  git sparse-checkout set --no-cone '/*' '!*/test' '!/lldb' '!/mlir' '!/clang-tools-extra' '!/polly' '!/flang'
   cd ..
 fi
 
