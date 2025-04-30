@@ -455,10 +455,6 @@ make install
 
 echo "building make"
 echo "======================="
-cd $M_SOURCE/make-$VER_MAKE
-# also support triplet ending with mingw32ucrt (version >= 4.3)
-sed -i.bak -e "s/\(mingw32\))/\1*)/" configure
-
 cd $M_BUILD
 mkdir make-build && cd make-build
 $M_SOURCE/make-$VER_MAKE/configure \
@@ -466,11 +462,8 @@ $M_SOURCE/make-$VER_MAKE/configure \
   --target=$MINGW_TRIPLE \
   --prefix=$M_TARGET \
   --program-prefix=mingw32- \
-  --disable-nls
-
-# enable sys/wait.h (version >= 4.4.1)
-echo "#undef HAVE_SYS_WAIT_H" >> $M_SOURCE/make-$VER_MAKE/src/config.h
-echo "#define HAVE_SYS_WAIT_H 1" >> $M_SOURCE/make-$VER_MAKE/src/config.h
+  --disable-nls \
+  CFLAGS="-std=gnu17"
 make -j$MJOBS
 make install
 
@@ -493,7 +486,8 @@ cd $M_SOURCE/yasm-$VER_YASM
 ./configure \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
-  --prefix=$M_TARGET
+  --prefix=$M_TARGET \
+  CFLAGS="-std=gnu17"
 make -j$MJOBS
 make install
 rm -rf $M_TARGET/include/libyasm
