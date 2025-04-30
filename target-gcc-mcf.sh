@@ -85,7 +85,7 @@ curl -L -o curl-win64-mingw.zip 'https://curl.se/windows/latest.cgi?p=win64-ming
 7z x curl*.zip
 
 #pkgconf
-git clone https://github.com/pkgconf/pkgconf --branch pkgconf-$VER_PKGCONF
+git clone https://github.com/pkgconf/pkgconf --branch pkgconf-2.3.0
 
 #windows-default-manifest
 git clone https://sourceware.org/git/cygwin-apps/windows-default-manifest.git
@@ -99,7 +99,8 @@ $M_SOURCE/gmp-$VER_GMP/configure \
   --target=$MINGW_TRIPLE \
   --prefix=$M_BUILD/for_target \
   --enable-static \
-  --disable-shared
+  --disable-shared \
+  CFLAGS="-std=gnu17"
 make -j$MJOBS
 make install
 
@@ -349,15 +350,13 @@ curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0012-Handle-spaces-in-path-for-default-manifest.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0014-gcc-9-branch-clone_function_name_1-Retain-any-stdcall-suffix.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0020-libgomp-Don-t-hard-code-MS-printf-attributes.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0021-PR14940-Allow-a-PCH-to-be-mapped-to-a-different-addr.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0140-gcc-diagnostic-color.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0200-add-m-no-align-vector-insn-option-for-i386.patch
-curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0400-gcc-Make-stupid-AT-T-syntax-not-default.patch
-curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0401-Always-quote-labels-in-Intel-syntax.patch
-curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0402-native-tls.patch
-curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0403-libstdc-Avoid-thread-local-states-for-MCF-thread-mod.patch
-curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/3001-gcc-lto-plugin-fixincludes-gnattools-c-tools-Improve.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/9000-gcc-Make-stupid-AT-T-syntax-not-default.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/9001-Always-quote-labels-in-Intel-syntax.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/9003-libstdc-Avoid-thread-local-states-for-MCF-thread-mod.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/2001-fix-building-rust-on-mingw-w64.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/9002-native-tls.patch
 
 apply_patch_for_gcc() {
   for patch in "$@"; do
@@ -376,8 +375,7 @@ apply_patch_for_gcc \
   0011-Enable-shared-gnat-implib.patch \
   0012-Handle-spaces-in-path-for-default-manifest.patch \
   0014-gcc-9-branch-clone_function_name_1-Retain-any-stdcall-suffix.patch \
-  0020-libgomp-Don-t-hard-code-MS-printf-attributes.patch \
-  0021-PR14940-Allow-a-PCH-to-be-mapped-to-a-different-addr.patch
+  0020-libgomp-Don-t-hard-code-MS-printf-attributes.patch
 
 # Enable diagnostic color under mintty
 # based on https://github.com/BurntSushi/ripgrep/issues/94#issuecomment-261761687
@@ -385,10 +383,10 @@ apply_patch_for_gcc 0140-gcc-diagnostic-color.patch
 
 # XXX: GAS segfaults on i686?!
 apply_patch_for_gcc \
-  0400-gcc-Make-stupid-AT-T-syntax-not-default.patch \
-  0401-Always-quote-labels-in-Intel-syntax.patch \
-  0402-native-tls.patch \
-  0403-libstdc-Avoid-thread-local-states-for-MCF-thread-mod.patch
+  9000-gcc-Make-stupid-AT-T-syntax-not-default.patch \
+  9001-Always-quote-labels-in-Intel-syntax.patch \
+  9002-native-tls.patch \
+  9003-libstdc-Avoid-thread-local-states-for-MCF-thread-mod.patch
 
 
 # workaround for AVX misalignment issue for pass-by-value arguments
@@ -399,8 +397,7 @@ apply_patch_for_gcc \
 # https://github.com/msys2/MINGW-packages/pull/8317#issuecomment-824548411
 apply_patch_for_gcc \
   0200-add-m-no-align-vector-insn-option-for-i386.patch \
-  2001-fix-building-rust-on-mingw-w64.patch \
-  3001-gcc-lto-plugin-fixincludes-gnattools-c-tools-Improve.patch
+  2001-fix-building-rust-on-mingw-w64.patch
 
 # so libgomp DLL gets built despide static libdl
 export lt_cv_deplibs_check_method='pass_all'
@@ -421,7 +418,7 @@ $M_SOURCE/gcc/configure \
   --prefix=$M_TARGET \
   --libexecdir=$M_TARGET/lib \
   --with-native-system-header-dir=$M_TARGET/include \
-  --with-{gmp,mpfr,mpc,isl}=$M_BUILD/for_target \
+  --with-{gmp,mpfr,mpc}=$M_BUILD/for_target \
   --disable-rpath \
   --disable-multilib \
   --disable-dependency-tracking \
@@ -483,10 +480,6 @@ make install
 
 echo "building make"
 echo "======================="
-cd $M_SOURCE/make-$VER_MAKE
-# also support triplet ending with mingw32ucrt (version >= 4.3)
-sed -i.bak -e "s/\(mingw32\))/\1*)/" configure
-
 cd $M_BUILD
 mkdir make-build && cd make-build
 $M_SOURCE/make-$VER_MAKE/configure \
@@ -494,11 +487,8 @@ $M_SOURCE/make-$VER_MAKE/configure \
   --target=$MINGW_TRIPLE \
   --prefix=$M_TARGET \
   --program-prefix=mingw32- \
-  --disable-nls
-
-# enable sys/wait.h (version >= 4.4.1)
-echo "#undef HAVE_SYS_WAIT_H" >> $M_SOURCE/make-$VER_MAKE/src/config.h
-echo "#define HAVE_SYS_WAIT_H 1" >> $M_SOURCE/make-$VER_MAKE/src/config.h
+  --disable-nls \
+  CFLAGS="-std=gnu17"
 make -j$MJOBS
 make install
 
@@ -521,7 +511,8 @@ cd $M_SOURCE/yasm-$VER_YASM
 ./configure \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
-  --prefix=$M_TARGET
+  --prefix=$M_TARGET \
+  CFLAGS="-std=gnu17"
 make -j$MJOBS
 make install
 rm -rf $M_TARGET/include/libyasm

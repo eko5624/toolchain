@@ -86,7 +86,7 @@ curl -L -o curl-win64-mingw.zip 'https://curl.se/windows/latest.cgi?p=win64-ming
 7z x curl*.zip
 
 #pkgconf
-git clone https://github.com/pkgconf/pkgconf --branch pkgconf-$VER_PKGCONF
+git clone https://github.com/pkgconf/pkgconf --branch pkgconf-2.3.0
 
 #windows-default-manifest
 git clone https://sourceware.org/git/cygwin-apps/windows-default-manifest.git
@@ -101,7 +101,8 @@ $M_SOURCE/gmp-$VER_GMP/configure \
   --target=$MINGW_TRIPLE \
   --prefix=$M_BUILD/for_target \
   --enable-static \
-  --disable-shared
+  --disable-shared \
+  CFLAGS="-std=gnu17"
 make -j$MJOBS
 make install
 
@@ -339,7 +340,8 @@ $M_SOURCE/make-$VER_MAKE/configure \
   --target=$MINGW_TRIPLE \
   --prefix=$M_TARGET \
   --program-prefix=mingw32- \
-  --disable-nls
+  --disable-nls \
+  CFLAGS="-std=gnu17"
 make -j$MJOBS
 make install
 
@@ -349,7 +351,8 @@ cd $M_SOURCE/yasm-$VER_YASM
 ./configure \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
-  --prefix=$M_TARGET
+  --prefix=$M_TARGET \
+  CFLAGS="-std=gnu17"
 make -j$MJOBS
 make install
 rm -rf $M_TARGET/include/libyasm
