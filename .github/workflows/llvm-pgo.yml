@@ -199,6 +199,6 @@ jobs:
           curl -u $GITHUB_ACTOR:$GH_TOKEN \
             -X POST -H "Accept: application/vnd.github.v3+json" \
             https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/toolchain.yml/dispatches \
-            -d '{"ref":"main","inputs":{"pgo":"true","llvm_thin_lto":"false","llvm_ccache":"false"}}'
+            -d '{"ref":"19","inputs":{"pgo":"true","llvm_thin_lto":"false","llvm_ccache":"false"}}'
 
             
