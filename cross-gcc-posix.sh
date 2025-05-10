@@ -24,11 +24,9 @@ while [ $# -gt 0 ]; do
     case "$1" in
     --build-x86_64)
         GCC_ARCH="x86-64"
-        unset OPT
         ;;
     --build-x86_64_v3)
         GCC_ARCH="x86-64-v3"
-        OPT=" -O3"
         ;;
     *)
         echo Unrecognized parameter $1
@@ -100,10 +98,7 @@ cd $TOP_DIR/gcc-wrapper
 for i in g++ c++ cpp gcc; do
   BASENAME=x86_64-w64-mingw32-$i
   install -vm755 gcc-compiler.in $M_CROSS/bin/$BASENAME
-  sed -e "s|@GCC_ARCH@|${GCC_ARCH}|g" \
-      -e "s|@opt@|${OPT}|g" \
-      -e "s|@compiler@|$i|g" \
-      -i $M_CROSS/bin/$BASENAME
+  sed -i "s|@compiler@|$i|g" $M_CROSS/bin/$BASENAME
 done
 
 for i in ld ld.bfd; do
@@ -151,6 +146,8 @@ $M_SOURCE/gcc/configure \
   --disable-shared \
   --disable-win32-registry \
   --disable-libstdcxx-pch \
+  --with-arch=${GCC_ARCH} \
+  --with-tune=generic \
   --enable-threads=posix \
   --without-included-gettext \
   --enable-lto \

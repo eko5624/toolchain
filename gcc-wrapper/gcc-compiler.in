@@ -1,8 +1,8 @@
 #!/bin/bash
+
 DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && cd .. && pwd)
 PROG=$DIR/bin/cross-@compiler@
-FLAGS="-march=@GCC_ARCH@ -mtune=generic"
-FLAGS="$FLAGS@opt@"
+FLAGS="$FLAGS -O3"
 FLAGS="$FLAGS -w -Wno-error=incompatible-pointer-types"
 
 if [ "$NO_CONFLTO" == "1" ]; then
