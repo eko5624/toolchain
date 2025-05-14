@@ -24,11 +24,9 @@ while [ $# -gt 0 ]; do
     case "$1" in
     --build-x86_64)
         GCC_ARCH="x86-64"
-        unset OPT
         ;;
     --build-x86_64_v3)
         GCC_ARCH="x86-64-v3"
-        OPT=" -O3"
         ;;
     *)
         echo Unrecognized parameter $1
@@ -100,10 +98,7 @@ cd $TOP_DIR/gcc-wrapper
 for i in g++ c++ cpp gcc; do
   BASENAME=x86_64-w64-mingw32-$i
   install -vm755 gcc-compiler.in $M_CROSS/bin/$BASENAME
-  sed -e "s|@GCC_ARCH@|${GCC_ARCH}|g" \
-      -e "s|@opt@|${OPT}|g" \
-      -e "s|@compiler@|$i|g" \
-      -i $M_CROSS/bin/$BASENAME
+  sed -i "s|@compiler@|$i|g" $M_CROSS/bin/$BASENAME
 done
 
 for i in ld ld.bfd; do
@@ -136,8 +131,14 @@ _gcc_date=$(head -n 34 gcc/DATESTAMP | sed -e 's/.* //' | tr -d '"\n')
 VER=$(printf "%s-%s" "$_gcc_version" "$_gcc_date")
 
 cd $M_BUILD
-mkdir gcc-build
-cd gcc-build
+mkdir gcc-build && cd gcc-build
+curl -OL https://raw.githubusercontent.com/skeeto/w64devkit/refs/heads/master/src/gcc-avx-misaligned.patch
+cd $M_SOURCE/gcc
+# Treat AVX register spills as always unaligned, 
+# eliminating the requirement for -Wa,-muse-unaligned-vector-move when targeting AVX-capable hardware
+# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=54412
+patch -p1 -i $M_BUILD/gcc-build/gcc-avx-misaligned.patch
+cd $M_BUILD/gcc-build
 $M_SOURCE/gcc/configure \
   --target=$MINGW_TRIPLE \
   --prefix=$M_CROSS \
@@ -151,6 +152,8 @@ $M_SOURCE/gcc/configure \
   --disable-shared \
   --disable-win32-registry \
   --disable-libstdcxx-pch \
+  --with-arch=${GCC_ARCH} \
+  --with-tune=generic \
   --enable-threads=posix \
   --without-included-gettext \
   --enable-lto \
