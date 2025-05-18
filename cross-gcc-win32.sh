@@ -150,7 +150,7 @@ $M_SOURCE/gcc/configure \
   --disable-shared \
   --disable-win32-registry \
   --with-arch=${GCC_ARCH} \
-  --with-tune=generic \
+  --with-tune=arrowlake \
   --enable-threads=win32 \
   --enable-libstdcxx-threads=yes \
   --without-included-gettext \
