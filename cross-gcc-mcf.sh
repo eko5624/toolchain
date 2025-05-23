@@ -163,7 +163,7 @@ $M_SOURCE/gcc/configure \
   --disable-nls \
   --disable-win32-registry \
   --with-arch=${GCC_ARCH} \
-  --with-tune=generic \
+  --with-tune=arrowlake \
   --enable-threads=mcf \
   --without-included-gettext \
   --enable-lto \
