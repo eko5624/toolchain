@@ -46,7 +46,7 @@ rustflags = ["-C", "target-cpu=x86-64"]
 
 [target.x86_64-pc-windows-gnullvm]
 linker = "x86_64-w64-mingw32-clang++"
-ar = "x86_64-w64-mingw32--ar"
+ar = "x86_64-w64-mingw32-ar"
 rustflags = ["-C", "target-cpu=x86-64"]
 
 [profile.release]
@@ -65,7 +65,7 @@ rustflags = ["-C", "target-cpu=x86-64-v3"]
 
 [target.x86_64-pc-windows-gnullvm]
 linker = "x86_64-w64-mingw32-clang++"
-ar = "x86_64-w64-mingw32--ar"
+ar = "x86_64-w64-mingw32-ar"
 rustflags = ["-C", "target-cpu=x86-64-v3"]
 
 [profile.release]
