@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   
 jobs:
-  build:
+  build_x86_64:
     runs-on: ubuntu-latest
     container:
       image: docker://ghcr.io/eko5624/archlinux:latest
@@ -23,22 +23,63 @@ jobs:
       - name: Building rust toolchain
         run: |
           chmod +x ./rust.sh
-          ./rust.sh 
+          ./rust.sh --build-x86_64
 
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
 
       - name: Packaging toolchain
         run: |
-          7z a rust-${{ env.date }}.7z rust/*
-          cp rust-${{ env.date }}.7z rust-latest.7z
+          7z a rust-x86_64-${{ env.date }}.7z rust/*
+          cp rust-x86_64-${{ env.date }}.7z rust-x86_64-latest.7z
 
       - name: Delete
         env:
           GH_TOKEN: ${{ github.token }} 
         run: |
           chmod +x ./package-delete.sh
-          ./package-delete.sh rust-latest.7z
+          ./package-delete.sh rust-x86_64-latest.7z
+      - name: Release
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-release.sh
+          ./package-release.sh
+
+  build_x86_64_v3:
+    runs-on: ubuntu-latest
+    container:
+      image: docker://ghcr.io/eko5624/archlinux:latest
+    steps:          
+      - name: Checkout
+        uses: actions/checkout@main
+
+      - name: Setup llvm-clang-pgo toolchain
+        run: |
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
+          tar -xvf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz 2>/dev/null >/dev/null
+          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
+
+      - name: Building rust toolchain
+        run: |
+          chmod +x ./rust.sh
+          ./rust.sh --build-x86_64_v3
+
+      - name: Get current timestamp
+        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
+
+      - name: Packaging toolchain
+        run: |
+          7z a rust-x86_64_v3-${{ env.date }}.7z rust/*
+          cp rust-x86_64_v3-${{ env.date }}.7z rust-x86_64_v3-latest.7z
+
+      - name: Delete
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-delete.sh
+          ./package-delete.sh rust-x86_64_v3-latest.7z
       - name: Release
         continue-on-error: true
         env:
