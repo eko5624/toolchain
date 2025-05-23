@@ -22,8 +22,8 @@ jobs:
 
       - name: Building rust toolchain
         run: |
-          chmod +x ./rust.sh --build-x86_64
-          ./rust.sh
+          chmod +x ./rust.sh
+          ./rust.sh --build-x86_64
 
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
@@ -46,7 +46,7 @@ jobs:
         run: |
           chmod +x ./package-release.sh
           ./package-release.sh
-          
+
   build_x86_64_v3:
     runs-on: ubuntu-latest
     container:
@@ -63,8 +63,8 @@ jobs:
 
       - name: Building rust toolchain
         run: |
-          chmod +x ./rust.sh --build-x86_64_v3
-          ./rust.sh
+          chmod +x ./rust.sh
+          ./rust.sh --build-x86_64_v3
 
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
