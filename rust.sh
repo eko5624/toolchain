@@ -35,41 +35,41 @@ rustup update
 LD_PRELOAD= cargo install cargo-c --profile=release-strip --features=vendored-openssl
 
 if [[ "${GCC_ARCH}" == "x86-64" ]]; then
-	cat <<EOF >$CARGO_HOME/config.toml
-	[net]
-	git-fetch-with-cli = true
+	cat > $CARGO_HOME/config.toml <<EOF
+[net]
+git-fetch-with-cli = true
 
-	[target.x86_64-pc-windows-gnu]
-	linker = "x86_64-w64-mingw32-gcc"
-	ar = "x86_64-w64-mingw32-ar"
-	rustflags = ["-C", "target-cpu=x86-64"]
+[target.x86_64-pc-windows-gnu]
+linker = "x86_64-w64-mingw32-gcc"
+ar = "x86_64-w64-mingw32-ar"
+rustflags = ["-C", "target-cpu=x86-64"]
 
-	[target.x86_64-pc-windows-gnullvm]
-	linker = "x86_64-w64-mingw32-clang++"
-	ar = "x86_64-w64-mingw32--ar"
-	rustflags = ["-C", "target-cpu=x86-64"]
+[target.x86_64-pc-windows-gnullvm]
+linker = "x86_64-w64-mingw32-clang++"
+ar = "x86_64-w64-mingw32--ar"
+rustflags = ["-C", "target-cpu=x86-64"]
 
-	[profile.release]
-	panic = "abort"
-	strip = true
-	EOF
+[profile.release]
+panic = "abort"
+strip = true
+EOF
 elif [[ "${GCC_ARCH}" == "x86-64-v3" ]]; then
-	cat <<EOF >$CARGO_HOME/config.toml
-	[net]
-	git-fetch-with-cli = true
+	cat > $CARGO_HOME/config.toml <<EOF
+[net]
+git-fetch-with-cli = true
 
-	[target.x86_64-pc-windows-gnu]
-	linker = "x86_64-w64-mingw32-gcc"
-	ar = "x86_64-w64-mingw32-ar"
-	rustflags = ["-C", "target-cpu=x86-64-v3"]
+[target.x86_64-pc-windows-gnu]
+linker = "x86_64-w64-mingw32-gcc"
+ar = "x86_64-w64-mingw32-ar"
+rustflags = ["-C", "target-cpu=x86-64-v3"]
 
-	[target.x86_64-pc-windows-gnullvm]
-	linker = "x86_64-w64-mingw32-clang++"
-	ar = "x86_64-w64-mingw32--ar"
-	rustflags = ["-C", "target-cpu=x86-64-v3"]
+[target.x86_64-pc-windows-gnullvm]
+linker = "x86_64-w64-mingw32-clang++"
+ar = "x86_64-w64-mingw32--ar"
+rustflags = ["-C", "target-cpu=x86-64-v3"]
 
-	[profile.release]
-	panic = "abort"
-	strip = true
-	EOF
+[profile.release]
+panic = "abort"
+strip = true
+EOF
 fi	
