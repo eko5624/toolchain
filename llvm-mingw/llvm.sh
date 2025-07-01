@@ -13,9 +13,7 @@ MJOBS=$(grep -c processor /proc/cpuinfo)
 
 M_ROOT=$(pwd)
 M_SOURCE=$M_ROOT/source
-M_CROSS=$M_ROOT/cross
 M_HOST=$M_ROOT/host
-
 PATH="$M_HOST/bin:$PATH"
 
 unset HOST
@@ -26,8 +24,12 @@ INSTRUMENTED=OFF
 
 while [ $# -gt 0 ]; do
     case "$1" in
+    --llvm-only)
+        LLVM_ONLY=1
+        ;;
     --stage1)
         unset CLANG_TOOLS_EXTRA
+        ;;
     --profile)
         PROFILE=1
         WITH_CLANG=1
@@ -60,7 +62,15 @@ while [ $# -gt 0 ]; do
         HOST="${1#*=}"
         ;;
     *)
-        PREFIX="$1"
+        if [ -n "$PREFIX" ]; then
+            if [ -n "$PREFIX_PGO" ]; then
+                echo Unrecognized parameter $1
+                exit 1
+            fi
+            PREFIX_PGO="$1"
+        else
+            PREFIX="$1"
+        fi
         ;;
     esac
     shift
