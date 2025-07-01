@@ -26,47 +26,21 @@ INSTRUMENTED=OFF
 
 while [ $# -gt 0 ]; do
     case "$1" in
-    --with-clang)
+    --stage1)
+        unset CLANG_TOOLS_EXTRA
+    --profile)
+        PROFILE=1
         WITH_CLANG=1
         BUILDDIR="$BUILDDIR-withclang"
-        ;;
-    --thinlto)
-        LTO="thin"
-        BUILDDIR="$BUILDDIR-thinlto"
-        ;;
-    --lto)
-        LTO="full"
-        BUILDDIR="$BUILDDIR-lto"
-        ;;
-    --disable-dylib)
         LINK_DYLIB=OFF
-        ;;
-    --full-llvm)
-        FULL_LLVM=1
-        ;;
-    --host=*)
-        HOST="${1#*=}"
-        ;;
-    --disable-clang-tools-extra)
-        unset CLANG_TOOLS_EXTRA
-        ;;
-    --no-llvm-tool-reuse)
-        NO_LLVM_TOOL_REUSE=1
-        ;;
-    --instrumented|--instrumented=*)
-        INSTRUMENTED="${1#--instrumented}"
-        INSTRUMENTED="${INSTRUMENTED#=}"
         INSTRUMENTED="${INSTRUMENTED:-Frontend}"
         : ${LLVM_PROFILE_DATA_DIR:=/tmp/llvm-profile}
         # A fixed BUILDDIR is set at the end for this case.
         ;;
-    --pgo|--pgo=*)
-        case "$1" in
-        --pgo=*)
-            LLVM_PROFDATA_FILE="${1#--pgo}"
-            LLVM_PROFDATA_FILE="${LLVM_PROFDATA_FILE#=}"
-            ;;
-        esac
+    --pgo)
+        PGO=1
+        WITH_CLANG=1
+        BUILDDIR="$BUILDDIR-withclang"
         LLVM_PROFDATA_FILE="${LLVM_PROFDATA_FILE:-profile.profdata}"
         if [ ! -e "$LLVM_PROFDATA_FILE" ]; then
             echo Profile \"$LLVM_PROFDATA_FILE\" not found
@@ -74,6 +48,16 @@ while [ $# -gt 0 ]; do
         fi
         LLVM_PROFDATA_FILE="$(cd "$(dirname "$LLVM_PROFDATA_FILE")" && pwd)/$(basename "$LLVM_PROFDATA_FILE")"
         BUILDDIR="$BUILDDIR-pgo"
+        ;;
+    --thinlto)
+        LTO="thin"
+        BUILDDIR="$BUILDDIR-thinlto"
+        ;;
+    --full-llvm)
+        FULL_LLVM=1
+        ;;
+    --host=*)
+        HOST="${1#*=}"
         ;;
     *)
         PREFIX="$1"
@@ -83,7 +67,6 @@ while [ $# -gt 0 ]; do
 done
 
 CMAKEFLAGS="$LLVM_CMAKEFLAGS"
-
 if [ -n "$HOST" ]; then
     ARCH="${HOST%%-*}"
     BUILDDIR=$BUILDDIR-$HOST
@@ -136,6 +119,31 @@ else
         CMAKEFLAGS="$CMAKEFLAGS -DLLVM_USE_LINKER=gold"
     fi
 fi
+
+if [ -n "$PROFILE" ]; then
+    export PATH=$PREFIX/bin:$PATH
+    STAGE1_PREFIX=$PREFIX
+    PREFIX=/tmp/dummy-prefix
+elif [ -n "$PGO" ]; then
+    if [ -z "$PREFIX_PGO" ]; then
+        echo Must provide a second destination for a PGO build
+        exit 1
+    fi
+    export PATH=$PREFIX/bin:$PATH
+    STAGE1_PREFIX=$PREFIX
+    PREFIX=$PREFIX_PGO
+
+    if [ -n "$LLVM_ONLY" ] && [ "$PREFIX" != "$STAGE1_PREFIX" ] ; then
+        # Only rebuilding LLVM, not any runtimes. Copy the stage1 toolchain
+        # and rebuild LLVM on top of it.
+        rm -rf $PREFIX
+        mkdir -p "$(dirname "$PREFIX")"
+        cp -a "$STAGE1_PREFIX" "$PREFIX"
+        # Remove the native Linux/macOS runtimes which aren't needed in
+        # the final distribution.
+        rm -rf "$PREFIX"/lib/clang/*/lib/linux
+    fi
+fi    
 
 if [ -n "$LTO" ]; then
     CMAKEFLAGS="$CMAKEFLAGS -DLLVM_ENABLE_LTO=$LTO"
