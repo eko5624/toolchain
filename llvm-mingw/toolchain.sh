@@ -17,14 +17,28 @@ export M_BUILD=$M_ROOT/build
 export MINGW_TRIPLE="x86_64-w64-mingw32"
 
 CFGUARD_FLAGS="--enable-cfguard"
+USE_CFLAGS="-g -O2 -mguard=cf"
 while [ $# -gt 0 ]; do
     case "$1" in
-      
+    --armv7)
+        FLAGS="--disable-lib32 --disable-lib64 --enable-libarm32"
+        ;;
+    --aarch64
+        FLAGS="--disable-lib32 --disable-lib64 --enable-libarm64"
+        ;;
+    --x86_64)
+        FLAGS="--disable-lib32 --enable-lib64"
+        ;;
+    --cppwinrt)
+        CPPWINRT=1
+        ;;
     --enable-cfguard)
         CFGUARD_FLAGS="--enable-cfguard"
+        USE_CFLAGS="-g -O2 -mguard=cf"
         ;;
     --disable-cfguard)
         CFGUARD_FLAGS=
+        USE_CFLAGS="-g -O2"
         ;;
     *)
         PREFIX="$1"
@@ -102,22 +116,24 @@ install -vm755 x86_64-w64-mingw32-gcc $PREFIX/bin/x86_64-w64-mingw32-gcc
 install -vm755 x86_64-w64-mingw32-g++ $PREFIX/bin/x86_64-w64-mingw32-g++
 install -vm755 x86_64-w64-mingw32-c++ $PREFIX/bin/x86_64-w64-mingw32-c++
 
-echo "building cppwinrt"
-echo "======================="
-cd $M_SOURCE
-git clone https://github.com/microsoft/cppwinrt.git --branch master
-cd $M_BUILD
-mkdir cppwinrt-build
-cmake -G Ninja -H$M_SOURCE/cppwinrt -B$M_BUILD/cppwinrt-build \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DBUILD_SHARED_LIBS=OFF \
-  -DCMAKE_INSTALL_PREFIX=$PREFIX \
-  -DCMAKE_C_COMPILER=clang \
-  -DCMAKE_CXX_COMPILER=clang++
-ninja -C cppwinrt-build
-ninja -C cppwinrt-build install
-curl -L https://github.com/microsoft/windows-rs/raw/master/crates/libs/bindgen/default/Windows.winmd -o cppwinrt-build/Windows.winmd
-cppwinrt -in cppwinrt-build/Windows.winmd -out $PREFIX/$MINGW_TRIPLE/include
+if [ -n "$CPPWINRT" ]; then
+    echo "building cppwinrt"
+    echo "======================="
+    cd $M_SOURCE
+    git clone https://github.com/microsoft/cppwinrt.git --branch master
+    cd $M_BUILD
+    mkdir cppwinrt-build
+    cmake -G Ninja -H$M_SOURCE/cppwinrt -B$M_BUILD/cppwinrt-build \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DBUILD_SHARED_LIBS=OFF \
+      -DCMAKE_INSTALL_PREFIX=$PREFIX \
+      -DCMAKE_C_COMPILER=clang \
+      -DCMAKE_CXX_COMPILER=clang++
+    ninja -C cppwinrt-build
+    ninja -C cppwinrt-build install
+    curl -L https://github.com/microsoft/windows-rs/raw/master/crates/libs/bindgen/default/Windows.winmd -o cppwinrt-build/Windows.winmd
+    cppwinrt -in cppwinrt-build/Windows.winmd -out $PREFIX/$MINGW_TRIPLE/include
+fi    
 
 echo "building gendef"
 echo "======================="
@@ -134,7 +150,6 @@ cd $M_BUILD
 mkdir headers-build
 cd headers-build
 $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
-  --host=$MINGW_TRIPLE \
   --prefix=$PREFIX/$MINGW_TRIPLE \
   --enable-sdk=all \
   --enable-idl \
@@ -150,14 +165,11 @@ autoreconf -ivf
 cd $M_BUILD 
 mkdir crt-build
 cd crt-build
-$M_SOURCE/mingw-w64/mingw-w64-crt/configure \
-  --host=$MINGW_TRIPLE \
-  --prefix=$PREFIX/$MINGW_TRIPLE \
+$M_SOURCE/mingw-w64/mingw-w64-crt/configure $FLAGS $CFGUARD_FLAGS \
+  --host=$ARCH-w64-mingw32 \
+  --prefix="$PREFIX/$ARCH-w64-mingw32" \
   --with-sysroot=$PREFIX \
   --with-default-msvcrt=ucrt \
-  --enable-lib64 \
-  --disable-lib32 \
-  --enable-cfguard \
   --disable-dependency-tracking
 make -j$MJOBS GC=0
 make install GC=0
@@ -172,10 +184,12 @@ cd $M_BUILD
 mkdir winpthreads-build
 cd winpthreads-build
 NO_CONFLTO=1 $M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
-  --host=$MINGW_TRIPLE \
-  --prefix=$PREFIX/$MINGW_TRIPLE \
-  --disable-shared \
-  --enable-static
+  --host=$ARCH-w64-mingw32 \
+  --prefix="$PREFIX/$ARCH-w64-mingw32" \
+  --libdir="$PREFIX/$ARCH-w64-mingw32/lib" \
+  --enable-silent-rules \
+  CFLAGS="$USE_CFLAGS" \
+  CXXFLAGS="$USE_CFLAGS"
 make -j$MJOBS GC=0
 make install GC=0
 
