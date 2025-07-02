@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   
 jobs:
-  build_llvm:
+  linux-stage1:
     runs-on: ubuntu-latest
     container:
       image: docker://ghcr.io/eko5624/archlinux:latest
@@ -34,12 +34,17 @@ jobs:
           tar -xvf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz 2>/dev/null >/dev/null
           rm cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
           mv cross host
+      - name: Building llvm
+        run: |
+          if [[ ! "$(ls -A install/llvm-mingw/bin)" ]]; then
+            chmod +x ./llvm-mingw/llvm.sh 
+            ./llvm-mingw/llvm.sh $(pwd)/install/llvm-mingw --stage1
+          fi
       - name: Building toolchain
         run: |
-          if [[ ! "$(ls -A cross/bin)" ]]; then
-            chmod +x ./cross-llvm.sh
-            ./cross-llvm.sh
-          fi
+          chmod +x ./llvm-mingw/toolchain.sh
+          ./llvm-mingw/toolchain.sh
+            ./llvm-mingw/llvm.sh $(pwd)/install/llvm-mingw --stage1
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV  
       - name: Packaging toolchain

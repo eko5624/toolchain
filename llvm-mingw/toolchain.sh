@@ -14,14 +14,29 @@ MJOBS=$(grep -c processor /proc/cpuinfo)
 export M_ROOT=$(pwd)
 export M_SOURCE=$M_ROOT/source
 export M_BUILD=$M_ROOT/build
-export M_CROSS=$M_ROOT/cross
-
 export MINGW_TRIPLE="x86_64-w64-mingw32"
-export PATH="$M_CROSS/bin:$PATH"
 
+CFGUARD_FLAGS="--enable-cfguard"
+while [ $# -gt 0 ]; do
+    case "$1" in
+      
+    --enable-cfguard)
+        CFGUARD_FLAGS="--enable-cfguard"
+        ;;
+    --disable-cfguard)
+        CFGUARD_FLAGS=
+        ;;
+    *)
+        PREFIX="$1"
+        ;;
+    esac
+    shift
+done
+
+export PATH="$PREFIX/bin:$PATH"
 mkdir -p $M_SOURCE
 mkdir -p $M_BUILD
-mkdir -p $M_CROSS/$MINGW_TRIPLE
+mkdir -p $PREFIX/$MINGW_TRIPLE
 
 echo "getting source"
 echo "======================="
@@ -47,12 +62,12 @@ git clone https://github.com/pkgconf/pkgconf --branch pkgconf-$VER_PKGCONF
 echo "stripping llvm"
 echo "======================="
 cd $M_SOURCE/llvm-mingw
-./strip-llvm.sh $M_CROSS
+./strip-llvm.sh $PREFIX
 echo "... Done"
 
 echo "installing wrappers"
 echo "======================="
-cd $M_CROSS/bin
+cd $PREFIX/bin
 ln -s llvm-ar $MINGW_TRIPLE-ar
 ln -s llvm-ar $MINGW_TRIPLE-llvm-ar
 ln -s llvm-ranlib $MINGW_TRIPLE-ranlib
@@ -79,13 +94,13 @@ ln -s $(which pkgconf) $MINGW_TRIPLE-pkg-config
 ln -s $(which pkgconf) $MINGW_TRIPLE-pkgconf
 
 cd $TOP_DIR/llvm-mingw-wrappers
-install -vm755 x86_64-w64-mingw32-as $M_CROSS/bin/x86_64-w64-mingw32-as
-install -vm755 x86_64-w64-mingw32-clang $M_CROSS/bin/x86_64-w64-mingw32-clang
-install -vm755 x86_64-w64-mingw32-clang++ $M_CROSS/bin/x86_64-w64-mingw32-clang++
-install -vm755 x86_64-w64-mingw32-ld $M_CROSS/bin/x86_64-w64-mingw32-ld
-install -vm755 x86_64-w64-mingw32-gcc $M_CROSS/bin/x86_64-w64-mingw32-gcc
-install -vm755 x86_64-w64-mingw32-g++ $M_CROSS/bin/x86_64-w64-mingw32-g++
-install -vm755 x86_64-w64-mingw32-c++ $M_CROSS/bin/x86_64-w64-mingw32-c++
+install -vm755 x86_64-w64-mingw32-as $PREFIX/bin/x86_64-w64-mingw32-as
+install -vm755 x86_64-w64-mingw32-clang $PREFIX/bin/x86_64-w64-mingw32-clang
+install -vm755 x86_64-w64-mingw32-clang++ $PREFIX/bin/x86_64-w64-mingw32-clang++
+install -vm755 x86_64-w64-mingw32-ld $PREFIX/bin/x86_64-w64-mingw32-ld
+install -vm755 x86_64-w64-mingw32-gcc $PREFIX/bin/x86_64-w64-mingw32-gcc
+install -vm755 x86_64-w64-mingw32-g++ $PREFIX/bin/x86_64-w64-mingw32-g++
+install -vm755 x86_64-w64-mingw32-c++ $PREFIX/bin/x86_64-w64-mingw32-c++
 
 echo "building cppwinrt"
 echo "======================="
@@ -96,20 +111,20 @@ mkdir cppwinrt-build
 cmake -G Ninja -H$M_SOURCE/cppwinrt -B$M_BUILD/cppwinrt-build \
   -DCMAKE_BUILD_TYPE=Release \
   -DBUILD_SHARED_LIBS=OFF \
-  -DCMAKE_INSTALL_PREFIX=$M_CROSS \
+  -DCMAKE_INSTALL_PREFIX=$PREFIX \
   -DCMAKE_C_COMPILER=clang \
   -DCMAKE_CXX_COMPILER=clang++
 ninja -C cppwinrt-build
 ninja -C cppwinrt-build install
 curl -L https://github.com/microsoft/windows-rs/raw/master/crates/libs/bindgen/default/Windows.winmd -o cppwinrt-build/Windows.winmd
-cppwinrt -in cppwinrt-build/Windows.winmd -out $M_CROSS/$MINGW_TRIPLE/include
+cppwinrt -in cppwinrt-build/Windows.winmd -out $PREFIX/$MINGW_TRIPLE/include
 
 echo "building gendef"
 echo "======================="
 cd $M_BUILD
 mkdir gendef-build
 cd gendef-build
-$M_SOURCE/mingw-w64/mingw-w64-tools/gendef/configure --prefix=$M_CROSS
+$M_SOURCE/mingw-w64/mingw-w64-tools/gendef/configure --prefix=$PREFIX
 make -j$MJOBS
 make install-strip
 
@@ -120,7 +135,7 @@ mkdir headers-build
 cd headers-build
 $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
   --host=$MINGW_TRIPLE \
-  --prefix=$M_CROSS/$MINGW_TRIPLE \
+  --prefix=$PREFIX/$MINGW_TRIPLE \
   --enable-sdk=all \
   --enable-idl \
   --with-default-win32-winnt=0x601 \
@@ -137,8 +152,8 @@ mkdir crt-build
 cd crt-build
 $M_SOURCE/mingw-w64/mingw-w64-crt/configure \
   --host=$MINGW_TRIPLE \
-  --prefix=$M_CROSS/$MINGW_TRIPLE \
-  --with-sysroot=$M_CROSS \
+  --prefix=$PREFIX/$MINGW_TRIPLE \
+  --with-sysroot=$PREFIX \
   --with-default-msvcrt=ucrt \
   --enable-lib64 \
   --disable-lib32 \
@@ -148,8 +163,8 @@ make -j$MJOBS GC=0
 make install GC=0
 # Create empty dummy archives, to avoid failing when the compiler driver
 # adds -lssp -lssh_nonshared when linking.
-llvm-ar rcs $M_CROSS/lib/libssp.a
-llvm-ar rcs $M_CROSS/lib/libssp_nonshared.a
+llvm-ar rcs $PREFIX/lib/libssp.a
+llvm-ar rcs $PREFIX/lib/libssp_nonshared.a
 
 echo "building winpthreads"
 echo "======================="
@@ -158,7 +173,7 @@ mkdir winpthreads-build
 cd winpthreads-build
 NO_CONFLTO=1 $M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
   --host=$MINGW_TRIPLE \
-  --prefix=$M_CROSS/$MINGW_TRIPLE \
+  --prefix=$PREFIX/$MINGW_TRIPLE \
   --disable-shared \
   --enable-static
 make -j$MJOBS GC=0
@@ -174,8 +189,8 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B$M_BUILD/buil
   -DCMAKE_C_COMPILER=$MINGW_TRIPLE-clang \
   -DCMAKE_CXX_COMPILER=$MINGW_TRIPLE-clang++ \
   -DCMAKE_SYSTEM_NAME=Windows \
-  -DCMAKE_AR=$M_CROSS/bin/llvm-ar \
-  -DCMAKE_RANLIB=$M_CROSS/bin/llvm-ranlib \
+  -DCMAKE_AR=$PREFIX/bin/llvm-ar \
+  -DCMAKE_RANLIB=$PREFIX/bin/llvm-ranlib \
   -DCMAKE_C_COMPILER_WORKS=1 \
   -DCMAKE_CXX_COMPILER_WORKS=1 \
   -DCMAKE_C_COMPILER_TARGET=x86_64-w64-windows-gnu \
@@ -185,7 +200,7 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B$M_BUILD/buil
   -DCOMPILER_RT_INCLUDE_TESTS=FALSE \
   -DCOMPILER_RT_EXCLUDE_ATOMIC_BUILTIN=FALSE \
   -DLLVM_CONFIG_PATH="" \
-  -DCMAKE_FIND_ROOT_PATH=$M_CROSS/$MINGW_TRIPLE \
+  -DCMAKE_FIND_ROOT_PATH=$PREFIX/$MINGW_TRIPLE \
   -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
   -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
   -DSANITIZER_CXX_ABI=libc++ \
@@ -200,13 +215,13 @@ cd $M_BUILD
 mkdir libcxx-build
 cmake -G Ninja -H$M_SOURCE/llvm-project/runtimes -B$M_BUILD/libcxx-build \
   -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_INSTALL_PREFIX=$M_CROSS/$MINGW_TRIPLE \
+  -DCMAKE_INSTALL_PREFIX=$PREFIX/$MINGW_TRIPLE \
   -DCMAKE_C_COMPILER=$MINGW_TRIPLE-clang \
   -DCMAKE_CXX_COMPILER=$MINGW_TRIPLE-clang++ \
   -DCMAKE_C_COMPILER_TARGET=x86_64-w64-windows-gnu \
   -DCMAKE_SYSTEM_NAME=Windows \
-  -DCMAKE_AR=$M_CROSS/bin/llvm-ar \
-  -DCMAKE_RANLIB=$M_CROSS/bin/llvm-ranlib \
+  -DCMAKE_AR=$PREFIX/bin/llvm-ar \
+  -DCMAKE_RANLIB=$PREFIX/bin/llvm-ranlib \
   -DCMAKE_C_COMPILER_WORKS=TRUE \
   -DCMAKE_CXX_COMPILER_WORKS=TRUE \
   -DLLVM_ENABLE_RUNTIMES="libunwind;libcxxabi;libcxx" \
@@ -232,7 +247,7 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/runtimes -B$M_BUILD/libcxx-build \
   -DLIBCXXABI_LIBDIR_SUFFIX=""
 cmake --build libcxx-build -j$MJOBS
 cmake --install libcxx-build
-cp $M_CROSS/$MINGW_TRIPLE/lib/libc++.a $M_CROSS/$MINGW_TRIPLE/lib/libstdc++.a
+cp $PREFIX/$MINGW_TRIPLE/lib/libc++.a $PREFIX/$MINGW_TRIPLE/lib/libstdc++.a
 
 echo "building llvm-compiler-rt"
 echo "======================="
@@ -244,8 +259,8 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt -B$M_BUILD/compiler-rt-build
   -DCMAKE_C_COMPILER=$MINGW_TRIPLE-clang \
   -DCMAKE_CXX_COMPILER=$MINGW_TRIPLE-clang++ \
   -DCMAKE_SYSTEM_NAME=Windows \
-  -DCMAKE_AR=$M_CROSS/bin/llvm-ar \
-  -DCMAKE_RANLIB=$M_CROSS/bin/llvm-ranlib \
+  -DCMAKE_AR=$PREFIX/bin/llvm-ar \
+  -DCMAKE_RANLIB=$PREFIX/bin/llvm-ranlib \
   -DCMAKE_C_COMPILER_WORKS=1 \
   -DCMAKE_CXX_COMPILER_WORKS=1 \
   -DCMAKE_C_COMPILER_TARGET=x86_64-w64-windows-gnu \
@@ -255,14 +270,14 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt -B$M_BUILD/compiler-rt-build
   -DCOMPILER_RT_INCLUDE_TESTS=FALSE \
   -DCOMPILER_RT_EXCLUDE_ATOMIC_BUILTIN=FALSE \
   -DLLVM_CONFIG_PATH="" \
-  -DCMAKE_FIND_ROOT_PATH=$M_CROSS/$MINGW_TRIPLE \
+  -DCMAKE_FIND_ROOT_PATH=$PREFIX/$MINGW_TRIPLE \
   -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
   -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
   -DSANITIZER_CXX_ABI=libc++
 cmake --build compiler-rt-build -j$MJOBS
 cmake --install compiler-rt-build
-mkdir -p $M_CROSS/$MINGW_TRIPLE/bin
-mv $(x86_64-w64-mingw32-clang --print-resource-dir)/lib/windows/*.dll $M_CROSS/$MINGW_TRIPLE/bin
+mkdir -p $PREFIX/$MINGW_TRIPLE/bin
+mv $(x86_64-w64-mingw32-clang --print-resource-dir)/lib/windows/*.dll $PREFIX/$MINGW_TRIPLE/bin
 
 echo "building pkgconf"
 echo "======================="
@@ -270,22 +285,22 @@ cd $M_BUILD
 mkdir pkgconf-build
 cd $M_SOURCE/pkgconf
 meson setup $M_BUILD/pkgconf-build \
-  --prefix=$M_CROSS \
+  --prefix=$PREFIX \
   --buildtype=release \
   -Dtests=disabled
 meson compile -C $M_BUILD/pkgconf-build
 meson install -C $M_BUILD/pkgconf-build
-cd $M_CROSS/bin
+cd $PREFIX/bin
 #ln -s pkgconf x86_64-w64-mingw32-pkgconf
 #ln -s pkgconf x86_64-w64-mingw32-pkg-config
-rm -rf $M_CROSS/lib/pkgconfig
+rm -rf $PREFIX/lib/pkgconfig
 
 echo "fix cross-llvm-wrappers"
 echo "======================="
-sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $M_CROSS/bin/x86_64-w64-mingw32-as
-sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $M_CROSS/bin/x86_64-w64-mingw32-c++
-sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $M_CROSS/bin/x86_64-w64-mingw32-clang
-sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $M_CROSS/bin/x86_64-w64-mingw32-clang++
-sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $M_CROSS/bin/x86_64-w64-mingw32-g++
-sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $M_CROSS/bin/x86_64-w64-mingw32-gcc
-sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $M_CROSS/bin/x86_64-w64-mingw32-ld
+sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $PREFIX/bin/x86_64-w64-mingw32-as
+sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $PREFIX/bin/x86_64-w64-mingw32-c++
+sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $PREFIX/bin/x86_64-w64-mingw32-clang
+sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $PREFIX/bin/x86_64-w64-mingw32-clang++
+sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $PREFIX/bin/x86_64-w64-mingw32-g++
+sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $PREFIX/bin/x86_64-w64-mingw32-gcc
+sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $PREFIX/bin/x86_64-w64-mingw32-ld
