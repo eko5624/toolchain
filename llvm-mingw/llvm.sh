@@ -24,9 +24,6 @@ INSTRUMENTED=OFF
 
 while [ $# -gt 0 ]; do
     case "$1" in
-    --llvm-only)
-        LLVM_ONLY=1
-        ;;
     --stage1)
         unset CLANG_TOOLS_EXTRA
         ;;

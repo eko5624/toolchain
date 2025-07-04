@@ -29,8 +29,14 @@ while [ $# -gt 0 ]; do
     --x86_64)
         FLAGS="--disable-lib32 --enable-lib64"
         ;;
-    --cppwinrt)
-        CPPWINRT=1
+    --llvm-only)
+        LLVM_ONLY=1
+        ;;
+    --disable-cppwinrt)
+        NO_CPPWINRT=1
+        ;;
+    --disable-pkgconf)
+        NO_PKGCONF=1
         ;;
     --enable-cfguard)
         CFGUARD_FLAGS="--enable-cfguard"
@@ -78,6 +84,10 @@ echo "======================="
 cd $M_SOURCE/llvm-mingw
 ./strip-llvm.sh $PREFIX
 echo "... Done"
+
+if [ -n "$LLVM_ONLY" ]; then
+    exit 0
+fi
 
 echo "installing wrappers"
 echo "======================="
