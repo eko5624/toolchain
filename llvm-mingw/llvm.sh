@@ -140,7 +140,7 @@ elif [ -n "$PGO" ]; then
     STAGE1_PREFIX=$PREFIX
     PREFIX=$PREFIX_PGO
 
-    if [ -n "$LLVM_ONLY" ] && [ "$PREFIX" != "$STAGE1_PREFIX" ] ; then
+    if [ "$PREFIX" != "$STAGE1_PREFIX" ] ; then
         # Only rebuilding LLVM, not any runtimes. Copy the stage1 toolchain
         # and rebuild LLVM on top of it.
         rm -rf $PREFIX

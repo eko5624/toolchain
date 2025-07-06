@@ -18,10 +18,10 @@ CFLAGS = --sysroot=$(STAGE1) -resource-dir=$(shell $(STAGE1)/bin/clang --print-r
 CC = $(PREFIX)/bin/clang
 CXX = $(PREFIX)/bin/clang++
 
-hello-exception-opt-%.exe: test/hello-exception.cpp
+hello-exception-opt-%.exe: llvm-mingw/test/hello-exception.cpp
 	$(CXX) -target $*-w64-mingw32 $(CFLAGS) $+ -o $@ -O3
 
-hello-exception-%.exe: test/hello-exception.cpp
+hello-exception-%.exe: llvm-mingw/test/hello-exception.cpp
 	$(CXX) -target $*-w64-mingw32 $(CFLAGS) $+ -o $@
 
 sqlite-opt-%.exe: $(SQLITE)/sqlite3.c $(SQLITE)/shell.c
