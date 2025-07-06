@@ -13,14 +13,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@main      
-      - name: Loading llvm cache
+      - name: Loading linux-stage1-llvm cache
         uses: actions/cache/restore@main
-        id: cross-llvm
+        id: linux-stage1-llvm
         with:
           path: ${{ github.workspace }}/cross
-          key: cross-llvm-${{ github.run_id }}
+          key: linux-stage1-llvm-${{ github.run_id }}
           restore-keys: |
-            cross-llvm-
+            linux-stage1-llvm-
       - name: Load llvm-project source
         uses: actions/cache@main
         id: llvm-source
@@ -28,88 +28,109 @@ jobs:
           path: ${{ github.workspace }}/source/llvm-project
           key: llvm-source-cache            
       - name: Install host clang toolchain
-        if: ${{ steps.cross-llvm.outputs.cache-matched-key == '' }}
+        if: ${{ steps.linux-stage1-llvm.outputs.cache-matched-key == '' }}
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
           tar -xvf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz 2>/dev/null >/dev/null
           rm cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
           mv cross host
-      - name: Building llvm
+      - name: Building linux-stage1-llvm
         run: |
           if [[ ! "$(ls -A install/llvm-mingw/bin)" ]]; then
-            chmod +x ./llvm-mingw/llvm.sh 
             ./llvm-mingw/llvm.sh $(pwd)/install/llvm-mingw --stage1
           fi
-      - name: Building toolchain
-        run: |
-          chmod +x ./llvm-mingw/toolchain.sh
-          ./llvm-mingw/toolchain.sh
-            ./llvm-mingw/llvm.sh $(pwd)/install/llvm-mingw --stage1
-      - name: Get current timestamp
-        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV  
-      - name: Packaging toolchain
-        if: ${{ steps.cross-llvm.outputs.cache-matched-key == '' }}
-        run: tar -zcvf cross-llvm-latest.tar.xz cross 2>/dev/null >/dev/null
-      - name: Saving llvm cache
-        if: ${{ steps.cross-llvm.outputs.cache-matched-key == '' }}
+      - name: Saving linux-stage1-llvm cache
+        if: ${{ steps.linux-stage1-llvm.outputs.cache-matched-key == '' }}
         uses: actions/cache/save@main
         with:
-          path: ${{ github.workspace }}/cross
-          key: cross-llvm-${{ github.run_id }}
+          path: ${{ github.workspace }}/install/llvm-mingw
+          key: linux-stage1-llvm-${{ github.run_id }}
+      - name: Building toolchain
+        run: |
+          ./llvm-mingw/toolchain.sh $(pwd)/install/llvm-mingw --enable-cfguard
+      - name: Get current timestamp
+        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
+      - name: Packaging toolchain
+        if: ${{ steps.linux-stage1-llvm.outputs.cache-matched-key == '' }}
+        run: |
+          cd install
+          tar -zcvf llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz llvm-mingw 2>/dev/null >/dev/null
       - name: Delete
         env:
           GH_TOKEN: ${{ github.token }} 
-        if: ${{ steps.cross-llvm.outputs.cache-matched-key == '' }}
+        if: ${{ steps.linux-stage1-llvm.outputs.cache-matched-key == '' }}
         run: |
           chmod +x ./package-delete.sh
-          ./package-delete.sh cross-llvm-latest.tar.xz
+          ./package-delete.sh llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
       - name: Release
-        if: ${{ steps.cross-llvm.outputs.cache-matched-key == '' }}
+        if: ${{ steps.linux-stage1-llvm.outputs.cache-matched-key == '' }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: toolchain
           name: toolchain
-          files: cross-llvm*.tar.xz
+          files: llvm-mingw-stage1*.tar.xz
 
-  build_llvm-mingw:
-    needs: build_llvm
+  linux-profile:
+    needs: [linux-stage1]
     runs-on: ubuntu-latest
     container:
       image: docker://ghcr.io/eko5624/archlinux:latest
     steps:
       - name: Checkout
-        uses: actions/checkout@main
+        uses: actions/checkout@main      
+      - name: Loading linux-profile-llvm cache
+        uses: actions/cache/restore@main
+        id: linux-profile-llvm
+        with:
+          path: ${{ github.workspace }}/cross
+          key: linux-profile-llvm-${{ github.run_id }}
+          restore-keys: |
+            linux-profile-llvm-
       - name: Load llvm-project source
         uses: actions/cache@main
         id: llvm-source
         with:
           path: ${{ github.workspace }}/source/llvm-project
-          key: llvm-source-cache          
-      - name: Setup cross-llvm
+          key: llvm-source-cache            
+      - name: Install stage1 Clang
+        if: ${{ steps.linux-profile-llvm.outputs.cache-matched-key == '' }}
         run: |
-          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/cross-llvm-latest.tar.xz
-          tar -xvf cross*.tar.xz 2>/dev/null >/dev/null
-          rm cross*.tar.xz            
-      - name: Building toolchain
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
+          tar -xvf llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz 2>/dev/null >/dev/null
+          rm llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
+          mv llvm-mingw llvm-mingw-stage1
+      - name: Building linux-profile-llvm
         run: |
-          chmod +x ./cross-llvm-mingw.sh
-          ./cross-llvm-mingw.sh
+          if [[ ! "$(ls -A /tmp/dummy-prefix/bin)" ]]; then
+            ./llvm-mingw/llvm.sh --profile $(pwd)/llvm-mingw-stage1
+          fi
+      - name: Saving linux-profile-llvm cache
+        if: ${{ steps.linux-profile-llvm.outputs.cache-matched-key == '' }}
+        uses: actions/cache/save@main
+        with:
+          path: /tmp/dummy-prefix
+          key: linux-stage1-llvm-${{ github.run_id }}
+      - name: Train pgo
+        run: |
+          ./llvm-mingw/pgo-training.sh llvm-project/llvm/build-instrumented $(pwd)/llvm-mingw-stage1
       - name: Get current timestamp
-        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV  
+        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Packaging toolchain
+        if: ${{ steps.linux-profile-llvm.outputs.cache-matched-key == '' }}
         run: |
-          tar -zcvf cross-llvm-mingw-${{ env.date }}-ucrt-x86_64.tar.xz cross 2>/dev/null >/dev/null
-          cp cross-llvm-mingw-${{ env.date }}-ucrt-x86_64.tar.xz cross-llvm-mingw-latest-ucrt-x86_64.tar.xz
+          cd install
+          tar -zcvf llvm-mingw-profile-latest-ucrt-x86_64.tar.xz llvm-mingw 2>/dev/null >/dev/null
       - name: Delete
         env:
           GH_TOKEN: ${{ github.token }} 
+        if: ${{ steps.linux-stage1-llvm.outputs.cache-matched-key == '' }}
         run: |
           chmod +x ./package-delete.sh
-          ./package-delete.sh cross-llvm-mingw-latest-ucrt-x86_64.tar.xz
+          ./package-delete.sh llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
       - name: Release
-        continue-on-error: true
+        if: ${{ steps.linux-profile-llvm.outputs.cache-matched-key == '' }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: toolchain
           name: toolchain
-          files: cross-llvm-mingw*.tar.xz
+          files: llvm-mingw-stage1*.tar.xz

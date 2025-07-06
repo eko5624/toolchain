@@ -32,11 +32,9 @@ while [ $# -gt 0 ]; do
     --llvm-only)
         LLVM_ONLY=1
         ;;
-    --disable-cppwinrt)
-        NO_CPPWINRT=1
-        ;;
-    --disable-pkgconf)
-        NO_PKGCONF=1
+    --all-tools)
+        CPPWINRT=1
+        PKGCONF=1
         ;;
     --enable-cfguard)
         CFGUARD_FLAGS="--enable-cfguard"
@@ -303,21 +301,23 @@ cmake --install compiler-rt-build
 mkdir -p $PREFIX/$MINGW_TRIPLE/bin
 mv $(x86_64-w64-mingw32-clang --print-resource-dir)/lib/windows/*.dll $PREFIX/$MINGW_TRIPLE/bin
 
-echo "building pkgconf"
-echo "======================="
-cd $M_BUILD
-mkdir pkgconf-build
-cd $M_SOURCE/pkgconf
-meson setup $M_BUILD/pkgconf-build \
-  --prefix=$PREFIX \
-  --buildtype=release \
-  -Dtests=disabled
-meson compile -C $M_BUILD/pkgconf-build
-meson install -C $M_BUILD/pkgconf-build
-cd $PREFIX/bin
-#ln -s pkgconf x86_64-w64-mingw32-pkgconf
-#ln -s pkgconf x86_64-w64-mingw32-pkg-config
-rm -rf $PREFIX/lib/pkgconfig
+if [ -n "$PKGCONF" ]; then
+    echo "building pkgconf"
+    echo "======================="
+    cd $M_BUILD
+    mkdir pkgconf-build
+    cd $M_SOURCE/pkgconf
+    meson setup $M_BUILD/pkgconf-build \
+      --prefix=$PREFIX \
+      --buildtype=release \
+      -Dtests=disabled
+    meson compile -C $M_BUILD/pkgconf-build
+    meson install -C $M_BUILD/pkgconf-build
+    cd $PREFIX/bin
+    #ln -s pkgconf x86_64-w64-mingw32-pkgconf
+    #ln -s pkgconf x86_64-w64-mingw32-pkg-config
+    rm -rf $PREFIX/lib/pkgconfig
+fi    
 
 echo "fix cross-llvm-wrappers"
 echo "======================="
