@@ -1,7 +1,9 @@
 #!/bin/bash
+TARGET_ARCH="@target_arch@"
+
 DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && cd .. && pwd)
 PROG=$DIR/bin/ld.lld
-TARGET=x86_64-w64-mingw32
+TARGET=${TARGET_ARCH}-w64-mingw32
 FLAGS="-m i386pep"
 FLAGS="$FLAGS -O3 --lto-O3 --lto-CGO3 -s -Xlink=-release"
 

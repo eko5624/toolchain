@@ -1,12 +1,14 @@
 #!/bin/bash
+TARGET_ARCH="@target_arch@"
+
 DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && cd .. && pwd)
 PROG=$DIR/bin/clang++
 FLAGS=""
-FLAGS="$FLAGS -target x86_64-w64-mingw32"
+FLAGS="$FLAGS -target ${TARGET_ARCH}-w64-mingw32"
 FLAGS="$FLAGS -rtlib=compiler-rt -unwindlib=libunwind -stdlib=libc++"
 FLAGS="$FLAGS --driver-mode=g++ -pthread"
-FLAGS="$FLAGS --sysroot $DIR/x86_64-w64-mingw32"
-FLAGS="$FLAGS -fuse-ld=lld --ld-path=x86_64-w64-mingw32-ld"
+FLAGS="$FLAGS --sysroot $DIR/${TARGET_ARCH}-w64-mingw32"
+FLAGS="$FLAGS -fuse-ld=lld --ld-path=${TARGET_ARCH}-w64-mingw32-ld"
 FLAGS="$FLAGS -Wno-unused-command-line-argument"
 
 if [ "$GC" != "0" ]; then

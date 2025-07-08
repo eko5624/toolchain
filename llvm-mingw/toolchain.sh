@@ -22,12 +22,15 @@ while [ $# -gt 0 ]; do
     case "$1" in
     --armv7)
         FLAGS="--disable-lib32 --disable-lib64 --enable-libarm32"
+        ARCH="armv7"
         ;;
     --aarch64
         FLAGS="--disable-lib32 --disable-lib64 --enable-libarm64"
+        ARCH="aarch64"
         ;;
     --x86_64)
         FLAGS="--disable-lib32 --enable-lib64"
+        ARCH="x86_64"
         ;;
     --llvm-only)
         LLVM_ONLY=1
@@ -90,39 +93,46 @@ fi
 echo "installing wrappers"
 echo "======================="
 cd $PREFIX/bin
-ln -s llvm-ar $MINGW_TRIPLE-ar
-ln -s llvm-ar $MINGW_TRIPLE-llvm-ar
-ln -s llvm-ranlib $MINGW_TRIPLE-ranlib
-ln -s llvm-ranlib $MINGW_TRIPLE-llvm-ranlib
-ln -s llvm-dlltool $MINGW_TRIPLE-dlltool
-ln -s llvm-dlltool $MINGW_TRIPLE-llvm-dlltool
-ln -s llvm-objcopy $MINGW_TRIPLE-objcopy
-ln -s llvm-objcopy $MINGW_TRIPLE-llvm-objcopy
-ln -s llvm-strip $MINGW_TRIPLE-strip
-ln -s llvm-strip $MINGW_TRIPLE-llvm-strip
-ln -s llvm-size $MINGW_TRIPLE-size
-ln -s llvm-size $MINGW_TRIPLE-llvm-size
-ln -s llvm-strings $MINGW_TRIPLE-strings
-ln -s llvm-strings $MINGW_TRIPLE-llvm-strings
-ln -s llvm-nm $MINGW_TRIPLE-nm
-ln -s llvm-nm $MINGW_TRIPLE-llvm-nm
-ln -s llvm-readelf $MINGW_TRIPLE-readelf
-ln -s llvm-readelf $MINGW_TRIPLE-llvm-readelf
-ln -s llvm-windres $MINGW_TRIPLE-windres
-ln -s llvm-windres $MINGW_TRIPLE-llvm-windres
-ln -s llvm-addr2line $MINGW_TRIPLE-addr2line
-ln -s llvm-addr2line $MINGW_TRIPLE-llvm-addr2line
-ln -s $(which pkgconf) $MINGW_TRIPLE-pkg-config
-ln -s $(which pkgconf) $MINGW_TRIPLE-pkgconf
+ln -s llvm-ar $ARCH-w64-mingw32-ar
+ln -s llvm-ar $ARCH-w64-mingw32-llvm-ar
+ln -s llvm-ranlib $ARCH-w64-mingw32-ranlib
+ln -s llvm-ranlib $ARCH-w64-mingw32-llvm-ranlib
+ln -s llvm-dlltool $ARCH-w64-mingw32-dlltool
+ln -s llvm-dlltool $ARCH-w64-mingw32-llvm-dlltool
+ln -s llvm-objcopy $ARCH-w64-mingw32-objcopy
+ln -s llvm-objcopy $ARCH-w64-mingw32-llvm-objcopy
+ln -s llvm-strip $ARCH-w64-mingw32-strip
+ln -s llvm-strip $ARCH-w64-mingw32-llvm-strip
+ln -s llvm-size $ARCH-w64-mingw32-size
+ln -s llvm-size $ARCH-w64-mingw32-llvm-size
+ln -s llvm-strings $ARCH-w64-mingw32-strings
+ln -s llvm-strings $ARCH-w64-mingw32-llvm-strings
+ln -s llvm-nm $ARCH-w64-mingw32-nm
+ln -s llvm-nm $ARCH-w64-mingw32-llvm-nm
+ln -s llvm-readelf $ARCH-w64-mingw32-readelf
+ln -s llvm-readelf $ARCH-w64-mingw32-llvm-readelf
+ln -s llvm-windres $ARCH-w64-mingw32-windres
+ln -s llvm-windres $ARCH-w64-mingw32-llvm-windres
+ln -s llvm-addr2line $ARCH-w64-mingw32-addr2line
+ln -s llvm-addr2line $ARCH-w64-mingw32-llvm-addr2line
+ln -s $(which pkgconf) $ARCH-w64-mingw32-pkg-config
+ln -s $(which pkgconf) $ARCH-w64-mingw32-pkgconf
 
-cd $TOP_DIR/llvm-mingw-wrappers
-install -vm755 x86_64-w64-mingw32-as $PREFIX/bin/x86_64-w64-mingw32-as
-install -vm755 x86_64-w64-mingw32-clang $PREFIX/bin/x86_64-w64-mingw32-clang
-install -vm755 x86_64-w64-mingw32-clang++ $PREFIX/bin/x86_64-w64-mingw32-clang++
-install -vm755 x86_64-w64-mingw32-ld $PREFIX/bin/x86_64-w64-mingw32-ld
-install -vm755 x86_64-w64-mingw32-gcc $PREFIX/bin/x86_64-w64-mingw32-gcc
-install -vm755 x86_64-w64-mingw32-g++ $PREFIX/bin/x86_64-w64-mingw32-g++
-install -vm755 x86_64-w64-mingw32-c++ $PREFIX/bin/x86_64-w64-mingw32-c++
+cd $TOP_DIR/llvm-mingw/wrappers
+
+for i in as c++ clang clang++ g++ gcc; do
+  BASENAME=$ARCH-w64-mingw32-$i
+  sed -i "s|@target_arch@|$ARCH|g" $BASENAME
+done
+sed -i "s|@target_arch@|$ARCH|g" $ARCH-w64-mingw32-ld
+ 
+install -vm755 $ARCH-w64-mingw32-as $PREFIX/bin/$ARCH-w64-mingw32-as
+install -vm755 $ARCH-w64-mingw32-clang $PREFIX/bin/$ARCH-w64-mingw32-clang
+install -vm755 $ARCH-w64-mingw32-clang++ $PREFIX/bin/$ARCH-w64-mingw32-clang++
+install -vm755 $ARCH-w64-mingw32-ld $PREFIX/bin/$ARCH-w64-mingw32-ld
+install -vm755 $ARCH-w64-mingw32-gcc $PREFIX/bin/$ARCH-w64-mingw32-gcc
+install -vm755 $ARCH-w64-mingw32-g++ $PREFIX/bin/$ARCH-w64-mingw32-g++
+install -vm755 $ARCH-w64-mingw32-c++ $PREFIX/bin/$ARCH-w64-mingw32-c++
 
 if [ -n "$CPPWINRT" ]; then
     echo "building cppwinrt"
@@ -207,22 +217,22 @@ cd $M_BUILD
 mkdir builtins-build
 cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B$M_BUILD/builtins-build \
   -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_INSTALL_PREFIX="$(x86_64-w64-mingw32-clang --print-resource-dir)" \
-  -DCMAKE_C_COMPILER=$MINGW_TRIPLE-clang \
-  -DCMAKE_CXX_COMPILER=$MINGW_TRIPLE-clang++ \
+  -DCMAKE_INSTALL_PREFIX="$($ARCH-w64-mingw32-clang --print-resource-dir)" \
+  -DCMAKE_C_COMPILER=$ARCH-w64-mingw32-clang \
+  -DCMAKE_CXX_COMPILER=$ARCH-w64-mingw32-clang++ \
   -DCMAKE_SYSTEM_NAME=Windows \
   -DCMAKE_AR=$PREFIX/bin/llvm-ar \
   -DCMAKE_RANLIB=$PREFIX/bin/llvm-ranlib \
   -DCMAKE_C_COMPILER_WORKS=1 \
   -DCMAKE_CXX_COMPILER_WORKS=1 \
-  -DCMAKE_C_COMPILER_TARGET=x86_64-w64-windows-gnu \
+  -DCMAKE_C_COMPILER_TARGET=$ARCH-w64-windows-gnu \
   -DCOMPILER_RT_DEFAULT_TARGET_ONLY=TRUE \
   -DCOMPILER_RT_USE_BUILTINS_LIBRARY=TRUE \
   -DCOMPILER_RT_BUILD_BUILTINS=TRUE \
   -DCOMPILER_RT_INCLUDE_TESTS=FALSE \
   -DCOMPILER_RT_EXCLUDE_ATOMIC_BUILTIN=FALSE \
   -DLLVM_CONFIG_PATH="" \
-  -DCMAKE_FIND_ROOT_PATH=$PREFIX/$MINGW_TRIPLE \
+  -DCMAKE_FIND_ROOT_PATH=$PREFIX/$ARCH-w64-mingw32 \
   -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
   -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
   -DSANITIZER_CXX_ABI=libc++ \
@@ -237,10 +247,10 @@ cd $M_BUILD
 mkdir libcxx-build
 cmake -G Ninja -H$M_SOURCE/llvm-project/runtimes -B$M_BUILD/libcxx-build \
   -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_INSTALL_PREFIX=$PREFIX/$MINGW_TRIPLE \
-  -DCMAKE_C_COMPILER=$MINGW_TRIPLE-clang \
-  -DCMAKE_CXX_COMPILER=$MINGW_TRIPLE-clang++ \
-  -DCMAKE_C_COMPILER_TARGET=x86_64-w64-windows-gnu \
+  -DCMAKE_INSTALL_PREFIX=$PREFIX/$ARCH-w64-mingw32 \
+  -DCMAKE_C_COMPILER=$ARCH-w64-mingw32-clang \
+  -DCMAKE_CXX_COMPILER=$ARCH-w64-mingw32-clang++ \
+  -DCMAKE_C_COMPILER_TARGET=$ARCH-w64-windows-gnu \
   -DCMAKE_SYSTEM_NAME=Windows \
   -DCMAKE_AR=$PREFIX/bin/llvm-ar \
   -DCMAKE_RANLIB=$PREFIX/bin/llvm-ranlib \
@@ -269,7 +279,7 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/runtimes -B$M_BUILD/libcxx-build \
   -DLIBCXXABI_LIBDIR_SUFFIX=""
 cmake --build libcxx-build -j$MJOBS
 cmake --install libcxx-build
-cp $PREFIX/$MINGW_TRIPLE/lib/libc++.a $PREFIX/$MINGW_TRIPLE/lib/libstdc++.a
+cp $PREFIX/$ARCH-w64-mingw32/lib/libc++.a $PREFIX/$ARCH-w64-mingw32/lib/libstdc++.a
 
 echo "building llvm-compiler-rt"
 echo "======================="
@@ -277,29 +287,29 @@ cd $M_BUILD
 mkdir compiler-rt-build
 cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt -B$M_BUILD/compiler-rt-build \
   -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_INSTALL_PREFIX="$(x86_64-w64-mingw32-clang --print-resource-dir)" \
-  -DCMAKE_C_COMPILER=$MINGW_TRIPLE-clang \
-  -DCMAKE_CXX_COMPILER=$MINGW_TRIPLE-clang++ \
+  -DCMAKE_INSTALL_PREFIX="$($ARCH-w64-mingw32-clang --print-resource-dir)" \
+  -DCMAKE_C_COMPILER=$ARCH-w64-mingw32-clang \
+  -DCMAKE_CXX_COMPILER=$ARCH-w64-mingw32-clang++ \
   -DCMAKE_SYSTEM_NAME=Windows \
   -DCMAKE_AR=$PREFIX/bin/llvm-ar \
   -DCMAKE_RANLIB=$PREFIX/bin/llvm-ranlib \
   -DCMAKE_C_COMPILER_WORKS=1 \
   -DCMAKE_CXX_COMPILER_WORKS=1 \
-  -DCMAKE_C_COMPILER_TARGET=x86_64-w64-windows-gnu \
+  -DCMAKE_C_COMPILER_TARGET=$ARCH-w64-windows-gnu \
   -DCOMPILER_RT_DEFAULT_TARGET_ONLY=TRUE \
   -DCOMPILER_RT_USE_BUILTINS_LIBRARY=TRUE \
   -DCOMPILER_RT_BUILD_BUILTINS=FALSE \
   -DCOMPILER_RT_INCLUDE_TESTS=FALSE \
   -DCOMPILER_RT_EXCLUDE_ATOMIC_BUILTIN=FALSE \
   -DLLVM_CONFIG_PATH="" \
-  -DCMAKE_FIND_ROOT_PATH=$PREFIX/$MINGW_TRIPLE \
+  -DCMAKE_FIND_ROOT_PATH=$PREFIX/$ARCH-w64-mingw32 \
   -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
   -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
   -DSANITIZER_CXX_ABI=libc++
 cmake --build compiler-rt-build -j$MJOBS
 cmake --install compiler-rt-build
-mkdir -p $PREFIX/$MINGW_TRIPLE/bin
-mv $(x86_64-w64-mingw32-clang --print-resource-dir)/lib/windows/*.dll $PREFIX/$MINGW_TRIPLE/bin
+mkdir -p $PREFIX/$ARCH-w64-mingw32/bin
+mv $($ARCH-w64-mingw32-clang --print-resource-dir)/lib/windows/*.dll $PREFIX/$ARCH-w64-mingw32/bin
 
 if [ -n "$PKGCONF" ]; then
     echo "building pkgconf"
