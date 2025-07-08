@@ -32,9 +32,6 @@ while [ $# -gt 0 ]; do
         FLAGS="--disable-lib32 --enable-lib64"
         ARCH="x86_64"
         ;;
-    --llvm-only)
-        LLVM_ONLY=1
-        ;;
     --all-tools)
         CPPWINRT=1
         PKGCONF=1
