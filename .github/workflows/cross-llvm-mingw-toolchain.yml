@@ -143,4 +143,23 @@ jobs:
           mv llvm-mingw /opt/llvm-mingw
       - name: Building linux-llvm
         run: |
-          ./llvm-mingw/llvm.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw --thinlto --pgo --llvm-only
+          ./llvm-mingw/llvm.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw --thinlto --pgo
+      - name: Get current timestamp
+        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
+      - name: Packaging toolchain
+        run: |
+          cd install
+          tar -zcvf llvm-mingw-$date-ucrt-linux-x86_64.tar.xz llvm-mingw 2>/dev/null >/dev/null
+          cp llvm-mingw-$date-ucrt-linux-x86_64.tar.xz llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
+      - name: Delete
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          chmod +x ./package-delete.sh
+          ./package-delete.sh llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: toolchain
+          name: toolchain
+          files: llvm-mingw*.tar.xz
