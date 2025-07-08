@@ -24,7 +24,7 @@ while [ $# -gt 0 ]; do
         FLAGS="--disable-lib32 --disable-lib64 --enable-libarm32"
         ARCH="armv7"
         ;;
-    --aarch64
+    --aarch64)
         FLAGS="--disable-lib32 --disable-lib64 --enable-libarm64"
         ARCH="aarch64"
         ;;
