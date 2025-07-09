@@ -36,6 +36,9 @@ while [ $# -gt 0 ]; do
         CPPWINRT=1
         PKGCONF=1
         ;;
+    --llvm-only)
+        LLVM_ONLY=1
+        ;;
     --enable-cfguard)
         CFGUARD_FLAGS="--enable-cfguard"
         USE_CFLAGS="-g -O2 -mguard=cf"
