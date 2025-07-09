@@ -133,6 +133,7 @@ install -vm755 $ARCH-w64-mingw32-ld $PREFIX/bin/$ARCH-w64-mingw32-ld
 install -vm755 $ARCH-w64-mingw32-gcc $PREFIX/bin/$ARCH-w64-mingw32-gcc
 install -vm755 $ARCH-w64-mingw32-g++ $PREFIX/bin/$ARCH-w64-mingw32-g++
 install -vm755 $ARCH-w64-mingw32-c++ $PREFIX/bin/$ARCH-w64-mingw32-c++
+cat $PREFIX/bin/$ARCH-w64-mingw32-clang
 
 if [ -n "$CPPWINRT" ]; then
     echo "building cppwinrt"
@@ -150,7 +151,7 @@ if [ -n "$CPPWINRT" ]; then
     ninja -C cppwinrt-build
     ninja -C cppwinrt-build install
     curl -L https://github.com/microsoft/windows-rs/raw/master/crates/libs/bindgen/default/Windows.winmd -o cppwinrt-build/Windows.winmd
-    cppwinrt -in cppwinrt-build/Windows.winmd -out $PREFIX/$MINGW_TRIPLE/include
+    cppwinrt -in cppwinrt-build/Windows.winmd -out $PREFIX/$ARCH-w64-mingw32/include
 fi    
 
 echo "building gendef"
@@ -168,7 +169,7 @@ cd $M_BUILD
 mkdir headers-build
 cd headers-build
 $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
-  --prefix=$PREFIX/$MINGW_TRIPLE \
+  --prefix=$PREFIX/$ARCH-w64-mingw32 \
   --enable-sdk=all \
   --enable-idl \
   --with-default-win32-winnt=0x601 \
