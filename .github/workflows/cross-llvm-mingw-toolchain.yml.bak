@@ -76,7 +76,7 @@ jobs:
       image: docker://ghcr.io/eko5624/archlinux:latest
     steps:
       - name: Checkout
-        uses: actions/checkout@main      
+        uses: actions/checkout@main     
       - name: Loading profile-profdata cache
         uses: actions/cache/restore@main
         id: profile-profdata
@@ -85,6 +85,14 @@ jobs:
           key: profile-profdata-${{ github.run_id }}
           restore-keys: |
             profile-profdata-
+      - name: Loading linux-profile-llvm cache
+        uses: actions/cache/restore@main
+        id: linux-profile-llvm
+        with:
+          path: ${{ github.workspace }}/install/llvm-mingw
+          key: linux-profile-llvm-${{ github.run_id }}
+          restore-keys: |
+            linux-profile-llvm-
       - name: Load llvm-project source
         uses: actions/cache@main
         id: llvm-source
@@ -100,9 +108,15 @@ jobs:
       - name: Building linux-profile-llvm
         run: |
           ./llvm-mingw/llvm.sh --profile $(pwd)/llvm-mingw-stage1
+      - name: Saving linux-profile-llvm cache
+        if: ${{ steps.linux-stage1-llvm.outputs.cache-matched-key == '' }}
+        uses: actions/cache/save@main
+        with:
+          path: ${{ github.workspace }}/install/llvm-mingw
+          key: linux-stage1-llvm-${{ github.run_id }}
       - name: Train pgo
         run: |
-          ./llvm-mingw/pgo-training.sh llvm-project/llvm/build-instrumented $(pwd)/llvm-mingw-stage1
+          ./llvm-mingw/pgo-training.sh $(pwd)/build-instrumented $(pwd)/llvm-mingw-stage1
       - name: Save profile.profdata cache
         if: ${{ steps.llvm-profdata.outputs.cache-matched-key == '' }}
         uses: actions/cache/save@main

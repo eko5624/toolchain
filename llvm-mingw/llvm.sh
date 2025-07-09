@@ -215,6 +215,7 @@ if [ "$INSTRUMENTED" != "OFF" ]; then
     # For instrumented builds, don't install the built files (so $PREFIX
     # is entirely unused).
     cmake --build . -j$MJOBS --target clang --target lld
+    mv build-instrumented $M_ROOT/build-instrumented
 else
     cmake --build . -j$MJOBS
     cmake --install . --strip
