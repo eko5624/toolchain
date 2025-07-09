@@ -38,7 +38,7 @@ jobs:
           ./llvm-mingw/llvm.sh --profile $(pwd)/llvm-mingw-stage1
       - name: Train pgo
         run: |
-          ./llvm-mingw/pgo-training.sh llvm-project/llvm/build-instrumented $(pwd)/llvm-mingw-stage1
+          ./llvm-mingw/pgo-training.sh source/llvm-project/llvm/build-instrumented $(pwd)/llvm-mingw-stage1
       - name: Save profile.profdata cache
         if: ${{ steps.llvm-profdata.outputs.cache-matched-key == '' }}
         uses: actions/cache/save@main
