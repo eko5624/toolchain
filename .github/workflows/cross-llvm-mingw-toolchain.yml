@@ -17,7 +17,7 @@ jobs:
         uses: actions/cache/restore@main
         id: linux-stage1-llvm
         with:
-          path: ${{ github.workspace }}/cross
+          path: ${{ github.workspace }}/install/llvm-mingw
           key: linux-stage1-llvm-${{ github.run_id }}
           restore-keys: |
             linux-stage1-llvm-
@@ -51,19 +51,17 @@ jobs:
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Packaging toolchain
-        if: ${{ steps.linux-stage1-llvm.outputs.cache-matched-key == '' }}
         run: |
           cd install
           tar -zcvf llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz llvm-mingw 2>/dev/null >/dev/null
+          cp llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz llvm-mingw-stage1-$date-ucrt-x86_64.tar.xz
       - name: Delete
         env:
-          GH_TOKEN: ${{ github.token }} 
-        if: ${{ steps.linux-stage1-llvm.outputs.cache-matched-key == '' }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           chmod +x ./package-delete.sh
           ./package-delete.sh llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
       - name: Release
-        if: ${{ steps.linux-stage1-llvm.outputs.cache-matched-key == '' }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: toolchain
