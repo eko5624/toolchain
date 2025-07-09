@@ -14,7 +14,6 @@ MJOBS=$(grep -c processor /proc/cpuinfo)
 export M_ROOT=$(pwd)
 export M_SOURCE=$M_ROOT/source
 export M_BUILD=$M_ROOT/build
-export MINGW_TRIPLE="x86_64-w64-mingw32"
 
 CFGUARD_FLAGS="--enable-cfguard"
 USE_CFLAGS="-g -O2 -mguard=cf"
@@ -205,10 +204,8 @@ cd winpthreads-build
 NO_CONFLTO=1 $M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
   --host=$ARCH-w64-mingw32 \
   --prefix="$PREFIX/$ARCH-w64-mingw32" \
-  --libdir="$PREFIX/$ARCH-w64-mingw32/lib" \
-  --enable-silent-rules \
-  CFLAGS="$USE_CFLAGS" \
-  CXXFLAGS="$USE_CFLAGS"
+  --disable-shared \
+  --enable-static
 make -j$MJOBS GC=0
 make install GC=0
 
