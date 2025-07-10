@@ -30,7 +30,6 @@ while [ $# -gt 0 ]; do
     --profile)
         PROFILE=1
         WITH_CLANG=1
-        BUILDDIR="$BUILDDIR-withclang"
         LINK_DYLIB=OFF
         INSTRUMENTED="${INSTRUMENTED:-Frontend}"
         : ${LLVM_PROFILE_DATA_DIR:=/tmp/llvm-profile}
