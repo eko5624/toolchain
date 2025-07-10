@@ -28,10 +28,11 @@ while [ $# -gt 0 ]; do
         unset CLANG_TOOLS_EXTRA
         ;;
     --profile)
+        unset CLANG_TOOLS_EXTRA
         PROFILE=1
         WITH_CLANG=1
         LINK_DYLIB=OFF
-        INSTRUMENTED="${INSTRUMENTED:-Frontend}"
+        : ${INSTRUMENTED:=Frontend}
         : ${LLVM_PROFILE_DATA_DIR:=/tmp/llvm-profile}
         # A fixed BUILDDIR is set at the end for this case.
         ;;
@@ -155,7 +156,7 @@ if [ -n "$LTO" ]; then
     CMAKEFLAGS="$CMAKEFLAGS -DLLVM_ENABLE_LTO=$LTO"
 fi
 
-if [ "$INSTRUMENTED" == "Frontend" ]; then
+if [ "$INSTRUMENTED" != "OFF" ]; then
     # For instrumented build, use a hardcoded builddir that we can
     # locate, and don't install the built files.
     BUILDDIR="build-instrumented"
