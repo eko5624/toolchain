@@ -156,7 +156,7 @@ if [ -n "$LTO" ]; then
     CMAKEFLAGS="$CMAKEFLAGS -DLLVM_ENABLE_LTO=$LTO"
 fi
 
-if [ "$INSTRUMENTED" != "OFF" ]; then
+if [ "$INSTRUMENTED" == "Frontend" ]; then
     # For instrumented build, use a hardcoded builddir that we can
     # locate, and don't install the built files.
     BUILDDIR="build-instrumented"
