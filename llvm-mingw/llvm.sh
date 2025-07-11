@@ -32,15 +32,15 @@ while [ $# -gt 0 ]; do
         PROFILE=1
         WITH_CLANG=1
         LINK_DYLIB=OFF
-        : ${INSTRUMENTED:=Frontend}
-        : ${LLVM_PROFILE_DATA_DIR:=/tmp/llvm-profile}
+        INSTRUMENTED="Frontend"
+        LLVM_PROFILE_DATA_DIR="/tmp/llvm-profile"
         # A fixed BUILDDIR is set at the end for this case.
         ;;
     --pgo)
         PGO=1
         WITH_CLANG=1
         BUILDDIR="$BUILDDIR-withclang"
-        LLVM_PROFDATA_FILE="${LLVM_PROFDATA_FILE:-profile.profdata}"
+        LLVM_PROFDATA_FILE="profile.profdata"
         if [ ! -e "$LLVM_PROFDATA_FILE" ]; then
             echo Profile \"$LLVM_PROFDATA_FILE\" not found
             exit 1
