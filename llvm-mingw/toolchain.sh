@@ -226,12 +226,12 @@ if [ -n "$NATIVE" ]; then
       -DCMAKE_FIND_ROOT_PATH=$PREFIX \
       -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
       -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
-      -DCOMPILER_RT_USE_LIBCXX=OFF \
+      -DCOMPILER_RT_USE_LIBCXX=OFF
     cmake --build builtins-build -j$MJOBS
     cmake --install builtins-build
 fi    
 
-mkdir builtins-build
+rm -rf builtins-build && mkdir builtins-build
 cd builtins-build
 cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B$M_BUILD/builtins-build \
   -DCMAKE_BUILD_TYPE=Release \
@@ -313,12 +313,12 @@ if [ -n "$NATIVE" ]; then
       -DCMAKE_FIND_ROOT_PATH=$PREFIX \
       -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
       -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
-      -DCOMPILER_RT_USE_LIBCXX=OFF \
+      -DCOMPILER_RT_USE_LIBCXX=OFF
     cmake --build compiler-rt-build -j$MJOBS
     cmake --install compiler-rt-build
 fi
 
-mkdir compiler-rt-build
+rm -rf compiler-rt-build && mkdir compiler-rt-build
 cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt -B$M_BUILD/compiler-rt-build \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX="$($ARCH-w64-mingw32-clang --print-resource-dir)" \
