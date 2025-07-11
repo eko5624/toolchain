@@ -46,6 +46,9 @@ while [ $# -gt 0 ]; do
         CFGUARD_FLAGS=
         USE_CFLAGS="-g -O2"
         ;;
+    --native)
+        NATIVE=1
+        ;;
     *)
         PREFIX="$1"
         ;;
@@ -212,7 +215,24 @@ make install GC=0
 echo "building llvm-compiler-rt-builtin"
 echo "======================="
 cd $M_BUILD
+if [ -n "$NATIVE" ]; then
+    mkdir builtins-build
+    cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B$M_BUILD/builtins-build \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_INSTALL_PREFIX="$(clang --print-resource-dir)" \
+      -DCMAKE_C_COMPILER=clang \
+      -DCMAKE_CXX_COMPILER=clang++ \
+      -DLLVM_CONFIG_PATH="" \
+      -DCMAKE_FIND_ROOT_PATH=$PREFIX \
+      -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
+      -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
+      -DCOMPILER_RT_USE_LIBCXX=OFF \
+    cmake --build builtins-build -j$MJOBS
+    cmake --install builtins-build
+fi    
+
 mkdir builtins-build
+cd builtins-build
 cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B$M_BUILD/builtins-build \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX="$($ARCH-w64-mingw32-clang --print-resource-dir)" \
@@ -282,6 +302,22 @@ cp $PREFIX/$ARCH-w64-mingw32/lib/libc++.a $PREFIX/$ARCH-w64-mingw32/lib/libstdc+
 echo "building llvm-compiler-rt"
 echo "======================="
 cd $M_BUILD
+if [ -n "$NATIVE" ]; then
+    mkdir compiler-rt-build
+    cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt -B$M_BUILD/compiler-rt-build \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_INSTALL_PREFIX="$(clang --print-resource-dir)" \
+      -DCMAKE_C_COMPILER=clang \
+      -DCMAKE_CXX_COMPILER=clang++ \
+      -DLLVM_CONFIG_PATH="" \
+      -DCMAKE_FIND_ROOT_PATH=$PREFIX \
+      -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
+      -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
+      -DCOMPILER_RT_USE_LIBCXX=OFF \
+    cmake --build compiler-rt-build -j$MJOBS
+    cmake --install compiler-rt-build
+fi
+
 mkdir compiler-rt-build
 cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt -B$M_BUILD/compiler-rt-build \
   -DCMAKE_BUILD_TYPE=Release \
