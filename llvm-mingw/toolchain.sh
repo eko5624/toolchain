@@ -232,7 +232,6 @@ if [ -n "$NATIVE" ]; then
 fi    
 
 rm -rf builtins-build && mkdir builtins-build
-cd builtins-build
 cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B$M_BUILD/builtins-build \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX="$($ARCH-w64-mingw32-clang --print-resource-dir)" \
