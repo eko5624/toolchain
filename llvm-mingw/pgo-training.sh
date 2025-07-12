@@ -55,8 +55,8 @@ if [ ! -d $SQLITE ]; then
 fi
 
 rm -rf "$LLVM_PROFILE_DATA_DIR"
-$MAKE -f llvm-mingw/pgo-training.make PREFIX=$PREFIX STAGE1=$STAGE1 SQLITE=$SQLITE clean
-$MAKE -f llvm-mingw/pgo-training.make PREFIX=$PREFIX STAGE1=$STAGE1 SQLITE=$SQLITE -j$CORES
+$MAKE -f pgo-training.make PREFIX=$PREFIX STAGE1=$STAGE1 SQLITE=$SQLITE clean
+$MAKE -f pgo-training.make PREFIX=$PREFIX STAGE1=$STAGE1 SQLITE=$SQLITE -j$CORES
 
 rm -f "$LLVM_PROFDATA_FILE"
 $STAGE1/bin/llvm-profdata merge -output "$LLVM_PROFDATA_FILE" $LLVM_PROFILE_DATA_DIR/*.profraw
