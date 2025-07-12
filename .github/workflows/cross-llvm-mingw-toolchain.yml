@@ -39,7 +39,7 @@ jobs:
       - name: Train pgo
         run: |
           cd llvm-mingw
-          ./pgo-training.sh $(pwd)/source/llvm-project/llvm/build-instrumented $(pwd)/llvm-mingw-stage1
+          ./pgo-training.sh ../source/llvm-project/llvm/build-instrumented ../llvm-mingw-stage1
       - name: Save profile.profdata cache
         if: ${{ steps.llvm-profdata.outputs.cache-matched-key == '' }}
         uses: actions/cache/save@main
