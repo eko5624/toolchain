@@ -59,7 +59,7 @@ fi
 : ${CORES:=$(nproc 2>/dev/null)}
 : ${CORES:=$(sysctl -n hw.ncpu 2>/dev/null)}
 : ${CORES:=4}
-: ${ARCHS:=${TOOLCHAIN_ARCHS-x86_64 armv7 aarch64}}
+: ${ARCHS:=${TOOLCHAIN_ARCHS}}
 
 download() {
     if command -v curl >/dev/null; then
