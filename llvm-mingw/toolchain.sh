@@ -215,23 +215,7 @@ make install GC=0
 echo "building llvm-compiler-rt-builtin"
 echo "======================="
 cd $M_BUILD
-if [ -n "$NATIVE" ]; then
-    mkdir builtins-build
-    cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B$M_BUILD/builtins-build \
-      -DCMAKE_BUILD_TYPE=Release \
-      -DCMAKE_INSTALL_PREFIX="$(clang --print-resource-dir)" \
-      -DCMAKE_C_COMPILER=clang \
-      -DCMAKE_CXX_COMPILER=clang++ \
-      -DLLVM_CONFIG_PATH="" \
-      -DCMAKE_FIND_ROOT_PATH=$PREFIX \
-      -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
-      -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
-      -DCOMPILER_RT_USE_LIBCXX=OFF
-    cmake --build builtins-build -j$MJOBS
-    cmake --install builtins-build
-fi    
-
-rm -rf builtins-build && mkdir builtins-build
+mkdir builtins-build
 cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B$M_BUILD/builtins-build \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX="$($ARCH-w64-mingw32-clang --print-resource-dir)" \
@@ -364,10 +348,10 @@ fi
 
 echo "fix cross-llvm-wrappers"
 echo "======================="
-sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $PREFIX/bin/x86_64-w64-mingw32-as
-sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $PREFIX/bin/x86_64-w64-mingw32-c++
-sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $PREFIX/bin/x86_64-w64-mingw32-clang
-sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $PREFIX/bin/x86_64-w64-mingw32-clang++
-sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $PREFIX/bin/x86_64-w64-mingw32-g++
-sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $PREFIX/bin/x86_64-w64-mingw32-gcc
-sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $PREFIX/bin/x86_64-w64-mingw32-ld
+sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $PREFIX/bin/$ARCH-w64-mingw32-as
+sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $PREFIX/bin/$ARCH-w64-mingw32-c++
+sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $PREFIX/bin/$ARCH-w64-mingw32-clang
+sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $PREFIX/bin/$ARCH-w64-mingw32-clang++
+sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $PREFIX/bin/$ARCH-w64-mingw32-g++
+sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $PREFIX/bin/$ARCH-w64-mingw32-gcc
+sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $PREFIX/bin/$ARCH-w64-mingw32-ld
