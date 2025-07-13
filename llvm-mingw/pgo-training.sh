@@ -51,14 +51,6 @@ while [ $# -gt 0 ]; do
     shift
 done
 
-if [ $# -lt 2 ]; then
-    echo $0 build stage1
-    exit 1
-fi
-PREFIX="$1"
-STAGE1="$2"
-PREFIX="$(cd "$PREFIX" && pwd)"
-
 MAKE=make
 if command -v gmake >/dev/null; then
     MAKE=gmake
