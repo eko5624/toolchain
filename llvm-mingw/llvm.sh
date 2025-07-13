@@ -202,6 +202,7 @@ cmake -G Ninja \
   -DLLVM_INCLUDE_BENCHMARKS=OFF \
   -DLLVM_LINK_LLVM_DYLIB=$LINK_DYLIB \
   -DLLVM_ENABLE_LIBXML2=OFF \
+  -DLLDB_ENABLE_PYTHON=OFF \
   -DLLVM_TOOLCHAIN_TOOLS="llvm-ar;llvm-ranlib;llvm-objdump;llvm-rc;llvm-cvtres;llvm-nm;llvm-strings;llvm-readobj;llvm-dlltool;llvm-pdbutil;llvm-objcopy;llvm-strip;llvm-cov;llvm-profdata;llvm-addr2line;llvm-symbolizer;llvm-windres;llvm-ml;llvm-readelf;llvm-size;llvm-cxxfilt;llvm-lib" \
   ${HOST+-DLLVM_HOST_TRIPLE=$HOST} \
   -DLLVM_BUILD_INSTRUMENTED=$INSTRUMENTED \
