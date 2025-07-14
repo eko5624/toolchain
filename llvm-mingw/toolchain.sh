@@ -59,7 +59,6 @@ done
 export PATH="$PREFIX/bin:$PATH"
 mkdir -p $M_SOURCE
 mkdir -p $M_BUILD
-mkdir -p $PREFIX/$MINGW_TRIPLE
 
 echo "getting source"
 echo "======================="
@@ -248,17 +247,16 @@ cd $M_BUILD
 mkdir libcxx-build
 cmake -G Ninja -H$M_SOURCE/llvm-project/runtimes -B$M_BUILD/libcxx-build \
   -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_INSTALL_PREFIX=$PREFIX/$ARCH-w64-mingw32 \
+  -DCMAKE_INSTALL_PREFIX="$PREFIX/$ARCH-w64-mingw32" \
   -DCMAKE_C_COMPILER=$ARCH-w64-mingw32-clang \
   -DCMAKE_CXX_COMPILER=$ARCH-w64-mingw32-clang++ \
-  -DCMAKE_C_COMPILER_TARGET=$ARCH-w64-windows-gnu \
+  -DCMAKE_CXX_COMPILER_TARGET=$ARCH-w64-windows-gnu \
   -DCMAKE_SYSTEM_NAME=Windows \
-  -DCMAKE_AR=$PREFIX/bin/llvm-ar \
-  -DCMAKE_RANLIB=$PREFIX/bin/llvm-ranlib \
   -DCMAKE_C_COMPILER_WORKS=TRUE \
   -DCMAKE_CXX_COMPILER_WORKS=TRUE \
+  -DCMAKE_AR="$PREFIX/bin/llvm-ar" \
+  -DCMAKE_RANLIB="$PREFIX/bin/llvm-ranlib" \
   -DLLVM_ENABLE_RUNTIMES="libunwind;libcxxabi;libcxx" \
-  -DLLVM_PATH=$M_SOURCE/llvm-project/llvm \
   -DLIBUNWIND_USE_COMPILER_RT=TRUE \
   -DLIBUNWIND_ENABLE_SHARED=ON \
   -DLIBUNWIND_ENABLE_STATIC=ON \
@@ -269,15 +267,15 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/runtimes -B$M_BUILD/libcxx-build \
   -DLIBCXX_CXX_ABI=libcxxabi \
   -DLIBCXX_LIBDIR_SUFFIX="" \
   -DLIBCXX_INCLUDE_TESTS=FALSE \
-  -DLIBCXXABI_INCLUDE_TESTS=FALSE \
-  -DLIBUNWIND_INCLUDE_TESTS=FALSE \
+  -DLIBCXX_INSTALL_MODULES=ON \
+  -DLIBCXX_INSTALL_MODULES_DIR="$PREFIX/share/libc++/v1" \
   -DLIBCXX_ENABLE_ABI_LINKER_SCRIPT=FALSE \
-  -DLIBCXX_HAS_WIN32_THREAD_API=ON \
-  -DLIBCXXABI_HAS_WIN32_THREAD_API=ON \
   -DLIBCXXABI_USE_COMPILER_RT=ON \
   -DLIBCXXABI_USE_LLVM_UNWINDER=ON \
   -DLIBCXXABI_ENABLE_SHARED=OFF \
-  -DLIBCXXABI_LIBDIR_SUFFIX=""
+  -DLIBCXXABI_LIBDIR_SUFFIX="" \
+  -DCMAKE_C_FLAGS_INIT="-mguard=cf" \
+  -DCMAKE_CXX_FLAGS_INIT="-mguard=cf"
 cmake --build libcxx-build -j$MJOBS
 cmake --install libcxx-build
 cp $PREFIX/$ARCH-w64-mingw32/lib/libc++.a $PREFIX/$ARCH-w64-mingw32/lib/libstdc++.a
