@@ -104,6 +104,8 @@ jobs:
         run: |
           cd llvm-mingw
           ./pgo-training.sh --x86_64 "../source/llvm-project/llvm/build-instrumented" "../llvm-mingw-stage1"
+          cd ..
+          mv llvm-mingw/profile.profdata ./
       - name: Save profile.profdata cache
         if: ${{ steps.llvm-profdata.outputs.cache-matched-key == '' }}
         uses: actions/cache/save@main
