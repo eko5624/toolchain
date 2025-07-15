@@ -37,7 +37,7 @@ jobs:
       - name: Building linux-stage1-llvm
         run: |
           if [[ ! "$(ls -A install/llvm-mingw/bin)" ]]; then
-            ./llvm-mingw/llvm.sh $(pwd)/install/llvm-mingw --stage1
+            ./llvm-mingw/llvm.sh $(pwd)/install/llvm-mingw --with-clang --stage1
           fi
       - name: Saving linux-stage1-llvm cache
         if: ${{ steps.linux-stage1-llvm.outputs.cache-matched-key == '' }}
