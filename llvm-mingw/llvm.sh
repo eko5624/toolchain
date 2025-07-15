@@ -24,6 +24,9 @@ INSTRUMENTED=OFF
 
 while [ $# -gt 0 ]; do
     case "$1" in
+    --with-clang)
+        WITH_CLANG=1
+        ;;
     --stage1)
         unset CLANG_TOOLS_EXTRA
         ;;
