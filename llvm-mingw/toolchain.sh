@@ -330,7 +330,7 @@ armv7)
     rm -f "$INSTALL_PREFIX/lib/windows/libclang_rt.asan"*arm*
     ;;
 *)
-    mv "$INSTALL_PREFIX/lib/windows/"*.dll "$PREFIX/$arch-w64-mingw32/bin"
+    mv "$INSTALL_PREFIX/lib/windows/"*.dll "$PREFIX/$ARCH-w64-mingw32/bin"
     ;;
 esac
 
