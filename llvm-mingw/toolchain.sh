@@ -57,6 +57,16 @@ while [ $# -gt 0 ]; do
 done
 
 export PATH="$PREFIX/bin:$PATH"
+CLANG_RESOURCE_DIR="$("$PREFIX/bin/clang" --print-resource-dir)"
+INSTALL_PREFIX="$CLANG_RESOURCE_DIR"
+
+if [ -h "$CLANG_RESOURCE_DIR/include" ]; then
+    # Symlink to system headers; use a staging directory in case parts
+    # of the resource dir are immutable
+    WORKDIR="$(mktemp -d)"; trap "rm -rf $WORKDIR" 0
+    INSTALL_PREFIX="$WORKDIR/install"
+fi
+
 mkdir -p $M_SOURCE
 mkdir -p $M_BUILD
 
@@ -85,7 +95,7 @@ echo "stripping llvm"
 echo "======================="
 cd $M_SOURCE/llvm-mingw
 ./strip-llvm.sh $PREFIX
-echo "... Done"
+echo "stripping llvm done"
 
 if [ -n "$LLVM_ONLY" ]; then
     exit 0
@@ -93,48 +103,28 @@ fi
 
 echo "installing wrappers"
 echo "======================="
+cp -f $M_SOURCE/llvm-mingw/wrappers/*-wrapper.sh $PREFIX/bin
+cp -f $M_SOURCE/llvm-mingw/wrappers/mingw32-common.cfg $PREFIX/bin
+cp -f $M_SOURCE/llvm-mingw/wrappers/$ARCH-w64-windows-gnu.cfg $PREFIX/bin
 cd $PREFIX/bin
-ln -s llvm-ar $ARCH-w64-mingw32-ar
-ln -s llvm-ar $ARCH-w64-mingw32-llvm-ar
-ln -s llvm-ranlib $ARCH-w64-mingw32-ranlib
-ln -s llvm-ranlib $ARCH-w64-mingw32-llvm-ranlib
-ln -s llvm-dlltool $ARCH-w64-mingw32-dlltool
-ln -s llvm-dlltool $ARCH-w64-mingw32-llvm-dlltool
-ln -s llvm-objcopy $ARCH-w64-mingw32-objcopy
-ln -s llvm-objcopy $ARCH-w64-mingw32-llvm-objcopy
-ln -s llvm-strip $ARCH-w64-mingw32-strip
-ln -s llvm-strip $ARCH-w64-mingw32-llvm-strip
-ln -s llvm-size $ARCH-w64-mingw32-size
-ln -s llvm-size $ARCH-w64-mingw32-llvm-size
-ln -s llvm-strings $ARCH-w64-mingw32-strings
-ln -s llvm-strings $ARCH-w64-mingw32-llvm-strings
-ln -s llvm-nm $ARCH-w64-mingw32-nm
-ln -s llvm-nm $ARCH-w64-mingw32-llvm-nm
-ln -s llvm-readelf $ARCH-w64-mingw32-readelf
-ln -s llvm-readelf $ARCH-w64-mingw32-llvm-readelf
-ln -s llvm-windres $ARCH-w64-mingw32-windres
-ln -s llvm-windres $ARCH-w64-mingw32-llvm-windres
-ln -s llvm-addr2line $ARCH-w64-mingw32-addr2line
-ln -s llvm-addr2line $ARCH-w64-mingw32-llvm-addr2line
-ln -s $(which pkgconf) $ARCH-w64-mingw32-pkg-config
-ln -s $(which pkgconf) $ARCH-w64-mingw32-pkgconf
-
-cd $TOP_DIR/llvm-mingw/wrappers
-
-for i in as c++ clang clang++ g++ gcc; do
-  BASENAME=$ARCH-w64-mingw32-$i
-  sed -i "s|@target_arch@|$ARCH|g" $BASENAME
+for exec in clang clang++ gcc g++ c++ as; do
+    ln -sf clang-target-wrapper.sh $ARCH-w64-mingw32-$exec
 done
-sed -i "s|@target_arch@|$ARCH|g" $ARCH-w64-mingw32-ld
- 
-install -vm755 $ARCH-w64-mingw32-as $PREFIX/bin/$ARCH-w64-mingw32-as
-install -vm755 $ARCH-w64-mingw32-clang $PREFIX/bin/$ARCH-w64-mingw32-clang
-install -vm755 $ARCH-w64-mingw32-clang++ $PREFIX/bin/$ARCH-w64-mingw32-clang++
-install -vm755 $ARCH-w64-mingw32-ld $PREFIX/bin/$ARCH-w64-mingw32-ld
-install -vm755 $ARCH-w64-mingw32-gcc $PREFIX/bin/$ARCH-w64-mingw32-gcc
-install -vm755 $ARCH-w64-mingw32-g++ $PREFIX/bin/$ARCH-w64-mingw32-g++
-install -vm755 $ARCH-w64-mingw32-c++ $PREFIX/bin/$ARCH-w64-mingw32-c++
-cat $PREFIX/bin/$ARCH-w64-mingw32-clang
+ln -sf clang-scan-deps $ARCH-w64-mingw32-clang-scan-deps
+for exec in addr2line ar ranlib nm objcopy readelf size strings strip; do
+    ln -sf llvm-$exec $ARCH-w64-mingw32-$exec
+done
+ln -sf llvm-ar $ARCH-w64-mingw32-llvm-ar
+ln -sf llvm-ranlib $ARCH-w64-mingw32-llvm-ranlib
+# windres and dlltool can't use llvm-wrapper, as that loses the original
+# target arch prefix.
+ln -sf llvm-windres $ARCH-w64-mingw32-windres
+ln -sf llvm-dlltool $ARCH-w64-mingw32-dlltool
+for exec in ld objdump; do
+    ln -sf $exec-wrapper.sh $ARCH-w64-mingw32-$exec
+done
+echo "installing wrappers done"
+
 
 if [ -n "$CPPWINRT" ]; then
     echo "building cppwinrt"
@@ -155,130 +145,141 @@ if [ -n "$CPPWINRT" ]; then
     cppwinrt -in cppwinrt-build/Windows.winmd -out $PREFIX/$ARCH-w64-mingw32/include
 fi    
 
-echo "building gendef"
-echo "======================="
-cd $M_BUILD
-mkdir gendef-build
-cd gendef-build
-$M_SOURCE/mingw-w64/mingw-w64-tools/gendef/configure --prefix=$PREFIX
-make -j$MJOBS
-make install-strip
+if [ -z "$NATIVE" ]; then
+    echo "building gendef"
+    echo "======================="
+    cd $M_BUILD
+    mkdir gendef-build
+    cd gendef-build
+    $M_SOURCE/mingw-w64/mingw-w64-tools/gendef/configure --prefix=$PREFIX
+    make -j$MJOBS
+    make install-strip
+fi    
 
-echo "building mingw-w64-headers"
-echo "======================="
-cd $M_BUILD
-mkdir headers-build
-cd headers-build
-$M_SOURCE/mingw-w64/mingw-w64-headers/configure \
-  --prefix=$PREFIX/$ARCH-w64-mingw32 \
-  --enable-sdk=all \
-  --enable-idl \
-  --with-default-win32-winnt=0x601 \
-  --with-default-msvcrt=ucrt
-make -j$MJOBS
-make install-strip
+if [ -z "$NATIVE" ]; then
+    echo "building mingw-w64-headers"
+    echo "======================="
+    cd $M_BUILD
+    mkdir headers-build
+    cd headers-build
+    $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
+      --prefix=$PREFIX/$ARCH-w64-mingw32 \
+      --enable-sdk=all \
+      --enable-idl \
+      --with-default-win32-winnt=0x601 \
+      --with-default-msvcrt=ucrt
+    make -j$MJOBS
+    make install-strip
+fi    
 
-echo "building mingw-w64-crt"
-echo "======================="
-cd $M_SOURCE/mingw-w64/mingw-w64-crt
-autoreconf -ivf
-cd $M_BUILD 
-mkdir crt-build
-cd crt-build
-$M_SOURCE/mingw-w64/mingw-w64-crt/configure $FLAGS $CFGUARD_FLAGS \
-  --host=$ARCH-w64-mingw32 \
-  --prefix="$PREFIX/$ARCH-w64-mingw32" \
-  --with-sysroot=$PREFIX \
-  --with-default-msvcrt=ucrt \
-  --disable-dependency-tracking
-make -j$MJOBS GC=0
-make install GC=0
-# Create empty dummy archives, to avoid failing when the compiler driver
-# adds -lssp -lssh_nonshared when linking.
-llvm-ar rcs $PREFIX/lib/libssp.a
-llvm-ar rcs $PREFIX/lib/libssp_nonshared.a
+if [ -z "$NATIVE" ]; then
+    echo "building mingw-w64-crt"
+    echo "======================="
+    cd $M_SOURCE/mingw-w64/mingw-w64-crt
+    autoreconf -ivf
+    cd $M_BUILD 
+    mkdir crt-build
+    cd crt-build
+    $M_SOURCE/mingw-w64/mingw-w64-crt/configure $FLAGS $CFGUARD_FLAGS \
+      --host=$ARCH-w64-mingw32 \
+      --prefix="$PREFIX/$ARCH-w64-mingw32" \
+      --with-sysroot=$PREFIX \
+      --with-default-msvcrt=ucrt \
+      --disable-dependency-tracking
+    make -j$MJOBS GC=0
+    make install GC=0
+    # Create empty dummy archives, to avoid failing when the compiler driver
+    # adds -lssp -lssh_nonshared when linking.
+    llvm-ar rcs $PREFIX/lib/libssp.a
+    llvm-ar rcs $PREFIX/lib/libssp_nonshared.a
+fi    
 
-echo "building winpthreads"
-echo "======================="
-cd $M_BUILD
-mkdir winpthreads-build
-cd winpthreads-build
-NO_CONFLTO=1 $M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
-  --host=$ARCH-w64-mingw32 \
-  --prefix="$PREFIX/$ARCH-w64-mingw32" \
-  --disable-shared \
-  --enable-static
-make -j$MJOBS GC=0
-make install GC=0
+if [ -z "$NATIVE" ]; then
+    echo "building winpthreads"
+    echo "======================="
+    cd $M_BUILD
+    mkdir winpthreads-build
+    cd winpthreads-build
+    NO_CONFLTO=1 $M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
+      --host=$ARCH-w64-mingw32 \
+      --prefix="$PREFIX/$ARCH-w64-mingw32" \
+      --disable-shared \
+      --enable-static
+    make -j$MJOBS GC=0
+    make install GC=0
+fi    
 
-echo "building llvm-compiler-rt-builtin"
-echo "======================="
-cd $M_BUILD
-mkdir builtins-build
-cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B$M_BUILD/builtins-build \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_INSTALL_PREFIX="$($ARCH-w64-mingw32-clang --print-resource-dir)" \
-  -DCMAKE_C_COMPILER=$ARCH-w64-mingw32-clang \
-  -DCMAKE_CXX_COMPILER=$ARCH-w64-mingw32-clang++ \
-  -DCMAKE_SYSTEM_NAME=Windows \
-  -DCMAKE_AR=$PREFIX/bin/llvm-ar \
-  -DCMAKE_RANLIB=$PREFIX/bin/llvm-ranlib \
-  -DCMAKE_C_COMPILER_WORKS=1 \
-  -DCMAKE_CXX_COMPILER_WORKS=1 \
-  -DCMAKE_C_COMPILER_TARGET=$ARCH-w64-windows-gnu \
-  -DCOMPILER_RT_DEFAULT_TARGET_ONLY=TRUE \
-  -DCOMPILER_RT_USE_BUILTINS_LIBRARY=TRUE \
-  -DCOMPILER_RT_BUILD_BUILTINS=TRUE \
-  -DCOMPILER_RT_INCLUDE_TESTS=FALSE \
-  -DCOMPILER_RT_EXCLUDE_ATOMIC_BUILTIN=FALSE \
-  -DLLVM_CONFIG_PATH="" \
-  -DCMAKE_FIND_ROOT_PATH=$PREFIX/$ARCH-w64-mingw32 \
-  -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
-  -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
-  -DSANITIZER_CXX_ABI=libc++ \
-  -DCMAKE_C_FLAGS_INIT="-mguard=cf" \
-  -DCMAKE_CXX_FLAGS_INIT="-mguard=cf"
-cmake --build builtins-build -j$MJOBS
-cmake --install builtins-build
+if [ -z "$NATIVE" ]; then
+    echo "building llvm-compiler-rt-builtin"
+    echo "======================="
+    cd $M_BUILD
+    mkdir builtins-build
+    cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B$M_BUILD/builtins-build \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_INSTALL_PREFIX="$CLANG_RESOURCE_DIR" \
+      -DCMAKE_C_COMPILER=$ARCH-w64-mingw32-clang \
+      -DCMAKE_CXX_COMPILER=$ARCH-w64-mingw32-clang++ \
+      -DCMAKE_SYSTEM_NAME=Windows \
+      -DCMAKE_AR=$PREFIX/bin/llvm-ar \
+      -DCMAKE_RANLIB=$PREFIX/bin/llvm-ranlib \
+      -DCMAKE_C_COMPILER_WORKS=1 \
+      -DCMAKE_CXX_COMPILER_WORKS=1 \
+      -DCMAKE_C_COMPILER_TARGET=$ARCH-w64-windows-gnu \
+      -DCOMPILER_RT_DEFAULT_TARGET_ONLY=TRUE \
+      -DCOMPILER_RT_USE_BUILTINS_LIBRARY=TRUE \
+      -DCOMPILER_RT_BUILD_BUILTINS=TRUE \
+      -DCOMPILER_RT_INCLUDE_TESTS=FALSE \
+      -DCOMPILER_RT_EXCLUDE_ATOMIC_BUILTIN=FALSE \
+      -DLLVM_CONFIG_PATH="" \
+      -DCMAKE_FIND_ROOT_PATH=$PREFIX/$ARCH-w64-mingw32 \
+      -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
+      -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
+      -DSANITIZER_CXX_ABI=libc++ \
+      -DCMAKE_C_FLAGS_INIT="-mguard=cf" \
+      -DCMAKE_CXX_FLAGS_INIT="-mguard=cf"
+    cmake --build builtins-build -j$MJOBS
+    cmake --install builtins-build --prefix "$INSTALL_PREFIX"
+fi    
 
-echo "building llvm-libcxx"
-echo "======================="
-cd $M_BUILD
-mkdir libcxx-build
-cmake -G Ninja -H$M_SOURCE/llvm-project/runtimes -B$M_BUILD/libcxx-build \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_INSTALL_PREFIX="$PREFIX/$ARCH-w64-mingw32" \
-  -DCMAKE_C_COMPILER=$ARCH-w64-mingw32-clang \
-  -DCMAKE_CXX_COMPILER=$ARCH-w64-mingw32-clang++ \
-  -DCMAKE_CXX_COMPILER_TARGET=$ARCH-w64-windows-gnu \
-  -DCMAKE_SYSTEM_NAME=Windows \
-  -DCMAKE_C_COMPILER_WORKS=TRUE \
-  -DCMAKE_CXX_COMPILER_WORKS=TRUE \
-  -DCMAKE_AR="$PREFIX/bin/llvm-ar" \
-  -DCMAKE_RANLIB="$PREFIX/bin/llvm-ranlib" \
-  -DLLVM_ENABLE_RUNTIMES="libunwind;libcxxabi;libcxx" \
-  -DLIBUNWIND_USE_COMPILER_RT=TRUE \
-  -DLIBUNWIND_ENABLE_SHARED=ON \
-  -DLIBUNWIND_ENABLE_STATIC=ON \
-  -DLIBCXX_USE_COMPILER_RT=ON \
-  -DLIBCXX_ENABLE_SHARED=ON \
-  -DLIBCXX_ENABLE_STATIC=ON \
-  -DLIBCXX_ENABLE_STATIC_ABI_LIBRARY=TRUE \
-  -DLIBCXX_CXX_ABI=libcxxabi \
-  -DLIBCXX_LIBDIR_SUFFIX="" \
-  -DLIBCXX_INCLUDE_TESTS=FALSE \
-  -DLIBCXX_INSTALL_MODULES=ON \
-  -DLIBCXX_INSTALL_MODULES_DIR="$PREFIX/share/libc++/v1" \
-  -DLIBCXX_ENABLE_ABI_LINKER_SCRIPT=FALSE \
-  -DLIBCXXABI_USE_COMPILER_RT=ON \
-  -DLIBCXXABI_USE_LLVM_UNWINDER=ON \
-  -DLIBCXXABI_ENABLE_SHARED=OFF \
-  -DLIBCXXABI_LIBDIR_SUFFIX="" \
-  -DCMAKE_C_FLAGS_INIT="-mguard=cf" \
-  -DCMAKE_CXX_FLAGS_INIT="-mguard=cf"
-cmake --build libcxx-build -j$MJOBS
-cmake --install libcxx-build
-cp $PREFIX/$ARCH-w64-mingw32/lib/libc++.a $PREFIX/$ARCH-w64-mingw32/lib/libstdc++.a
+if [ -z "$NATIVE" ]; then
+    echo "building llvm-libcxx"
+    echo "======================="
+    cd $M_BUILD
+    mkdir libcxx-build
+    cmake -G Ninja -H$M_SOURCE/llvm-project/runtimes -B$M_BUILD/libcxx-build \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_INSTALL_PREFIX="$PREFIX/$ARCH-w64-mingw32" \
+      -DCMAKE_C_COMPILER=$ARCH-w64-mingw32-clang \
+      -DCMAKE_CXX_COMPILER=$ARCH-w64-mingw32-clang++ \
+      -DCMAKE_CXX_COMPILER_TARGET=$ARCH-w64-windows-gnu \
+      -DCMAKE_SYSTEM_NAME=Windows \
+      -DCMAKE_C_COMPILER_WORKS=TRUE \
+      -DCMAKE_CXX_COMPILER_WORKS=TRUE \
+      -DCMAKE_AR="$PREFIX/bin/llvm-ar" \
+      -DCMAKE_RANLIB="$PREFIX/bin/llvm-ranlib" \
+      -DLLVM_ENABLE_RUNTIMES="libunwind;libcxxabi;libcxx" \
+      -DLIBUNWIND_USE_COMPILER_RT=TRUE \
+      -DLIBUNWIND_ENABLE_SHARED=ON \
+      -DLIBUNWIND_ENABLE_STATIC=ON \
+      -DLIBCXX_USE_COMPILER_RT=ON \
+      -DLIBCXX_ENABLE_SHARED=ON \
+      -DLIBCXX_ENABLE_STATIC=ON \
+      -DLIBCXX_ENABLE_STATIC_ABI_LIBRARY=TRUE \
+      -DLIBCXX_CXX_ABI=libcxxabi \
+      -DLIBCXX_LIBDIR_SUFFIX="" \
+      -DLIBCXX_INCLUDE_TESTS=FALSE \
+      -DLIBCXX_INSTALL_MODULES=ON \
+      -DLIBCXX_INSTALL_MODULES_DIR="$PREFIX/share/libc++/v1" \
+      -DLIBCXX_ENABLE_ABI_LINKER_SCRIPT=FALSE \
+      -DLIBCXXABI_USE_COMPILER_RT=ON \
+      -DLIBCXXABI_USE_LLVM_UNWINDER=ON \
+      -DLIBCXXABI_ENABLE_SHARED=OFF \
+      -DLIBCXXABI_LIBDIR_SUFFIX="" \
+      -DCMAKE_C_FLAGS_INIT="-mguard=cf" \
+      -DCMAKE_CXX_FLAGS_INIT="-mguard=cf"
+    cmake --build libcxx-build -j$MJOBS
+    cmake --install libcxx-build
+fi    
 
 echo "building llvm-compiler-rt"
 echo "======================="
@@ -287,7 +288,7 @@ if [ -n "$NATIVE" ]; then
     mkdir compiler-rt-build
     cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt -B$M_BUILD/compiler-rt-build \
       -DCMAKE_BUILD_TYPE=Release \
-      -DCMAKE_INSTALL_PREFIX="$(clang --print-resource-dir)" \
+      -DCMAKE_INSTALL_PREFIX="$CLANG_RESOURCE_DIR" \
       -DCMAKE_C_COMPILER=clang \
       -DCMAKE_CXX_COMPILER=clang++ \
       -DLLVM_CONFIG_PATH="" \
@@ -296,13 +297,19 @@ if [ -n "$NATIVE" ]; then
       -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
       -DCOMPILER_RT_USE_LIBCXX=OFF
     cmake --build compiler-rt-build -j$MJOBS
-    cmake --install compiler-rt-build
+    cmake --install compiler-rt-build --prefix "$INSTALL_PREFIX"
+    if [ "$INSTALL_PREFIX" != "$CLANG_RESOURCE_DIR" ]; then
+        # symlink to system headers - skip copy
+        rm -rf "$INSTALL_PREFIX/include"
+        cp -r "$INSTALL_PREFIX/." $CLANG_RESOURCE_DIR
+    fi
+    exit 0
 fi
 
 rm -rf compiler-rt-build && mkdir compiler-rt-build
 cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt -B$M_BUILD/compiler-rt-build \
   -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_INSTALL_PREFIX="$($ARCH-w64-mingw32-clang --print-resource-dir)" \
+  -DCMAKE_INSTALL_PREFIX="$CLANG_RESOURCE_DIR" \
   -DCMAKE_C_COMPILER=$ARCH-w64-mingw32-clang \
   -DCMAKE_CXX_COMPILER=$ARCH-w64-mingw32-clang++ \
   -DCMAKE_SYSTEM_NAME=Windows \
@@ -322,9 +329,28 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt -B$M_BUILD/compiler-rt-build
   -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
   -DSANITIZER_CXX_ABI=libc++
 cmake --build compiler-rt-build -j$MJOBS
-cmake --install compiler-rt-build
+cmake --install compiler-rt-build --prefix "$INSTALL_PREFIX"
 mkdir -p $PREFIX/$ARCH-w64-mingw32/bin
-mv $($ARCH-w64-mingw32-clang --print-resource-dir)/lib/windows/*.dll $PREFIX/$ARCH-w64-mingw32/bin
+case $ARCH in
+aarch64)
+    # asan doesn't work on aarch64 or armv7; make this clear by omitting
+    # the installed files altogether.
+    rm -f "$INSTALL_PREFIX/lib/windows/libclang_rt.asan"*aarch64*
+    ;;
+armv7)
+    rm -f "$INSTALL_PREFIX/lib/windows/libclang_rt.asan"*arm*
+    ;;
+*)
+    mv "$INSTALL_PREFIX/lib/windows/"*.dll "$PREFIX/$arch-w64-mingw32/bin"
+    ;;
+esac
+
+if [ "$INSTALL_PREFIX" != "$CLANG_RESOURCE_DIR" ]; then
+    # symlink to system headers - skip copy
+    rm -rf "$INSTALL_PREFIX/include"
+
+    cp -r "$INSTALL_PREFIX/." $CLANG_RESOURCE_DIR
+fi
 
 if [ -n "$PKGCONF" ]; then
     echo "building pkgconf"
@@ -342,14 +368,4 @@ if [ -n "$PKGCONF" ]; then
     #ln -s pkgconf x86_64-w64-mingw32-pkgconf
     #ln -s pkgconf x86_64-w64-mingw32-pkg-config
     rm -rf $PREFIX/lib/pkgconfig
-fi    
-
-echo "fix cross-llvm-wrappers"
-echo "======================="
-sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $PREFIX/bin/$ARCH-w64-mingw32-as
-sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $PREFIX/bin/$ARCH-w64-mingw32-c++
-sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $PREFIX/bin/$ARCH-w64-mingw32-clang
-sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $PREFIX/bin/$ARCH-w64-mingw32-clang++
-sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $PREFIX/bin/$ARCH-w64-mingw32-g++
-sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $PREFIX/bin/$ARCH-w64-mingw32-gcc
-sed -i 's/$FLAGS "$@"/"$@" $FLAGS/' $PREFIX/bin/$ARCH-w64-mingw32-ld
+fi
