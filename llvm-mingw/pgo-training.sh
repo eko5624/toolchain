@@ -51,7 +51,7 @@ while [ $# -gt 0 ]; do
     shift
 done
 
-export PATH="$STAGE1/bin:$PATH"
+export PATH="$PREFIX/bin:$PATH"
 
 MAKE=make
 if command -v gmake >/dev/null; then
