@@ -21,6 +21,7 @@ set -e
 
 : ${LLVM_PROFILE_DATA_DIR:=/tmp/llvm-profile}
 : ${LLVM_PROFDATA_FILE:=profile.profdata}
+TOP_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd .. && pwd)
 
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -51,7 +52,7 @@ while [ $# -gt 0 ]; do
     shift
 done
 
-export PATH="$PREFIX/bin:$PATH"
+export PATH="$STAGE1/bin:$PATH"
 
 MAKE=make
 if command -v gmake >/dev/null; then
