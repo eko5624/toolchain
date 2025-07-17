@@ -8,8 +8,6 @@ on:
 jobs:
   linux-stage1:
     runs-on: ubuntu-latest
-    container:
-      image: docker://ghcr.io/eko5624/archlinux:latest
     steps:
       - name: Checkout
         uses: actions/checkout@main      
@@ -72,8 +70,6 @@ jobs:
   linux-profile:
     needs: [linux-stage1]
     runs-on: ubuntu-latest
-    container:
-      image: docker://ghcr.io/eko5624/archlinux:latest
     steps:
       - name: Checkout
         uses: actions/checkout@main      
