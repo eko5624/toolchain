@@ -21,21 +21,20 @@ set -e
 
 : ${LLVM_PROFILE_DATA_DIR:=/tmp/llvm-profile}
 : ${LLVM_PROFDATA_FILE:=profile.profdata}
-TOP_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd .. && pwd)
 
 while [ $# -gt 0 ]; do
     case "$1" in
     --x86_64)
         FLAGS="--disable-lib32 --enable-lib64"
-        TOOLCHAIN_ARCHS="x86_64"
+        ARCHS="x86_64"
         ;;
     --aarch64)
         FLAGS="--disable-lib32 --disable-lib64 --enable-libarm64"
-        TOOLCHAIN_ARCHS="aarch64"
+        ARCHS="aarch64"
         ;;
     --armv7)
         FLAGS="--disable-lib32 --disable-lib64 --enable-libarm32"
-        TOOLCHAIN_ARCHS="armv7"
+        ARCHS="armv7"
         ;;
     *)
         if [ -n "$PREFIX" ]; then
@@ -62,7 +61,6 @@ fi
 : ${CORES:=$(nproc 2>/dev/null)}
 : ${CORES:=$(sysctl -n hw.ncpu 2>/dev/null)}
 : ${CORES:=4}
-: ${ARCHS:=${TOOLCHAIN_ARCHS}}
 
 download() {
     if command -v curl >/dev/null; then
