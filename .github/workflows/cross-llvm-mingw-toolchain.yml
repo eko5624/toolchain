@@ -8,8 +8,6 @@ on:
 jobs:
   linux-stage1:
     runs-on: ubuntu-latest
-    container:
-      image: docker://ghcr.io/eko5624/archlinux:latest
     steps:
       - name: Checkout
         uses: actions/checkout@main      
@@ -27,13 +25,6 @@ jobs:
         with:
           path: ${{ github.workspace }}/source/llvm-project
           key: llvm-source-cache
-      - name: Install host clang toolchain
-        if: ${{ steps.linux-stage1-llvm.outputs.cache-matched-key == '' }}
-        run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
-          tar -xvf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz 2>/dev/null >/dev/null
-          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
-          mv cross host
       - name: Building linux-stage1-llvm
         run: |
           if [[ ! "$(ls -A install/llvm-mingw/bin)" ]]; then
@@ -47,7 +38,7 @@ jobs:
           key: linux-stage1-llvm-${{ github.run_id }}
       - name: Building toolchain
         run: |
-          ./llvm-mingw/toolchain.sh $(pwd)/install/llvm-mingw --x86_64 --native --enable-cfguard
+          ./llvm-mingw/toolchain.sh $(pwd)/install/llvm-mingw --native --enable-cfguard
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Packaging toolchain
@@ -72,8 +63,6 @@ jobs:
   linux-profile:
     needs: [linux-stage1]
     runs-on: ubuntu-latest
-    container:
-      image: docker://ghcr.io/eko5624/archlinux:latest
     steps:
       - name: Checkout
         uses: actions/checkout@main      
@@ -103,7 +92,8 @@ jobs:
       - name: Train pgo
         run: |
           cd llvm-mingw
-          ./pgo-training.sh --x86_64 "../source/llvm-project/llvm/build-instrumented" "../llvm-mingw-stage1"
+          ln -sf ../source/llvm-project llvm-project
+          ./pgo-training.sh "llvm-project/llvm/build-instrumented" "../llvm-mingw-stage1"
           cd ..
           mv llvm-mingw/profile.profdata ./
       - name: Save profile.profdata cache
@@ -116,8 +106,6 @@ jobs:
   linux-toolchain:
     needs: [linux-profile]
     runs-on: ubuntu-latest
-    container:
-      image: docker://ghcr.io/eko5624/archlinux:latest
     steps:
       - name: Checkout
         uses: actions/checkout@main      
