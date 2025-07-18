@@ -26,15 +26,15 @@ while [ $# -gt 0 ]; do
     case "$1" in
     --x86_64)
         FLAGS="--disable-lib32 --enable-lib64"
-        ARCHS="x86_64"
+        TOOLCHAIN_ARCHS="x86_64"
         ;;
     --aarch64)
         FLAGS="--disable-lib32 --disable-lib64 --enable-libarm64"
-        ARCHS="aarch64"
+        TOOLCHAIN_ARCHS="aarch64"
         ;;
     --armv7)
         FLAGS="--disable-lib32 --disable-lib64 --enable-libarm32"
-        ARCHS="armv7"
+        TOOLCHAIN_ARCHS="armv7"
         ;;
     *)
         if [ -n "$PREFIX" ]; then
@@ -58,9 +58,7 @@ if command -v gmake >/dev/null; then
     MAKE=gmake
 fi
 
-: ${CORES:=$(nproc 2>/dev/null)}
-: ${CORES:=$(sysctl -n hw.ncpu 2>/dev/null)}
-: ${CORES:=4}
+: ${ARCHS:=${TOOLCHAIN_ARCHS-x86_64 armv7 aarch64}}
 
 download() {
     if command -v curl >/dev/null; then
