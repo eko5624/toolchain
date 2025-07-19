@@ -206,8 +206,8 @@ echo "building mingw-w64-crt"
 echo "======================="
 cd $M_SOURCE/mingw-w64/mingw-w64-crt
 autoreconf -ivf
-cd $M_BUILD
 for arch in $ARCHS; do
+    cd $M_BUILD
     mkdir crt-build-$arch
     cd crt-build-$arch
     case $arch in
@@ -245,8 +245,8 @@ done
 
 echo "building winpthreads"
 echo "======================="
-cd $M_BUILD
 for arch in $ARCHS; do
+    cd $M_BUILD
     mkdir winpthreads-build-$arch
     cd winpthreads-build-$arch
     $M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
@@ -260,8 +260,8 @@ done
 
 echo "building llvm-compiler-rt-builtin"
 echo "======================="
-cd $M_BUILD
 for arch in $ARCHS; do
+    cd $M_BUILD
     mkdir builtins-build-$arch
     cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B$M_BUILD/builtins-build \
       -DCMAKE_BUILD_TYPE=Release \
@@ -292,8 +292,8 @@ done
 
 echo "building llvm-libcxx"
 echo "======================="
-cd $M_BUILD
 for arch in $ARCHS; do
+    cd $M_BUILD
     mkdir libcxx-build-$arch
     cmake -G Ninja -H$M_SOURCE/llvm-project/runtimes -B$M_BUILD/libcxx-build \
       -DCMAKE_BUILD_TYPE=Release \
@@ -332,8 +332,8 @@ done
 
 echo "building llvm-compiler-rt"
 echo "======================="
-cd $M_BUILD
 for arch in $ARCHS; do
+    cd $M_BUILD
     mkdir compiler-rt-build-$arch
     cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt -B$M_BUILD/compiler-rt-build \
       -DCMAKE_BUILD_TYPE=Release \
