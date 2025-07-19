@@ -150,7 +150,9 @@ for arch in $ARCHS; do
     for exec in ld objdump; do
         ln -sf $exec-wrapper.sh $arch-w64-mingw32-$exec
     done
-done    
+    ln -sf $(which pkgconf) $arch-pkg-config
+    ln -sf $(which pkgconf) $arch-pkgconf
+done
 echo "installing wrappers done"
 
 if [ -n "$CPPWINRT" ]; then
@@ -381,20 +383,20 @@ if [ "$INSTALL_PREFIX" != "$CLANG_RESOURCE_DIR" ]; then
     cp -r "$INSTALL_PREFIX/." $CLANG_RESOURCE_DIR
 fi
 
-if [ -n "$PKGCONF" ]; then
-    echo "building pkgconf"
-    echo "======================="
-    cd $M_BUILD
-    mkdir pkgconf-build
-    cd $M_SOURCE/pkgconf
-    meson setup $M_BUILD/pkgconf-build \
-      --prefix=$PREFIX \
-      --buildtype=release \
-      -Dtests=disabled
-    meson compile -C $M_BUILD/pkgconf-build
-    meson install -C $M_BUILD/pkgconf-build
-    cd $PREFIX/bin
-    #ln -s pkgconf x86_64-w64-mingw32-pkgconf
-    #ln -s pkgconf x86_64-w64-mingw32-pkg-config
-    rm -rf $PREFIX/lib/pkgconfig
-fi
+#if [ -n "$PKGCONF" ]; then
+#    echo "building pkgconf"
+#    echo "======================="
+#    cd $M_BUILD
+#    mkdir pkgconf-build
+#    cd $M_SOURCE/pkgconf
+#    meson setup $M_BUILD/pkgconf-build \
+#      --prefix=$PREFIX \
+#      --buildtype=release \
+#      -Dtests=disabled
+#    meson compile -C $M_BUILD/pkgconf-build
+#    meson install -C $M_BUILD/pkgconf-build
+#    cd $PREFIX/bin
+#    #ln -s pkgconf x86_64-w64-mingw32-pkgconf
+#    #ln -s pkgconf x86_64-w64-mingw32-pkg-config
+#    rm -rf $PREFIX/lib/pkgconfig
+#fi
