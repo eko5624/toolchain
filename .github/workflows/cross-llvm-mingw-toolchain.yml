@@ -37,8 +37,8 @@ jobs:
       - name: Train pgo
         run: |
           cd llvm-mingw
-          ln -s ../source/llvm-project llvm-project
-          ./pgo-training.sh --x86_64 "llvm-project/llvm/build-instrumented" "../llvm-mingw-stage1"
+          ln -sf ../source/llvm-project llvm-project
+          ./pgo-training.sh "llvm-project/llvm/build-instrumented" "../llvm-mingw-stage1"
           cd ..
           mv llvm-mingw/profile.profdata ./
       - name: Save profile.profdata cache
@@ -51,8 +51,6 @@ jobs:
   linux-toolchain:
     needs: [linux-profile]
     runs-on: ubuntu-latest
-    container:
-      image: docker://ghcr.io/eko5624/archlinux:latest
     steps:
       - name: Checkout
         uses: actions/checkout@main      
