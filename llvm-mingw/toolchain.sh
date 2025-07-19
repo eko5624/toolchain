@@ -263,7 +263,7 @@ echo "======================="
 for arch in $ARCHS; do
     cd $M_BUILD
     mkdir builtins-build-$arch
-    cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B$M_BUILD/builtins-build \
+    cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B$M_BUILD/builtins-build-$arch \
       -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_INSTALL_PREFIX="$CLANG_RESOURCE_DIR" \
       -DCMAKE_C_COMPILER=$arch-w64-mingw32-clang \
@@ -295,7 +295,7 @@ echo "======================="
 for arch in $ARCHS; do
     cd $M_BUILD
     mkdir libcxx-build-$arch
-    cmake -G Ninja -H$M_SOURCE/llvm-project/runtimes -B$M_BUILD/libcxx-build \
+    cmake -G Ninja -H$M_SOURCE/llvm-project/runtimes -B$M_BUILD/libcxx-build-$arch \
       -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_INSTALL_PREFIX="$PREFIX/$arch-w64-mingw32" \
       -DCMAKE_C_COMPILER=$arch-w64-mingw32-clang \
@@ -335,7 +335,7 @@ echo "======================="
 for arch in $ARCHS; do
     cd $M_BUILD
     mkdir compiler-rt-build-$arch
-    cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt -B$M_BUILD/compiler-rt-build \
+    cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt -B$M_BUILD/compiler-rt-build-$arch \
       -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_INSTALL_PREFIX="$CLANG_RESOURCE_DIR" \
       -DCMAKE_C_COMPILER=$arch-w64-mingw32-clang \
