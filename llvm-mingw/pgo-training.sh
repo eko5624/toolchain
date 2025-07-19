@@ -22,43 +22,23 @@ set -e
 : ${LLVM_PROFILE_DATA_DIR:=/tmp/llvm-profile}
 : ${LLVM_PROFDATA_FILE:=profile.profdata}
 
-while [ $# -gt 0 ]; do
-    case "$1" in
-    --x86_64)
-        FLAGS="--disable-lib32 --enable-lib64"
-        TOOLCHAIN_ARCHS="x86_64"
-        ;;
-    --aarch64)
-        FLAGS="--disable-lib32 --disable-lib64 --enable-libarm64"
-        TOOLCHAIN_ARCHS="aarch64"
-        ;;
-    --armv7)
-        FLAGS="--disable-lib32 --disable-lib64 --enable-libarm32"
-        TOOLCHAIN_ARCHS="armv7"
-        ;;
-    *)
-        if [ -n "$PREFIX" ]; then
-            if [ -n "$STAGE1" ]; then
-                echo Unrecognized parameter $1
-                exit 1
-            fi
-            STAGE1="$1"
-        else
-            PREFIX="$1"
-        fi
-        ;;
-    esac
-    shift
-done
-
-export PATH="$STAGE1/bin:$PATH"
+if [ $# -lt 2 ]; then
+    echo $0 build stage1
+    exit 1
+fi
+PREFIX="$1"
+STAGE1="$2"
+PREFIX="$(cd "$PREFIX" && pwd)"
 
 MAKE=make
 if command -v gmake >/dev/null; then
     MAKE=gmake
 fi
 
-: ${ARCHS:=${TOOLCHAIN_ARCHS-x86_64 armv7 aarch64}}
+: ${CORES:=$(nproc 2>/dev/null)}
+: ${CORES:=$(sysctl -n hw.ncpu 2>/dev/null)}
+: ${CORES:=4}
+: ${ARCHS:=${TOOLCHAIN_ARCHS-i686 x86_64 armv7 aarch64 arm64ec}}
 
 download() {
     if command -v curl >/dev/null; then
