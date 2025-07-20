@@ -150,8 +150,8 @@ for arch in $ARCHS; do
     for exec in ld objdump; do
         ln -sf $exec-wrapper.sh $arch-w64-mingw32-$exec
     done
-    ln -sf $(which pkgconf) $arch-pkg-config
-    ln -sf $(which pkgconf) $arch-pkgconf
+    ln -sf $(which pkgconf) $arch-w64-mingw32-pkg-config
+    ln -sf $(which pkgconf) $arch-w64-mingw32-pkgconf
 done
 echo "installing wrappers done"
 
