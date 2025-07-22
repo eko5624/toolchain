@@ -43,7 +43,7 @@ jobs:
       - name: Building windows-llvm
         run: |
           if [[ ! "$(ls -A install/llvm-mingw/bin)" ]]; then
-            ./llvm-mingw/llvm.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw --with-clang --thinlto --pgo --host=x86_64-w64-mingw32
+            ./llvm-mingw/llvm.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw --thinlto --pgo --host=x86_64-w64-mingw32
           fi  
       - name: Saving windows-llvm cache
         if: ${{ steps.windows-llvm.outputs.cache-matched-key == '' }}
