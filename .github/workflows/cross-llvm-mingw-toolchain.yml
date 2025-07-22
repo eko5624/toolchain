@@ -38,7 +38,7 @@ jobs:
           key: linux-stage1-llvm-${{ github.run_id }}
       - name: Building toolchain
         run: |
-          ./llvm-mingw/toolchain.sh $(pwd)/install/llvm-mingw --native --all-tools --enable-cfguard
+          ./llvm-mingw/toolchain-linux.sh $(pwd)/install/llvm-mingw --native --all-tools --enable-cfguard
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Packaging toolchain
@@ -132,7 +132,10 @@ jobs:
           mv llvm-mingw-stage1 /opt/llvm-mingw
       - name: Building linux-llvm
         run: |
-          ./llvm-mingw/llvm.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw --thinlto --pgo
+          ./llvm-mingw/llvm.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw --with-clang --thinlto --pgo
+      - name: Building toolchain
+        run: |
+          ./llvm-mingw/toolchain.sh $(pwd)/install/llvm-mingw --native --all-tools --enable-cfguard
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Packaging toolchain
@@ -146,6 +149,75 @@ jobs:
         run: |
           chmod +x ./package-delete.sh
           ./package-delete.sh llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: toolchain
+          name: toolchain
+          files: llvm-mingw*.tar.xz
+
+  windows-toolchain:
+    needs: [linux-profile]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+      - name: Loading windows-llvm cache
+        uses: actions/cache/restore@main
+        id: windows-llvm
+        with:
+          path: ${{ github.workspace }}/install/llvm-mingw
+          key: windows-llvm-${{ github.run_id }}
+          restore-keys: |
+            windows-llvm-
+      - name: Loading profile-profdata cache
+        uses: actions/cache/restore@main
+        id: profile-profdata
+        with:
+          path: ${{ github.workspace }}/profile.profdata
+          key: profile-profdata-${{ github.run_id }}
+          restore-keys: |
+            profile-profdata-
+      - name: Load llvm-project source
+        uses: actions/cache@main
+        id: llvm-source
+        with:
+          path: ${{ github.workspace }}/source/llvm-project
+          key: llvm-source-cache            
+      - name: Install stage1 Clang
+        if: ${{ steps.linux-profile-llvm.outputs.cache-matched-key == '' }}
+        run: |
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
+          tar -xvf llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz 2>/dev/null >/dev/null
+          rm llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
+          mv llvm-mingw-stage1 /opt/llvm-mingw
+      - name: Building windows-llvm
+        run: |
+          if [[ ! "$(ls -A install/llvm-mingw/bin)" ]]; then
+            ./llvm-mingw/llvm.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw --with-clang --thinlto --pgo --host=x86_64-w64-mingw32
+          fi  
+      - name: Saving windows-llvm cache
+        if: ${{ steps.windows-llvm.outputs.cache-matched-key == '' }}
+        uses: actions/cache/save@main
+        with:
+          path: ${{ github.workspace }}/install/llvm-mingw
+          key: windows-llvm-${{ github.run_id }}
+      - name: Building toolchain
+        run: |
+          ./llvm-mingw/toolchain-windows.sh $(pwd)/install/llvm-mingw $(pwd)/install/llvm-mingw --x86_64
+      - name: Get current timestamp
+        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
+      - name: Packaging toolchain
+        run: |
+          cd install
+          tar -zcvf ../llvm-mingw-latest-ucrt-windows-x86_64.tar.xz llvm-mingw 2>/dev/null >/dev/null
+          cp ../llvm-mingw-latest-ucrt-windows-x86_64.tar.xz ../llvm-mingw-$date-ucrt-windows-x86_64.tar.xz
+      - name: Delete
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          chmod +x ./package-delete.sh
+          ./package-delete.sh llvm-mingw-latest-ucrt-windows-x86_64.tar.xz
       - name: Release
         uses: softprops/action-gh-release@v2
         with:

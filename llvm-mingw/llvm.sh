@@ -26,6 +26,7 @@ while [ $# -gt 0 ]; do
     case "$1" in
     --with-clang)
         WITH_CLANG=1
+        BUILDDIR="$BUILDDIR-withclang"
         ;;
     --stage1)
         unset CLANG_TOOLS_EXTRA
@@ -40,9 +41,7 @@ while [ $# -gt 0 ]; do
         # A fixed BUILDDIR is set at the end for this case.
         ;;
     --pgo)
-        PGO=1
-        WITH_CLANG=1
-        BUILDDIR="$BUILDDIR-withclang"
+        PGO=1        
         LLVM_PROFDATA_FILE="profile.profdata"
         if [ ! -e "$LLVM_PROFDATA_FILE" ]; then
             echo Profile \"$LLVM_PROFDATA_FILE\" not found
@@ -79,7 +78,6 @@ done
 CMAKEFLAGS="$LLVM_CMAKEFLAGS"
 if [ -n "$HOST" ]; then
     ARCH="${HOST%%-*}"
-    BUILDDIR=$BUILDDIR-$HOST
 
     if [ -n "$WITH_CLANG" ]; then
         CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_C_COMPILER=clang"
