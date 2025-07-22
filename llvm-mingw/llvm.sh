@@ -75,6 +75,31 @@ while [ $# -gt 0 ]; do
     shift
 done
 
+if [ -n "$PROFILE" ]; then
+    export PATH=$PREFIX/bin:$PATH
+    STAGE1_PREFIX=$PREFIX
+    PREFIX=/tmp/dummy-prefix
+elif [ -n "$PGO" ]; then
+    if [ -z "$PREFIX_PGO" ]; then
+        echo Must provide a second destination for a PGO build
+        exit 1
+    fi
+    export PATH=$PREFIX/bin:$PATH
+    STAGE1_PREFIX=$PREFIX
+    PREFIX=$PREFIX_PGO
+
+    if [ "$PREFIX" != "$STAGE1_PREFIX" ] ; then
+        # Only rebuilding LLVM, not any runtimes. Copy the stage1 toolchain
+        # and rebuild LLVM on top of it.
+        rm -rf $PREFIX
+        mkdir -p "$(dirname "$PREFIX")"
+        cp -a "$STAGE1_PREFIX" "$PREFIX"
+        # Remove the native Linux/macOS runtimes which aren't needed in
+        # the final distribution.
+        rm -rf "$PREFIX"/lib/clang/*/lib/linux
+    fi
+fi
+
 CMAKEFLAGS="$LLVM_CMAKEFLAGS"
 if [ -n "$HOST" ]; then
     ARCH="${HOST%%-*}"
@@ -126,32 +151,7 @@ else
     elif command -v ld.gold >/dev/null; then
         CMAKEFLAGS="$CMAKEFLAGS -DLLVM_USE_LINKER=gold"
     fi
-fi
-
-if [ -n "$PROFILE" ]; then
-    export PATH=$PREFIX/bin:$PATH
-    STAGE1_PREFIX=$PREFIX
-    PREFIX=/tmp/dummy-prefix
-elif [ -n "$PGO" ]; then
-    if [ -z "$PREFIX_PGO" ]; then
-        echo Must provide a second destination for a PGO build
-        exit 1
-    fi
-    export PATH=$PREFIX/bin:$PATH
-    STAGE1_PREFIX=$PREFIX
-    PREFIX=$PREFIX_PGO
-
-    if [ "$PREFIX" != "$STAGE1_PREFIX" ] ; then
-        # Only rebuilding LLVM, not any runtimes. Copy the stage1 toolchain
-        # and rebuild LLVM on top of it.
-        rm -rf $PREFIX
-        mkdir -p "$(dirname "$PREFIX")"
-        cp -a "$STAGE1_PREFIX" "$PREFIX"
-        # Remove the native Linux/macOS runtimes which aren't needed in
-        # the final distribution.
-        rm -rf "$PREFIX"/lib/clang/*/lib/linux
-    fi
-fi    
+fi   
 
 if [ -n "$LTO" ]; then
     CMAKEFLAGS="$CMAKEFLAGS -DLLVM_ENABLE_LTO=$LTO"
