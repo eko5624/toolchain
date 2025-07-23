@@ -132,7 +132,7 @@ jobs:
           mv llvm-mingw-stage1 /opt/llvm-mingw
       - name: Building linux-llvm
         run: |
-          ./llvm-mingw/llvm.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw --with-clang --thinlto --pgo
+          ./llvm-mingw/llvm.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw --with-clang --thinlto --pgo --llvm-only
       - name: Building toolchain
         run: |
           ./llvm-mingw/toolchain.sh $(pwd)/install/llvm-mingw --native --all-tools --enable-cfguard

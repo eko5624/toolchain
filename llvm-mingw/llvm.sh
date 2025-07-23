@@ -28,6 +28,9 @@ while [ $# -gt 0 ]; do
         WITH_CLANG=1
         BUILDDIR="$BUILDDIR-withclang"
         ;;
+    --llvm-only)
+        LLVM_ONLY=1
+        ;;
     --stage1)
         unset CLANG_TOOLS_EXTRA
         ;;
@@ -35,6 +38,7 @@ while [ $# -gt 0 ]; do
         unset CLANG_TOOLS_EXTRA
         PROFILE=1
         WITH_CLANG=1
+        LLVM_ONLY=1
         LINK_DYLIB=OFF
         INSTRUMENTED="Frontend"
         LLVM_PROFILE_DATA_DIR="/tmp/llvm-profile"
@@ -53,9 +57,6 @@ while [ $# -gt 0 ]; do
     --thinlto)
         LTO="thin"
         BUILDDIR="$BUILDDIR-thinlto"
-        ;;
-    --full-llvm)
-        FULL_LLVM=1
         ;;
     --host=*)
         HOST="${1#*=}"
@@ -88,7 +89,7 @@ elif [ -n "$PGO" ]; then
     STAGE1_PREFIX=$PREFIX
     PREFIX=$PREFIX_PGO
 
-    if [ "$PREFIX" != "$STAGE1_PREFIX" ] ; then
+    if [ -n "$LLVM_ONLY" ] && [ "$PREFIX" != "$STAGE1_PREFIX" ] ; then
         # Only rebuilding LLVM, not any runtimes. Copy the stage1 toolchain
         # and rebuild LLVM on top of it.
         rm -rf $PREFIX

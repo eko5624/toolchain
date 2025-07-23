@@ -36,7 +36,6 @@ while [ $# -gt 0 ]; do
 done
 
 export PATH="/opt/llvm-mingw/bin:$PATH"
-TOOLCHAIN_TARGET_OSES="mingw32"
 CLANG_RESOURCE_DIR="$("/opt/llvm-mingw/bin/clang" --print-resource-dir)"
 CLANG_VERSION=$(basename "$CLANG_RESOURCE_DIR")
 
@@ -121,7 +120,7 @@ echo "stripping llvm"
 echo "======================="
 cd $M_SOURCE/llvm-mingw
 ./strip-llvm.sh $PREFIX --host=$ARCH-w64-mingw32
-echo "strip llvm done"
+echo "... Done"
 
 echo "installing wrappers"
 echo "======================="
@@ -162,7 +161,7 @@ done
 for exec in ld objdump; do
   ln -sf $ARCH-w64-mingw32-$exec $exec
 done
-echo "install wrappers done"
+echo "... Done"
 
 echo "building cppwinrt"
 echo "======================="
@@ -203,6 +202,7 @@ done
 # Copy the libc++ module sources
 rm -rf $PREFIX/share/libc++
 cp -a /opt/llvm-mingw/share/libc++ $PREFIX/share
+echo "... Done"
 
 echo "building make"
 echo "======================="
