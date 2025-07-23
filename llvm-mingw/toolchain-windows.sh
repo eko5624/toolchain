@@ -220,17 +220,8 @@ echo "... Done"
 echo "building pkgconf"
 echo "======================="
 cd $M_BUILD
-mkdir pkgconf-build && cd pkgconf-build
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-pkgconf/0002-size-t-format.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-pkgconf/0003-printf-format.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-pkgconf/0004-default-pure-static.patch
-
+mkdir pkgconf-build
 cd $M_SOURCE/pkgconf
-# https://github.com/msys2/MINGW-packages/issues/8473
-patch -R -p1 -i $M_BUILD/pkgconf-build/0004-default-pure-static.patch
-patch -p1 -i $M_BUILD/pkgconf-build/0002-size-t-format.patch
-patch -p1 -i $M_BUILD/pkgconf-build/0003-printf-format.patch
-
 meson setup $M_BUILD/pkgconf-build \
   --prefix=$PREFIX \
   --cross-file=$TOP_DIR/cross.meson \
