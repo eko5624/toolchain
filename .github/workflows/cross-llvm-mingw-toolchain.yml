@@ -51,9 +51,11 @@ jobs:
         with:
           path: ${{ github.workspace }}/install/llvm-mingw
           key: windows-llvm-${{ github.run_id }}
+      - name: Install Meson and Ninja
+        run: |
+          pip install meson ninja
       - name: Building toolchain
         run: |
-          sudo apt-get update && sudo apt-get install ninja-build
           ./llvm-mingw/toolchain-windows.sh $(pwd)/install/llvm-mingw --x86_64
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
