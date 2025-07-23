@@ -53,7 +53,7 @@ jobs:
           key: windows-llvm-${{ github.run_id }}
       - name: Building toolchain
         run: |
-          ./llvm-mingw/toolchain-windows.sh $(pwd)/install/llvm-mingw $(pwd)/install/llvm-mingw --x86_64
+          ./llvm-mingw/toolchain-windows.sh $(pwd)/install/llvm-mingw --x86_64
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Packaging toolchain

@@ -121,7 +121,7 @@ echo "stripping llvm"
 echo "======================="
 cd $M_SOURCE/llvm-mingw
 ./strip-llvm.sh $PREFIX --host=$ARCH-w64-mingw32
-echo "installing wrappers done"
+echo "strip llvm done"
 
 echo "installing wrappers"
 echo "======================="
@@ -162,7 +162,7 @@ done
 for exec in ld objdump; do
   ln -sf $ARCH-w64-mingw32-$exec $exec
 done
-echo "installing wrappers done"
+echo "install wrappers done"
 
 echo "building cppwinrt"
 echo "======================="
@@ -196,7 +196,7 @@ cp -a $CLANG_RESOURCE_DIR $PREFIX/lib/clang/$CLANG_VERSION
 mkdir -p $PREFIX/include
 cp -a /opt/llvm-mingw/generic-w64-mingw32/include/. $PREFIX/include
 mkdir -p $PREFIX/$ARCH-w64-mingw32
-for subdir in bin lib share; do
+for subdir in bin lib; do
   cp -a /opt/llvm-mingw/$ARCH-w64-mingw32/$subdir $PREFIX/$ARCH-w64-mingw32
 done
 
