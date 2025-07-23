@@ -59,7 +59,7 @@ jobs:
       - name: Packaging toolchain
         run: |
           cd install
-          tar -zcvf ../llvm-mingw-latest-ucrt-windows-x86_64.tar.xz llvm-mingw 2>/dev/null >/dev/null
+          tar -zchvf ../llvm-mingw-latest-ucrt-windows-x86_64.tar.xz llvm-mingw 2>/dev/null >/dev/null
           cp ../llvm-mingw-latest-ucrt-windows-x86_64.tar.xz ../llvm-mingw-$date-ucrt-windows-x86_64.tar.xz
       - name: Delete
         env:
