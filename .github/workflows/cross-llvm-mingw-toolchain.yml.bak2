@@ -157,7 +157,6 @@ jobs:
           files: llvm-mingw*.tar.xz
 
   windows-toolchain:
-    needs: [linux-profile]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -194,7 +193,7 @@ jobs:
       - name: Building windows-llvm
         run: |
           if [[ ! "$(ls -A install/llvm-mingw/bin)" ]]; then
-            ./llvm-mingw/llvm.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw --with-clang --thinlto --pgo --host=x86_64-w64-mingw32
+            ./llvm-mingw/llvm.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw --thinlto --pgo --host=x86_64-w64-mingw32
           fi  
       - name: Saving windows-llvm cache
         if: ${{ steps.windows-llvm.outputs.cache-matched-key == '' }}
@@ -202,15 +201,18 @@ jobs:
         with:
           path: ${{ github.workspace }}/install/llvm-mingw
           key: windows-llvm-${{ github.run_id }}
+      - name: Install Meson and Ninja
+        run: |
+          pip install meson ninja
       - name: Building toolchain
         run: |
-          ./llvm-mingw/toolchain-windows.sh $(pwd)/install/llvm-mingw $(pwd)/install/llvm-mingw --x86_64
+          ./llvm-mingw/toolchain-windows.sh $(pwd)/install/llvm-mingw --x86_64
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Packaging toolchain
         run: |
           cd install
-          tar -zcvf ../llvm-mingw-latest-ucrt-windows-x86_64.tar.xz llvm-mingw 2>/dev/null >/dev/null
+          tar -zchvf ../llvm-mingw-latest-ucrt-windows-x86_64.tar.xz llvm-mingw 2>/dev/null >/dev/null
           cp ../llvm-mingw-latest-ucrt-windows-x86_64.tar.xz ../llvm-mingw-$date-ucrt-windows-x86_64.tar.xz
       - name: Delete
         env:
