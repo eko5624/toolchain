@@ -192,6 +192,7 @@ echo "======================="
 cp /opt/llvm-mingw/$ARCH-w64-mingw32/bin/*.dll $PREFIX/bin
 rm -rf $PREFIX/lib/clang/$CLANG_VERSION
 cp -a $CLANG_RESOURCE_DIR $PREFIX/lib/clang/$CLANG_VERSION
+rm -rf $PREFIX/lib/clang/*/lib/linux
 mkdir -p $PREFIX/include
 cp -a /opt/llvm-mingw/generic-w64-mingw32/include/. $PREFIX/include
 mkdir -p $PREFIX/$ARCH-w64-mingw32
