@@ -33,7 +33,7 @@ jobs:
         if: ${{ steps.target-llvm.outputs.cache-matched-key == '' }}
         run: |
           curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/cross-llvm-mingw-latest-ucrt-x86_64.tar.xz
-          tar -xvf cross-llvm-mingw*.tar.xz
+          tar -Jxf cross-llvm-mingw*.tar.xz
           rm cross-llvm-mingw*.tar.xz    
       - name: Building toolchain
         if: ${{ steps.target-llvm.outputs.cache-matched-key == '' }}
@@ -86,7 +86,7 @@ jobs:
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-mingw-latest-ucrt-x86_64.tar.xz
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/target-llvm-latest.7z
-          tar -xvf cross*.tar.xz 2>/dev/null >/dev/null
+          tar -Jxf cross*.tar.xz
           7z x target*.7z
           rm *.tar.xz *.7z      
       - name: Building toolchain

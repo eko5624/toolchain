@@ -58,14 +58,14 @@ jobs:
         if: ${{ steps.llvm-profdata.outputs.cache-matched-key == '' }}
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
-          tar -xvf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz 2>/dev/null >/dev/null
+          tar -Jxf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
           rm cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
           mv cross host
       - name: Setup llvm-ir
         if: ${{ steps.llvm-profdata.outputs.cache-matched-key == '' }}
         run: |
           curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/llvm-ir-latest.tar.xz
-          tar -xvf llvm-ir-latest.tar.xz 2>/dev/null >/dev/null
+          tar -Jxf llvm-ir-latest.tar.xz
           rm llvm*.tar.xz
           rm -rf cross/llvm-lto || true
           rm -rf cross/llvm-ccache || true
@@ -146,14 +146,14 @@ jobs:
         if: ${{ steps.cross-llvm-pgo.outputs.cache-matched-key == '' }}
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
-          tar -xvf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz 2>/dev/null >/dev/null
+          tar -Jxf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
           rm cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
           mv cross host
       - name: Install llvm-lto llvm-ccache
         if: (steps.cross-llvm-pgo.outputs.cache-matched-key == '' && inputs.llvm_thin_lto) || (steps.cross-llvm-pgo.outputs.cache-matched-key == '' && inputs.llvm_ccache)
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-pgo-latest.tar.xz || true
-          tar -xvf cross-llvm-pgo-latest.tar.xz 2>/dev/null >/dev/null || true
+          tar -Jxf cross-llvm-pgo-latest.tar.xz || true
           rm cross-llvm-pgo-latest.tar.xz || true
           rm -rf llvm_pgo/bin || true
           rm -rf llvm_pgo/lib || true
@@ -172,7 +172,7 @@ jobs:
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Package cross-llvm-pgo
         if: ${{ steps.cross-llvm-pgo.outputs.cache-matched-key == '' }}
-        run: tar -zcvf cross-llvm-pgo-latest.tar.xz llvm_pgo 2>/dev/null >/dev/null
+        run: tar -Jcf cross-llvm-pgo-latest.tar.xz llvm_pgo
       - name: Delete
         if: ${{ steps.cross-llvm-pgo.outputs.cache-matched-key == '' }}
         env:

@@ -64,14 +64,14 @@ jobs:
         if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
-          tar -xvf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz 2>/dev/null >/dev/null
+          tar -Jxf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
           rm cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
           mv cross host
       - name: Setup llvm-lto llvm-ccache
         if: (steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_thin_lto) || (steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_ccache)
         run: |
             curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-ir-latest.tar.xz || true
-            tar -xvf llvm-ir-latest.tar.xz 2>/dev/null >/dev/null || true 
+            tar -Jxf llvm-ir-latest.tar.xz || true 
             rm llvm-ir-latest.tar.xz || true
             rm -rf cross/bin || true
             rm -rf cross/lib || true          
@@ -92,7 +92,7 @@ jobs:
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Package llvm
         if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
-        run: tar -zcvf llvm-ir-latest.tar.xz cross 2>/dev/null >/dev/null
+        run: tar -Jcf llvm-ir-latest.tar.xz cross
       - name: Delete
         if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
         env:

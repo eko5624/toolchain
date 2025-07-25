@@ -17,7 +17,7 @@ jobs:
       - name: Setup llvm-clang-pgo toolchain
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
-          tar -xvf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz 2>/dev/null >/dev/null
+          tar -Jxf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
           rm cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
 
       - name: Building rust toolchain
@@ -58,7 +58,7 @@ jobs:
       - name: Setup llvm-clang-pgo toolchain
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
-          tar -xvf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz 2>/dev/null >/dev/null
+          tar -Jxf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
           rm cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
 
       - name: Building rust toolchain

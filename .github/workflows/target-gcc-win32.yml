@@ -28,7 +28,7 @@ jobs:
       - name: Setup Toolchain
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-gcc-win32-latest-ucrt-x86_64.tar.xz
-          tar -xvf cross-gcc-win32*.tar.xz 2>/dev/null >/dev/null
+          tar -Jxf cross-gcc-win32*.tar.xz
           rm cross-gcc-win32*.tar.xz
       - name: Loading target gcc cache
         uses: actions/cache/restore@main

@@ -35,7 +35,7 @@ jobs:
            echo "ver=$(cat cross/version.txt)" >> $GITHUB_ENV
       - name: Packaging toolchain
         run: |
-          tar -zcvf cross-gcc-win32-${{ env.ver }}-ucrt-x86_64.tar.xz cross 2>/dev/null >/dev/null
+          tar -Jcf cross-gcc-win32-${{ env.ver }}-ucrt-x86_64.tar.xz cross
           cp cross-gcc-win32-${{ env.ver }}-ucrt-x86_64.tar.xz cross-gcc-win32-latest-ucrt-x86_64.tar.xz
       - name: Delete
         env:
@@ -86,7 +86,7 @@ jobs:
            echo "ver=$(cat cross/version.txt)" >> $GITHUB_ENV
       - name: Packaging toolchain
         run: |
-          tar -zcvf cross-gcc-win32-${{ env.ver }}-ucrt-x86_64_v3.tar.xz cross 2>/dev/null >/dev/null
+          tar -Jcf cross-gcc-win32-${{ env.ver }}-ucrt-x86_64_v3.tar.xz cross
           cp cross-gcc-win32-${{ env.ver }}-ucrt-x86_64_v3.tar.xz cross-gcc-win32-latest-ucrt-x86_64_v3.tar.xz
       - name: Delete
         env:

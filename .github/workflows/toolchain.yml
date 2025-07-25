@@ -40,7 +40,7 @@ jobs:
       - name: Install host clang toolchain
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
-          tar -xvf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz 2>/dev/null >/dev/null
+          tar -Jxf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
           rm cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
           mv cross host    
       - name: Setup llvm
@@ -86,7 +86,7 @@ jobs:
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Package x86_64 toolchain
         run: |
-          tar -zcvf cross-llvm-clang${{ env.NAME }}-${{ env.date }}-ucrt-x86_64.tar.xz cross 2>/dev/null >/dev/null
+          tar -Jcf cross-llvm-clang${{ env.NAME }}-${{ env.date }}-ucrt-x86_64.tar.xz cross
           cp cross-llvm-clang${{ env.NAME }}-${{ env.date }}-ucrt-x86_64.tar.xz cross-llvm-clang${{ env.NAME }}-latest-ucrt-x86_64.tar.xz
           rm -rf cross
       - name: Delete
@@ -122,7 +122,7 @@ jobs:
       - name: Install host clang toolchain
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
-          tar -xvf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz 2>/dev/null >/dev/null
+          tar -Jxf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
           rm cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
           mv cross host       
       - name: Setup llvm
@@ -164,7 +164,7 @@ jobs:
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Package x86_64_v3 toolchain
         run: |
-          tar -zcvf cross-llvm-clang${{ env.NAME }}-${{ env.date }}-ucrt-x86_64_v3.tar.xz cross 2>/dev/null >/dev/null
+          tar -Jcf cross-llvm-clang${{ env.NAME }}-${{ env.date }}-ucrt-x86_64_v3.tar.xz cross
           cp cross-llvm-clang${{ env.NAME }}-${{ env.date }}-ucrt-x86_64_v3.tar.xz cross-llvm-clang${{ env.NAME }}-latest-ucrt-x86_64_v3.tar.xz
           rm -rf cross
       - name: Delete
@@ -200,7 +200,7 @@ jobs:
       - name: Install host clang toolchain
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
-          tar -xvf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz 2>/dev/null >/dev/null
+          tar -Jxf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
           rm cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
           mv cross host       
       - name: Setup llvm
@@ -242,7 +242,7 @@ jobs:
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Package aarch64 toolchain
         run: |
-          tar -zcvf cross-llvm-clang${{ env.NAME }}-${{ env.date }}-ucrt-aarch64.tar.xz cross 2>/dev/null >/dev/null
+          tar -Jcf cross-llvm-clang${{ env.NAME }}-${{ env.date }}-ucrt-aarch64.tar.xz cross
           cp cross-llvm-clang${{ env.NAME }}-${{ env.date }}-ucrt-aarch64.tar.xz cross-llvm-clang${{ env.NAME }}-latest-ucrt-aarch64.tar.xz
           rm -rf cross
       - name: Delete
