@@ -25,20 +25,25 @@ jobs:
         with:
           path: ${{ github.workspace }}/source/llvm-project
           key: llvm-source-cache            
-      - name: Install host clang toolchain
-        if: ${{ steps.llvm-profdata.outputs.cache-matched-key == '' }}
+      #- name: Install host clang toolchain
+      #  if: ${{ steps.llvm-profdata.outputs.cache-matched-key == '' }}
+      #  run: |
+      #    curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
+      #    tar -Jxvf llvm-mingw-latest-ucrt-linux-x86_64.tar.xz 2>/dev/null >/dev/null
+      #    rm llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
+      - name: Install fuchsia-clang
+        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
         run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
-          tar -Jxvf llvm-mingw-latest-ucrt-linux-x86_64.tar.xz 2>/dev/null >/dev/null
-          rm llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
+          sudo GOBIN=/usr/bin go install go.chromium.org/luci/cipd/client/cmd/...@latest
+          sudo cipd install fuchsia/third_party/clang/linux-amd64 latest -root /usr/local/fuchsia-clang
       - name: Building linux-profile-llvm
         run: |
-          ./llvm-mingw/llvm.sh --profile $(pwd)/cross
+          ./llvm-mingw/llvm.sh --profile /usr/local/fuchsia-clang
       - name: Train pgo
         run: |
           cd llvm-mingw
           ln -sf ../source/llvm-project llvm-project
-          ./pgo-training.sh "llvm-project/llvm/build-instrumented" "../cross"
+          ./pgo-training.sh "llvm-project/llvm/build-instrumented" "/usr/local/fuchsia-clang"
           cd ..
           mv llvm-mingw/profile.profdata ./
       - name: Save profile.profdata cache
