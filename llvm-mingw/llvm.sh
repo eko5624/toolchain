@@ -13,8 +13,6 @@ MJOBS=$(grep -c processor /proc/cpuinfo)
 
 M_ROOT=$(pwd)
 M_SOURCE=$M_ROOT/source
-M_CROSS=$M_ROOT/cross
-PATH="$M_CROSS/bin:/usr/local/fuchsia-clang/bin:$PATH"
 
 unset HOST
 BUILDDIR="build"
