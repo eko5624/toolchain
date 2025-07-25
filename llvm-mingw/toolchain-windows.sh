@@ -35,8 +35,8 @@ while [ $# -gt 0 ]; do
     shift
 done
 
-export PATH="/opt/llvm-mingw/bin:$PATH"
-CLANG_RESOURCE_DIR="$("/opt/llvm-mingw/bin/clang" --print-resource-dir)"
+export PATH="$M_ROOT/host/bin:$PATH"
+CLANG_RESOURCE_DIR="$("$M_ROOT/host/bin/clang" --print-resource-dir)"
 CLANG_VERSION=$(basename "$CLANG_RESOURCE_DIR")
 
 mkdir -p $M_SOURCE
@@ -189,19 +189,19 @@ make install-strip
 
 echo "prepare cross toolchain"
 echo "======================="
-cp /opt/llvm-mingw/$ARCH-w64-mingw32/bin/*.dll $PREFIX/bin
+cp $M_ROOT/host/$ARCH-w64-mingw32/bin/*.dll $PREFIX/bin
 rm -rf $PREFIX/lib/clang/$CLANG_VERSION
 cp -a $CLANG_RESOURCE_DIR $PREFIX/lib/clang/$CLANG_VERSION
 mkdir -p $PREFIX/include
-cp -a /opt/llvm-mingw/generic-w64-mingw32/include/. $PREFIX/include
+cp -a $M_ROOT/host/generic-w64-mingw32/include/. $PREFIX/include
 mkdir -p $PREFIX/$ARCH-w64-mingw32
 for subdir in bin lib; do
-  cp -a /opt/llvm-mingw/$ARCH-w64-mingw32/$subdir $PREFIX/$ARCH-w64-mingw32
+  cp -a $M_ROOT/host/$ARCH-w64-mingw32/$subdir $PREFIX/$ARCH-w64-mingw32
 done
 
 # Copy the libc++ module sources
 rm -rf $PREFIX/share/libc++
-cp -a /opt/llvm-mingw/share/libc++ $PREFIX/share
+cp -a $M_ROOT/host/share/libc++ $PREFIX/share
 echo "... Done"
 
 echo "building make"
