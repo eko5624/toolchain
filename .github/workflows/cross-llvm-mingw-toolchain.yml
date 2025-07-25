@@ -135,6 +135,7 @@ jobs:
           tar -Jxvf llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz 2>/dev/null >/dev/null
           rm llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
       - name: Building linux-llvm
+        if: ${{ steps.linux-llvm.outputs.cache-matched-key == '' }}
         run: |
           ./llvm-mingw/llvm.sh $(pwd)/llvm-mingw-stage1 $(pwd)/cross --with-clang --thinlto --pgo --llvm-only
       - name: Saving linux-llvm cache
