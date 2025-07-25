@@ -29,14 +29,22 @@ while [ $# -gt 0 ]; do
         ARCH="x86_64"
         ;;
     *)
-        PREFIX="$1"
+        if [ -n "$STAGE1_PREFIX" ]; then
+            if [ -n "$PREFIX" ]; then
+                echo Unrecognized parameter $1
+                exit 1
+            fi
+            PREFIX="$1"
+        else
+            STAGE1_PREFIX="$1"
+        fi
         ;;
     esac
     shift
 done
 
-export PATH="$M_ROOT/cross/bin:$PATH"
-CLANG_RESOURCE_DIR="$("$M_ROOT/cross/bin/clang" --print-resource-dir)"
+export PATH="$STAGE1_PREFIX/bin:$PATH"
+CLANG_RESOURCE_DIR="$("$STAGE1_PREFIX/bin/clang" --print-resource-dir)"
 CLANG_VERSION=$(basename "$CLANG_RESOURCE_DIR")
 
 mkdir -p $M_SOURCE
@@ -127,9 +135,9 @@ echo "======================="
 cp -f $M_SOURCE/llvm-mingw/wrappers/*-wrapper.sh $PREFIX/bin
 cp -f $M_SOURCE/llvm-mingw/wrappers/mingw32-common.cfg $PREFIX/bin
 cp -f $M_SOURCE/llvm-mingw/wrappers/$ARCH-w64-windows-gnu.cfg $PREFIX/bin
-$ARCH-w64-mingw32-gcc $M_SOURCE/llvm-mingw/wrappers/clang-target-wrapper.c -o $PREFIX/bin/clang-target-wrapper.exe -O2 -Wl,-s -municode -DCLANG=\"clang-$CLANG_VER.exe\" -DCLANG_SCAN_DEPS=\"clang-scan-deps-real\" -D__USE_MINGW_ANSI_STDIO=0
-$ARCH-w64-mingw32-gcc $M_SOURCE/llvm-mingw/wrappers/clang-scan-deps-wrapper.c -o $PREFIX/bin/clang-scan-deps-wrapper.exe -O2 -Wl,-s -municode -DCLANG=\"clang-$CLANG_VER.exe\" -DCLANG_SCAN_DEPS=\"clang-scan-deps-real\" -D__USE_MINGW_ANSI_STDIO=0
-$ARCH-w64-mingw32-gcc $M_SOURCE/llvm-mingw/wrappers/llvm-wrapper.c -o $PREFIX/bin/llvm-wrapper.exe -O2 -Wl,-s -municode -DCLANG=\"clang-$CLANG_VER.exe\" -DCLANG_SCAN_DEPS=\"clang-scan-deps-real\" -D__USE_MINGW_ANSI_STDIO=0
+$ARCH-w64-mingw32-gcc $M_SOURCE/llvm-mingw/wrappers/clang-target-wrapper.c -o $PREFIX/bin/clang-target-wrapper.exe -O2 -Wl,-s -municode -DCLANG=\"clang-$CLANG_VERSION.exe\" -DCLANG_SCAN_DEPS=\"clang-scan-deps-real\" -D__USE_MINGW_ANSI_STDIO=0
+$ARCH-w64-mingw32-gcc $M_SOURCE/llvm-mingw/wrappers/clang-scan-deps-wrapper.c -o $PREFIX/bin/clang-scan-deps-wrapper.exe -O2 -Wl,-s -municode -DCLANG=\"clang-$CLANG_VERSION.exe\" -DCLANG_SCAN_DEPS=\"clang-scan-deps-real\" -D__USE_MINGW_ANSI_STDIO=0
+$ARCH-w64-mingw32-gcc $M_SOURCE/llvm-mingw/wrappers/llvm-wrapper.c -o $PREFIX/bin/llvm-wrapper.exe -O2 -Wl,-s -municode -DCLANG=\"clang-$CLANG_VERSION.exe\" -DCLANG_SCAN_DEPS=\"clang-scan-deps-real\" -D__USE_MINGW_ANSI_STDIO=0
 cd $PREFIX/bin
 for exec in clang clang++ gcc g++ c++ as; do
   ln -sf clang-target-wrapper.exe $ARCH-w64-mingw32-$exec.exe
@@ -149,7 +157,7 @@ for exec in ld objdump; do
 done
 
 mv clang-scan-deps.exe clang-scan-deps-real.exe
-mv clang.exe clang-$CLANG_VER.exe
+mv clang.exe clang-$CLANG_VERSION.exe
 
 # Install unprefixed wrappers if $HOST is one of the architectures we are installing wrappers for.
 for exec in clang clang++ gcc g++ c++ addr2line ar dlltool ranlib nm objcopy readelf size strings strip windres clang-scan-deps; do
@@ -189,19 +197,19 @@ make install-strip
 
 echo "prepare cross toolchain"
 echo "======================="
-cp $M_ROOT/cross/$ARCH-w64-mingw32/bin/*.dll $PREFIX/bin
+cp $STAGE1_PREFIX/$ARCH-w64-mingw32/bin/*.dll $PREFIX/bin
 rm -rf $PREFIX/lib/clang/$CLANG_VERSION
 cp -a $CLANG_RESOURCE_DIR $PREFIX/lib/clang/$CLANG_VERSION
 mkdir -p $PREFIX/include
-cp -a $M_ROOT/cross/generic-w64-mingw32/include/. $PREFIX/include
+cp -a $STAGE1_PREFIX/generic-w64-mingw32/include/. $PREFIX/include
 mkdir -p $PREFIX/$ARCH-w64-mingw32
 for subdir in bin lib; do
-  cp -a $M_ROOT/cross/$ARCH-w64-mingw32/$subdir $PREFIX/$ARCH-w64-mingw32
+  cp -a $STAGE1_PREFIX/$ARCH-w64-mingw32/$subdir $PREFIX/$ARCH-w64-mingw32
 done
 
 # Copy the libc++ module sources
 rm -rf $PREFIX/share/libc++
-cp -a $M_ROOT/cross/share/libc++ $PREFIX/share
+cp -a $STAGE1_PREFIX/share/libc++ $PREFIX/share
 echo "... Done"
 
 echo "building make"
