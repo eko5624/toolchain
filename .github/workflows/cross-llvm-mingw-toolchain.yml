@@ -18,7 +18,7 @@ jobs:
           path: ${{ github.workspace }}/llvm-mingw-stage1
           key: linux-stage1-llvm-${{ github.run_id }}
           restore-keys: |
-            stage1-llvm-
+            linux-stage1-llvm-
       - name: Loading llvm-project source
         uses: actions/cache@main
         id: llvm-source
