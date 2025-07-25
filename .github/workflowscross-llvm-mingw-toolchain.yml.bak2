@@ -211,7 +211,7 @@ jobs:
           pip install meson ninja
       - name: Building toolchain
         run: |
-          ./llvm-mingw/toolchain-windows.sh $(pwd)/target --x86_64
+          ./llvm-mingw/toolchain-windows.sh $(pwd)/llvm-mingw-stage1 $(pwd)/target --x86_64
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Packaging toolchain
