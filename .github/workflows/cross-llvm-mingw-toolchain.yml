@@ -16,9 +16,9 @@ jobs:
         id: stage1-llvm
         with:
           path: ${{ github.workspace }}/llvm-mingw-stage1
-          key: linux-stage1-llvm-${{ github.run_id }}
+          key: stage1-llvm-${{ github.run_id }}
           restore-keys: |
-            linux-stage1-llvm-
+            stage1-llvm-
       - name: Loading llvm-project source
         uses: actions/cache@main
         id: llvm-source
@@ -30,12 +30,12 @@ jobs:
           if [[ ! "$(ls -A llvm-mingw-stage1/bin)" ]]; then
             ./llvm-mingw/llvm.sh $(pwd)/llvm-mingw-stage1 --stage1 --with-clang
           fi
-      - name: Saving linux-stage1-llvm cache
+      - name: Saving stage1-llvm cache
         if: ${{ steps.stage1-llvm.outputs.cache-matched-key == '' }}
         uses: actions/cache/save@main
         with:
           path: ${{ github.workspace }}/llvm-mingw-stage1
-          key: linux-stage1-llvm-${{ github.run_id }}
+          key: stage1-llvm-${{ github.run_id }}
       - name: Building toolchain
         run: |
           ./llvm-mingw/toolchain-linux.sh $(pwd)/llvm-mingw-stage1 --native --all-tools --enable-cfguard
