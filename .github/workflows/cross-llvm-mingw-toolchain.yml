@@ -106,7 +106,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@main      
+        uses: actions/checkout@main
+      - name: Loading linux-llvm cache
+        uses: actions/cache/restore@main
+        id: linux-llvm
+        with:
+          path: ${{ github.workspace }}/cross
+          key: linux-llvm-${{ github.run_id }}
+          restore-keys: |
+            linux-llvm-   
       - name: Loading profile-profdata cache
         uses: actions/cache/restore@main
         id: profile-profdata
@@ -121,14 +129,6 @@ jobs:
         with:
           path: ${{ github.workspace }}/source/llvm-project
           key: llvm-source-cache
-      - name: Loading linux-llvm cache
-        uses: actions/cache/restore@main
-        id: linux-llvm
-        with:
-          path: ${{ github.workspace }}/cross
-          key: linux-llvm-${{ github.run_id }}
-          restore-keys: |
-            linux-llvm-
       - name: Install stage1 Clang
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
@@ -173,8 +173,8 @@ jobs:
         uses: actions/cache/restore@main
         id: windows-llvm
         with:
-          path: ${{ github.workspace }}/install/llvm-mingw
-          key: windows-llvm-${{ github.run_id }}
+          path: ${{ github.workspace }}/target
+          key: linux-llvm-${{ github.run_id }}
           restore-keys: |
             windows-llvm-
       - name: Loading profile-profdata cache
@@ -190,15 +190,7 @@ jobs:
         id: llvm-source
         with:
           path: ${{ github.workspace }}/source/llvm-project
-          key: llvm-source-cache
-      - name: Loading windows-llvm cache
-        uses: actions/cache/restore@main
-        id: windows-llvm
-        with:
-          path: ${{ github.workspace }}/target
-          key: linux-llvm-${{ github.run_id }}
-          restore-keys: |
-            windows-llvm-   
+          key: llvm-source-cache   
       - name: Install stage1 Clang
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
