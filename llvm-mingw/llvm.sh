@@ -13,8 +13,6 @@ MJOBS=$(grep -c processor /proc/cpuinfo)
 
 M_ROOT=$(pwd)
 M_SOURCE=$M_ROOT/source
-M_HOST=$M_ROOT/host
-PATH="$M_HOST/bin:$PATH"
 
 unset HOST
 BUILDDIR="build"

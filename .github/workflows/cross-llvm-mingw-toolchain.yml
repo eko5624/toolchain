@@ -6,62 +6,7 @@ on:
   workflow_dispatch:
   
 jobs:
-  linux-stage1:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@main      
-      - name: Loading linux-stage1-llvm cache
-        uses: actions/cache/restore@main
-        id: linux-stage1-llvm
-        with:
-          path: ${{ github.workspace }}/install/llvm-mingw
-          key: linux-stage1-llvm-${{ github.run_id }}
-          restore-keys: |
-            linux-stage1-llvm-
-      - name: Loading llvm-project source
-        uses: actions/cache@main
-        id: llvm-source
-        with:
-          path: ${{ github.workspace }}/source/llvm-project
-          key: llvm-source-cache
-      - name: Building linux-stage1-llvm
-        run: |
-          if [[ ! "$(ls -A install/llvm-mingw/bin)" ]]; then
-            ./llvm-mingw/llvm.sh $(pwd)/install/llvm-mingw --stage1 --with-clang
-          fi
-      - name: Saving linux-stage1-llvm cache
-        if: ${{ steps.linux-stage1-llvm.outputs.cache-matched-key == '' }}
-        uses: actions/cache/save@main
-        with:
-          path: ${{ github.workspace }}/install/llvm-mingw
-          key: linux-stage1-llvm-${{ github.run_id }}
-      - name: Building toolchain
-        run: |
-          ./llvm-mingw/toolchain-linux.sh $(pwd)/install/llvm-mingw --native --all-tools --enable-cfguard
-      - name: Get current timestamp
-        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
-      - name: Packaging toolchain
-        run: |
-          cd install
-          mv llvm-mingw llvm-mingw-stage1
-          tar -Jcvf ../llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz llvm-mingw-stage1 2>/dev/null >/dev/null
-          cp ../llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz ../llvm-mingw-stage1-$date-ucrt-x86_64.tar.xz
-      - name: Delete
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          chmod +x ./package-delete.sh
-          ./package-delete.sh llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
-      - name: Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: toolchain
-          name: toolchain
-          files: llvm-mingw-stage1*.tar.xz
-
   linux-profile:
-    needs: [linux-stage1]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -80,20 +25,20 @@ jobs:
         with:
           path: ${{ github.workspace }}/source/llvm-project
           key: llvm-source-cache            
-      - name: Install stage1 Clang
-        if: ${{ steps.linux-profile-llvm.outputs.cache-matched-key == '' }}
+      - name: Install host clang toolchain
+        if: ${{ steps.llvm-profdata.outputs.cache-matched-key == '' }}
         run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
-          tar -Jxvf llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz 2>/dev/null >/dev/null
-          rm llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
+          tar -Jxvf llvm-mingw-latest-ucrt-linux-x86_64.tar.xz 2>/dev/null >/dev/null
+          rm llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
       - name: Building linux-profile-llvm
         run: |
-          ./llvm-mingw/llvm.sh --profile $(pwd)/llvm-mingw-stage1
+          ./llvm-mingw/llvm.sh --profile $(pwd)/cross
       - name: Train pgo
         run: |
           cd llvm-mingw
           ln -sf ../source/llvm-project llvm-project
-          ./pgo-training.sh "llvm-project/llvm/build-instrumented" "../llvm-mingw-stage1"
+          ./pgo-training.sh "llvm-project/llvm/build-instrumented" "../cross"
           cd ..
           mv llvm-mingw/profile.profdata ./
       - name: Save profile.profdata cache
@@ -123,16 +68,15 @@ jobs:
         with:
           path: ${{ github.workspace }}/source/llvm-project
           key: llvm-source-cache            
-      - name: Install stage1 Clang
+      - name: Install host clang toolchain
         if: ${{ steps.linux-profile-llvm.outputs.cache-matched-key == '' }}
         run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
-          tar -Jxvf llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz 2>/dev/null >/dev/null
-          rm llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
-          mv llvm-mingw-stage1 /opt/llvm-mingw
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
+          tar -Jxvf llvm-mingw-latest-ucrt-linux-x86_64.tar.xz 2>/dev/null >/dev/null
+          rm llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
       - name: Building linux-llvm
         run: |
-          ./llvm-mingw/llvm.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw --with-clang --thinlto --pgo --llvm-only
+          ./llvm-mingw/llvm.sh $(pwd)/host $(pwd)/install/llvm-mingw --with-clang --thinlto --pgo --llvm-only
       - name: Building toolchain
         run: |
           ./llvm-mingw/toolchain.sh $(pwd)/install/llvm-mingw --native --all-tools --enable-cfguard
@@ -184,17 +128,17 @@ jobs:
         with:
           path: ${{ github.workspace }}/source/llvm-project
           key: llvm-source-cache            
-      - name: Install stage1 Clang
+      - name: Install host clang toolchain
         if: ${{ steps.linux-profile-llvm.outputs.cache-matched-key == '' }}
         run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
-          tar -Jxvf llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz 2>/dev/null >/dev/null
-          rm llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
-          mv llvm-mingw-stage1 /opt/llvm-mingw
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
+          tar -Jxvf llvm-mingw-latest-ucrt-linux-x86_64.tar.xz 2>/dev/null >/dev/null
+          mv llvm-mingw host
+          rm llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
       - name: Building windows-llvm
         run: |
           if [[ ! "$(ls -A install/llvm-mingw/bin)" ]]; then
-            ./llvm-mingw/llvm.sh /opt/llvm-mingw $(pwd)/install/llvm-mingw --thinlto --pgo --host=x86_64-w64-mingw32
+            ./llvm-mingw/llvm.sh $(pwd)/host $(pwd)/install/llvm-mingw --thinlto --pgo --host=x86_64-w64-mingw32
           fi  
       - name: Saving windows-llvm cache
         if: ${{ steps.windows-llvm.outputs.cache-matched-key == '' }}
@@ -213,7 +157,7 @@ jobs:
       - name: Packaging toolchain
         run: |
           cd install
-          tar -zchvf ../llvm-mingw-latest-ucrt-windows-x86_64.tar.xz llvm-mingw 2>/dev/null >/dev/null
+          tar -Jzchvf ../llvm-mingw-latest-ucrt-windows-x86_64.tar.xz llvm-mingw 2>/dev/null >/dev/null
           cp ../llvm-mingw-latest-ucrt-windows-x86_64.tar.xz ../llvm-mingw-$date-ucrt-windows-x86_64.tar.xz
       - name: Delete
         env:
