@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ex
+set -e
 
 TOP_DIR=$(pwd)
 source $TOP_DIR/ver.sh
