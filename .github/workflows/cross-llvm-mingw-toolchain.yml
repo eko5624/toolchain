@@ -37,7 +37,7 @@ jobs:
         if: ${{ steps.linux-profile-llvm.outputs.cache-matched-key == '' }}
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
-          tar -xvf llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz 2>/dev/null >/dev/null
+          tar -Jxvf llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz 2>/dev/null >/dev/null
           rm llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
           mv llvm-mingw-stage1 /opt/llvm-mingw
       - name: Building windows-llvm
