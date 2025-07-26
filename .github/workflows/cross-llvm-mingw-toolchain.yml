@@ -67,6 +67,7 @@ jobs:
 
   linux-profile:
     needs: [linux-stage1]
+    if: (needs.linux-stage1.result == 'success' || needs.linux-stage1.result == 'skipped')
     runs-on: ubuntu-latest
     steps:
       - name: Init variable
