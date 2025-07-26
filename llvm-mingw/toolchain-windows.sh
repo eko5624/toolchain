@@ -29,22 +29,22 @@ while [ $# -gt 0 ]; do
         ARCH="x86_64"
         ;;
     *)
-        if [ -n "$STAGE1_PREFIX" ]; then
-            if [ -n "$PREFIX" ]; then
+        if [ -n "$SRC" ]; then
+            if [ -n "$DEST" ]; then
                 echo Unrecognized parameter $1
                 exit 1
             fi
             PREFIX="$1"
         else
-            STAGE1_PREFIX="$1"
+            SRC="$1"
         fi
         ;;
     esac
     shift
 done
 
-export PATH="$STAGE1_PREFIX/bin:$PATH"
-CLANG_RESOURCE_DIR="$("$STAGE1_PREFIX/bin/clang" --print-resource-dir)"
+export PATH="$SRC/bin:$PATH"
+CLANG_RESOURCE_DIR="$("$SRC/bin/clang" --print-resource-dir)"
 CLANG_VERSION=$(basename "$CLANG_RESOURCE_DIR")
 
 mkdir -p $M_SOURCE
@@ -110,7 +110,7 @@ git clone https://github.com/pkgconf/pkgconf --branch pkgconf-$VER_PKGCONF
 #cd $M_BUILD
 #mkdir lldb-mi-build
 #cmake -G Ninja -H$M_SOURCE/lldb-mi -B$M_BUILD/lldb-mi-build \
-#  -DCMAKE_INSTALL_PREFIX=$PREFIX \
+#  -DCMAKE_INSTALL_PREFIX=$DEST \
 #  -DCMAKE_BUILD_TYPE=Release \
 #  -DCMAKE_SYSTEM_NAME=Windows \
 #  -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc \
@@ -127,18 +127,18 @@ git clone https://github.com/pkgconf/pkgconf --branch pkgconf-$VER_PKGCONF
 echo "stripping llvm"
 echo "======================="
 cd $M_SOURCE/llvm-mingw
-./strip-llvm.sh $PREFIX --host=$ARCH-w64-mingw32
+./strip-llvm.sh $DEST --host=$ARCH-w64-mingw32
 echo "... Done"
 
 echo "installing wrappers"
 echo "======================="
-cp -f $M_SOURCE/llvm-mingw/wrappers/*-wrapper.sh $PREFIX/bin
-cp -f $M_SOURCE/llvm-mingw/wrappers/mingw32-common.cfg $PREFIX/bin
-cp -f $M_SOURCE/llvm-mingw/wrappers/$ARCH-w64-windows-gnu.cfg $PREFIX/bin
-$ARCH-w64-mingw32-gcc $M_SOURCE/llvm-mingw/wrappers/clang-target-wrapper.c -o $PREFIX/bin/clang-target-wrapper.exe -O2 -Wl,-s -municode -DCLANG=\"clang-$CLANG_VERSION.exe\" -DCLANG_SCAN_DEPS=\"clang-scan-deps-real\" -D__USE_MINGW_ANSI_STDIO=0
-$ARCH-w64-mingw32-gcc $M_SOURCE/llvm-mingw/wrappers/clang-scan-deps-wrapper.c -o $PREFIX/bin/clang-scan-deps-wrapper.exe -O2 -Wl,-s -municode -DCLANG=\"clang-$CLANG_VERSION.exe\" -DCLANG_SCAN_DEPS=\"clang-scan-deps-real\" -D__USE_MINGW_ANSI_STDIO=0
-$ARCH-w64-mingw32-gcc $M_SOURCE/llvm-mingw/wrappers/llvm-wrapper.c -o $PREFIX/bin/llvm-wrapper.exe -O2 -Wl,-s -municode -DCLANG=\"clang-$CLANG_VERSION.exe\" -DCLANG_SCAN_DEPS=\"clang-scan-deps-real\" -D__USE_MINGW_ANSI_STDIO=0
-cd $PREFIX/bin
+cp -f $M_SOURCE/llvm-mingw/wrappers/*-wrapper.sh $DEST/bin
+cp -f $M_SOURCE/llvm-mingw/wrappers/mingw32-common.cfg $DEST/bin
+cp -f $M_SOURCE/llvm-mingw/wrappers/$ARCH-w64-windows-gnu.cfg $DEST/bin
+$ARCH-w64-mingw32-gcc $M_SOURCE/llvm-mingw/wrappers/clang-target-wrapper.c -o $DEST/bin/clang-target-wrapper.exe -O2 -Wl,-s -municode -DCLANG=\"clang-$CLANG_VERSION.exe\" -DCLANG_SCAN_DEPS=\"clang-scan-deps-real\" -D__USE_MINGW_ANSI_STDIO=0
+$ARCH-w64-mingw32-gcc $M_SOURCE/llvm-mingw/wrappers/clang-scan-deps-wrapper.c -o $DEST/bin/clang-scan-deps-wrapper.exe -O2 -Wl,-s -municode -DCLANG=\"clang-$CLANG_VERSION.exe\" -DCLANG_SCAN_DEPS=\"clang-scan-deps-real\" -D__USE_MINGW_ANSI_STDIO=0
+$ARCH-w64-mingw32-gcc $M_SOURCE/llvm-mingw/wrappers/llvm-wrapper.c -o $DEST/bin/llvm-wrapper.exe -O2 -Wl,-s -municode -DCLANG=\"clang-$CLANG_VERSION.exe\" -DCLANG_SCAN_DEPS=\"clang-scan-deps-real\" -D__USE_MINGW_ANSI_STDIO=0
+cd $DEST/bin
 for exec in clang clang++ gcc g++ c++ as; do
   ln -sf clang-target-wrapper.exe $ARCH-w64-mingw32-$exec.exe
 done
@@ -176,7 +176,7 @@ echo "======================="
 cd $M_BUILD
 mkdir cppwinrt-build
 cmake -G Ninja -H$M_SOURCE/cppwinrt -B$M_BUILD/cppwinrt-build \
-  -DCMAKE_INSTALL_PREFIX=$PREFIX \
+  -DCMAKE_INSTALL_PREFIX=$DEST \
   -DCMAKE_TOOLCHAIN_FILE=$M_SOURCE/cppwinrt/cross-mingw-toolchain.cmake \
   -DCMAKE_BUILD_TYPE=Release \
   -DBUILD_SHARED_LIBS=OFF \
@@ -184,32 +184,32 @@ cmake -G Ninja -H$M_SOURCE/cppwinrt -B$M_BUILD/cppwinrt-build \
 ninja -C cppwinrt-build
 ninja -C cppwinrt-build install
 curl -L https://github.com/microsoft/windows-rs/raw/master/crates/libs/bindgen/default/Windows.winmd -o cppwinrt-build/Windows.winmd
-cppwinrt -in cppwinrt-build/Windows.winmd -out $PREFIX/include
+cppwinrt -in cppwinrt-build/Windows.winmd -out $DEST/include
 
 echo "building gendef"
 echo "======================="
 cd $M_BUILD
 mkdir gendef-build
 cd gendef-build
-$M_SOURCE/mingw-w64/mingw-w64-tools/gendef/configure --prefix=$PREFIX --host=$ARCH-w64-mingw32
+$M_SOURCE/mingw-w64/mingw-w64-tools/gendef/configure --prefix=$DEST --host=$ARCH-w64-mingw32
 make -j$MJOBS
 make install-strip
 
 echo "prepare cross toolchain"
 echo "======================="
-cp $STAGE1_PREFIX/$ARCH-w64-mingw32/bin/*.dll $PREFIX/bin
-rm -rf $PREFIX/lib/clang/$CLANG_VERSION
-cp -a $CLANG_RESOURCE_DIR $PREFIX/lib/clang/$CLANG_VERSION
-mkdir -p $PREFIX/include
-cp -a $STAGE1_PREFIX/generic-w64-mingw32/include/. $PREFIX/include
-mkdir -p $PREFIX/$ARCH-w64-mingw32
+cp $SRC/$ARCH-w64-mingw32/bin/*.dll $DEST/bin
+rm -rf $DEST/lib/clang/$CLANG_VERSION
+cp -a $CLANG_RESOURCE_DIR $DEST/lib/clang/$CLANG_VERSION
+mkdir -p $DEST/include
+cp -a $SRC/generic-w64-mingw32/include/. $DEST/include
+mkdir -p $DEST/$ARCH-w64-mingw32
 for subdir in bin lib; do
-  cp -a $STAGE1_PREFIX/$ARCH-w64-mingw32/$subdir $PREFIX/$ARCH-w64-mingw32
+  cp -a $SRC/$ARCH-w64-mingw32/$subdir $DEST/$ARCH-w64-mingw32
 done
 
 # Copy the libc++ module sources
-rm -rf $PREFIX/share/libc++
-cp -a $STAGE1_PREFIX/share/libc++ $PREFIX/share
+rm -rf $DEST/share/libc++
+cp -a $SRC/share/libc++ $DEST/share
 echo "... Done"
 
 echo "building make"
@@ -218,7 +218,7 @@ cd $M_BUILD
 mkdir make-build && cd make-build
 $M_SOURCE/make-$VER_MAKE/configure \
   --host=$ARCH-w64-mingw32 \
-  --prefix=$PREFIX \
+  --prefix=$DEST \
   --program-prefix=mingw32- \
   --enable-job-server
 make -j$MJOBS
@@ -231,28 +231,28 @@ cd $M_BUILD
 mkdir pkgconf-build
 cd $M_SOURCE/pkgconf
 meson setup $M_BUILD/pkgconf-build \
-  --prefix=$PREFIX \
+  --prefix=$DEST \
   --cross-file=$TOP_DIR/cross.meson \
   --buildtype=release \
   -Dtests=disabled
 meson compile -C $M_BUILD/pkgconf-build
 meson install -C $M_BUILD/pkgconf-build
-cp $PREFIX/bin/pkgconf.exe $PREFIX/bin/pkg-config.exe
-cp $PREFIX/bin/pkgconf.exe $PREFIX/bin/$ARCH-w64-mingw32-pkg-config.exe
+cp $DEST/bin/pkgconf.exe $DEST/bin/pkg-config.exe
+cp $DEST/bin/pkgconf.exe $DEST/bin/$ARCH-w64-mingw32-pkg-config.exe
 
 
 echo "removing *.dll.a *.la"
 echo "======================="
-find $PREFIX/lib -maxdepth 1 -type f -name "*.dll.a" -print0 | xargs -0 -I {} rm {}
-find $PREFIX/$ARCH-w64-mingw32/lib -maxdepth 1 -type f -name "*.dll.a" -print0 | xargs -0 -I {} rm {}
-find $PREFIX/$ARCH-w64-mingw32/lib -maxdepth 1 -type f -name "*.la" -print0 | xargs -0 -I {} rm {}
-rm -rf $PREFIX/lib/pkgconfig
-rm -rf $PREFIX/include/pkgconf
+find $DEST/lib -maxdepth 1 -type f -name "*.dll.a" -print0 | xargs -0 -I {} rm {}
+find $DEST/$ARCH-w64-mingw32/lib -maxdepth 1 -type f -name "*.dll.a" -print0 | xargs -0 -I {} rm {}
+find $DEST/$ARCH-w64-mingw32/lib -maxdepth 1 -type f -name "*.la" -print0 | xargs -0 -I {} rm {}
+rm -rf $DEST/lib/pkgconfig
+rm -rf $DEST/include/pkgconf
 echo "... Done"
 
 echo "copy yasm nasm cmake ninja curl"
 echo "======================="
-cd $PREFIX
+cd $DEST
 cp $M_SOURCE/nasm-$VER_NASM/*.exe bin
 cp $M_SOURCE/yasm-$VER_YASM-win64.exe bin/yasm.exe
 cp $M_SOURCE/cmake-$VER_CMAKE-windows-x86_64/bin/cmake.exe bin
