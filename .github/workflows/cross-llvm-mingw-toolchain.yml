@@ -50,7 +50,7 @@ jobs:
           key: linux-llvm-${{ github.run_id }}
       - name: Building toolchain
         run: |
-          ./llvm-mingw/toolchain-linux.sh $(pwd)/cross --native
+          ./llvm-mingw/toolchain-linux.sh $(pwd)/cross --native --llvm-only
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Packaging toolchain
