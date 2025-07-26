@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       clang:
-        description: "Build llvm with host clang"
+        description: "Build llvm with linux clang"
         required: false
         default: "true"
         type: boolean
