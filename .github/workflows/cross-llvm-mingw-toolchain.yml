@@ -31,7 +31,7 @@ jobs:
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
           tar -Jxf llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
           mv cross host
-          rm llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
+          rm llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
       - name: Building linux-stage1-llvm
         run: |
           if [[ ! "$(ls -A llvm-mingw-stage1/bin)" ]]; then
