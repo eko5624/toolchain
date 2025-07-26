@@ -6,66 +6,61 @@ on:
   workflow_dispatch:
   
 jobs:
-  linux-toolchain:
+  linux-stage1:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@main
-      - name: Loading linux-llvm cache
+        uses: actions/checkout@main      
+      - name: Loading stage1-llvm cache
         uses: actions/cache/restore@main
-        id: linux-llvm
+        id: stage1-llvm
         with:
-          path: ${{ github.workspace }}/cross
-          key: linux-llvm-${{ github.run_id }}
+          path: ${{ github.workspace }}/llvm-mingw-stage1
+          key: stage1-llvm-${{ github.run_id }}
           restore-keys: |
-            linux-llvm-   
-      - name: Loading profile-profdata cache
-        uses: actions/cache/restore@main
-        id: profile-profdata
-        with:
-          path: ${{ github.workspace }}/profile.profdata
-          key: profile-profdata-${{ github.run_id }}
-          restore-keys: |
-            profile-profdata-
-      - name: Load llvm-project source
+            stage1-llvm-
+      - name: Loading llvm-project source
         uses: actions/cache@main
         id: llvm-source
         with:
           path: ${{ github.workspace }}/source/llvm-project
           key: llvm-source-cache
-      - name: Install stage1 Clang
+      - name: Install linux clang
+        if: ${{ steps.stage1-llvm.outputs.cache-matched-key == '' }}
         run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
-          tar -Jxf llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
+          tar -Jxf llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
+          mv cross host
           rm llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
-      - name: Building linux-llvm
-        if: ${{ steps.linux-llvm.outputs.cache-matched-key == '' }}
+      - name: Building linux-stage1-llvm
         run: |
-          ./llvm-mingw/llvm.sh $(pwd)/llvm-mingw-stage1 $(pwd)/cross --with-clang --thinlto --pgo --llvm-only
-      - name: Saving linux-llvm cache
-        if: ${{ steps.linux-llvm.outputs.cache-matched-key == '' }}
+          if [[ ! "$(ls -A llvm-mingw-stage1/bin)" ]]; then
+            ./llvm-mingw/llvm.sh $(pwd)/llvm-mingw-stage1 --stage1 --with-clang
+          fi
+      - name: Saving stage1-llvm cache
+        if: ${{ steps.stage1-llvm.outputs.cache-matched-key == '' }}
         uses: actions/cache/save@main
         with:
-          path: ${{ github.workspace }}/cross
-          key: linux-llvm-${{ github.run_id }}
+          path: ${{ github.workspace }}/llvm-mingw-stage1
+          key: stage1-llvm-${{ github.run_id }}
       - name: Building toolchain
         run: |
-          ./llvm-mingw/toolchain-linux.sh $(pwd)/cross --native --llvm-only
+          ./llvm-mingw/toolchain-linux.sh $(pwd)/llvm-mingw-stage1 --native --all-tools --enable-cfguard
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Packaging toolchain
         run: |
-          tar -Jcf llvm-mingw-latest-ucrt-linux-x86_64.tar.xz cross
-          cp llvm-mingw-latest-ucrt-linux-x86_64.tar.xz llvm-mingw-$date-ucrt-linux-x86_64.tar.xz
+          tar -Jcf llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz llvm-mingw-stage1
+          cp llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz llvm-mingw-stage1-$date-ucrt-x86_64.tar.xz
       - name: Delete
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           chmod +x ./package-delete.sh
-          ./package-delete.sh llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
+          ./package-delete.sh llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: toolchain
           name: toolchain
-          files: llvm-mingw*.tar.xz
+          files: llvm-mingw-stage1*.tar.xz

@@ -19,6 +19,7 @@ BUILDDIR="build"
 LINK_DYLIB=ON
 CLANG_TOOLS_EXTRA=ON
 INSTRUMENTED=OFF
+M_HOST=$M_ROOT/host
 
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -30,6 +31,7 @@ while [ $# -gt 0 ]; do
         LLVM_ONLY=1
         ;;
     --stage1)
+        STAGE1=1
         unset CLANG_TOOLS_EXTRA
         ;;
     --profile)
@@ -78,6 +80,8 @@ if [ -n "$PROFILE" ]; then
     export PATH=$PREFIX/bin:$PATH
     STAGE1_PREFIX=$PREFIX
     PREFIX=/tmp/dummy-prefix
+elif [ -n "$STAGE1" ]; then
+    export PATH=$M_HOST/bin:$PATH
 elif [ -n "$PGO" ]; then
     if [ -z "$PREFIX_PGO" ]; then
         echo Must provide a second destination for a PGO build
