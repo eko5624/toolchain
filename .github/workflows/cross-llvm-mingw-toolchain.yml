@@ -4,107 +4,285 @@ defaults:
     shell: bash
 on:
   workflow_dispatch:
+    inputs:
+      clang:
+        description: "Build llvm with linux clang"
+        required: false
+        default: "true"
+        type: boolean
   
 jobs:
-  build_llvm:
+  linux-stage1:
+    if: ${{ inputs.clang == false }}
     runs-on: ubuntu-latest
-    container:
-      image: docker://ghcr.io/eko5624/archlinux:latest
     steps:
       - name: Checkout
         uses: actions/checkout@main      
-      - name: Loading llvm cache
+      - name: Loading stage1-llvm cache
         uses: actions/cache/restore@main
-        id: cross-llvm
+        id: stage1-llvm
         with:
-          path: ${{ github.workspace }}/cross
-          key: cross-llvm-${{ github.run_id }}
+          path: ${{ github.workspace }}/llvm-mingw-stage1
+          key: stage1-llvm-${{ github.run_id }}
           restore-keys: |
-            cross-llvm-
+            stage1-llvm-
+      - name: Loading llvm-project source
+        uses: actions/cache@main
+        id: llvm-source
+        with:
+          path: ${{ github.workspace }}/source/llvm-project
+          key: llvm-source-cache
+      - name: Building linux-stage1-llvm
+        run: |
+          if [[ ! "$(ls -A llvm-mingw-stage1/bin)" ]]; then
+            ./llvm-mingw/llvm.sh $(pwd)/llvm-mingw-stage1 --stage1
+          fi
+      - name: Saving stage1-llvm cache
+        if: ${{ steps.stage1-llvm.outputs.cache-matched-key == '' }}
+        uses: actions/cache/save@main
+        with:
+          path: ${{ github.workspace }}/llvm-mingw-stage1
+          key: stage1-llvm-${{ github.run_id }}
+      - name: Building toolchain
+        run: |
+          ./llvm-mingw/toolchain-linux.sh $(pwd)/llvm-mingw-stage1 --native --all-tools --enable-cfguard
+      - name: Get current timestamp
+        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
+      - name: Packaging toolchain
+        run: |
+          tar -Jcf llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz llvm-mingw-stage1
+          cp llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz llvm-mingw-stage1-$date-ucrt-x86_64.tar.xz
+      - name: Delete
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          chmod +x ./package-delete.sh
+          ./package-delete.sh llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: toolchain
+          name: toolchain
+          files: llvm-mingw-stage1*.tar.xz
+
+  linux-profile:
+    needs: [linux-stage1]
+    if: always() && (needs.linux-stage1.result == 'success' || needs.linux-stage1.result == 'skipped')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Init variable
+        run: |
+          if [ ${{ inputs.clang }} == 'true' ]; then
+            echo "DIR=host" >> $GITHUB_ENV
+          else
+            echo "DIR=llvm-mingw-stage1" >> $GITHUB_ENV
+          fi
+      - name: Checkout
+        uses: actions/checkout@main      
+      - name: Loading profile-profdata cache
+        uses: actions/cache/restore@main
+        id: profile-profdata
+        with:
+          path: ${{ github.workspace }}/profile.profdata
+          key: profile-profdata-${{ github.run_id }}
+          restore-keys: |
+            profile-profdata-
       - name: Load llvm-project source
         uses: actions/cache@main
         id: llvm-source
         with:
           path: ${{ github.workspace }}/source/llvm-project
           key: llvm-source-cache            
-      - name: Install host clang toolchain
-        if: ${{ steps.cross-llvm.outputs.cache-matched-key == '' }}
+      - name: Install linux clang
+        if: ${{ inputs.clang }}
         run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
-          tar -Jxf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
-          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
+          tar -Jxf llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
           mv cross host
-      - name: Building toolchain
+          rm llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
+      - name: Install stage1 clang
+        if: ${{ inputs.clang == false }}
         run: |
-          if [[ ! "$(ls -A cross/bin)" ]]; then
-            chmod +x ./cross-llvm.sh
-            ./cross-llvm.sh
-          fi
-      - name: Get current timestamp
-        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV  
-      - name: Packaging toolchain
-        if: ${{ steps.cross-llvm.outputs.cache-matched-key == '' }}
-        run: tar -Jcf cross-llvm-latest.tar.xz cross
-      - name: Saving llvm cache
-        if: ${{ steps.cross-llvm.outputs.cache-matched-key == '' }}
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
+          tar -Jxf llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
+          rm llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
+      - name: Building linux-profile-llvm
+        run: |
+          ./llvm-mingw/llvm.sh --profile $(pwd)/$DIR
+      - name: Train pgo
+        run: |
+          cd llvm-mingw
+          ln -sf ../source/llvm-project llvm-project
+          ./pgo-training.sh "llvm-project/llvm/build-instrumented" "../$DIR"
+          cd ..
+          mv llvm-mingw/profile.profdata ./
+      - name: Save profile.profdata cache
+        if: ${{ steps.llvm-profdata.outputs.cache-matched-key == '' }}
         uses: actions/cache/save@main
         with:
-          path: ${{ github.workspace }}/cross
-          key: cross-llvm-${{ github.run_id }}
-      - name: Delete
-        env:
-          GH_TOKEN: ${{ github.token }} 
-        if: ${{ steps.cross-llvm.outputs.cache-matched-key == '' }}
-        run: |
-          chmod +x ./package-delete.sh
-          ./package-delete.sh cross-llvm-latest.tar.xz
-      - name: Release
-        if: ${{ steps.cross-llvm.outputs.cache-matched-key == '' }}
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: toolchain
-          name: toolchain
-          files: cross-llvm*.tar.xz
+          path: ${{ github.workspace }}/profile.profdata
+          key: profile-profdata-${{ github.run_id }}
 
-  build_llvm-mingw:
-    needs: build_llvm
+  linux-toolchain:
+    needs: [linux-profile]
     runs-on: ubuntu-latest
-    container:
-      image: docker://ghcr.io/eko5624/archlinux:latest
     steps:
+      - name: Init variable
+        run: |
+          if [ ${{ inputs.clang }} == 'true' ]; then
+            echo "DIR=host" >> $GITHUB_ENV
+          else
+            echo "DIR=llvm-mingw-stage1" >> $GITHUB_ENV
+          fi
       - name: Checkout
         uses: actions/checkout@main
+      - name: Loading linux-llvm cache
+        uses: actions/cache/restore@main
+        id: linux-llvm
+        with:
+          path: ${{ github.workspace }}/cross
+          key: linux-llvm-${{ github.run_id }}
+          restore-keys: |
+            linux-llvm-   
+      - name: Loading profile-profdata cache
+        uses: actions/cache/restore@main
+        id: profile-profdata
+        with:
+          path: ${{ github.workspace }}/profile.profdata
+          key: profile-profdata-${{ github.run_id }}
+          restore-keys: |
+            profile-profdata-
       - name: Load llvm-project source
         uses: actions/cache@main
         id: llvm-source
         with:
           path: ${{ github.workspace }}/source/llvm-project
-          key: llvm-source-cache          
-      - name: Setup cross-llvm
+          key: llvm-source-cache
+      - name: Install linux clang
+        if: ${{ inputs.clang }}
         run: |
-          curl -OL https://github.com/eko5624/toolchain/releases/download/toolchain/cross-llvm-latest.tar.xz
-          tar -Jxf cross*.tar.xz
-          rm cross*.tar.xz            
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
+          tar -Jxf llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
+          mv cross host
+          rm llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
+      - name: Install stage1 clang
+        if: ${{ inputs.clang == false }}
+        run: |
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
+          tar -Jxf llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
+          rm llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
+      - name: Building linux-llvm
+        if: ${{ steps.linux-llvm.outputs.cache-matched-key == '' }}
+        run: |
+          ./llvm-mingw/llvm.sh $(pwd)/$DIR $(pwd)/cross --with-clang --thinlto --pgo --llvm-only
       - name: Building toolchain
+        if: ${{ inputs.clang }}
         run: |
-          chmod +x ./cross-llvm-mingw.sh
-          ./cross-llvm-mingw.sh
+          ./llvm-mingw/toolchain-linux.sh $(pwd)/cross --native --all-tools --enable-cfguard
+      - name: Saving linux-llvm cache
+        if: ${{ steps.linux-llvm.outputs.cache-matched-key == '' }}
+        uses: actions/cache/save@main
+        with:
+          path: ${{ github.workspace }}/cross
+          key: linux-llvm-${{ github.run_id }}
       - name: Get current timestamp
-        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV  
+        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Packaging toolchain
         run: |
-          tar -Jcf cross-llvm-mingw-${{ env.date }}-ucrt-x86_64.tar.xz cross
-          cp cross-llvm-mingw-${{ env.date }}-ucrt-x86_64.tar.xz cross-llvm-mingw-latest-ucrt-x86_64.tar.xz
+          tar -Jcf llvm-mingw-latest-ucrt-linux-x86_64.tar.xz cross
+          cp llvm-mingw-latest-ucrt-linux-x86_64.tar.xz llvm-mingw-$date-ucrt-linux-x86_64.tar.xz
       - name: Delete
         env:
-          GH_TOKEN: ${{ github.token }} 
+          GH_TOKEN: ${{ github.token }}
         run: |
           chmod +x ./package-delete.sh
-          ./package-delete.sh cross-llvm-mingw-latest-ucrt-x86_64.tar.xz
+          ./package-delete.sh llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
       - name: Release
-        continue-on-error: true
         uses: softprops/action-gh-release@v2
         with:
           tag_name: toolchain
           name: toolchain
-          files: cross-llvm-mingw*.tar.xz
+          files: llvm-mingw*.tar.xz
+
+  windows-toolchain:
+    needs: [linux-profile]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Init variable
+        run: |
+          if [ ${{ inputs.clang }} == 'true' ]; then
+            echo "DIR=host" >> $GITHUB_ENV
+          else
+            echo "DIR=llvm-mingw-stage1" >> $GITHUB_ENV
+          fi
+      - name: Checkout
+        uses: actions/checkout@main
+      - name: Loading windows-llvm cache
+        uses: actions/cache/restore@main
+        id: windows-llvm
+        with:
+          path: ${{ github.workspace }}/target
+          key: linux-llvm-${{ github.run_id }}
+          restore-keys: |
+            windows-llvm-
+      - name: Loading profile-profdata cache
+        uses: actions/cache/restore@main
+        id: profile-profdata
+        with:
+          path: ${{ github.workspace }}/profile.profdata
+          key: profile-profdata-${{ github.run_id }}
+          restore-keys: |
+            profile-profdata-
+      - name: Load llvm-project source
+        uses: actions/cache@main
+        id: llvm-source
+        with:
+          path: ${{ github.workspace }}/source/llvm-project
+          key: llvm-source-cache   
+      - name: Install linux clang
+        if: ${{ inputs.clang }}
+        run: |
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
+          tar -Jxf llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
+          mv cross host
+          rm llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
+      - name: Install stage1 clang
+        if: ${{ inputs.clang == false }}
+        run: |
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
+          tar -Jxf llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
+          rm llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
+      - name: Building windows-llvm
+        if: ${{ steps.windows-llvm.outputs.cache-matched-key == '' }}
+        run: |
+          ./llvm-mingw/llvm.sh $(pwd)/$DIR $(pwd)/target --thinlto --pgo --host=x86_64-w64-mingw32
+      - name: Saving windows-llvm cache
+        if: ${{ steps.windows-llvm.outputs.cache-matched-key == '' }}
+        uses: actions/cache/save@main
+        with:
+          path: ${{ github.workspace }}/target
+          key: windows-llvm-${{ github.run_id }}
+      - name: Install Meson and Ninja
+        run: |
+          pip install meson ninja
+      - name: Building toolchain
+        run: |
+          ./llvm-mingw/toolchain-windows.sh $(pwd)/$DIR $(pwd)/target --x86_64
+      - name: Get current timestamp
+        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
+      - name: Packaging toolchain
+        run: |
+          tar -Jchf llvm-mingw-latest-ucrt-windows-x86_64.tar.xz target
+          cp llvm-mingw-latest-ucrt-windows-x86_64.tar.xz llvm-mingw-$date-ucrt-windows-x86_64.tar.xz
+      - name: Delete
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          chmod +x ./package-delete.sh
+          ./package-delete.sh llvm-mingw-latest-ucrt-windows-x86_64.tar.xz
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: toolchain
+          name: toolchain
+          files: llvm-mingw*.tar.xz
