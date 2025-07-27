@@ -22,7 +22,7 @@ on:
         type: boolean     
   
 jobs:
-  build_llvm:
+  llvm-ir:
     runs-on: ubuntu-latest
     container:
       image: docker://ghcr.io/eko5624/archlinux:latest
@@ -79,8 +79,8 @@ jobs:
         if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
         run: |
           set -x
-          chmod +x ./llvm-static.sh
-          ./llvm-static.sh --enable-pgo_gen $LLVM_CCACHE
+          chmod +x ./llvm-static/llvm.sh
+          ./llvm-static/llvm.sh --enable-pgo_gen $LLVM_CCACHE
       - name: Save llvm-ir cache
         uses: actions/cache/save@main
         if: always()
@@ -108,8 +108,8 @@ jobs:
           name: toolchain
           files: llvm-ir-latest.tar.xz
 
-  build_llvm-pgo:
-    needs: build_llvm
+  llvm-pgo:
+    needs: llvm-ir
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}

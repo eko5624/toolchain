@@ -69,19 +69,19 @@ jobs:
       - name: Build toolchain
         run: |
           set -x
-          chmod +x ./llvm-static-wrappers.sh
-          ./llvm-static-wrappers.sh --x86_64
-          chmod +x ./cross-llvm-clang.sh
-          ./cross-llvm-clang.sh $PGO --x86_64
+          chmod +x ./llvm-static/wrappers.sh
+          ./llvm-static/wrappers.sh --x86_64
+          chmod +x ./llvm-static/toolchain.sh
+          ./llvm-static/toolchain.sh $PGO --x86_64
           if [ ${{ inputs.pgo }} == 'true' ]; then
-            chmod +x ./host-llvm-clang.sh
-            ./host-llvm-clang.sh
+            chmod +x ./llvm-static/host-toolchain.sh
+            ./llvm-static/host-toolchain.sh
           fi
       - name: Train bolt with sqlite
         if: ${{ inputs.pgo }}
         run: |
-          chmod +x ./train-bolt.sh 
-          ./train-bolt.sh --x86_64
+          chmod +x ./llvm-static/train-bolt.sh 
+          ./llvm-static/train-bolt.sh --x86_64
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Package x86_64 toolchain
@@ -151,15 +151,15 @@ jobs:
       - name: Build toolchain
         run: |
           set -x
-          chmod +x ./llvm-static-wrappers.sh
-          ./llvm-static-wrappers.sh --x86_64_v3
-          chmod +x ./cross-llvm-clang.sh
-          ./cross-llvm-clang.sh $PGO --x86_64_v3
+          chmod +x ./llvm-static/wrappers.sh
+          ./llvm-static/wrappers.sh --x86_64_v3
+          chmod +x ./llvm-static/toolchain.sh
+          ./llvm-static/toolchain.sh $PGO --x86_64_v3
       - name: Train bolt with sqlite
         if: ${{ inputs.pgo }}
         run: |
-          chmod +x ./train-bolt.sh
-          ./train-bolt.sh --x86_64_v3
+          chmod +x ./llvm-static/train-bolt.sh
+          ./llvm-static/train-bolt.sh --x86_64_v3
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Package x86_64_v3 toolchain
@@ -229,15 +229,15 @@ jobs:
       - name: Build toolchain
         run: |
           set -x
-          chmod +x ./llvm-static-wrappers.sh
-          ./llvm-static-wrappers.sh --aarch64
-          chmod +x ./cross-llvm-clang.sh
-          ./cross-llvm-clang.sh $PGO --aarch64
+          chmod +x ./llvm-static/wrappers.sh
+          ./llvm-static/wrappers.sh --aarch64
+          chmod +x ./llvm-static/toolchain.sh
+          ./llvm-static/toolchain.sh $PGO --aarch64
       - name: Train bolt with sqlite
         if: ${{ inputs.pgo }}
         run: |
-          chmod +x ./train-bolt.sh
-          ./train-bolt.sh --aarch64
+          chmod +x ./llvm-static/train-bolt.sh
+          ./llvm-static/train-bolt.sh --aarch64
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Package aarch64 toolchain

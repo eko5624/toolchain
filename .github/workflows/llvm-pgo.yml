@@ -22,7 +22,7 @@ on:
         type: boolean
   
 jobs:
-  train_pgo:
+  train-pgo:
     runs-on: ubuntu-latest
     container:
       image: docker://ghcr.io/eko5624/archlinux:latest
@@ -79,15 +79,15 @@ jobs:
         if: ${{ steps.llvm-profdata.outputs.cache-matched-key == '' }}
         run: |
           set -x
-          chmod +x ./llvm-static-wrappers.sh
-          ./llvm-static-wrappers.sh --x86_64
-          chmod +x ./cross-llvm-clang.sh
-          ./cross-llvm-clang.sh --enable-pgo_gen --x86_64
+          chmod +x ./llvm-static/wrappers.sh
+          ./llvm-static/wrappers.sh --x86_64
+          chmod +x ./llvm-static/toolchain.sh
+          ./llvm-static/toolchain.sh --enable-pgo_gen --x86_64
       - name: Train pgo with shaderc
         if: ${{ steps.llvm-profdata.outputs.cache-matched-key == '' }}
         run: |
-          chmod +x ./train-pgo.sh
-          ./train-pgo.sh --enable-pgo_gen
+          chmod +x ./llvm-static/train-pgo.sh
+          ./llvm-static/train-pgo.sh --enable-pgo_gen
       - name: Save llvm.profdata cache
         if: ${{ steps.llvm-profdata.outputs.cache-matched-key == '' }}
         uses: actions/cache/save@main
@@ -95,8 +95,8 @@ jobs:
           path: ${{ github.workspace }}/llvm.profdata
           key: llvm-profdata-${{ github.run_id }}
 
-  llvm_pgo:
-    needs: train_pgo
+  llvm-pgo:
+    needs: train-pgo
     runs-on: ubuntu-latest
     container:
       image: docker://ghcr.io/eko5624/archlinux:latest
@@ -160,8 +160,8 @@ jobs:
       - name: Build llvm with pgo
         if: ${{ steps.cross-llvm-pgo.outputs.cache-matched-key == '' }}
         run: |
-          chmod +x ./llvm-static.sh
-          ./llvm-static.sh --enable-bolt_use --enable-pgo_use $LLVM_LTO $LLVM_CCACHE
+          chmod +x ./llvm-static/llvm.sh
+          ./llvm-static/llvm.sh --enable-bolt_use --enable-pgo_use $LLVM_LTO $LLVM_CCACHE
       - name: Save cross-llvm-pgo cache
         if: ${{ steps.cross-llvm-pgo.outputs.cache-matched-key == '' }}
         uses: actions/cache/save@main
@@ -188,8 +188,8 @@ jobs:
           name: toolchain
           files: cross-llvm-pgo-latest.tar.xz
 
-  build_toolchain_with_pgo:
-    needs: llvm_pgo
+  toolchain:
+    needs: llvm-pgo
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
