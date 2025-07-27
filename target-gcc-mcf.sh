@@ -85,7 +85,7 @@ curl -L -o curl-win64-mingw.zip 'https://curl.se/windows/latest.cgi?p=win64-ming
 7z x curl*.zip
 
 #pkgconf
-git clone https://github.com/pkgconf/pkgconf --branch pkgconf-2.3.0
+git clone https://github.com/pkgconf/pkgconf --branch pkgconf-$VER_PKGCONF
 
 #windows-default-manifest
 git clone https://sourceware.org/git/cygwin-apps/windows-default-manifest.git
@@ -342,6 +342,7 @@ git clone https://github.com/gcc-mirror/gcc.git --branch releases/gcc-$VER_GCC
 
 cd $M_BUILD
 mkdir gcc-build && cd gcc-build
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0001-libstdc-Search-for-tzdata-on-Windows-msys.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0003-Windows-Follow-Posix-dir-exists-semantics-more-close.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0005-Windows-Don-t-ignore-native-system-header-dir.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0007-Build-EXTRA_GNATTOOLS-for-Ada.patch
@@ -350,13 +351,18 @@ curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0012-Handle-spaces-in-path-for-default-manifest.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0014-gcc-9-branch-clone_function_name_1-Retain-any-stdcall-suffix.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0020-libgomp-Don-t-hard-code-MS-printf-attributes.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0021-PR14940-Allow-a-PCH-to-be-mapped-to-a-different-addr.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0140-gcc-diagnostic-color.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0200-add-m-no-align-vector-insn-option-for-i386.patch
-curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/9000-gcc-Make-stupid-AT-T-syntax-not-default.patch
-curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/9001-Always-quote-labels-in-Intel-syntax.patch
-curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/9003-libstdc-Avoid-thread-local-states-for-MCF-thread-mod.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/2001-fix-building-rust-on-mingw-w64.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/3001-fix-codeview-crashes.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/9000-gcc-Make-stupid-AT-T-syntax-not-default.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/9001-i386-Quote-user-defined-symbols-in-assembly-in-Intel.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/9002-native-tls.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/9003-libstdc-Avoid-thread-local-states-for-MCF-thread-mod.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/9005-i386-cygming-Decrease-default-preferred-stack-bounda.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/9007-Enable-mcf-thread-model-for-aarch64-mingw.patch
+curl -L -o cf588f1a8e7406ced5b08f32f9d23f015a240a31.patch https://gcc.gnu.org/cgit/gcc/patch/?id=cf588f1a8e7406ced5b08f32f9d23f015a240a31
 
 apply_patch_for_gcc() {
   for patch in "$@"; do
@@ -375,19 +381,12 @@ apply_patch_for_gcc \
   0011-Enable-shared-gnat-implib.patch \
   0012-Handle-spaces-in-path-for-default-manifest.patch \
   0014-gcc-9-branch-clone_function_name_1-Retain-any-stdcall-suffix.patch \
-  0020-libgomp-Don-t-hard-code-MS-printf-attributes.patch
+  0020-libgomp-Don-t-hard-code-MS-printf-attributes.patch \
+  0021-PR14940-Allow-a-PCH-to-be-mapped-to-a-different-addr.patch
 
 # Enable diagnostic color under mintty
 # based on https://github.com/BurntSushi/ripgrep/issues/94#issuecomment-261761687
 apply_patch_for_gcc 0140-gcc-diagnostic-color.patch
-
-# XXX: GAS segfaults on i686?!
-apply_patch_for_gcc \
-  9000-gcc-Make-stupid-AT-T-syntax-not-default.patch \
-  9001-Always-quote-labels-in-Intel-syntax.patch \
-  9002-native-tls.patch \
-  9003-libstdc-Avoid-thread-local-states-for-MCF-thread-mod.patch
-
 
 # workaround for AVX misalignment issue for pass-by-value arguments
 #   cf. https://github.com/msys2/MSYS2-packages/issues/1209
@@ -399,8 +398,27 @@ apply_patch_for_gcc \
   0200-add-m-no-align-vector-insn-option-for-i386.patch \
   2001-fix-building-rust-on-mingw-w64.patch
 
-# so libgomp DLL gets built despide static libdl
-export lt_cv_deplibs_check_method='pass_all'
+# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=120051
+apply_patch_for_gcc 3001-fix-codeview-crashes.patch
+
+# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=120495
+# https://github.com/msys2/MINGW-packages/issues/24209
+apply_patch_for_gcc cf588f1a8e7406ced5b08f32f9d23f015a240a31.patch
+
+# Use MSYS zoneinfo
+apply_patch_for_gcc 0001-libstdc-Search-for-tzdata-on-Windows-msys.patch
+
+# backported from master
+apply_patch_for_gcc \
+  9001-i386-Quote-user-defined-symbols-in-assembly-in-Intel.patch \
+  9002-native-tls.patch \
+  9005-i386-cygming-Decrease-default-preferred-stack-bounda.patch \
+  9007-Enable-mcf-thread-model-for-aarch64-mingw.patch
+
+# GCC with the MCF thread model
+apply_patch_for_gcc \
+  9000-gcc-Make-stupid-AT-T-syntax-not-default.patch \
+  9003-libstdc-Avoid-thread-local-states-for-MCF-thread-mod.patch
 
 # In addition adaint.c does `#include <accctrl.h>` which pulls in msxml.h, hacky hack:
 CPPFLAGS+=" -DCOM_NO_WINDOWS_H"
@@ -446,8 +464,8 @@ $M_SOURCE/gcc/configure \
   --enable-checking=release \
   --enable-static \
   --enable-shared \
-  --with-arch=nocona \
-  --with-tune=generic \
+  --with-arch=x86-64-v2 \
+  --with-tune=intel \
   --without-included-gettext \
   --with-pkgversion="GCC with MCF thread model" \
   CFLAGS='-O2' \
@@ -536,6 +554,7 @@ echo "building pkgconf"
 echo "======================="
 cd $M_BUILD
 mkdir pkgconf-build
+cd $M_SOURCE/pkgconf
 meson setup $M_BUILD/pkgconf-build \
   --prefix=$M_TARGET \
   --cross-file=$TOP_DIR/cross.meson \
@@ -558,4 +577,3 @@ cp -r $M_SOURCE/cmake-$VER_CMAKE-windows-x86_64/share/cmake* share
 cp $M_SOURCE/ninja.exe bin
 cp $M_SOURCE/curl*/bin/curl-ca-bundle.crt bin
 cp $M_SOURCE/curl*/bin/curl.exe bin
-
