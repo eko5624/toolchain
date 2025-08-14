@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
  
 jobs:
-  build_cross-gcc-mcf-x86_64:
+  build-x86_64:
     runs-on: ubuntu-latest
     container:
       image: docker://ghcr.io/eko5624/archlinux:latest
@@ -16,14 +16,7 @@ jobs:
           sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
           sudo pacman -Syu --noconfirm
           sudo pacman -S --noconfirm --needed mingw-w64-gcc
-      - uses: actions/checkout@main
-      - name: Loading gcc cache
-        uses: actions/cache/restore@main
-        with:
-          path: ${{ github.workspace }}/cross
-          key: cross-gcc-mcf-x86_64-ucrt-${{ github.run_id }}
-          restore-keys: |
-            cross-gcc-mcf-x86_64-ucrt-            
+      - uses: actions/checkout@main            
       - name: Building toolchain
         run: |
           if [[ ! "$(ls -A cross/bin)" ]]; then
@@ -50,14 +43,8 @@ jobs:
           tag_name: toolchain
           name: toolchain
           files: cross-gcc-mcf*.tar.xz
-      - name: Saving gcc cache
-        uses: actions/cache/save@main
-        if: always()
-        with:
-          path: ${{ github.workspace }}/cross
-          key: cross-gcc-mcf-x86_64-ucrt-${{ github.run_id }}
 
-  build_cross-gcc-mcf-x86_64_v3:
+  build-x86_64_v3:
     runs-on: ubuntu-latest
     container:
       image: docker://ghcr.io/eko5624/archlinux:latest
@@ -67,14 +54,7 @@ jobs:
           sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
           sudo pacman -Syu --noconfirm
           sudo pacman -S --noconfirm --needed mingw-w64-gcc    
-      - uses: actions/checkout@main
-      - name: Loading gcc cache
-        uses: actions/cache/restore@main
-        with:
-          path: ${{ github.workspace }}/cross
-          key: cross-gcc-mcf-x86_64_v3-ucrt-${{ github.run_id }}
-          restore-keys: |
-            cross-gcc-mcf-x86_64_v3-ucrt-            
+      - uses: actions/checkout@main           
       - name: Building toolchain
         run: |
           if [[ ! "$(ls -A cross/bin)" ]]; then
@@ -101,10 +81,4 @@ jobs:
           tag_name: toolchain
           name: toolchain
           files: cross-gcc-mcf*.tar.xz
-      - name: Saving gcc cache
-        uses: actions/cache/save@main
-        if: always()
-        with:
-          path: ${{ github.workspace }}/cross
-          key: cross-gcc-mcf-x86_64_v3-ucrt-${{ github.run_id }}
 

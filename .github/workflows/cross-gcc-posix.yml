@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
  
 jobs:
-  build_cross-gcc-posix-x86_64:
+  build-x86_64:
     runs-on: ubuntu-latest
     container:
       image: docker://ghcr.io/eko5624/archlinux:latest
@@ -57,7 +57,7 @@ jobs:
           path: ${{ github.workspace }}/cross
           key: cross-gcc-posix-x86_64-ucrt-${{ github.run_id }}
 
-  build_cross-gcc-posix-x86_64_v3:
+  build-x86_64_v3:
     runs-on: ubuntu-latest
     container:
       image: docker://ghcr.io/eko5624/archlinux:latest

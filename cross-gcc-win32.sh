@@ -3,7 +3,6 @@ set -e
 
 TOP_DIR=$(pwd)
 source $TOP_DIR/ver.sh
-export BRANCH_GCC=releases/gcc-${VER_GCC%%.*}
 
 # Speed up the process
 # Env Var NUMJOBS overrides automatic detection
@@ -15,16 +14,20 @@ export M_ROOT=$(pwd)
 export M_SOURCE=$M_ROOT/source
 export M_BUILD=$M_ROOT/build
 export M_CROSS=$M_ROOT/cross
-
 export PATH="$M_CROSS/bin:$PATH"
+BRANCH_GCC=${VER_GCC%%.*}
 
 while [ $# -gt 0 ]; do
     case "$1" in
     --build-x86_64)
-        GCC_ARCH="x86-64"
+        GCC_ARCH="x86-64-v2"
+        GCC_TUNE="generic"
+        USE_FLAGS="-O2"
         ;;
     --build-x86_64_v3)
         GCC_ARCH="x86-64-v3"
+        GCC_TUNE="generic"
+        USE_FLAGS="-O3"
         ;;
     *)
         echo Unrecognized parameter $1
@@ -46,8 +49,8 @@ wget -c -O binutils-$VER_BINUTILS.tar.bz2 http://ftp.gnu.org/gnu/binutils/binuti
 tar xjf binutils-$VER_BINUTILS.tar.bz2 2>/dev/null >/dev/null
 
 #gcc
-#git clone https://github.com/gcc-mirror/gcc.git --branch releases/gcc-$BRANCH_GCC
-git clone https://github.com/gcc-mirror/gcc.git --branch releases/gcc-$VER_GCC
+git clone https://github.com/gcc-mirror/gcc.git --branch releases/gcc-$BRANCH_GCC
+# git clone https://github.com/gcc-mirror/gcc.git --branch releases/gcc-$VER_GCC
 
 #mingw-w64
 git clone https://github.com/mingw-w64/mingw-w64.git --branch master
@@ -150,7 +153,7 @@ $M_SOURCE/gcc/configure \
   --disable-shared \
   --disable-win32-registry \
   --with-arch=${GCC_ARCH} \
-  --with-tune=generic \
+  --with-tune=${GCC_TUNE} \
   --enable-threads=win32 \
   --enable-libstdcxx-threads=yes \
   --without-included-gettext \
@@ -160,7 +163,9 @@ $M_SOURCE/gcc/configure \
   --disable-sjlj-exceptions \
   --enable-default-pie \
   --enable-host-pie \
-  --enable-host-bind-now
+  --enable-host-bind-now \
+  CFLAGS="${USE_FLAGS}" \
+  CXXFLAGS="${USE_FLAGS}"
 make -j$MJOBS all-gcc
 make install-strip-gcc
 
