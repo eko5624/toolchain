@@ -3,7 +3,6 @@ set -e
 
 TOP_DIR=$(pwd)
 source $TOP_DIR/ver.sh
-export BRANCH_GCC=releases/gcc-${VER_GCC%%.*}
 
 # Speed up the process
 # Env Var NUMJOBS overrides automatic detection
@@ -16,6 +15,27 @@ M_CROSS=$M_ROOT/cross
 M_TARGET=$M_ROOT/target
 MINGW_TRIPLE="x86_64-w64-mingw32"
 PATH="$M_CROSS/bin:$PATH"
+BRANCH_GCC=${VER_GCC%%.*}
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+    --build-x86_64)
+        GCC_ARCH="x86-64-v2"
+        GCC_TUNE="generic"
+        USE_FLAGS="-O2"
+        ;;
+    --build-x86_64_v3)
+        GCC_ARCH="x86-64-v3"
+        GCC_TUNE="generic"
+        USE_FLAGS="-O3"
+        ;;
+    *)
+        echo Unrecognized parameter $1
+        exit 1
+        ;;
+    esac
+    shift
+done
 
 mkdir -p $M_SOURCE
 mkdir -p $M_BUILD
@@ -337,12 +357,11 @@ cppwinrt -in cppwinrt-build/Windows.winmd -out $M_TARGET/include
 echo "building gcc"
 echo "======================="
 cd $M_SOURCE
-#git clone https://github.com/gcc-mirror/gcc.git --branch releases/gcc-$BRANCH_GCC
-git clone https://github.com/gcc-mirror/gcc.git --branch releases/gcc-$VER_GCC
+git clone https://github.com/gcc-mirror/gcc.git --branch releases/gcc-$BRANCH_GCC
+# git clone https://github.com/gcc-mirror/gcc.git --branch releases/gcc-$VER_GCC
 
 cd $M_BUILD
 mkdir gcc-build && cd gcc-build
-curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/0001-libstdc-Search-for-tzdata-on-Windows-msys.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0003-Windows-Follow-Posix-dir-exists-semantics-more-close.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0005-Windows-Don-t-ignore-native-system-header-dir.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0007-Build-EXTRA_GNATTOOLS-for-Ada.patch
@@ -362,7 +381,8 @@ curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/9003-libstdc-Avoid-thread-local-states-for-MCF-thread-mod.patch
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/9005-i386-cygming-Decrease-default-preferred-stack-bounda.patch
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/9007-Enable-mcf-thread-model-for-aarch64-mingw.patch
-curl -L -o cf588f1a8e7406ced5b08f32f9d23f015a240a31.patch https://gcc.gnu.org/cgit/gcc/patch/?id=cf588f1a8e7406ced5b08f32f9d23f015a240a31
+curl -L -o 724f36504aa8573883e1919c6968665f8af28aef.patch https://gcc.gnu.org/cgit/gcc/patch/?id=724f36504aa8573883e1919c6968665f8af28aef
+curl -L -o e28494e08092c4096a015563c0ba0494ce1edf81.patch https://gcc.gnu.org/cgit/gcc/patch/?id=e28494e08092c4096a015563c0ba0494ce1edf81
 
 apply_patch_for_gcc() {
   for patch in "$@"; do
@@ -401,12 +421,10 @@ apply_patch_for_gcc \
 # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=120051
 apply_patch_for_gcc 3001-fix-codeview-crashes.patch
 
-# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=120495
-# https://github.com/msys2/MINGW-packages/issues/24209
-apply_patch_for_gcc cf588f1a8e7406ced5b08f32f9d23f015a240a31.patch
-
-# Use MSYS zoneinfo
-apply_patch_for_gcc 0001-libstdc-Search-for-tzdata-on-Windows-msys.patch
+# Use MSYS zoneinfo - contained in GCC 16
+apply_patch_for_gcc \
+  724f36504aa8573883e1919c6968665f8af28aef.patch \
+  e28494e08092c4096a015563c0ba0494ce1edf81.patch
 
 # backported from master
 apply_patch_for_gcc \
@@ -464,12 +482,12 @@ $M_SOURCE/gcc/configure \
   --enable-checking=release \
   --enable-static \
   --enable-shared \
-  --with-arch=x86-64-v2 \
-  --with-tune=intel \
+  --with-arch=${GCC_ARCH} \
+  --with-tune=${GCC_TUNE} \
   --without-included-gettext \
   --with-pkgversion="GCC with MCF thread model" \
-  CFLAGS='-O2' \
-  CXXFLAGS='-O2' \
+  CFLAGS="${USE_FLAGS}" \
+  CXXFLAGS="${USE_FLAGS}" \
   LDFLAGS='-Wl,--no-insert-timestamp -Wl,--dynamicbase -Wl,--high-entropy-va -Wl,--nxcompat -Wl,--tsaware'
 make -j$MJOBS
 make install

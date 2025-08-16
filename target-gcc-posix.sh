@@ -3,7 +3,6 @@ set -e
 
 TOP_DIR=$(pwd)
 source $TOP_DIR/ver.sh
-export BRANCH_GCC=releases/gcc-${VER_GCC%%.*}
 
 # Speed up the process
 # Env Var NUMJOBS overrides automatic detection
@@ -16,6 +15,27 @@ M_CROSS=$M_ROOT/cross
 M_TARGET=$M_ROOT/target
 MINGW_TRIPLE="x86_64-w64-mingw32"
 PATH="$M_CROSS/bin:$PATH"
+BRANCH_GCC=${VER_GCC%%.*}
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+    --build-x86_64)
+        GCC_ARCH="x86-64-v2"
+        GCC_TUNE="generic"
+        USE_FLAGS="-O2"
+        ;;
+    --build-x86_64_v3)
+        GCC_ARCH="x86-64-v3"
+        GCC_TUNE="generic"
+        USE_FLAGS="-O3"
+        ;;
+    *)
+        echo Unrecognized parameter $1
+        exit 1
+        ;;
+    esac
+    shift
+done
 
 mkdir -p $M_SOURCE
 mkdir -p $M_BUILD
@@ -25,7 +45,7 @@ echo "======================="
 cd $M_SOURCE
 
 #binutils
-wget -c -O binutils-$VER_BINUTILS.tar.bz2 http://ftp.gnu.org/gnu/binutils/binutils-$VER_BINUTILS.tar.bz2 2>/dev/null >/dev/null
+wget -c -O binutils-$VER_BINUTILS.tar.bz2 https://ftp.gnu.org/gnu/binutils/binutils-$VER_BINUTILS.tar.bz2 2>/dev/null >/dev/null
 tar xjf binutils-$VER_BINUTILS.tar.bz2 2>/dev/null >/dev/null
 
 #gcc
@@ -69,7 +89,7 @@ curl -OL https://github.com/ninja-build/ninja/releases/download/v$VER_NINJA/ninj
 
 #yasm
 #curl -OL https://github.com/yasm/yasm/releases/download/v$VER_YASM/yasm-$VER_YASM-win64.exe
-wget -c -O yasm-$VER_YASM.tar.gz http://www.tortall.net/projects/yasm/releases/yasm-$VER_YASM.tar.gz
+wget -c -O yasm-$VER_YASM.tar.gz http://www.tortall.net/projects/yasm/releases/yasm-$VER_YASM.tar.gz 2>/dev/null >/dev/null
 tar xzf yasm-$VER_YASM.tar.gz 2>/dev/null >/dev/null
 
 #nasm
@@ -84,7 +104,7 @@ curl -L -o curl-win64-mingw.zip 'https://curl.se/windows/latest.cgi?p=win64-ming
 7z x curl*.zip
 
 #pkgconf
-git clone https://github.com/pkgconf/pkgconf --branch pkgconf-2.3.0
+git clone https://github.com/pkgconf/pkgconf --branch pkgconf-$VER_PKGCONF
 
 #windows-default-manifest
 git clone https://sourceware.org/git/cygwin-apps/windows-default-manifest.git
@@ -239,37 +259,6 @@ rm $M_TARGET/include/pthread_signal.h
 rm $M_TARGET/include/pthread_time.h
 rm $M_TARGET/include/pthread_unistd.h
 
-echo "building mingw-w64-crt"
-echo "======================="
-cd $M_BUILD
-mkdir crt-build && cd crt-build
-$M_SOURCE/mingw-w64/mingw-w64-crt/configure \
-  --host=$MINGW_TRIPLE \
-  --prefix=$M_TARGET \
-  --with-sysroot=$M_TARGET \
-  --with-default-msvcrt=ucrt \
-  --enable-wildcard \
-  --disable-dependency-tracking \
-  --enable-lib64 \
-  --disable-lib32
-make -j$MJOBS install-strip
-make install
-# Create empty dummy archives, to avoid failing when the compiler driver
-# adds -lssp -lssh_nonshared when linking.
-ar rcs $M_TARGET/lib/libssp.a
-ar rcs $M_TARGET/lib/libssp_nonshared.a
-
-echo "building gendef"
-echo "======================="
-cd $M_BUILD
-mkdir gendef-build && cd gendef-build
-$M_SOURCE/mingw-w64/mingw-w64-tools/gendef/configure \
-  --host=$MINGW_TRIPLE \
-  --target=$MINGW_TRIPLE \
-  --prefix=$M_TARGET
-make -j$MJOBS
-make install
-
 echo "building winpthreads"
 echo "======================="
 cd $M_BUILD
@@ -308,6 +297,37 @@ $M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
 make -j$MJOBS
 make install
 
+echo "building mingw-w64-crt"
+echo "======================="
+cd $M_BUILD
+mkdir crt-build && cd crt-build
+$M_SOURCE/mingw-w64/mingw-w64-crt/configure \
+  --host=$MINGW_TRIPLE \
+  --prefix=$M_TARGET \
+  --with-sysroot=$M_TARGET \
+  --with-default-msvcrt=ucrt \
+  --enable-wildcard \
+  --disable-dependency-tracking \
+  --enable-lib64 \
+  --disable-lib32
+make -j$MJOBS install-strip
+make install
+# Create empty dummy archives, to avoid failing when the compiler driver
+# adds -lssp -lssh_nonshared when linking.
+ar rcs $M_TARGET/lib/libssp.a
+ar rcs $M_TARGET/lib/libssp_nonshared.a
+
+echo "building gendef"
+echo "======================="
+cd $M_BUILD
+mkdir gendef-build && cd gendef-build
+$M_SOURCE/mingw-w64/mingw-w64-tools/gendef/configure \
+  --host=$MINGW_TRIPLE \
+  --target=$MINGW_TRIPLE \
+  --prefix=$M_TARGET
+make -j$MJOBS
+make install
+
 echo "building cppwinrt"
 echo "======================="
 cd $M_BUILD
@@ -326,8 +346,8 @@ cppwinrt -in cppwinrt-build/Windows.winmd -out $M_TARGET/include
 echo "building gcc"
 echo "======================="
 cd $M_SOURCE
-#git clone https://github.com/gcc-mirror/gcc.git --branch releases/gcc-$BRANCH_GCC
-git clone https://github.com/gcc-mirror/gcc.git --branch releases/gcc-$VER_GCC
+git clone https://github.com/gcc-mirror/gcc.git --branch releases/gcc-$BRANCH_GCC
+# git clone https://github.com/gcc-mirror/gcc.git --branch releases/gcc-$VER_GCC
 
 cd $M_BUILD
 mkdir gcc-build && cd gcc-build
@@ -339,10 +359,14 @@ curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0012-Handle-spaces-in-path-for-default-manifest.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0014-gcc-9-branch-clone_function_name_1-Retain-any-stdcall-suffix.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0020-libgomp-Don-t-hard-code-MS-printf-attributes.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0021-PR14940-Allow-a-PCH-to-be-mapped-to-a-different-addr.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0140-gcc-diagnostic-color.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0200-add-m-no-align-vector-insn-option-for-i386.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/2001-fix-building-rust-on-mingw-w64.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/3001-fix-codeview-crashes.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/9002-native-tls.patch
+curl -L -o 724f36504aa8573883e1919c6968665f8af28aef.patch https://gcc.gnu.org/cgit/gcc/patch/?id=724f36504aa8573883e1919c6968665f8af28aef
+curl -L -o e28494e08092c4096a015563c0ba0494ce1edf81.patch https://gcc.gnu.org/cgit/gcc/patch/?id=e28494e08092c4096a015563c0ba0494ce1edf81
 
 apply_patch_for_gcc() {
   for patch in "$@"; do
@@ -361,13 +385,13 @@ apply_patch_for_gcc \
   0011-Enable-shared-gnat-implib.patch \
   0012-Handle-spaces-in-path-for-default-manifest.patch \
   0014-gcc-9-branch-clone_function_name_1-Retain-any-stdcall-suffix.patch \
-  0020-libgomp-Don-t-hard-code-MS-printf-attributes.patch
+  0020-libgomp-Don-t-hard-code-MS-printf-attributes.patch \
+  0021-PR14940-Allow-a-PCH-to-be-mapped-to-a-different-addr.patch
 
 # Enable diagnostic color under mintty
 # based on https://github.com/BurntSushi/ripgrep/issues/94#issuecomment-261761687
 apply_patch_for_gcc 0140-gcc-diagnostic-color.patch
 
-apply_patch_for_gcc 9002-native-tls.patch
 # workaround for AVX misalignment issue for pass-by-value arguments
 #   cf. https://github.com/msys2/MSYS2-packages/issues/1209
 #   cf. https://sourceforge.net/p/mingw-w64/discussion/723797/thread/bc936130/
@@ -376,6 +400,16 @@ apply_patch_for_gcc 9002-native-tls.patch
 # https://github.com/msys2/MINGW-packages/pull/8317#issuecomment-824548411
 apply_patch_for_gcc 0200-add-m-no-align-vector-insn-option-for-i386.patch
 apply_patch_for_gcc 2001-fix-building-rust-on-mingw-w64.patch
+
+# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=120051
+apply_patch_for_gcc 3001-fix-codeview-crashes.patch
+
+# Use MSYS zoneinfo - contained in GCC 16
+apply_patch_for_gcc \
+  724f36504aa8573883e1919c6968665f8af28aef.patch \
+  e28494e08092c4096a015563c0ba0494ce1edf81.patch
+
+# apply_patch_for_gcc 9002-native-tls.patch
 
 # so libgomp DLL gets built despide static libdl
 export lt_cv_deplibs_check_method='pass_all'
@@ -420,12 +454,12 @@ $M_SOURCE/gcc/configure \
   --enable-checking=release \
   --enable-static \
   --enable-shared \
-  --with-arch=nocona \
-  --with-tune=generic \
+  --with-arch=${GCC_ARCH} \
+  --with-tune=${GCC_TUNE} \
   --without-included-gettext \
   --with-pkgversion="GCC with posix thread model" \
-  CFLAGS='-O2' \
-  CXXFLAGS='-O2' \
+  CFLAGS="${USE_FLAGS}" \
+  CXXFLAGS="${USE_FLAGS}" \
   LDFLAGS='-Wl,--no-insert-timestamp -Wl,--dynamicbase -Wl,--high-entropy-va -Wl,--nxcompat -Wl,--tsaware'
 make -j$MJOBS
 make install
@@ -510,17 +544,8 @@ make install
 echo "building pkgconf"
 echo "======================="
 cd $M_BUILD
-mkdir pkgconf-build && cd pkgconf-build
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-pkgconf/0002-size-t-format.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-pkgconf/0003-printf-format.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-pkgconf/0004-default-pure-static.patch
-
+mkdir pkgconf-build
 cd $M_SOURCE/pkgconf
-# https://github.com/msys2/MINGW-packages/issues/8473
-patch -R -p1 -i $M_BUILD/pkgconf-build/0004-default-pure-static.patch
-patch -p1 -i $M_BUILD/pkgconf-build/0002-size-t-format.patch
-patch -p1 -i $M_BUILD/pkgconf-build/0003-printf-format.patch
-
 meson setup $M_BUILD/pkgconf-build \
   --prefix=$M_TARGET \
   --cross-file=$TOP_DIR/cross.meson \

@@ -1,4 +1,4 @@
-name: target-gcc-posix-ucrt(x86_64)
+name: target-gcc-posix-ucrt
 defaults:
   run:
     shell: bash
@@ -6,32 +6,24 @@ on:
   workflow_dispatch:
   
 jobs:
-  build:
+  build-x86_64:
     runs-on: ubuntu-latest
     container:
       image: docker://ghcr.io/eko5624/archlinux:latest
     steps:
       - name: Checkout
         uses: actions/checkout@main
-        
       - name: Setup Toolchain
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-gcc-posix-latest-ucrt-x86_64.tar.xz
           tar -Jxf cross-gcc-posix*.tar.xz
-          rm cross-gcc-posix*.tar.xz      
-      - name: Loading target gcc cache
-        uses: actions/cache/restore@main
-        with:
-          path: ${{ github.workspace }}/target
-          key: target-gcc-posix-${{ github.run_id }}
-          restore-keys: |
-            target-gcc-posix-            
+          rm cross-gcc-posix*.tar.xz                 
       - name: Building gcc with posix
         run: |
           PWD=$(pwd)
           if [[ ! "$(ls -A target/bin)" ]]; then
             chmod +x ./target-gcc-posix.sh
-            ./target-gcc-posix.sh
+            ./target-gcc-posix.sh --build-x86_64
           fi  
       - name: Get gcc version
         run: |
@@ -40,6 +32,12 @@ jobs:
         run: |
           7z a target-gcc-posix-${{ env.ver }}-ucrt-x86_64.7z target/*
           cp target-gcc-posix-${{ env.ver }}-ucrt-x86_64.7z target-gcc-posix-latest-ucrt-x86_64.7z
+      - name: Delete
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-delete.sh
+          ./package-delete.sh target-gcc-posix-latest-ucrt-x86_64.7z
       - name: Release
         continue-on-error: true
         env:
@@ -47,9 +45,43 @@ jobs:
         run: |
           chmod +x ./package-release.sh
           ./package-release.sh
-      - name: Saving target gcc cache
-        uses: actions/cache/save@main
-        if: always()
-        with:
-          path: ${{ github.workspace }}/target
-          key: target-gcc-posix-${{ github.run_id }}
+
+  build-x86_64_v3:
+    runs-on: ubuntu-latest
+    container:
+      image: docker://ghcr.io/eko5624/archlinux:latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+      - name: Setup Toolchain
+        run: |
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-gcc-posix-latest-ucrt-x86_64.tar.xz
+          tar -Jxf cross-gcc-posix*.tar.xz
+          rm cross-gcc-posix*.tar.xz                 
+      - name: Building gcc with posix
+        run: |
+          PWD=$(pwd)
+          if [[ ! "$(ls -A target/bin)" ]]; then
+            chmod +x ./target-gcc-posix.sh
+            ./target-gcc-posix.sh --build-x86_64_v3
+          fi  
+      - name: Get gcc version
+        run: |
+           echo "ver=$(cat target/version.txt)" >> $GITHUB_ENV           
+      - name: Packaging toolchain
+        run: |
+          7z a target-gcc-posix-${{ env.ver }}-ucrt-x86_64_v3.7z target/*
+          cp target-gcc-posix-${{ env.ver }}-ucrt-x86_64_v3.7z target-gcc-posix-latest-ucrt-x86_64_v3.7z
+      - name: Delete
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-delete.sh
+          ./package-delete.sh target-gcc-posix-latest-ucrt-x86_64_v3.7z
+      - name: Release
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-release.sh
+          ./package-release.sh

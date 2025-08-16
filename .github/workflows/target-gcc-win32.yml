@@ -1,4 +1,4 @@
-name: target-gcc-win32-ucrt(x86_64)
+name: target-gcc-win32-ucrt
 defaults:
   run:
     shell: bash
@@ -6,44 +6,22 @@ on:
   workflow_dispatch:
   
 jobs:
-  build:
+  build-x86_64:
     runs-on: ubuntu-latest
     container:
-      image: archlinux/archlinux:base-devel
-    steps:    
-      - name: Install Dependencies
-        run: |
-          sudo echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
-          sudo pacman -Syu --noconfirm docker
-          sudo pacman -S --noconfirm --needed git gyp mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf unzip p7zip xz python-pip python-cairo curl jq wget
-          pip3 install -U --break-system-packages setuptools rst2pdf mako jsonschema meson
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --global pull.rebase true
-          git config --global rebase.autoStash true
-          git config --global fetch.prune true
-          git config --global --add safe.directory $PWD          
+      image: docker://ghcr.io/eko5624/archlinux:latest
+    steps:         
       - name: Checkout
         uses: actions/checkout@main        
       - name: Setup Toolchain
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-gcc-win32-latest-ucrt-x86_64.tar.xz
           tar -Jxf cross-gcc-win32*.tar.xz
-          rm cross-gcc-win32*.tar.xz
-      - name: Loading target gcc cache
-        uses: actions/cache/restore@main
-        with:
-          path: ${{ github.workspace }}/target
-          key: target-gcc-win32-${{ github.run_id }}
-          restore-keys: |
-            target-gcc-win32-            
+          rm cross-gcc-win32*.tar.xz          
       - name: Building gcc with thread win32
         run: |
-          PWD=$(pwd)
-          if [[ ! "$(ls -A target/bin)" ]]; then
-            chmod +x ./target-gcc-win32.sh
-            ./target-gcc-win32.sh
-          fi  
+          chmod +x ./target-gcc-win32.sh
+          ./target-gcc-win32.sh --build-x86_64 
       - name: Get gcc version
         run: |
           echo "ver=$(cat target/version.txt)" >> $GITHUB_ENV           
@@ -51,6 +29,12 @@ jobs:
         run: |
           7z a target-gcc-win32-${{ env.ver }}-ucrt-x86_64.7z target/*
           cp target-gcc-win32-${{ env.ver }}-ucrt-x86_64.7z target-gcc-win32-latest-ucrt-x86_64.7z
+      - name: Delete
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-delete.sh
+          ./package-delete.sh target-gcc-win32-latest-ucrt-x86_64.7z
       - name: Release
         continue-on-error: true
         env:
@@ -58,9 +42,40 @@ jobs:
         run: |
           chmod +x ./package-release.sh
           ./package-release.sh
-      - name: Saving target gcc cache
-        uses: actions/cache/save@main
-        if: always()
-        with:
-          path: ${{ github.workspace }}/target
-          key: target-gcc-win32-${{ github.run_id }}
+
+  build-x86_64_v3:
+    runs-on: ubuntu-latest
+    container:
+      image: docker://ghcr.io/eko5624/archlinux:latest
+    steps:         
+      - name: Checkout
+        uses: actions/checkout@main        
+      - name: Setup Toolchain
+        run: |
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-gcc-win32-latest-ucrt-x86_64.tar.xz
+          tar -Jxf cross-gcc-win32*.tar.xz
+          rm cross-gcc-win32*.tar.xz           
+      - name: Building gcc with thread win32
+        run: |
+          chmod +x ./target-gcc-win32.sh
+          ./target-gcc-win32.sh --build-x86_64_v3 
+      - name: Get gcc version
+        run: |
+          echo "ver=$(cat target/version.txt)" >> $GITHUB_ENV           
+      - name: Packaging toolchain
+        run: |
+          7z a target-gcc-win32-${{ env.ver }}-ucrt-x86_64_v3.7z target/*
+          cp target-gcc-win32-${{ env.ver }}-ucrt-x86_64_v3.7z target-gcc-win32-latest-ucrt-x86_64_v3.7z
+      - name: Delete
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-delete.sh
+          ./package-delete.sh target-gcc-win32-latest-ucrt-x86_64_v3.7z
+      - name: Release
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }} 
+        run: |
+          chmod +x ./package-release.sh
+          ./package-release.sh
