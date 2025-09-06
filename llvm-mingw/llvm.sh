@@ -27,6 +27,9 @@ while [ $# -gt 0 ]; do
         WITH_CLANG=1
         BUILDDIR="$BUILDDIR-withclang"
         ;;
+    --use-linker=*)
+        USE_LINKER="${1#*=}"
+        ;;
     --llvm-only)
         LLVM_ONLY=1
         ;;
@@ -108,7 +111,7 @@ if [ -n "$HOST" ]; then
     if [ -n "$WITH_CLANG" ]; then
         CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_C_COMPILER=clang"
         CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_CXX_COMPILER=clang++"
-        CMAKEFLAGS="$CMAKEFLAGS -DLLVM_USE_LINKER=lld"
+        CMAKEFLAGS="$CMAKEFLAGS -DLLVM_USE_LINKER=${USE_LINKER:-lld}"
         CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_C_COMPILER_TARGET=$HOST"
         CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_CXX_COMPILER_TARGET=$HOST"
     else
@@ -142,12 +145,14 @@ elif [ -n "$WITH_CLANG" ]; then
     # tools.
     CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_C_COMPILER=clang"
     CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_CXX_COMPILER=clang++"
-    CMAKEFLAGS="$CMAKEFLAGS -DLLVM_USE_LINKER=lld"
+    CMAKEFLAGS="$CMAKEFLAGS -DLLVM_USE_LINKER=${USE_LINKER:-lld}"
 else
     # Native compilation with the system default compiler.
 
     # Use a faster linker, if available.
-    if command -v ld.lld >/dev/null; then
+    if [ -n "$USE_LINKER" ]; then
+        CMAKEFLAGS="$CMAKEFLAGS -DLLVM_USE_LINKER=$USE_LINKER"
+    elif command -v ld.lld >/dev/null; then
         CMAKEFLAGS="$CMAKEFLAGS -DLLVM_USE_LINKER=lld"
     elif command -v ld.gold >/dev/null; then
         CMAKEFLAGS="$CMAKEFLAGS -DLLVM_USE_LINKER=gold"
