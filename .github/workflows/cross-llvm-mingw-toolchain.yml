@@ -8,7 +8,7 @@ on:
       clang:
         description: "Build llvm with linux clang"
         required: false
-        default: "true"
+        default: "false"
         type: boolean
   
 jobs:
