@@ -45,10 +45,10 @@ echo "======================="
 cd $M_SOURCE
 
 #binutils
-wget -c -O binutils-$VER_BINUTILS.tar.bz2 http://ftp.gnu.org/gnu/binutils/binutils-$VER_BINUTILS.tar.bz2 2>/dev/null >/dev/null
-tar xjf binutils-$VER_BINUTILS.tar.bz2 2>/dev/null >/dev/null
-#mkdir binutils
-#git clone https://sourceware.org/git/binutils-gdb.git --branch binutils-${VER_BINUTILS//./_}-branch binutils
+#wget -c -O binutils-$VER_BINUTILS.tar.bz2 http://ftp.gnu.org/gnu/binutils/binutils-$VER_BINUTILS.tar.bz2 2>/dev/null >/dev/null
+#tar xjf binutils-$VER_BINUTILS.tar.bz2 2>/dev/null >/dev/null
+mkdir binutils
+git clone https://sourceware.org/git/binutils-gdb.git --branch binutils-${VER_BINUTILS//./_}-branch binutils
 
 #gmp
 wget -c -O gmp-$VER_GMP.tar.bz2 https://ftp.gnu.org/gnu/gmp/gmp-$VER_GMP.tar.bz2 2>/dev/null >/dev/null
@@ -70,7 +70,7 @@ tar xjf isl-$VER_ISL.tar.bz2 2>/dev/null >/dev/null
 git clone https://github.com/mingw-w64/mingw-w64.git --branch master
 
 #mcfgthread
-git clone https://github.com/lhmouse/mcfgthread.git --branch master
+git clone https://github.com/lhmouse/mcfgthread.git --branch v2.2-ga.2
 
 #cppwinrt
 git clone https://github.com/microsoft/cppwinrt.git --branch master
@@ -87,11 +87,6 @@ curl -OL https://github.com/Kitware/CMake/releases/download/v$VER_CMAKE/cmake-$V
 #ninja
 curl -OL https://github.com/ninja-build/ninja/releases/download/v$VER_NINJA/ninja-win.zip
 7z x ninja*.zip
-
-#yasm
-#curl -OL https://github.com/yasm/yasm/releases/download/v$VER_YASM/yasm-$VER_YASM-win64.exe
-wget -c -O yasm-$VER_YASM.tar.gz http://www.tortall.net/projects/yasm/releases/yasm-$VER_YASM.tar.gz
-tar xzf yasm-$VER_YASM.tar.gz 2>/dev/null >/dev/null
 
 #nasm
 #curl -OL https://www.nasm.us/pub/nasm/releasebuilds/$VER_NASM/win64/nasm-$VER_NASM-win64.zip
@@ -173,11 +168,14 @@ mkdir binutils-build && cd binutils-build
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0002-check-for-unusual-file-harder.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0010-bfd-Increase-_bfd_coff_max_nscns-to-65279.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0110-binutils-mingw-gnu-print.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-binutils/0401-opcodes-i386-dis-Use-Intel-syntax-by-default.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0410-windres-handle-spaces.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0500-fix-weak-undef-symbols-after-image-base-change.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/2001-ld-option-to-move-default-bases-under-4GB.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/2003-Restore-old-behaviour-of-windres-so-that-options-con.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/3001-hack-libiberty-link-order.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/4000-fix-DEBUG_S_INLINEELINES.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-binutils/9200-bfd-pe-pei-x86_64-Decrease-preferred-section-alignme.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/libiberty-unlink-handle-windows-nul.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/reproducible-import-libraries.patch
 
@@ -188,11 +186,16 @@ apply_patch_for_binutils() {
   done
 }
 
-cd $M_SOURCE/binutils-$VER_BINUTILS
+cd $M_SOURCE/binutils
 apply_patch_for_binutils \
   0002-check-for-unusual-file-harder.patch \
   0010-bfd-Increase-_bfd_coff_max_nscns-to-65279.patch \
   0110-binutils-mingw-gnu-print.patch
+
+# ZZZ
+apply_patch_for_binutils \
+  0401-opcodes-i386-dis-Use-Intel-syntax-by-default.patch \
+  9200-bfd-pe-pei-x86_64-Decrease-preferred-section-alignme.patch
 
 # Add an option to change default bases back below 4GB to ease transition
 # https://github.com/msys2/MINGW-packages/issues/7027
@@ -221,8 +224,12 @@ patch -p1 -i $M_BUILD/binutils-build/libiberty-unlink-handle-windows-nul.patch
 # built one is just luck, and I don't know how that is supposed to work.
 patch -p1 -i $M_BUILD/binutils-build/3001-hack-libiberty-link-order.patch
 
+# https://github.com/msys2/MINGW-packages/issues/24148
+# https://sourceware.org/bugzilla/show_bug.cgi?id=32942
+patch -p1 -i $M_BUILD/binutils-build/4000-fix-DEBUG_S_INLINEELINES.patch
+
 cd $M_BUILD/binutils-build
-$M_SOURCE/binutils-$VER_BINUTILS/configure \
+$M_SOURCE/binutils/configure \
   --host=$MINGW_TRIPLE \
   --target=$MINGW_TRIPLE \
   --prefix=$M_TARGET \
@@ -231,6 +238,7 @@ $M_SOURCE/binutils-$VER_BINUTILS/configure \
   --disable-nls \
   --disable-werror \
   --disable-shared \
+  --disable-{gdb,gdbserver} \
   --enable-lto \
   --enable-64-bit-bfd
 make -j$MJOBS
@@ -357,32 +365,25 @@ cppwinrt -in cppwinrt-build/Windows.winmd -out $M_TARGET/include
 echo "building gcc"
 echo "======================="
 cd $M_SOURCE
-git clone https://github.com/gcc-mirror/gcc.git --branch releases/gcc-$BRANCH_GCC
+git clone https://github.com/gcc-mirror/gcc.git --branch master
 # git clone https://github.com/gcc-mirror/gcc.git --branch releases/gcc-$VER_GCC
 
 cd $M_BUILD
 mkdir gcc-build && cd gcc-build
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0003-Windows-Follow-Posix-dir-exists-semantics-more-close.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0005-Windows-Don-t-ignore-native-system-header-dir.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0007-Build-EXTRA_GNATTOOLS-for-Ada.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0008-Prettify-linking-no-undefined.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0011-Enable-shared-gnat-implib.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0012-Handle-spaces-in-path-for-default-manifest.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0014-gcc-9-branch-clone_function_name_1-Retain-any-stdcall-suffix.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0020-libgomp-Don-t-hard-code-MS-printf-attributes.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0021-PR14940-Allow-a-PCH-to-be-mapped-to-a-different-addr.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0140-gcc-diagnostic-color.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/0200-add-m-no-align-vector-insn-option-for-i386.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/2001-fix-building-rust-on-mingw-w64.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/3001-fix-codeview-crashes.patch
-curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/9000-gcc-Make-stupid-AT-T-syntax-not-default.patch
-curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/9001-i386-Quote-user-defined-symbols-in-assembly-in-Intel.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-gcc/9002-native-tls.patch
-curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/9003-libstdc-Avoid-thread-local-states-for-MCF-thread-mod.patch
-curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/9005-i386-cygming-Decrease-default-preferred-stack-bounda.patch
-curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/master/mingw-w64-gcc/9007-Enable-mcf-thread-model-for-aarch64-mingw.patch
-curl -L -o 724f36504aa8573883e1919c6968665f8af28aef.patch https://gcc.gnu.org/cgit/gcc/patch/?id=724f36504aa8573883e1919c6968665f8af28aef
-curl -L -o e28494e08092c4096a015563c0ba0494ce1edf81.patch https://gcc.gnu.org/cgit/gcc/patch/?id=e28494e08092c4096a015563c0ba0494ce1edf81
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/0003-Windows-Follow-Posix-dir-exists-semantics-more-close.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/0005-Windows-Don-t-ignore-native-system-header-dir.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/0007-Build-EXTRA_GNATTOOLS-for-Ada.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/0008-Prettify-linking-no-undefined.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/0011-Enable-shared-gnat-implib.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/0012-Handle-spaces-in-path-for-default-manifest.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/0014-gcc-9-branch-clone_function_name_1-Retain-any-stdcall-suffix.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/0140-gcc-diagnostic-color.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/0200-add-m-no-align-vector-insn-option-for-i386.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/2001-fix-building-rust-on-mingw-w64.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/3001-fix-codeview-crashes.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/9000-gcc-Make-stupid-AT-T-syntax-not-default.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/9003-libstdc-Avoid-thread-local-states-for-MCF-thread-mod.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/9009-libgcc-Pass-x87-control-word-in-the-correct-type.patch
 
 apply_patch_for_gcc() {
   for patch in "$@"; do
@@ -400,9 +401,7 @@ apply_patch_for_gcc \
   0008-Prettify-linking-no-undefined.patch \
   0011-Enable-shared-gnat-implib.patch \
   0012-Handle-spaces-in-path-for-default-manifest.patch \
-  0014-gcc-9-branch-clone_function_name_1-Retain-any-stdcall-suffix.patch \
-  0020-libgomp-Don-t-hard-code-MS-printf-attributes.patch \
-  0021-PR14940-Allow-a-PCH-to-be-mapped-to-a-different-addr.patch
+  0014-gcc-9-branch-clone_function_name_1-Retain-any-stdcall-suffix.patch
 
 # Enable diagnostic color under mintty
 # based on https://github.com/BurntSushi/ripgrep/issues/94#issuecomment-261761687
@@ -421,21 +420,10 @@ apply_patch_for_gcc \
 # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=120051
 apply_patch_for_gcc 3001-fix-codeview-crashes.patch
 
-# Use MSYS zoneinfo - contained in GCC 16
-apply_patch_for_gcc \
-  724f36504aa8573883e1919c6968665f8af28aef.patch \
-  e28494e08092c4096a015563c0ba0494ce1edf81.patch
-
-# backported from master
-apply_patch_for_gcc \
-  9001-i386-Quote-user-defined-symbols-in-assembly-in-Intel.patch \
-  9002-native-tls.patch \
-  9005-i386-cygming-Decrease-default-preferred-stack-bounda.patch \
-  9007-Enable-mcf-thread-model-for-aarch64-mingw.patch
-
 # GCC with the MCF thread model
 apply_patch_for_gcc \
   9000-gcc-Make-stupid-AT-T-syntax-not-default.patch \
+  9009-libgcc-Pass-x87-control-word-in-the-correct-type.patch \
   9003-libstdc-Avoid-thread-local-states-for-MCF-thread-mod.patch
 
 # In addition adaint.c does `#include <accctrl.h>` which pulls in msxml.h, hacky hack:
@@ -475,6 +463,7 @@ $M_SOURCE/gcc/configure \
   --enable-libatomic \
   --enable-libgomp \
   --enable-__cxa_atexit \
+  --enable-tls \
   --enable-graphite \
   --enable-mingw-wildcard \
   --enable-threads=mcf \
@@ -488,7 +477,7 @@ $M_SOURCE/gcc/configure \
   --with-pkgversion="GCC with MCF thread model" \
   CFLAGS="${USE_FLAGS}" \
   CXXFLAGS="${USE_FLAGS}" \
-  LDFLAGS='-Wl,--no-insert-timestamp -Wl,--dynamicbase -Wl,--high-entropy-va -Wl,--nxcompat -Wl,--tsaware'
+  LDFLAGS="-s"
 make -j$MJOBS
 make install
 for f in $M_TARGET/bin/*.exe; do
@@ -527,33 +516,6 @@ $M_SOURCE/make-$VER_MAKE/configure \
   CFLAGS="-std=gnu17"
 make -j$MJOBS
 make install
-
-#echo "building cmake"
-#echo "======================="
-#cd $M_BUILD
-#mkdir cmake-build
-#cmake -H$M_SOURCE/CMake -B$M_BUILD/cmake-build \
-#  -DCMAKE_INSTALL_PREFIX=$M_TARGET \
-#  -DCMAKE_TOOLCHAIN_FILE=$TOP_DIR/toolchain.cmake \
-#  -DCMAKE_BUILD_TYPE=Release \
-#  -DBUILD_SHARED_LIBS=OFF \
-#  -DCMAKE_USE_SYSTEM_LIBRARIES=OFF
-#make -j$MJOBS -C $M_BUILD/cmake-build
-#make install -C $M_BUILD/cmake-build
-
-echo "building yasm"
-echo "======================="
-cd $M_SOURCE/yasm-$VER_YASM
-./configure \
-  --host=$MINGW_TRIPLE \
-  --target=$MINGW_TRIPLE \
-  --prefix=$M_TARGET \
-  CFLAGS="-std=gnu17"
-make -j$MJOBS
-make install
-rm -rf $M_TARGET/include/libyasm
-rm $M_TARGET/include/libyasm*
-rm $M_TARGET/lib/libyasm.a
 
 echo "building nasm"
 echo "======================="
