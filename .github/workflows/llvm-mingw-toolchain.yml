@@ -1,4 +1,4 @@
-name: cross-llvm-mingw-toolchain
+name: llvm-mingw-toolchain
 defaults:
   run:
     shell: bash
