@@ -324,8 +324,8 @@ for arch in $ARCHS; do
       -DLIBCXXABI_USE_LLVM_UNWINDER=ON \
       -DLIBCXXABI_ENABLE_SHARED=OFF \
       -DLIBCXXABI_LIBDIR_SUFFIX="" \
-      -DCMAKE_C_FLAGS_INIT="-mguard=cf" \
-      -DCMAKE_CXX_FLAGS_INIT="-mguard=cf"
+      -DCMAKE_C_FLAGS_INIT="-mguard=cf -D__USE_MINGW_ANSI_STDIO=1" \
+      -DCMAKE_CXX_FLAGS_INIT="-mguard=cf -D__USE_MINGW_ANSI_STDIO=1"
     cmake --build libcxx-build-$arch -j$MJOBS
     cmake --install libcxx-build-$arch
 done    
