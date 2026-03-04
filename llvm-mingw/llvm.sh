@@ -199,15 +199,13 @@ cmake -G Ninja \
   -DCMAKE_BUILD_TYPE=Release \
   -DLLVM_ENABLE_ASSERTIONS=OFF \
   -DLLVM_ENABLE_PROJECTS=$PROJECTS \
+  -DLLVM_ENABLE_BINDINGS=OFF \
   -DLLVM_TARGETS_TO_BUILD="ARM;AArch64;X86;NVPTX" \
   -DLLVM_INSTALL_TOOLCHAIN_ONLY=ON \
   -DLLVM_INCLUDE_TESTS=OFF \
   -DLLVM_INCLUDE_EXAMPLES=OFF \
   -DLLVM_INCLUDE_DOCS=OFF \
   -DLLVM_INCLUDE_BENCHMARKS=OFF \
-  -DLLVM_LINK_LLVM_DYLIB=$LINK_DYLIB \
-  -DLLVM_ENABLE_LIBXML2=OFF \
-  -DLLDB_ENABLE_PYTHON=OFF \
   -DLLVM_TOOLCHAIN_TOOLS="llvm-ar;llvm-ranlib;llvm-objdump;llvm-rc;llvm-cvtres;llvm-nm;llvm-strings;llvm-readobj;llvm-dlltool;llvm-pdbutil;llvm-objcopy;llvm-strip;llvm-cov;llvm-profdata;llvm-addr2line;llvm-symbolizer;llvm-windres;llvm-ml;llvm-readelf;llvm-size;llvm-cxxfilt;llvm-lib" \
   ${HOST+-DLLVM_HOST_TRIPLE=$HOST} \
   -DLLVM_BUILD_INSTRUMENTED=$INSTRUMENTED \
