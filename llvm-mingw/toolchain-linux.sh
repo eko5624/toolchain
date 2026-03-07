@@ -32,17 +32,11 @@ while [ $# -gt 0 ]; do
         CPPWINRT=1
         PKGCONF=1
         ;;
-    --llvm-only)
-        LLVM_ONLY=1
-        ;;
     --enable-cfguard)
         CFGUARD_FLAGS="--enable-cfguard"
         ;;
     --disable-cfguard)
         CFGUARD_FLAGS=
-        ;;
-    --native)
-        NATIVE=1
         ;;
     *)
         PREFIX="$1"
@@ -76,7 +70,7 @@ cd $M_SOURCE
 #llvm
 #git clone https://github.com/llvm/llvm-project.git --branch release/18.x llvmorg-$VER_LLVM
 if [ ! -d "$M_SOURCE/llvm-project" ]; then
-  git clone https://github.com/llvm/llvm-project.git --branch llvmorg-$VER_LLVM
+  git clone https://github.com/llvm/llvm-project.git --branch release/22.x
 fi
 
 #lldb-mi
@@ -89,42 +83,14 @@ git clone https://github.com/mstorsjo/llvm-mingw.git --branch master
 git clone https://github.com/mingw-w64/mingw-w64.git --branch master
 
 #pkgconf
-git clone https://github.com/pkgconf/pkgconf --branch pkgconf-$VER_PKGCONF
+#git clone https://github.com/pkgconf/pkgconf --branch pkgconf-$VER_PKGCONF
 
 echo "stripping llvm"
 echo "======================="
 cd $M_SOURCE/llvm-mingw
 ./strip-llvm.sh $PREFIX
 echo "stripping llvm done"
-
-if [ -n "$NATIVE" ]; then
-    echo "building llvm-compiler-rt"
-    echo "======================="
-    cd $M_BUILD
-    mkdir compiler-rt-build
-    cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt -B$M_BUILD/compiler-rt-build \
-      -DCMAKE_BUILD_TYPE=Release \
-      -DCMAKE_INSTALL_PREFIX="$CLANG_RESOURCE_DIR" \
-      -DCMAKE_C_COMPILER=clang \
-      -DCMAKE_CXX_COMPILER=clang++ \
-      -DLLVM_CONFIG_PATH="" \
-      -DCMAKE_FIND_ROOT_PATH=$PREFIX \
-      -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
-      -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
-      -DCOMPILER_RT_USE_LIBCXX=OFF
-    cmake --build compiler-rt-build -j$MJOBS
-    cmake --install compiler-rt-build --prefix "$INSTALL_PREFIX"
-    rm -rf compiler-rt-build
-    if [ "$INSTALL_PREFIX" != "$CLANG_RESOURCE_DIR" ]; then
-        # symlink to system headers - skip copy
-        rm -rf "$INSTALL_PREFIX/include"
-        cp -r "$INSTALL_PREFIX/." $CLANG_RESOURCE_DIR
-    fi
-fi
-
-if [ -n "$LLVM_ONLY" ]; then
-    exit 0
-fi
+echo "======================="
 
 echo "installing wrappers"
 echo "======================="
@@ -176,7 +142,7 @@ fi
 echo "building gendef"
 echo "======================="
 cd $M_BUILD
-mkdir gendef-build
+rm -rf endef-build && mkdir gendef-build
 cd gendef-build
 $M_SOURCE/mingw-w64/mingw-w64-tools/gendef/configure --prefix=$PREFIX
 make -j$MJOBS
@@ -185,7 +151,7 @@ make install-strip
 echo "building mingw-w64-headers"
 echo "======================="
 cd $M_BUILD
-mkdir headers-build
+rm -rf headers-build && mkdir headers-build
 cd headers-build
 $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
   --prefix="$HEADER_ROOT" \
@@ -209,7 +175,7 @@ cd $M_SOURCE/mingw-w64/mingw-w64-crt
 autoreconf -ivf
 for arch in $ARCHS; do
     cd $M_BUILD
-    mkdir crt-build-$arch
+    rm -rf crt-build-$arch && mkdir crt-build-$arch
     cd crt-build-$arch
     case $arch in
     armv7)
@@ -248,7 +214,7 @@ echo "building winpthreads"
 echo "======================="
 for arch in $ARCHS; do
     cd $M_BUILD
-    mkdir winpthreads-build-$arch
+    rm -rf winpthreads-build-$arch && mkdir winpthreads-build-$arch
     cd winpthreads-build-$arch
     $M_SOURCE/mingw-w64/mingw-w64-libraries/winpthreads/configure \
       --host=$arch-w64-mingw32 \
@@ -263,7 +229,7 @@ echo "building llvm-compiler-rt-builtin"
 echo "======================="
 for arch in $ARCHS; do
     cd $M_BUILD
-    mkdir builtins-build-$arch
+    rm -rf builtins-build-$arch && mkdir builtins-build-$arch
     cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B$M_BUILD/builtins-build-$arch \
       -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_INSTALL_PREFIX="$CLANG_RESOURCE_DIR" \
@@ -295,7 +261,7 @@ echo "building llvm-libcxx"
 echo "======================="
 for arch in $ARCHS; do
     cd $M_BUILD
-    mkdir libcxx-build-$arch
+    rm -rf libcxx-build-$arch && mkdir libcxx-build-$arch
     cmake -G Ninja -H$M_SOURCE/llvm-project/runtimes -B$M_BUILD/libcxx-build-$arch \
       -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_INSTALL_PREFIX="$PREFIX/$arch-w64-mingw32" \
@@ -318,8 +284,6 @@ for arch in $ARCHS; do
       -DLIBCXX_CXX_ABI=libcxxabi \
       -DLIBCXX_LIBDIR_SUFFIX="" \
       -DLIBCXX_INCLUDE_TESTS=FALSE \
-      -DLIBCXX_INSTALL_MODULES=ON \
-      -DLIBCXX_INSTALL_MODULES_DIR="$PREFIX/share/libc++/v1" \
       -DLIBCXX_ENABLE_ABI_LINKER_SCRIPT=FALSE \
       -DLIBCXXABI_USE_COMPILER_RT=ON \
       -DLIBCXXABI_USE_LLVM_UNWINDER=ON \
@@ -335,7 +299,7 @@ echo "building llvm-compiler-rt"
 echo "======================="
 for arch in $ARCHS; do
     cd $M_BUILD
-    mkdir compiler-rt-build-$arch
+    rm -rf compiler-rt-build-$arch && mkdir compiler-rt-build-$arch
     cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt -B$M_BUILD/compiler-rt-build-$arch \
       -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_INSTALL_PREFIX="$CLANG_RESOURCE_DIR" \

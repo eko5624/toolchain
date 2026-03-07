@@ -33,10 +33,8 @@ jobs:
           path: ${{ github.workspace }}/source/llvm-project
           key: llvm-source-cache
       - name: Building linux-stage1-llvm
-        run: |
-          if [[ ! "$(ls -A llvm-mingw-stage1/bin)" ]]; then
-            ./llvm-mingw/llvm.sh $(pwd)/llvm-mingw-stage1 --stage1
-          fi
+        if: ${{ steps.stage1-llvm.outputs.cache-matched-key == '' }}
+        run: ./llvm-mingw/llvm.sh $(pwd)/llvm-mingw-stage1 --stage1 --with-clang
       - name: Saving stage1-llvm cache
         if: ${{ steps.stage1-llvm.outputs.cache-matched-key == '' }}
         uses: actions/cache/save@main
@@ -45,7 +43,9 @@ jobs:
           key: stage1-llvm-${{ github.run_id }}
       - name: Building toolchain
         run: |
+          chmod +x ./llvm-mingw/*.sh
           ./llvm-mingw/toolchain-linux.sh $(pwd)/llvm-mingw-stage1 --enable-cfguard
+          ./llvm-mingw/toolchain-host.sh $(pwd)/llvm-mingw-stage1
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Packaging toolchain
@@ -174,11 +174,13 @@ jobs:
       - name: Building linux-llvm
         if: ${{ steps.linux-llvm.outputs.cache-matched-key == '' }}
         run: |
-          ./llvm-mingw/llvm.sh $(pwd)/$DIR $(pwd)/cross --with-clang --thinlto --pgo --llvm-only
+          ./llvm-mingw/llvm.sh $(pwd)/$DIR $(pwd)/cross --with-clang --thinlto --pgo
       - name: Building toolchain
         if: ${{ inputs.clang }}
         run: |
-          ./llvm-mingw/toolchain-linux.sh $(pwd)/cross --native --all-tools --enable-cfguard
+          chmod +x ./llvm-mingw/*.sh
+          ./llvm-mingw/toolchain-linux.sh $(pwd)/cross --all-tools --enable-cfguard
+          ./llvm-mingw/toolchain-host.sh $(pwd)/cross
       - name: Saving linux-llvm cache
         if: ${{ steps.linux-llvm.outputs.cache-matched-key == '' }}
         uses: actions/cache/save@main
