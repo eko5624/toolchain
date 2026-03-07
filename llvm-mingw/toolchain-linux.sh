@@ -55,6 +55,7 @@ done
 
 HEADER_ROOT="$PREFIX/generic-w64-mingw32"
 
+ORIG_PATH="$PATH"
 export PATH="$PREFIX/bin:$PATH"
 CLANG_RESOURCE_DIR="$("$PREFIX/bin/clang" --print-resource-dir)"
 INSTALL_PREFIX="$CLANG_RESOURCE_DIR"
@@ -160,7 +161,7 @@ if [ -n "$CPPWINRT" ]; then
     git clone https://github.com/microsoft/cppwinrt.git --branch master
     cd $M_BUILD
     mkdir cppwinrt-build
-    cmake -G Ninja -H$M_SOURCE/cppwinrt -B$M_BUILD/cppwinrt-build \
+    PATH=$ORIG_PATH cmake -G Ninja -H$M_SOURCE/cppwinrt -B$M_BUILD/cppwinrt-build \
       -DCMAKE_BUILD_TYPE=Release \
       -DBUILD_SHARED_LIBS=OFF \
       -DCMAKE_INSTALL_PREFIX=$PREFIX \
