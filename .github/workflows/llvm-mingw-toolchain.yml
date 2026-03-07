@@ -34,7 +34,7 @@ jobs:
           key: llvm-source-cache
       - name: Building linux-stage1-llvm
         if: ${{ steps.stage1-llvm.outputs.cache-matched-key == '' }}
-        run: ./llvm-mingw/llvm.sh $(pwd)/llvm-mingw-stage1 --stage1 --with-clang
+        run: ./llvm-mingw/llvm.sh $(pwd)/llvm-mingw-stage1 --stage1 --with-clang --host=x86_64-unknown-linux-gnu
       - name: Saving stage1-llvm cache
         if: ${{ steps.stage1-llvm.outputs.cache-matched-key == '' }}
         uses: actions/cache/save@main
