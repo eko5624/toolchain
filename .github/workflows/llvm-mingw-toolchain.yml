@@ -32,7 +32,6 @@ jobs:
           path: ${{ github.workspace }}/source/llvm-project
           key: llvm-source-cache
       - name: Install linux clang
-        if: ${{ inputs.clang }}
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
           tar -Jxf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
