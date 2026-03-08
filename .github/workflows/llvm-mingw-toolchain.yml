@@ -13,7 +13,6 @@ on:
   
 jobs:
   linux-stage1:
-    if: ${{ inputs.clang == false }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -32,6 +31,13 @@ jobs:
         with:
           path: ${{ github.workspace }}/source/llvm-project
           key: llvm-source-cache
+      - name: Install linux clang
+        if: ${{ inputs.clang }}
+        run: |
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
+          tar -Jxf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
+          mv cross host
+          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
       - name: Building linux-stage1-llvm
         if: ${{ steps.stage1-llvm.outputs.cache-matched-key == '' }}
         run: ./llvm-mingw/llvm.sh $(pwd)/llvm-mingw-stage1 --stage1 --with-clang
@@ -96,10 +102,10 @@ jobs:
       - name: Install linux clang
         if: ${{ inputs.clang }}
         run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
-          tar -Jxf llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
+          tar -Jxf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
           mv cross host
-          rm llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
+          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
       - name: Install stage1 clang
         if: ${{ inputs.clang == false }}
         run: |

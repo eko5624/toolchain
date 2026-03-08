@@ -78,6 +78,10 @@ while [ $# -gt 0 ]; do
     shift
 done
 
+if [ -n "$STAGE1" ]; then
+    export PATH=$M_HOST/bin:$PATH
+fi    
+
 if [ -n "$PROFILE" ]; then
     export PATH=$PREFIX/bin:$PATH
     STAGE1_PREFIX=$PREFIX
