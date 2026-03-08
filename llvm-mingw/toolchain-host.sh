@@ -15,19 +15,7 @@ export M_ROOT=$(pwd)
 export M_SOURCE=$M_ROOT/source
 export M_BUILD=$M_ROOT/build
 
-while [ $# -gt 0 ]; do
-    case "$1" in
-    --all-tools)
-        CPPWINRT=1
-        PKGCONF=1
-        ;;
-    *)
-        PREFIX="$1"
-        ;;
-    esac
-    shift
-done
-
+PREFIX="$1"
 ORIG_PATH="$PATH"
 export PATH="$PREFIX/bin:$PATH"
 CLANG_RESOURCE_DIR="$(clang --print-resource-dir)"
@@ -106,10 +94,10 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/runtimes -B$M_BUILD/libcxx-build \
   -DLLVM_ENABLE_RUNTIMES="libunwind;libcxxabi;libcxx" \
   -DLLVM_PATH=$M_SOURCE/llvm-project/llvm \
   -DLIBUNWIND_USE_COMPILER_RT=TRUE \
-  -DLIBUNWIND_ENABLE_SHARED=ON \
+  -DLIBUNWIND_ENABLE_SHARED=OFF \
   -DLIBUNWIND_ENABLE_STATIC=ON \
   -DLIBCXX_USE_COMPILER_RT=ON \
-  -DLIBCXX_ENABLE_SHARED=ON \
+  -DLIBCXX_ENABLE_SHARED=OFF \
   -DLIBCXX_ENABLE_STATIC=ON \
   -DLIBCXX_ENABLE_STATIC_ABI_LIBRARY=TRUE \
   -DLIBCXX_CXX_ABI=libcxxabi \
