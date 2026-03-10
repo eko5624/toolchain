@@ -50,7 +50,7 @@ jobs:
         run: |
           chmod +x ./llvm-mingw/*.sh
           ./llvm-mingw/toolchain-linux.sh $(pwd)/llvm-mingw-stage1 --enable-cfguard
-          ./llvm-mingw/toolchain-host.sh $(pwd)/llvm-mingw-stage1
+          # ./llvm-mingw/toolchain-host.sh $(pwd)/llvm-mingw-stage1
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Packaging toolchain
