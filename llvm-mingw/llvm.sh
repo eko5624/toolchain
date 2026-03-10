@@ -111,7 +111,6 @@ COMPILER_FLAGS=""
 COMPILER_FLAGS="$COMPILER_FLAGS -DCMAKE_ASM_COMPILER_TARGET=x86_64-unknown-linux-gnu"
 COMPILER_FLAGS="$COMPILER_FLAGS -DCMAKE_C_COMPILER_TARGET=x86_64-unknown-linux-gnu"
 COMPILER_FLAGS="$COMPILER_FLAGS -DCMAKE_CXX_COMPILER_TARGET=x86_64-unknown-linux-gnu"
-COMPILER_FLAGS="$COMPILER_FLAGS -DLLVM_DEFAULT_TARGET_TRIPLE=x86_64-unknown-linux-gnu"
 
 if [ -n "$HOST" ]; then
     ARCH="${HOST%%-*}"
@@ -189,7 +188,7 @@ echo "======================="
 cd $M_SOURCE
 #git clone https://github.com/llvm/llvm-project.git --branch release/18.x llvmorg-$VER_LLVM
 if [ ! -d "$M_SOURCE/llvm-project" ]; then
-  git clone https://github.com/llvm/llvm-project.git --branch llvmorg-21.1.8
+  git clone https://github.com/llvm/llvm-project.git --branch release/22.x
 fi
 
 echo "building llvm"
