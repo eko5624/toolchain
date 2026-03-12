@@ -27,19 +27,19 @@ jobs:
     steps:
       - name: Install Dependencies
         run: |
-        sudo apt-get update
-        sudo apt-get install --no-install-recommends -y \
-          build-essential \
-          nasm \
-          git \
-          meson \
-          ninja-build \
-          go-git \
-          libmimalloc-dev \
-          autoconf \
-          automake \
-          libtool \
-          pkg-config
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y \
+            build-essential \
+            nasm \
+            git \
+            meson \
+            ninja-build \
+            go-git \
+            libmimalloc-dev \
+            autoconf \
+            automake \
+            libtool \
+            pkg-config
       - uses: actions/checkout@main
       - name: Init variable
         run: |
