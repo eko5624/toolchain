@@ -13,9 +13,13 @@ on:
   
 jobs:
   linux-stage1:
-    if: ${{ inputs.clang == false }}
     runs-on: ubuntu-latest
     steps:
+      - name: Init variable
+        run: |
+          if [ ${{ inputs.clang }} == 'true' ]; then
+            echo "LLVM_ARGS=--with-clang" >> $GITHUB_ENV
+          fi
       - name: Checkout
         uses: actions/checkout@main      
       - name: Loading stage1-llvm cache
@@ -32,11 +36,16 @@ jobs:
         with:
           path: ${{ github.workspace }}/source/llvm-project
           key: llvm-source-cache
-      - name: Building linux-stage1-llvm
+      - name: Install linux clang
+        if: ${{ inputs.clang }}
         run: |
-          if [[ ! "$(ls -A llvm-mingw-stage1/bin)" ]]; then
-            ./llvm-mingw/llvm.sh $(pwd)/llvm-mingw-stage1 --stage1
-          fi
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
+          tar -Jxf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
+          mv cross host
+          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
+      - name: Building linux-stage1-llvm
+        if: ${{ steps.stage1-llvm.outputs.cache-matched-key == '' }}
+        run: ./llvm-mingw/llvm.sh "$(pwd)/llvm-mingw-stage1" --stage1 $LLVM_ARGS
       - name: Saving stage1-llvm cache
         if: ${{ steps.stage1-llvm.outputs.cache-matched-key == '' }}
         uses: actions/cache/save@main
@@ -45,7 +54,7 @@ jobs:
           key: stage1-llvm-${{ github.run_id }}
       - name: Building toolchain
         run: |
-          ./llvm-mingw/toolchain-linux.sh $(pwd)/llvm-mingw-stage1 --native --all-tools --enable-cfguard
+          ./llvm-mingw/toolchain-linux.sh "$(pwd)/llvm-mingw-stage1" --native --all-tools --enable-cfguard
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Packaging toolchain
@@ -67,16 +76,8 @@ jobs:
 
   linux-profile:
     needs: [linux-stage1]
-    if: always() && (needs.linux-stage1.result == 'success' || needs.linux-stage1.result == 'skipped')
     runs-on: ubuntu-latest
     steps:
-      - name: Init variable
-        run: |
-          if [ ${{ inputs.clang }} == 'true' ]; then
-            echo "DIR=host" >> $GITHUB_ENV
-          else
-            echo "DIR=llvm-mingw-stage1" >> $GITHUB_ENV
-          fi
       - name: Checkout
         uses: actions/checkout@main      
       - name: Loading profile-profdata cache
@@ -92,28 +93,20 @@ jobs:
         id: llvm-source
         with:
           path: ${{ github.workspace }}/source/llvm-project
-          key: llvm-source-cache            
-      - name: Install linux clang
-        if: ${{ inputs.clang }}
-        run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
-          tar -Jxf llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
-          mv cross host
-          rm llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
+          key: llvm-source-cache
       - name: Install stage1 clang
-        if: ${{ inputs.clang == false }}
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
           tar -Jxf llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
           rm llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
       - name: Building linux-profile-llvm
         run: |
-          ./llvm-mingw/llvm.sh --profile $(pwd)/$DIR
+          ./llvm-mingw/llvm.sh --profile "$(pwd)/llvm-mingw-stage1"
       - name: Train pgo
         run: |
           cd llvm-mingw
           ln -sf ../source/llvm-project llvm-project
-          ./pgo-training.sh "llvm-project/llvm/build-instrumented" "../$DIR"
+          ./pgo-training.sh "llvm-project/llvm/build-instrumented" "../llvm-mingw-stage1"
           cd ..
           mv llvm-mingw/profile.profdata ./
       - name: Save profile.profdata cache
@@ -127,13 +120,6 @@ jobs:
     needs: [linux-profile]
     runs-on: ubuntu-latest
     steps:
-      - name: Init variable
-        run: |
-          if [ ${{ inputs.clang }} == 'true' ]; then
-            echo "DIR=host" >> $GITHUB_ENV
-          else
-            echo "DIR=llvm-mingw-stage1" >> $GITHUB_ENV
-          fi
       - name: Checkout
         uses: actions/checkout@main
       - name: Loading linux-llvm cache
@@ -158,15 +144,7 @@ jobs:
         with:
           path: ${{ github.workspace }}/source/llvm-project
           key: llvm-source-cache
-      - name: Install linux clang
-        if: ${{ inputs.clang }}
-        run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
-          tar -Jxf llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
-          mv cross host
-          rm llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
       - name: Install stage1 clang
-        if: ${{ inputs.clang == false }}
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
           tar -Jxf llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
@@ -174,11 +152,10 @@ jobs:
       - name: Building linux-llvm
         if: ${{ steps.linux-llvm.outputs.cache-matched-key == '' }}
         run: |
-          ./llvm-mingw/llvm.sh $(pwd)/$DIR $(pwd)/cross --with-clang --thinlto --pgo --llvm-only
+          ./llvm-mingw/llvm.sh "$(pwd)/llvm-mingw-stage1" "$(pwd)/cross" --with-clang --thinlto --pgo --llvm-only
       - name: Building toolchain
-        if: ${{ inputs.clang }}
         run: |
-          ./llvm-mingw/toolchain-linux.sh $(pwd)/cross --native --all-tools --enable-cfguard
+          ./llvm-mingw/toolchain-linux.sh "$(pwd)/cross" --native --all-tools --enable-cfguard
       - name: Saving linux-llvm cache
         if: ${{ steps.linux-llvm.outputs.cache-matched-key == '' }}
         uses: actions/cache/save@main
@@ -208,13 +185,6 @@ jobs:
     needs: [linux-profile]
     runs-on: ubuntu-latest
     steps:
-      - name: Init variable
-        run: |
-          if [ ${{ inputs.clang }} == 'true' ]; then
-            echo "DIR=host" >> $GITHUB_ENV
-          else
-            echo "DIR=llvm-mingw-stage1" >> $GITHUB_ENV
-          fi
       - name: Checkout
         uses: actions/checkout@main
       - name: Loading windows-llvm cache
@@ -239,15 +209,7 @@ jobs:
         with:
           path: ${{ github.workspace }}/source/llvm-project
           key: llvm-source-cache   
-      - name: Install linux clang
-        if: ${{ inputs.clang }}
-        run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
-          tar -Jxf llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
-          mv cross host
-          rm llvm-mingw-latest-ucrt-linux-x86_64.tar.xz
       - name: Install stage1 clang
-        if: ${{ inputs.clang == false }}
         run: |
           curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
           tar -Jxf llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
@@ -255,7 +217,7 @@ jobs:
       - name: Building windows-llvm
         if: ${{ steps.windows-llvm.outputs.cache-matched-key == '' }}
         run: |
-          ./llvm-mingw/llvm.sh $(pwd)/$DIR $(pwd)/target --thinlto --pgo --host=x86_64-w64-mingw32
+          ./llvm-mingw/llvm.sh "$(pwd)/llvm-mingw-stage1" "$(pwd)/target" --thinlto --pgo --host=x86_64-w64-mingw32
       - name: Saving windows-llvm cache
         if: ${{ steps.windows-llvm.outputs.cache-matched-key == '' }}
         uses: actions/cache/save@main
@@ -267,7 +229,7 @@ jobs:
           pip install meson ninja
       - name: Building toolchain
         run: |
-          ./llvm-mingw/toolchain-windows.sh $(pwd)/$DIR $(pwd)/target --x86_64
+          ./llvm-mingw/toolchain-windows.sh "$(pwd)/llvm-mingw-stage1" "$(pwd)/target" --x86_64
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Packaging toolchain
