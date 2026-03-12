@@ -24,8 +24,6 @@ on:
 jobs:
   train-pgo:
     runs-on: ubuntu-latest
-    container:
-      image: docker://ghcr.io/eko5624/archlinux:latest
     steps:
       - name: Init variable
         run: |
@@ -49,18 +47,18 @@ jobs:
           key: llvm-profdata-${{ github.run_id }}
           restore-keys: |
             llvm-profdata-
-      #- name: Install fuchsia-clang
-      #  if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
-      #  run: |
-      #    sudo GOBIN=/usr/bin go install go.chromium.org/luci/cipd/client/cmd/...@latest
-      #    sudo cipd install fuchsia/third_party/clang/linux-amd64 latest -root /usr/local/fuchsia-clang
-      - name: Install host clang toolchain
-        if: ${{ steps.llvm-profdata.outputs.cache-matched-key == '' }}
+      - name: Install fuchsia-clang
+        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
         run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
-          tar -Jxf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
-          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
-          mv cross host
+          sudo GOBIN=/usr/bin go install go.chromium.org/luci/cipd/client/cmd/...@latest
+          sudo cipd install fuchsia/third_party/clang/linux-amd64 latest -root /usr/local/fuchsia-clang
+      #- name: Install host clang toolchain
+      #  if: ${{ steps.llvm-profdata.outputs.cache-matched-key == '' }}
+      #  run: |
+      #    curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
+      #    tar -Jxf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
+      #    rm cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
+      #    mv cross host
       - name: Setup llvm-ir
         if: ${{ steps.llvm-profdata.outputs.cache-matched-key == '' }}
         run: |
@@ -98,8 +96,6 @@ jobs:
   llvm-pgo:
     needs: train-pgo
     runs-on: ubuntu-latest
-    container:
-      image: docker://ghcr.io/eko5624/archlinux:latest
     steps:
       - name: Init variable
         run: |
@@ -137,18 +133,18 @@ jobs:
         with:
           path: ${{ github.workspace }}/source/llvm-project
           key: llvm-source-cache
-      #- name: Install fuchsia-clang
-      #  if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
-      #  run: |
-      #    sudo GOBIN=/usr/bin go install go.chromium.org/luci/cipd/client/cmd/...@latest
-      #    sudo cipd install fuchsia/third_party/clang/linux-amd64 latest -root /usr/local/fuchsia-clang
-      - name: Install host clang toolchain
-        if: ${{ steps.cross-llvm-pgo.outputs.cache-matched-key == '' }}
+      - name: Install fuchsia-clang
+        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
         run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
-          tar -Jxf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
-          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
-          mv cross host
+          sudo GOBIN=/usr/bin go install go.chromium.org/luci/cipd/client/cmd/...@latest
+          sudo cipd install fuchsia/third_party/clang/linux-amd64 latest -root /usr/local/fuchsia-clang
+      #- name: Install host clang toolchain
+      #  if: ${{ steps.cross-llvm-pgo.outputs.cache-matched-key == '' }}
+      #  run: |
+      #    curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
+      #    tar -Jxf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
+      #    rm cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
+      #    mv cross host
       - name: Install llvm-lto llvm-ccache
         if: (steps.cross-llvm-pgo.outputs.cache-matched-key == '' && inputs.llvm_thin_lto) || (steps.cross-llvm-pgo.outputs.cache-matched-key == '' && inputs.llvm_ccache)
         run: |

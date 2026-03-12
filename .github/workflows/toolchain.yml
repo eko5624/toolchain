@@ -24,8 +24,6 @@ on:
 jobs:
   x86_64:
     runs-on: ubuntu-latest
-    container:
-      image: docker://ghcr.io/eko5624/archlinux:latest
     steps:
       - name: Init variable
         run: |
@@ -106,8 +104,6 @@ jobs:
 
   x86_64_v3:
     runs-on: ubuntu-latest
-    container:
-      image: docker://ghcr.io/eko5624/archlinux:latest
     steps:
       - name: Init variable
         run: |
@@ -184,8 +180,6 @@ jobs:
 
   aarch64:
     runs-on: ubuntu-latest
-    container:
-      image: docker://ghcr.io/eko5624/archlinux:latest
     steps:
       - name: Init variable
         run: |
