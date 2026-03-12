@@ -24,9 +24,23 @@ on:
 jobs:
   llvm-ir:
     runs-on: ubuntu-latest
-    container:
-      image: docker://ghcr.io/eko5624/archlinux:latest
     steps:
+      - name: Install Dependencies
+        run: |
+        sudo apt-get update
+        sudo apt-get install --no-install-recommends -y \
+          build-essential \
+          nasm \
+          git \
+          meson \
+          ninja-build \
+          go-git \
+          libmimalloc-dev \
+          autoconf \
+          automake \
+          libtool \
+          pkg-config
+      - uses: actions/checkout@main
       - name: Init variable
         run: |
           if [ ${{ inputs.llvm_thin_lto }} == 'true' ]; then
@@ -55,18 +69,11 @@ jobs:
           key: llvm-ir-cache-${{ github.run_id }}
           restore-keys: |
             llvm-ir-cache-
-      #- name: Install fuchsia-clang
-      #  if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
-      #  run: |
-      #    sudo GOBIN=/usr/bin go install go.chromium.org/luci/cipd/client/cmd/...@latest
-      #    sudo cipd install fuchsia/third_party/clang/linux-amd64 latest -root /usr/local/fuchsia-clang
-      - name: Install host clang toolchain
+      - name: Install fuchsia-clang
         if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
         run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
-          tar -Jxf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
-          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
-          mv cross host
+          sudo GOBIN=/usr/bin go install go.chromium.org/luci/cipd/client/cmd/...@latest
+          sudo cipd install fuchsia/third_party/clang/linux-amd64 latest -root /usr/local/fuchsia-clang
       - name: Setup llvm-lto llvm-ccache
         if: (steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_thin_lto) || (steps.llvm-cache.outputs.cache-matched-key == '' && inputs.llvm_ccache)
         run: |
