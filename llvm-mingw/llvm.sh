@@ -79,7 +79,7 @@ while [ $# -gt 0 ]; do
 done
 
 if [ -n "$STAGE1" ]; then
-    export PATH=$M_HOST/bin:$PATH
+    export PATH="$M_HOST/bin:/usr/local/fuchsia-clang/bin:$PATH"
 fi    
 
 if [ -n "$PROFILE" ]; then
