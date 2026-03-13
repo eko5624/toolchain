@@ -33,11 +33,11 @@ if [ ! -d "$M_SOURCE/llvm-project" ]; then
   git clone https://github.com/llvm/llvm-project.git --branch llvmorg-$VER_LLVM
 fi
 
-echo "building llvm-compiler-rt"
+echo "building llvm-compiler-rt-builtin"
 echo "======================="
 cd $M_BUILD
-mkdir compiler-rt-build
-cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt -B$M_BUILD/compiler-rt-build \
+rm -rf builtins-build && mkdir builtins-build
+cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B$M_BUILD/builtins-build \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX="$CLANG_RESOURCE_DIR" \
   -DCMAKE_C_COMPILER=clang \
@@ -52,11 +52,15 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt -B$M_BUILD/compiler-rt-build
   -DCMAKE_ASM_COMPILER_TARGET=x86_64-unknown-linux-gnu \
   -DLLVM_DEFAULT_TARGET_TRIPLE=x86_64-unknown-linux-gnu \
   -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON \
+  -DCOMPILER_RT_DEFAULT_TARGET_ONLY=TRUE \
+  -DCOMPILER_RT_USE_BUILTINS_LIBRARY=TRUE \
+  -DCOMPILER_RT_BUILD_BUILTINS=TRUE \
+  -DCOMPILER_RT_INCLUDE_TESTS=FALSE \
+  -DCOMPILER_RT_EXCLUDE_ATOMIC_BUILTIN=FALSE \
   -DLLVM_CONFIG_PATH="" \
-  -DCMAKE_FIND_ROOT_PATH=$PREFIX \
+  -DCMAKE_FIND_ROOT_PATH="$PREFIX" \
   -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
   -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
-  -DCOMPILER_RT_USE_LIBCXX=OFF
-cmake --build compiler-rt-build -j$MJOBS
-cmake --install compiler-rt-build --prefix "$INSTALL_PREFIX"
-rm -rf compiler-rt-build
+  -DSANITIZER_CXX_ABI=libc++
+cmake --build builtins-build -j$MJOBS
+cmake --install builtins-build
