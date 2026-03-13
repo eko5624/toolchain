@@ -31,12 +31,11 @@ jobs:
         with:
           path: ${{ github.workspace }}/source/llvm-project
           key: llvm-source-cache
-      - name: Install linux clang
+      - name: Install fuchsia-clang
+        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
         run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
-          tar -Jxf llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
-          mv llvm-mingw-stage1 host
-          rm llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
+          sudo GOBIN=/usr/bin go install go.chromium.org/luci/cipd/client/cmd/...@latest
+          sudo cipd install fuchsia/third_party/clang/linux-amd64 latest -root /usr/local/fuchsia-clang
       - name: Building linux-stage1-llvm
         if: ${{ steps.stage1-llvm.outputs.cache-matched-key == '' }}
         run: ./llvm-mingw/llvm.sh $(pwd)/llvm-mingw-stage1 --stage1 --with-clang
