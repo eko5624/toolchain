@@ -217,6 +217,7 @@ cmake -G Ninja \
   -DCLANG_DEFAULT_UNWINDLIB=libunwind \
   -DCLANG_DEFAULT_CXX_STDLIB=libc++ \
   -DLLD_DEFAULT_LD_LLD_IS_MINGW=ON \
+  -DLLVM_LINK_LLVM_DYLIB=$LINK_DYLIB \
   -DLLVM_ENABLE_LIBXML2=OFF \
   -DLLDB_ENABLE_PYTHON=OFF \
   -DLLVM_TOOLCHAIN_TOOLS="llvm-ar;llvm-ranlib;llvm-objdump;llvm-rc;llvm-cvtres;llvm-nm;llvm-strings;llvm-readobj;llvm-dlltool;llvm-pdbutil;llvm-objcopy;llvm-strip;llvm-cov;llvm-profdata;llvm-addr2line;llvm-symbolizer;llvm-windres;llvm-ml;llvm-readelf;llvm-size;llvm-cxxfilt;llvm-lib" \
@@ -224,8 +225,8 @@ cmake -G Ninja \
   -DLLVM_BUILD_INSTRUMENTED=$INSTRUMENTED \
   ${LLVM_PROFILE_DATA_DIR+-DLLVM_PROFILE_DATA_DIR=$LLVM_PROFILE_DATA_DIR} \
   ${LLVM_PROFDATA_FILE+-DLLVM_PROFDATA_FILE=$LLVM_PROFDATA_FILE} \
-  $COMPILER_FLAGS \
-  $CMAKEFLAGS \
+  ${COMPILER_FLAGS} \
+  ${CMAKEFLAGS} \
   ..
 
 if [ "$INSTRUMENTED" != "OFF" ]; then

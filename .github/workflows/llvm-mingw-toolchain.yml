@@ -33,13 +33,13 @@ jobs:
           key: llvm-source-cache
       - name: Install linux clang
         run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
-          tar -Jxf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
-          mv cross host
-          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
+          tar -Jxf llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
+          mv llvm-mingw-stage1 host
+          rm llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
       - name: Building linux-stage1-llvm
         if: ${{ steps.stage1-llvm.outputs.cache-matched-key == '' }}
-        run: ./llvm-mingw/llvm.sh $(pwd)/llvm-mingw-stage1 --stage1
+        run: ./llvm-mingw/llvm.sh $(pwd)/llvm-mingw-stage1 --stage1 --with-clang
       - name: Saving stage1-llvm cache
         if: ${{ steps.stage1-llvm.outputs.cache-matched-key == '' }}
         uses: actions/cache/save@main
