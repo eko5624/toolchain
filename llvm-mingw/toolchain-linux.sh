@@ -322,4 +322,5 @@ for arch in $ARCHS; do
     cmake --build compiler-rt-build-$arch -j$MJOBS
     cmake --install compiler-rt-build-$arch --prefix "$INSTALL_PREFIX"
     mkdir -p $PREFIX/$arch-w64-mingw32/bin
-    cp $PREFIX/$arch-w64-mingw32/lib/libc++.a $PREFIX/$arch-w64-mingw32/lib/libstdc++.a     
+    cp $PREFIX/$arch-w64-mingw32/lib/libc++.a $PREFIX/$arch-w64-mingw32/lib/libstdc++.a
+  done
