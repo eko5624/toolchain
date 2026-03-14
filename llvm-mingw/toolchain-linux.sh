@@ -83,15 +83,17 @@ git clone https://github.com/mingw-w64/mingw-w64.git --branch master
 #pkgconf
 #git clone https://github.com/pkgconf/pkgconf --branch pkgconf-$VER_PKGCONF
 
-echo "stripping llvm"
 echo "======================="
+echo "stripping llvm"
+
 cd $M_SOURCE/llvm-mingw
 ./strip-llvm.sh $PREFIX
-echo "stripping llvm done"
-echo "======================="
 
-echo "installing wrappers"
+echo "... Done"
+
 echo "======================="
+echo "installing wrappers"
+
 cp -f $M_SOURCE/llvm-mingw/wrappers/*-wrapper.sh $PREFIX/bin
 cp -f $M_SOURCE/llvm-mingw/wrappers/mingw32-common.cfg $PREFIX/bin
 for arch in $ARCHS; do
@@ -116,7 +118,8 @@ for arch in $ARCHS; do
         ln -sf $exec-wrapper.sh $arch-w64-mingw32-$exec
     done
 done
-echo "installing wrappers done"
+
+echo "... Done"
 
 if [ -n "$CPPWINRT" ]; then
     echo "building cppwinrt"
