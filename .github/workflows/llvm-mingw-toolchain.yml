@@ -74,6 +74,22 @@ jobs:
     if: always() && (needs.linux-stage1.result == 'success' || needs.linux-stage1.result == 'skipped')
     runs-on: ubuntu-latest
     steps:
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y \
+            build-essential \
+            nasm \
+            git \
+            meson \
+            ninja-build \
+            go-git \
+            libmimalloc-dev \
+            libc++-dev \
+            autoconf \
+            automake \
+            libtool \
+            pkg-config
       - name: Init variable
         run: |
           if [ ${{ inputs.clang }} == 'true' ]; then
