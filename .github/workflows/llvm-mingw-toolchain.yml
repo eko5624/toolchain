@@ -31,11 +31,13 @@ jobs:
         with:
           path: ${{ github.workspace }}/source/llvm-project
           key: llvm-source-cache
-      - name: Install fuchsia-clang
+      - name: Install host clang toolchain
         if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
         run: |
-          sudo GOBIN=/usr/bin go install go.chromium.org/luci/cipd/client/cmd/...@latest
-          sudo cipd install fuchsia/third_party/clang/linux-amd64 latest -root /usr/local/fuchsia-clang
+          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
+          tar -Jxf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
+          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
+          mv cross host
       - name: Building linux-stage1-llvm
         if: ${{ steps.stage1-llvm.outputs.cache-matched-key == '' }}
         run: ./llvm-mingw/llvm.sh $(pwd)/llvm-mingw-stage1 --stage1 --with-clang
@@ -71,25 +73,19 @@ jobs:
 
   linux-profile:
     needs: [linux-stage1]
-    if: always() && (needs.linux-stage1.result == 'success' || needs.linux-stage1.result == 'skipped')
     runs-on: ubuntu-latest
     steps:
-      - name: Install Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install --no-install-recommends -y \
-            build-essential \
-            nasm \
-            git \
-            meson \
-            ninja-build \
-            go-git \
-            libmimalloc-dev \
-            libc++-dev \
-            autoconf \
-            automake \
-            libtool \
-            pkg-config
+      #- name: Install Dependencies
+      #  run: |
+      #    sudo apt-get update
+      #    sudo apt-get install --no-install-recommends -y \
+      #      build-essential \
+      #      nasm \
+      #      meson \
+      #      ninja-build \
+      #      go-git \
+      #      libmimalloc-dev \
+      #      libc++-dev
       - name: Init variable
         run: |
           if [ ${{ inputs.clang }} == 'true' ]; then

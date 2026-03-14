@@ -248,9 +248,7 @@ for arch in $ARCHS; do
       -DCMAKE_FIND_ROOT_PATH=$PREFIX/$arch-w64-mingw32 \
       -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
       -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
-      -DSANITIZER_CXX_ABI=libc++ \
-      -DCMAKE_C_FLAGS_INIT="-mguard=cf" \
-      -DCMAKE_CXX_FLAGS_INIT="-mguard=cf"
+      -DSANITIZER_CXX_ABI=libc++
     cmake --build builtins-build-$arch -j$MJOBS
     cmake --install builtins-build-$arch --prefix "$INSTALL_PREFIX"
 done    
@@ -289,8 +287,8 @@ for arch in $ARCHS; do
       -DLIBCXXABI_USE_LLVM_UNWINDER=ON \
       -DLIBCXXABI_ENABLE_SHARED=OFF \
       -DLIBCXXABI_LIBDIR_SUFFIX="" \
-      -DCMAKE_C_FLAGS_INIT="-mguard=cf -D__USE_MINGW_ANSI_STDIO=1" \
-      -DCMAKE_CXX_FLAGS_INIT="-mguard=cf -D__USE_MINGW_ANSI_STDIO=1"
+      -DCMAKE_C_FLAGS_INIT="-D__USE_MINGW_ANSI_STDIO=1" \
+      -DCMAKE_CXX_FLAGS_INIT="-D__USE_MINGW_ANSI_STDIO=1"
     cmake --build libcxx-build-$arch -j$MJOBS
     cmake --install libcxx-build-$arch
 done    
@@ -324,42 +322,4 @@ for arch in $ARCHS; do
     cmake --build compiler-rt-build-$arch -j$MJOBS
     cmake --install compiler-rt-build-$arch --prefix "$INSTALL_PREFIX"
     mkdir -p $PREFIX/$arch-w64-mingw32/bin
-    case $arch in
-    aarch64)
-        # asan doesn't work on aarch64 or armv7; make this clear by omitting
-        # the installed files altogether.
-        rm -f "$INSTALL_PREFIX/lib/windows/libclang_rt.asan"*aarch64*
-        ;;
-    armv7)
-        rm -f "$INSTALL_PREFIX/lib/windows/libclang_rt.asan"*arm*
-        ;;
-    *)
-        mv "$INSTALL_PREFIX/lib/windows/"*.dll "$PREFIX/$arch-w64-mingw32/bin"
-        ;;
-    esac
-done    
-
-if [ "$INSTALL_PREFIX" != "$CLANG_RESOURCE_DIR" ]; then
-    # symlink to system headers - skip copy
-    rm -rf "$INSTALL_PREFIX/include"
-
-    cp -r "$INSTALL_PREFIX/." $CLANG_RESOURCE_DIR
-fi
-
-#if [ -n "$PKGCONF" ]; then
-#    echo "building pkgconf"
-#    echo "======================="
-#    cd $M_BUILD
-#    mkdir pkgconf-build
-#    cd $M_SOURCE/pkgconf
-#    meson setup $M_BUILD/pkgconf-build \
-#      --prefix=$PREFIX \
-#      --buildtype=release \
-#      -Dtests=disabled
-#    meson compile -C $M_BUILD/pkgconf-build
-#    meson install -C $M_BUILD/pkgconf-build
-#    cd $PREFIX/bin
-#    #ln -s pkgconf x86_64-w64-mingw32-pkgconf
-#    #ln -s pkgconf x86_64-w64-mingw32-pkg-config
-#    rm -rf $PREFIX/lib/pkgconfig
-#fi
+    cp $PREFIX/$arch-w64-mingw32/lib/libc++.a $PREFIX/$arch-w64-mingw32/lib/libstdc++.a     
