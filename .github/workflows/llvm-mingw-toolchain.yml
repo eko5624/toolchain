@@ -49,8 +49,11 @@ jobs:
           key: stage1-llvm-${{ github.run_id }}
       - name: Building toolchain
         run: |
-          chmod +x ./llvm-mingw/*.sh
+          chmod +x ./llvm-mingw/toolchain-linux.sh
           ./llvm-mingw/toolchain-linux.sh $(pwd)/llvm-mingw-stage1 --enable-cfguard
+      - name: Building host toolchain
+        run: |
+          chmod +x ./llvm-mingw/toolchain-host.sh
           ./llvm-mingw/toolchain-host.sh $(pwd)/llvm-mingw-stage1
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
