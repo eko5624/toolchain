@@ -206,8 +206,6 @@ for arch in $ARCHS; do
     fi
 done
 
-
-
 echo "building winpthreads"
 echo "======================="
 for arch in $ARCHS; do
