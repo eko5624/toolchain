@@ -15,8 +15,6 @@ export M_ROOT=$(pwd)
 export M_SOURCE=$M_ROOT/source
 export M_BUILD=$M_ROOT/build
 
-CFGUARD_FLAGS="--enable-cfguard"
-USE_CFLAGS="-g -O2 -mguard=cf"
 while [ $# -gt 0 ]; do
     case "$1" in
     --armv7)

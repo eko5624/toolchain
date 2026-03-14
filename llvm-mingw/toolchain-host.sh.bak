@@ -21,13 +21,6 @@ export PATH="$PREFIX/bin:$PATH"
 CLANG_RESOURCE_DIR="$(clang --print-resource-dir)"
 INSTALL_PREFIX="$CLANG_RESOURCE_DIR"
 
-if [ -h "$CLANG_RESOURCE_DIR/include" ]; then
-    # Symlink to system headers; use a staging directory in case parts
-    # of the resource dir are immutable
-    WORKDIR="$(mktemp -d)"; trap "rm -rf $WORKDIR" 0
-    INSTALL_PREFIX="$WORKDIR/install"
-fi
-
 mkdir -p $M_SOURCE
 mkdir -p $M_BUILD
 
@@ -92,12 +85,11 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/runtimes -B$M_BUILD/libcxx-build \
   -DLLVM_DEFAULT_TARGET_TRIPLE=x86_64-unknown-linux-gnu \
   -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON \
   -DLLVM_ENABLE_RUNTIMES="libunwind;libcxxabi;libcxx" \
-  -DLLVM_PATH=$M_SOURCE/llvm-project/llvm \
   -DLIBUNWIND_USE_COMPILER_RT=TRUE \
-  -DLIBUNWIND_ENABLE_SHARED=OFF \
+  -DLIBUNWIND_ENABLE_SHARED=ON \
   -DLIBUNWIND_ENABLE_STATIC=ON \
   -DLIBCXX_USE_COMPILER_RT=ON \
-  -DLIBCXX_ENABLE_SHARED=OFF \
+  -DLIBCXX_ENABLE_SHARED=ON \
   -DLIBCXX_ENABLE_STATIC=ON \
   -DLIBCXX_ENABLE_STATIC_ABI_LIBRARY=TRUE \
   -DLIBCXX_CXX_ABI=libcxxabi \
@@ -139,8 +131,7 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt -B$M_BUILD/compiler-rt-build
   -DCMAKE_FIND_ROOT_PATH=$PREFIX \
   -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
   -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
-  -DSANITIZER_CXX_ABI=libc++ \
-  -DCOMPILER_RT_BUILD_SANITIZERS=OFF
+  -DSANITIZER_CXX_ABI=libc++
 cmake --build compiler-rt-build
 cmake --install compiler-rt-build
 
