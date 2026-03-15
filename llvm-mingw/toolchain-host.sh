@@ -5,7 +5,7 @@ TOP_DIR=$(pwd)
 source $TOP_DIR/ver.sh
 
 # worflows for clang compilation:
-# llvm -> mingw's header+crt -> compiler-rt builtins -> libcxx -> openmp
+# llvm -> compiler-rt builtins -> libcxx -> openmp
 
 # Speed up the process
 # Env Var NUMJOBS overrides automatic detection
@@ -56,7 +56,6 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B$M_BUILD/buil
   -DCOMPILER_RT_USE_BUILTINS_LIBRARY=TRUE \
   -DCOMPILER_RT_BUILD_BUILTINS=TRUE \
   -DCOMPILER_RT_INCLUDE_TESTS=FALSE \
-  -DCOMPILER_RT_EXCLUDE_ATOMIC_BUILTIN=FALSE \
   -DLLVM_CONFIG_PATH="" \
   -DCMAKE_FIND_ROOT_PATH="$PREFIX" \
   -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \

@@ -174,11 +174,6 @@ if [ "$INSTRUMENTED" != "OFF" ]; then
     BUILDDIR="build-instrumented"
 fi
 
-TOOLCHAIN_ONLY=ON
-if [ -n "$FULL_LLVM" ]; then
-    TOOLCHAIN_ONLY=OFF
-fi
-
 PROJECTS="clang;lld"
 mkdir -p $M_SOURCE
 
