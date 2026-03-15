@@ -16,6 +16,7 @@ M_SOURCE=$M_ROOT/source
 
 unset HOST
 BUILDDIR="build"
+CLANG_TOOLS_EXTRA=ON
 INSTRUMENTED=OFF
 M_HOST=$M_ROOT/host
 
@@ -172,6 +173,10 @@ if [ "$INSTRUMENTED" != "OFF" ]; then
 fi
 
 PROJECTS="clang;lld"
+if [ -n "$CLANG_TOOLS_EXTRA" ]; then
+    PROJECTS="$PROJECTS;clang-tools-extra"
+fi
+
 mkdir -p $M_SOURCE
 
 echo "getting source"
