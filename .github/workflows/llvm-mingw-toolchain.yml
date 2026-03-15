@@ -12,70 +12,7 @@ on:
         type: boolean
   
 jobs:
-  linux-stage1:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@main      
-      - name: Loading stage1-llvm cache
-        uses: actions/cache/restore@main
-        id: stage1-llvm
-        with:
-          path: ${{ github.workspace }}/llvm-mingw-stage1
-          key: stage1-llvm-${{ github.run_id }}
-          restore-keys: |
-            stage1-llvm-
-      - name: Loading llvm-project source
-        uses: actions/cache@main
-        id: llvm-source
-        with:
-          path: ${{ github.workspace }}/source/llvm-project
-          key: llvm-source-cache
-      - name: Install host clang toolchain
-        if: ${{ steps.llvm-cache.outputs.cache-matched-key == '' }}
-        run: |
-          curl -OL https://github.com/${{ github.repository }}/releases/download/toolchain/cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
-          tar -Jxf cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
-          rm cross-llvm-clang-pgo-latest-ucrt-x86_64.tar.xz
-          mv cross host
-      - name: Building linux-stage1-llvm
-        if: ${{ steps.stage1-llvm.outputs.cache-matched-key == '' }}
-        run: ./llvm-mingw/llvm.sh $(pwd)/llvm-mingw-stage1 --stage1 --with-clang
-      - name: Saving stage1-llvm cache
-        if: ${{ steps.stage1-llvm.outputs.cache-matched-key == '' }}
-        uses: actions/cache/save@main
-        with:
-          path: ${{ github.workspace }}/llvm-mingw-stage1
-          key: stage1-llvm-${{ github.run_id }}
-      - name: Building toolchain
-        run: |
-          chmod +x ./llvm-mingw/toolchain-linux.sh
-          ./llvm-mingw/toolchain-linux.sh $(pwd)/llvm-mingw-stage1 --enable-cfguard
-      - name: Building host toolchain
-        run: |
-          chmod +x ./llvm-mingw/toolchain-host.sh
-          ./llvm-mingw/toolchain-host.sh $(pwd)/llvm-mingw-stage1
-      - name: Get current timestamp
-        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
-      - name: Packaging toolchain
-        run: |
-          tar -Jcf llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz llvm-mingw-stage1
-          cp llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz llvm-mingw-stage1-$date-ucrt-x86_64.tar.xz
-      - name: Delete
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          chmod +x ./package-delete.sh
-          ./package-delete.sh llvm-mingw-stage1-latest-ucrt-x86_64.tar.xz
-      - name: Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: toolchain
-          name: toolchain
-          files: llvm-mingw-stage1*.tar.xz
-
   linux-profile:
-    needs: [linux-stage1]
     runs-on: ubuntu-latest
     steps:
       #- name: Install Dependencies
