@@ -75,7 +75,7 @@ jobs:
           files: llvm-mingw-stage1*.tar.xz
 
   windows-toolchain:
-    needs: [linux-stage1]]
+    needs: [linux-stage1]
     runs-on: ubuntu-latest
     steps:
       - name: Init variable
