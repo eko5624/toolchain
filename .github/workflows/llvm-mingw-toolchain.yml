@@ -185,10 +185,12 @@ jobs:
         run: |
           ./llvm-mingw/llvm.sh $(pwd)/$DIR $(pwd)/cross --with-clang --thinlto --pgo
       - name: Building toolchain
-        if: ${{ inputs.clang }}
         run: |
-          chmod +x ./llvm-mingw/*.sh
+          chmod +x ./llvm-mingw/toolchain-linux.sh
           ./llvm-mingw/toolchain-linux.sh $(pwd)/cross --all-tools --enable-cfguard
+      - name: Building host toolchain
+        run: |
+          chmod +x ./llvm-mingw/toolchain-host.sh
           ./llvm-mingw/toolchain-host.sh $(pwd)/cross
       - name: Saving linux-llvm cache
         if: ${{ steps.linux-llvm.outputs.cache-matched-key == '' }}
