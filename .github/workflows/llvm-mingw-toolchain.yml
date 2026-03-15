@@ -12,7 +12,7 @@ on:
         type: boolean
   
 jobs:
- linux-stage1:
+  linux-stage1:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
