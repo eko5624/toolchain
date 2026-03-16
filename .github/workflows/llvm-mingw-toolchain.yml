@@ -52,7 +52,7 @@ jobs:
           key: stage1-llvm-${{ github.run_id }}
       - name: Building toolchain
         run: |
-          ./llvm-mingw/toolchain-linux.sh "$(pwd)/llvm-mingw-stage1" --native --all-tools --enable-cfguard
+          ./llvm-mingw/toolchain-linux.sh "$(pwd)/llvm-mingw-stage1" --native --enable-cfguard
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Packaging toolchain
@@ -150,10 +150,10 @@ jobs:
       - name: Building linux-llvm
         if: ${{ steps.linux-llvm.outputs.cache-matched-key == '' }}
         run: |
-          ./llvm-mingw/llvm.sh "$(pwd)/llvm-mingw-stage1" "$(pwd)/cross" --with-clang --thinlto --pgo --llvm-only
+          ./llvm-mingw/llvm.sh "$(pwd)/llvm-mingw-stage1" "$(pwd)/cross" --with-clang --thinlto --pgo
       - name: Building toolchain
         run: |
-          ./llvm-mingw/toolchain-linux.sh "$(pwd)/cross" --native --all-tools --enable-cfguard
+          ./llvm-mingw/toolchain-linux.sh "$(pwd)/cross" --all-tools --enable-cfguard
       - name: Saving linux-llvm cache
         if: ${{ steps.linux-llvm.outputs.cache-matched-key == '' }}
         uses: actions/cache/save@main
