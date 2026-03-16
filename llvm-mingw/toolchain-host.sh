@@ -61,7 +61,8 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt/lib/builtins -B$M_BUILD/buil
   -DCMAKE_FIND_ROOT_PATH="$PREFIX" \
   -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
   -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
-  -DSANITIZER_CXX_ABI=libc++
+  -DSANITIZER_CXX_ABI=libc++ \
+  -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY
 cmake --build builtins-build -j$MJOBS
 cmake --install builtins-build
 
@@ -125,6 +126,7 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt -B$M_BUILD/compiler-rt-build
   -DCMAKE_ASM_COMPILER_TARGET=x86_64-unknown-linux-gnu \
   -DLLVM_DEFAULT_TARGET_TRIPLE=x86_64-unknown-linux-gnu \
   -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON \
+  -DCOMPILER_RT_TARGET_HAS_ATOMICS=ON \
   -DCOMPILER_RT_DEFAULT_TARGET_ONLY=TRUE \
   -DCOMPILER_RT_USE_BUILTINS_LIBRARY=TRUE \
   -DCOMPILER_RT_BUILD_BUILTINS=FALSE \
@@ -134,8 +136,8 @@ cmake -G Ninja -H$M_SOURCE/llvm-project/compiler-rt -B$M_BUILD/compiler-rt-build
   -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
   -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
   -DSANITIZER_CXX_ABI=libc++ \
-  -DCMAKE_EXE_LINKER_FLAGS_INIT='-lc++abi' \
-  -DCOMPILER_RT_BUILD_SANITIZERS=OFF
+  -DCOMPILER_RT_BUILD_SANITIZERS=OFF \
+  -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY
 cmake --build compiler-rt-build
 cmake --install compiler-rt-build
 
