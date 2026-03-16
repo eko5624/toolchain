@@ -15,15 +15,6 @@ jobs:
   windows-toolchain:
     runs-on: ubuntu-latest
     steps:
-      - name: Install Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install --no-install-recommends -y \
-            build-essential \
-            nasm \
-            meson \
-            ninja-build \
-            libatomic1
       - name: Init variable
         run: |
           if [ ${{ inputs.clang }} == 'true' ]; then
