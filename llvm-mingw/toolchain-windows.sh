@@ -171,7 +171,21 @@ for exec in ld objdump; do
 done
 echo "... Done"
 
-echo "building cppwinrt"
+echo "building native cppwinrt"
+echo "======================="
+cd $M_BUILD
+mkdir cppwinrt-build
+cmake -G Ninja -H$M_SOURCE/cppwinrt -B$M_BUILD/cppwinrt-build \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DBUILD_SHARED_LIBS=OFF \
+  -DCMAKE_INSTALL_PREFIX=$SRC \
+  -DCMAKE_C_COMPILER=clang \
+  -DCMAKE_CXX_COMPILER=clang++
+ninja -C cppwinrt-build
+ninja -C cppwinrt-build install
+rm -rf cppwinrt-build
+
+echo "building target cppwinrt"
 echo "======================="
 cd $M_BUILD
 mkdir cppwinrt-build
