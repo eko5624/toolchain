@@ -56,7 +56,7 @@ git clone https://github.com/gcc-mirror/gcc.git --branch master
 git clone https://github.com/mingw-w64/mingw-w64.git --branch master
 
 #mcfgthread
-git clone https://github.com/lhmouse/mcfgthread.git --branch master
+git clone https://github.com/lhmouse/mcfgthread.git --branch v2.3-ga.2
 
 #cppwinrt
 git clone https://github.com/microsoft/cppwinrt.git --branch master

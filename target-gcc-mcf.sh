@@ -70,7 +70,7 @@ tar xjf isl-$VER_ISL.tar.bz2 2>/dev/null >/dev/null
 git clone https://github.com/mingw-w64/mingw-w64.git --branch master
 
 #mcfgthread
-git clone https://github.com/lhmouse/mcfgthread.git --branch v2.2-ga.2
+git clone https://github.com/lhmouse/mcfgthread.git --branch v2.3-ga.2
 
 #cppwinrt
 git clone https://github.com/microsoft/cppwinrt.git --branch master
@@ -167,14 +167,12 @@ cd $M_BUILD
 mkdir binutils-build && cd binutils-build
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0002-check-for-unusual-file-harder.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0010-bfd-Increase-_bfd_coff_max_nscns-to-65279.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0110-binutils-mingw-gnu-print.patch
-curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-binutils/0401-opcodes-i386-dis-Use-Intel-syntax-by-default.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0410-windres-handle-spaces.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0011-libiberty-Preserve-errno-across-calls-to-libiberty_v.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/0500-fix-weak-undef-symbols-after-image-base-change.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/2001-ld-option-to-move-default-bases-under-4GB.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/2003-Restore-old-behaviour-of-windres-so-that-options-con.patch
-curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/3001-hack-libiberty-link-order.patch
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/2003-Revert-Restore-old-behaviour-of-windres-so-that-opti.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/4000-fix-DEBUG_S_INLINEELINES.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-binutils/9001-opcodes-i386-dis-Use-Intel-syntax-by-default.patch
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-binutils/9200-bfd-pe-pei-x86_64-Decrease-preferred-section-alignme.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/libiberty-unlink-handle-windows-nul.patch
 curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-binutils/reproducible-import-libraries.patch
@@ -190,11 +188,11 @@ cd $M_SOURCE/binutils
 apply_patch_for_binutils \
   0002-check-for-unusual-file-harder.patch \
   0010-bfd-Increase-_bfd_coff_max_nscns-to-65279.patch \
-  0110-binutils-mingw-gnu-print.patch
+  0011-libiberty-Preserve-errno-across-calls-to-libiberty_v.patch
 
 # ZZZ
 apply_patch_for_binutils \
-  0401-opcodes-i386-dis-Use-Intel-syntax-by-default.patch \
+  9001-opcodes-i386-dis-Use-Intel-syntax-by-default.patch \
   9200-bfd-pe-pei-x86_64-Decrease-preferred-section-alignme.patch
 
 # Add an option to change default bases back below 4GB to ease transition
@@ -203,7 +201,7 @@ apply_patch_for_binutils \
 apply_patch_for_binutils 2001-ld-option-to-move-default-bases-under-4GB.patch
 
 # https://github.com/msys2/MINGW-packages/pull/9233#issuecomment-889439433
-patch -R -p1 -i $M_BUILD/binutils-build/2003-Restore-old-behaviour-of-windres-so-that-options-con.patch
+apply_patch_for_binutils 2003-Revert-Restore-old-behaviour-of-windres-so-that-opti.patch
 
 # patches for reproducibility from Debian:
 # https://salsa.debian.org/mingw-w64-team/binutils-mingw-w64/-/tree/master/debian/patches
@@ -217,12 +215,6 @@ patch -p2 -i $M_BUILD/binutils-build/reproducible-import-libraries.patch
 # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=108276
 # https://gcc.gnu.org/pipermail/gcc-patches/2023-January/609487.html
 patch -p1 -i $M_BUILD/binutils-build/libiberty-unlink-handle-windows-nul.patch
-
-# XXX: make sure we link against the just built libiberty, not the system one
-# to avoid a linker error. All the ld deps contain system deps and system
-# search paths, so imho if things link against the system lib or the just
-# built one is just luck, and I don't know how that is supposed to work.
-patch -p1 -i $M_BUILD/binutils-build/3001-hack-libiberty-link-order.patch
 
 # https://github.com/msys2/MINGW-packages/issues/24148
 # https://sourceware.org/bugzilla/show_bug.cgi?id=32942
@@ -248,6 +240,10 @@ echo "building mingw-w64-headers"
 echo "======================="
 cd $M_BUILD
 mkdir headers-build && cd headers-build
+curl -OL https://raw.githubusercontent.com/msys2/MINGW-packages/refs/heads/master/mingw-w64-headers/0001-remove-ireference-boolean.patch
+cd $M_SOURCE/mingw-w64
+git apply $M_BUILD/headers-build/0001-remove-ireference-boolean.patch
+cd $M_BUILD/headers-build
 $M_SOURCE/mingw-w64/mingw-w64-headers/configure \
   --host=$MINGW_TRIPLE \
   --prefix=$M_TARGET \
@@ -371,19 +367,17 @@ git clone https://github.com/gcc-mirror/gcc.git --branch master
 cd $M_BUILD
 mkdir gcc-build && cd gcc-build
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/0003-Windows-Follow-Posix-dir-exists-semantics-more-close.patch
-curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/0005-Windows-Don-t-ignore-native-system-header-dir.patch
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/0007-Build-EXTRA_GNATTOOLS-for-Ada.patch
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/0008-Prettify-linking-no-undefined.patch
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/0011-Enable-shared-gnat-implib.patch
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/0012-Handle-spaces-in-path-for-default-manifest.patch
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/0014-gcc-9-branch-clone_function_name_1-Retain-any-stdcall-suffix.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/0022-unset-native-system-header-dir.patch
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/0140-gcc-diagnostic-color.patch
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/0200-add-m-no-align-vector-insn-option-for-i386.patch
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/2001-fix-building-rust-on-mingw-w64.patch
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/3001-fix-codeview-crashes.patch
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/9000-gcc-Make-stupid-AT-T-syntax-not-default.patch
-curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/9003-libstdc-Avoid-thread-local-states-for-MCF-thread-mod.patch
-curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/9009-libgcc-Pass-x87-control-word-in-the-correct-type.patch
 
 apply_patch_for_gcc() {
   for patch in "$@"; do
@@ -396,12 +390,12 @@ apply_patch_for_gcc() {
 cd $M_SOURCE/gcc
 apply_patch_for_gcc \
   0003-Windows-Follow-Posix-dir-exists-semantics-more-close.patch \
-  0005-Windows-Don-t-ignore-native-system-header-dir.patch \
   0007-Build-EXTRA_GNATTOOLS-for-Ada.patch \
   0008-Prettify-linking-no-undefined.patch \
   0011-Enable-shared-gnat-implib.patch \
   0012-Handle-spaces-in-path-for-default-manifest.patch \
-  0014-gcc-9-branch-clone_function_name_1-Retain-any-stdcall-suffix.patch
+  0014-gcc-9-branch-clone_function_name_1-Retain-any-stdcall-suffix.patch \
+  0022-unset-native-system-header-dir.patch
 
 # Enable diagnostic color under mintty
 # based on https://github.com/BurntSushi/ripgrep/issues/94#issuecomment-261761687
@@ -423,8 +417,6 @@ apply_patch_for_gcc 3001-fix-codeview-crashes.patch
 # GCC with the MCF thread model
 apply_patch_for_gcc \
   9000-gcc-Make-stupid-AT-T-syntax-not-default.patch \
-  9009-libgcc-Pass-x87-control-word-in-the-correct-type.patch \
-  9003-libstdc-Avoid-thread-local-states-for-MCF-thread-mod.patch
 
 # In addition adaint.c does `#include <accctrl.h>` which pulls in msxml.h, hacky hack:
 CPPFLAGS+=" -DCOM_NO_WINDOWS_H"
