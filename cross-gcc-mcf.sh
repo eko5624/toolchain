@@ -85,6 +85,7 @@ $M_SOURCE/binutils-$VER_BINUTILS/configure \
   --disable-multilib \
   --disable-nls \
   --disable-shared \
+  --disable-werror \
   --disable-win32-registry \
   --without-included-gettext \
   --enable-lto \
