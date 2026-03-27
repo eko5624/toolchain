@@ -48,7 +48,7 @@ cd $M_SOURCE
 #wget -c -O binutils-$VER_BINUTILS.tar.bz2 http://ftp.gnu.org/gnu/binutils/binutils-$VER_BINUTILS.tar.bz2 2>/dev/null >/dev/null
 #tar xjf binutils-$VER_BINUTILS.tar.bz2 2>/dev/null >/dev/null
 mkdir binutils
-git clone https://sourceware.org/git/binutils-gdb.git --branch binutils-${VER_BINUTILS//./_}-branch binutils
+git clone https://sourceware.org/git/binutils-gdb.git --branch binutils-2_46-branch binutils
 
 #gmp
 wget -c -O gmp-$VER_GMP.tar.bz2 https://ftp.gnu.org/gnu/gmp/gmp-$VER_GMP.tar.bz2 2>/dev/null >/dev/null
