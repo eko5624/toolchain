@@ -361,8 +361,8 @@ cppwinrt -in cppwinrt-build/Windows.winmd -out $M_TARGET/include
 echo "building gcc"
 echo "======================="
 cd $M_SOURCE
-git clone https://github.com/gcc-mirror/gcc.git --branch master
-# git clone https://github.com/gcc-mirror/gcc.git --branch releases/gcc-$VER_GCC
+# git clone https://github.com/gcc-mirror/gcc.git --branch master
+git clone https://github.com/gcc-mirror/gcc.git --branch releases/gcc-$VER_GCC
 
 cd $M_BUILD
 mkdir gcc-build && cd gcc-build
@@ -378,6 +378,7 @@ curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/2001-fix-building-rust-on-mingw-w64.patch
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/3001-fix-codeview-crashes.patch
 curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/9000-gcc-Make-stupid-AT-T-syntax-not-default.patch
+curl -OL https://raw.githubusercontent.com/lhmouse/MINGW-packages/refs/heads/gcc-mcf/mingw-w64-gcc/9001-Prevent-recursive-LoadLibrary-in-libgcc-DLL.patch
 
 apply_patch_for_gcc() {
   for patch in "$@"; do
@@ -417,6 +418,7 @@ apply_patch_for_gcc 3001-fix-codeview-crashes.patch
 # GCC with the MCF thread model
 apply_patch_for_gcc \
   9000-gcc-Make-stupid-AT-T-syntax-not-default.patch \
+  9001-Prevent-recursive-LoadLibrary-in-libgcc-DLL.patch
 
 # In addition adaint.c does `#include <accctrl.h>` which pulls in msxml.h, hacky hack:
 CPPFLAGS+=" -DCOM_NO_WINDOWS_H"
@@ -445,7 +447,7 @@ $M_SOURCE/gcc/configure \
   --enable-libssp \
   --disable-libstdcxx-pch \
   --disable-libstdcxx-debug \
-  --disable-libstdcxx-backtrace \
+  --enable-libstdcxx-backtrace=yes \
   --disable-win32-registry \
   --disable-version-specific-runtime-libs \
   --enable-languages=c,c++ \
@@ -465,6 +467,7 @@ $M_SOURCE/gcc/configure \
   --enable-shared \
   --with-arch=${GCC_ARCH} \
   --with-tune=${GCC_TUNE} \
+  --with-libstdcxx-zoneinfo="yes" \
   --without-included-gettext \
   --with-pkgversion="GCC with MCF thread model" \
   CFLAGS="${USE_FLAGS}" \
