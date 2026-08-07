@@ -354,7 +354,7 @@ cmake -G Ninja -H$M_SOURCE/cppwinrt -B$M_BUILD/cppwinrt-build \
   -DBUILD_TESTING=OFF
 ninja -C cppwinrt-build
 ninja -C cppwinrt-build install
-curl -L https://github.com/microsoft/windows-rs/raw/master/crates/libs/bindgen/default/Windows.winmd -o cppwinrt-build/Windows.winmd
+curl -L https://github.com/microsoft/windows-rs/raw/master/crates/libs/default/Windows.winmd -o cppwinrt-build/Windows.winmd
 cppwinrt -in cppwinrt-build/Windows.winmd -out $M_TARGET/include
 
 

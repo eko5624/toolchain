@@ -87,7 +87,7 @@ NO_CONFLTO=1 PATH=$ORIG_PATH cmake -G Ninja -H$M_SOURCE/cppwinrt -B$M_BUILD/cppw
   -DCMAKE_CXX_COMPILER=clang++
 ninja -C cppwinrt-build
 ninja -C cppwinrt-build install
-curl -L https://github.com/microsoft/windows-rs/raw/master/crates/libs/bindgen/default/Windows.winmd -o cppwinrt-build/Windows.winmd
+curl -L https://github.com/microsoft/windows-rs/raw/master/crates/libs/default/Windows.winmd -o cppwinrt-build/Windows.winmd
 cppwinrt -in cppwinrt-build/Windows.winmd -out $M_CROSS/${_TARGET_ARCH}/include
 
 echo "building gendef"

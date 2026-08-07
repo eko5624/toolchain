@@ -167,7 +167,7 @@ if [ -n "$CPPWINRT" ]; then
       -DCMAKE_CXX_COMPILER=clang++
     ninja -C cppwinrt-build
     ninja -C cppwinrt-build install
-    curl -L https://github.com/microsoft/windows-rs/raw/master/crates/libs/bindgen/default/Windows.winmd -o cppwinrt-build/Windows.winmd
+    curl -L https://github.com/microsoft/windows-rs/raw/master/crates/libs/default/Windows.winmd -o cppwinrt-build/Windows.winmd
     cppwinrt -in cppwinrt-build/Windows.winmd -out $HEADER_ROOT/include
 fi    
 
