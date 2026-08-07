@@ -12,7 +12,6 @@ while [ $# -gt 0 ]; do
         _TARGET_ARCH=x86_64-w64-mingw32
         _GCC_ARCH="x86-64"
         _CLANG_CFI=""
-        _LLD_CFI=""
         _LD_M_FLAG="i386pep"
         _OPT=""
         ;;
@@ -21,7 +20,6 @@ while [ $# -gt 0 ]; do
         _TARGET_ARCH=x86_64-w64-mingw32
         _GCC_ARCH="x86-64-v3"
         _CLANG_CFI=" -mguard=cf"
-        _LLD_CFI=" -Xlink=-guard:cf,longjmp -Xlink=-cetcompat"
         _LD_M_FLAG="i386pep"
         _OPT=" -O3"
         ;;
@@ -30,7 +28,6 @@ while [ $# -gt 0 ]; do
         _TARGET_ARCH=aarch64-w64-mingw32
         _GCC_ARCH="cortex-a76"
         _CLANG_CFI=" -mguard=cf"
-        _LLD_CFI=" -Xlink=-guard:cf,longjmp -Xlink=-cetcompat"
         _LD_M_FLAG="arm64pe"
         _OPT=" -O3"
         ;;
