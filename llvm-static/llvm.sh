@@ -190,7 +190,7 @@ cmake --install zstd-build
 echo "building mimalloc"
 echo "======================="
 cd $M_SOURCE
-git clone https://github.com/microsoft/mimalloc.git
+git clone https://github.com/microsoft/mimalloc.git --branch dev2
 cd $M_BUILD
 mkdir mimalloc-build
 cmake -G Ninja -H$M_SOURCE/mimalloc -B$M_BUILD/mimalloc-build \
