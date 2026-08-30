@@ -249,8 +249,7 @@ cd $M_SOURCE/pkgconf
 meson setup $M_BUILD/pkgconf-build \
   --prefix=$DEST \
   --cross-file=$TOP_DIR/cross.meson \
-  --buildtype=release \
-  -Dtests=disabled
+  --buildtype=release
 meson compile -C $M_BUILD/pkgconf-build
 meson install -C $M_BUILD/pkgconf-build
 cp $DEST/bin/pkgconf.exe $DEST/bin/pkg-config.exe
