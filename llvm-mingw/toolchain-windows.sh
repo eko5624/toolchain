@@ -180,7 +180,8 @@ cmake -G Ninja -H$M_SOURCE/cppwinrt -B$M_BUILD/cppwinrt-build \
   -DBUILD_SHARED_LIBS=OFF \
   -DCMAKE_INSTALL_PREFIX=$SRC \
   -DCMAKE_C_COMPILER=clang \
-  -DCMAKE_CXX_COMPILER=clang++
+  -DCMAKE_CXX_COMPILER=clang++ \
+  -DCMAKE_CXX_FLAGS="-include algorithm -include functional -include chrono"
 ninja -C cppwinrt-build
 ninja -C cppwinrt-build install
 rm -rf cppwinrt-build
@@ -194,11 +195,12 @@ cmake -G Ninja -H$M_SOURCE/cppwinrt -B$M_BUILD/cppwinrt-build \
   -DCMAKE_TOOLCHAIN_FILE=$M_SOURCE/cppwinrt/cross-mingw-toolchain.cmake \
   -DCMAKE_BUILD_TYPE=Release \
   -DBUILD_SHARED_LIBS=OFF \
-  -DBUILD_TESTING=OFF
+  -DBUILD_TESTING=OFF \
+  -DCMAKE_CXX_FLAGS="-include algorithm -include functional -include chrono"
 ninja -C cppwinrt-build
 ninja -C cppwinrt-build install
-curl -L https://github.com/microsoft/windows-rs/raw/master/crates/libs/bindgen/default/Windows.winmd -o cppwinrt-build/Windows.winmd
-cppwinrt -in cppwinrt-build/Windows.winmd -out $DEST/include
+curl -L https://github.com/microsoft/windows-rs/raw/master/crates/libs/default/Windows.winmd -o cppwinrt-build/Windows.winmd
+cppwinrt -input cppwinrt-build/Windows.winmd -output $DEST/include
 
 echo "building gendef"
 echo "======================="

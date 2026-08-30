@@ -164,11 +164,12 @@ if [ -n "$CPPWINRT" ]; then
       -DBUILD_SHARED_LIBS=OFF \
       -DCMAKE_INSTALL_PREFIX=$PREFIX \
       -DCMAKE_C_COMPILER=clang \
-      -DCMAKE_CXX_COMPILER=clang++
+      -DCMAKE_CXX_COMPILER=clang++ \
+      -DCMAKE_CXX_FLAGS="-include algorithm -include functional -include chrono"
     ninja -C cppwinrt-build
     ninja -C cppwinrt-build install
     curl -L https://github.com/microsoft/windows-rs/raw/master/crates/libs/default/Windows.winmd -o cppwinrt-build/Windows.winmd
-    cppwinrt -in cppwinrt-build/Windows.winmd -out $HEADER_ROOT/include
+    cppwinrt -input cppwinrt-build/Windows.winmd -output $HEADER_ROOT/include
 fi    
 
 echo "building gendef"

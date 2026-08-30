@@ -84,11 +84,12 @@ NO_CONFLTO=1 PATH=$ORIG_PATH cmake -G Ninja -H$M_SOURCE/cppwinrt -B$M_BUILD/cppw
   -DBUILD_SHARED_LIBS=OFF \
   -DCMAKE_INSTALL_PREFIX=$M_CROSS \
   -DCMAKE_C_COMPILER=clang \
-  -DCMAKE_CXX_COMPILER=clang++
+  -DCMAKE_CXX_COMPILER=clang++ \
+  -DCMAKE_CXX_FLAGS="-include algorithm -include functional -include chrono"
 ninja -C cppwinrt-build
 ninja -C cppwinrt-build install
 curl -L https://github.com/microsoft/windows-rs/raw/master/crates/libs/default/Windows.winmd -o cppwinrt-build/Windows.winmd
-cppwinrt -in cppwinrt-build/Windows.winmd -out $M_CROSS/${_TARGET_ARCH}/include
+cppwinrt -input cppwinrt-build/Windows.winmd -output $HEADER_ROOT/include
 
 echo "building gendef"
 echo "======================="
