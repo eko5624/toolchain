@@ -77,11 +77,6 @@ jobs:
             chmod +x ./llvm-static/host-toolchain.sh
             ./llvm-static/host-toolchain.sh
           fi
-      - name: Train bolt with sqlite
-        if: ${{ inputs.pgo }}
-        run: |
-          chmod +x ./llvm-static/train-bolt.sh 
-          ./llvm-static/train-bolt.sh --x86_64
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Package x86_64 toolchain
@@ -155,11 +150,6 @@ jobs:
           ./llvm-static/wrappers.sh --x86_64_v3
           chmod +x ./llvm-static/toolchain.sh
           ./llvm-static/toolchain.sh $PGO --x86_64_v3
-      - name: Train bolt with sqlite
-        if: ${{ inputs.pgo }}
-        run: |
-          chmod +x ./llvm-static/train-bolt.sh
-          ./llvm-static/train-bolt.sh --x86_64_v3
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Package x86_64_v3 toolchain
@@ -233,11 +223,6 @@ jobs:
           ./llvm-static/wrappers.sh --aarch64
           chmod +x ./llvm-static/toolchain.sh
           ./llvm-static/toolchain.sh $PGO --aarch64
-      - name: Train bolt with sqlite
-        if: ${{ inputs.pgo }}
-        run: |
-          chmod +x ./llvm-static/train-bolt.sh
-          ./llvm-static/train-bolt.sh --aarch64
       - name: Get current timestamp
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Package aarch64 toolchain

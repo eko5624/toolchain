@@ -161,7 +161,7 @@ jobs:
         if: ${{ steps.cross-llvm-pgo.outputs.cache-matched-key == '' }}
         run: |
           chmod +x ./llvm-static/llvm.sh
-          ./llvm-static/llvm.sh --enable-bolt_use --enable-pgo_use $LLVM_LTO $LLVM_CCACHE
+          ./llvm-static/llvm.sh --enable-pgo_use $LLVM_LTO $LLVM_CCACHE
       - name: Save cross-llvm-pgo cache
         if: ${{ steps.cross-llvm-pgo.outputs.cache-matched-key == '' }}
         uses: actions/cache/save@main
